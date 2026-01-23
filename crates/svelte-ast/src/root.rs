@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use serde::Serialize;
+use std::collections::HashMap;
 use swc_ecma_ast as swc;
 
 use crate::node::AstNode;

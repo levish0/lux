@@ -1,9 +1,9 @@
-pub mod span;
+pub mod attributes;
+pub mod blocks;
+pub mod css;
+pub mod elements;
 pub mod node;
 pub mod root;
-pub mod text;
+pub mod span;
 pub mod tags;
-pub mod blocks;
-pub mod elements;
-pub mod attributes;
-pub mod css;
+pub mod text;

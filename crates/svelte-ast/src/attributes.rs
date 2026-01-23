@@ -1,8 +1,8 @@
 use serde::Serialize;
 use swc_ecma_ast as swc;
 
-use crate::text::Text;
 use crate::tags::ExpressionTag;
+use crate::text::Text;
 
 /*
  * interface Attribute extends BaseNode {
