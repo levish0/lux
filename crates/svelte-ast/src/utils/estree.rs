@@ -369,12 +369,41 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                 }
             }
             "MemberExpression" | "OptionalMemberExpression" => {
+                let is_optional = t == "OptionalMemberExpression";
+                if is_optional {
+                    obj.insert("type".to_string(), Value::String("MemberExpression".to_string()));
+                }
+                // SWC already serializes as "object" and "property"
+                // Also handle legacy "obj"/"prop" field names just in case
                 if let Some(o) = obj.remove("obj") {
                     obj.insert("object".to_string(), o);
                 }
-                if let Some(p) = obj.remove("prop") {
-                    obj.insert("property".to_string(), p);
+                // Determine computed from property value
+                let prop_key = if obj.contains_key("property") {
+                    "property"
+                } else {
+                    "prop"
+                };
+                if let Some(p) = obj.remove(prop_key) {
+                    let is_computed = p
+                        .as_object()
+                        .and_then(|o| o.get("type"))
+                        .and_then(|t| t.as_str())
+                        == Some("Computed");
+                    if is_computed {
+                        // Unwrap the Computed wrapper: extract inner expr
+                        if let Value::Object(mut comp) = p {
+                            if let Some(expr) = comp.remove("expr") {
+                                obj.insert("property".to_string(), expr);
+                            }
+                        }
+                    } else {
+                        obj.insert("property".to_string(), p);
+                    }
+                    obj.insert("computed".to_string(), Value::Bool(is_computed));
                 }
+                obj.entry("optional".to_string())
+                    .or_insert(Value::Bool(is_optional));
             }
             "SpreadElement" => {
                 if let Some(expr) = obj.remove("expr") {

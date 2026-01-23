@@ -47,6 +47,7 @@
                     "right": {
                       "arguments": [],
                       "callee": {
+                        "computed": false,
                         "end": 110,
                         "object": {
                           "end": 98,
@@ -54,6 +55,7 @@
                           "start": 97,
                           "type": "Identifier"
                         },
+                        "optional": false,
                         "property": {
                           "end": 110,
                           "name": "toLowerCase",
