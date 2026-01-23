@@ -1,36 +1,19 @@
 {
-  "type": "Root",
-  "start": 0,
-  "end": 118,
+  "css": null,
+  "end": 117,
   "fragment": {
-    "type": "Fragment",
     "nodes": [
       {
-        "type": "Text",
-        "start": 35,
-        "end": 37,
         "data": "\n\n",
-        "raw": "\n\n"
+        "end": 37,
+        "raw": "\n\n",
+        "start": 35,
+        "type": "Text"
       },
       {
-        "type": "RegularElement",
-        "start": 37,
-        "end": 117,
-        "name": "input",
-        "name_loc": {
-          "start": 38,
-          "end": 43
-        },
         "attributes": [
           {
-            "type": "BindDirective",
-            "start": 44,
             "end": 114,
-            "name": "value",
-            "name_loc": {
-              "start": 44,
-              "end": 54
-            },
             "expression": {
               "end": 112,
               "expressions": [
@@ -108,29 +91,34 @@
               ],
               "start": 68,
               "type": "SequenceExpression"
-            }
+            },
+            "name": "value",
+            "name_loc": {
+              "end": 54,
+              "start": 44
+            },
+            "start": 44,
+            "type": "BindDirective"
           }
         ],
+        "end": 117,
         "fragment": {
-          "type": "Fragment",
-          "nodes": []
-        }
-      },
-      {
-        "type": "Text",
-        "start": 117,
-        "end": 118,
-        "data": "\n",
-        "raw": "\n"
+          "nodes": [],
+          "type": "Fragment"
+        },
+        "name": "input",
+        "name_loc": {
+          "end": 43,
+          "start": 38
+        },
+        "start": 37,
+        "type": "RegularElement"
       }
-    ]
+    ],
+    "type": "Fragment"
   },
-  "css": null,
   "instance": {
-    "type": "Script",
-    "start": 0,
-    "end": 35,
-    "context": "Default",
+    "attributes": [],
     "content": {
       "body": [
         {
@@ -167,10 +155,13 @@
       "start": 10,
       "type": "Program"
     },
-    "attributes": []
+    "context": "default",
+    "end": 35,
+    "start": 0,
+    "type": "Script"
   },
-  "module": null,
+  "js": [],
   "options": null,
-  "comments": [],
-  "ts": false
+  "start": 0,
+  "type": "Root"
 }

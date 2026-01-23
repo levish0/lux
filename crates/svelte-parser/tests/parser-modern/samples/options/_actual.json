@@ -1,0 +1,182 @@
+{
+  "css": null,
+  "end": 169,
+  "fragment": {
+    "nodes": [
+      {
+        "attributes": [
+          {
+            "end": 49,
+            "name": "customElement",
+            "name_loc": {
+              "end": 29,
+              "start": 16
+            },
+            "start": 16,
+            "type": "Attribute",
+            "value": [
+              {
+                "data": "my-custom-element",
+                "end": 48,
+                "raw": "my-custom-element",
+                "start": 31
+              }
+            ]
+          },
+          {
+            "end": 62,
+            "name": "runes",
+            "name_loc": {
+              "end": 55,
+              "start": 50
+            },
+            "start": 50,
+            "type": "Attribute",
+            "value": {
+              "end": 62,
+              "expression": {
+                "end": 61,
+                "start": 57,
+                "type": "BooleanLiteral",
+                "value": true
+              },
+              "start": 56
+            }
+          }
+        ],
+        "end": 65,
+        "fragment": {
+          "nodes": [],
+          "type": "Fragment"
+        },
+        "name": "svelte:options",
+        "name_loc": {
+          "end": 15,
+          "start": 1
+        },
+        "start": 0,
+        "type": "RegularElement"
+      },
+      {
+        "data": "\n\n",
+        "end": 67,
+        "raw": "\n\n",
+        "start": 65,
+        "type": "Text"
+      },
+      {
+        "data": "\n\n",
+        "end": 104,
+        "raw": "\n\n",
+        "start": 102,
+        "type": "Text"
+      }
+    ],
+    "type": "Fragment"
+  },
+  "instance": {
+    "attributes": [
+      {
+        "end": 121,
+        "name": "lang",
+        "name_loc": {
+          "end": 116,
+          "start": 112
+        },
+        "start": 112,
+        "value": [
+          {
+            "data": "ts",
+            "end": 120,
+            "raw": "ts",
+            "start": 118
+          }
+        ]
+      },
+      {
+        "end": 158,
+        "name": "generics",
+        "name_loc": {
+          "end": 130,
+          "start": 122
+        },
+        "start": 122,
+        "value": [
+          {
+            "data": "T extends ",
+            "end": 142,
+            "raw": "T extends ",
+            "start": 132
+          },
+          {
+            "end": 157,
+            "expression": {
+              "end": 147,
+              "name": "foo",
+              "start": 144,
+              "type": "Identifier"
+            },
+            "start": 142
+          }
+        ]
+      }
+    ],
+    "content": {
+      "body": [],
+      "end": 160,
+      "sourceType": "module",
+      "start": 159,
+      "type": "Program"
+    },
+    "context": "default",
+    "end": 169,
+    "start": 104,
+    "type": "Script"
+  },
+  "js": [],
+  "module": {
+    "attributes": [
+      {
+        "end": 81,
+        "name": "module",
+        "name_loc": {
+          "end": 81,
+          "start": 75
+        },
+        "start": 75,
+        "value": true
+      },
+      {
+        "end": 91,
+        "name": "lang",
+        "name_loc": {
+          "end": 86,
+          "start": 82
+        },
+        "start": 82,
+        "value": [
+          {
+            "data": "ts",
+            "end": 90,
+            "raw": "ts",
+            "start": 88
+          }
+        ]
+      }
+    ],
+    "content": {
+      "body": [],
+      "end": 93,
+      "sourceType": "module",
+      "start": 92,
+      "type": "Program"
+    },
+    "context": "module",
+    "end": 102,
+    "start": 67,
+    "type": "Script"
+  },
+  "options": null,
+  "start": 0,
+  "type": "Root"
+}

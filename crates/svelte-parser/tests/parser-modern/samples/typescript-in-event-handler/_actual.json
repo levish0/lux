@@ -1,36 +1,19 @@
 {
-  "type": "Root",
-  "start": 0,
-  "end": 174,
+  "css": null,
+  "end": 173,
   "fragment": {
-    "type": "Fragment",
     "nodes": [
       {
-        "type": "Text",
-        "start": 52,
-        "end": 54,
         "data": "\n\n",
-        "raw": "\n\n"
+        "end": 54,
+        "raw": "\n\n",
+        "start": 52,
+        "type": "Text"
       },
       {
-        "type": "RegularElement",
-        "start": 54,
-        "end": 173,
-        "name": "button",
-        "name_loc": {
-          "start": 55,
-          "end": 61
-        },
         "attributes": [
           {
-            "type": "OnDirective",
-            "start": 63,
             "end": 147,
-            "name": "click",
-            "name_loc": {
-              "start": 63,
-              "end": 71
-            },
             "expression": {
               "async": false,
               "body": {
@@ -146,48 +129,71 @@
               "type": "ArrowFunctionExpression",
               "typeParameters": null
             },
-            "modifiers": []
+            "modifiers": [],
+            "name": "click",
+            "name_loc": {
+              "end": 71,
+              "start": 63
+            },
+            "start": 63,
+            "type": "OnDirective"
           }
         ],
+        "end": 173,
         "fragment": {
-          "type": "Fragment",
           "nodes": [
             {
-              "type": "Text",
-              "start": 149,
-              "end": 157,
               "data": "clicks: ",
-              "raw": "clicks: "
+              "end": 157,
+              "raw": "clicks: ",
+              "start": 149,
+              "type": "Text"
             },
             {
-              "type": "ExpressionTag",
-              "start": 157,
               "end": 164,
               "expression": {
                 "end": 163,
                 "name": "count",
                 "start": 158,
                 "type": "Identifier"
-              }
+              },
+              "start": 157,
+              "type": "ExpressionTag"
             }
-          ]
-        }
-      },
-      {
-        "type": "Text",
-        "start": 173,
-        "end": 174,
-        "data": "\n",
-        "raw": "\n"
+          ],
+          "type": "Fragment"
+        },
+        "name": "button",
+        "name_loc": {
+          "end": 61,
+          "start": 55
+        },
+        "start": 54,
+        "type": "RegularElement"
       }
-    ]
+    ],
+    "type": "Fragment"
   },
-  "css": null,
   "instance": {
-    "type": "Script",
-    "start": 0,
-    "end": 52,
-    "context": "Default",
+    "attributes": [
+      {
+        "end": 17,
+        "name": "lang",
+        "name_loc": {
+          "end": 12,
+          "start": 8
+        },
+        "start": 8,
+        "value": [
+          {
+            "data": "ts",
+            "end": 16,
+            "raw": "ts",
+            "start": 14
+          }
+        ]
+      }
+    ],
     "content": {
       "body": [
         {
@@ -241,32 +247,13 @@
       "start": 20,
       "type": "Program"
     },
-    "attributes": [
-      {
-        "start": 8,
-        "end": 17,
-        "name": "lang",
-        "name_loc": {
-          "start": 8,
-          "end": 12
-        },
-        "value": {
-          "Sequence": [
-            {
-              "Text": {
-                "start": 14,
-                "end": 16,
-                "data": "ts",
-                "raw": "ts"
-              }
-            }
-          ]
-        }
-      }
-    ]
+    "context": "default",
+    "end": 52,
+    "start": 0,
+    "type": "Script"
   },
-  "module": null,
+  "js": [],
   "options": null,
-  "comments": [],
-  "ts": true
+  "start": 0,
+  "type": "Root"
 }

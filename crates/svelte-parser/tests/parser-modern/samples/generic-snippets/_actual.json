@@ -1,0 +1,52 @@
+{
+  "css": null,
+  "end": 192,
+  "fragment": {
+    "nodes": [
+      {
+        "data": "\n\n",
+        "end": 30,
+        "raw": "\n\n",
+        "start": 28,
+        "type": "Text"
+      }
+    ],
+    "type": "Fragment"
+  },
+  "instance": {
+    "attributes": [
+      {
+        "end": 17,
+        "name": "lang",
+        "name_loc": {
+          "end": 12,
+          "start": 8
+        },
+        "start": 8,
+        "value": [
+          {
+            "data": "ts",
+            "end": 16,
+            "raw": "ts",
+            "start": 14
+          }
+        ]
+      }
+    ],
+    "content": {
+      "body": [],
+      "end": 19,
+      "sourceType": "module",
+      "start": 18,
+      "type": "Program"
+    },
+    "context": "default",
+    "end": 28,
+    "start": 0,
+    "type": "Script"
+  },
+  "js": [],
+  "options": null,
+  "start": 0,
+  "type": "Root"
+}

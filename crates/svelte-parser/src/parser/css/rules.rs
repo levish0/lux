@@ -208,6 +208,7 @@ fn parse_declaration(source: &str, pos: &mut usize, offset: u32) -> ParseResult<
         }
     }
     let value = source[value_start..*pos].trim().to_string();
+    let end = *pos;
 
     // Consume optional ;
     if *pos < bytes.len() && bytes[*pos] == b';' {
@@ -215,7 +216,7 @@ fn parse_declaration(source: &str, pos: &mut usize, offset: u32) -> ParseResult<
     }
 
     Ok(CssDeclaration {
-        span: Span::new(start + offset as usize, *pos + offset as usize),
+        span: Span::new(start + offset as usize, end + offset as usize),
         property,
         value,
     })

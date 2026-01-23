@@ -1,0 +1,109 @@
+{
+  "css": null,
+  "end": 51,
+  "fragment": {
+    "nodes": [
+      {
+        "alternate": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 31,
+              "raw": "\n\t",
+              "start": 29,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 45,
+              "fragment": {
+                "nodes": [
+                  {
+                    "data": "not foo",
+                    "end": 41,
+                    "raw": "not foo",
+                    "start": 34,
+                    "type": "Text"
+                  }
+                ],
+                "type": "Fragment"
+              },
+              "name": "p",
+              "name_loc": {
+                "end": 33,
+                "start": 32
+              },
+              "start": 31,
+              "type": "RegularElement"
+            },
+            {
+              "data": "\n",
+              "end": 46,
+              "raw": "\n",
+              "start": 45,
+              "type": "Text"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "consequent": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 11,
+              "raw": "\n\t",
+              "start": 9,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 21,
+              "fragment": {
+                "nodes": [
+                  {
+                    "data": "foo",
+                    "end": 17,
+                    "raw": "foo",
+                    "start": 14,
+                    "type": "Text"
+                  }
+                ],
+                "type": "Fragment"
+              },
+              "name": "p",
+              "name_loc": {
+                "end": 13,
+                "start": 12
+              },
+              "start": 11,
+              "type": "RegularElement"
+            },
+            {
+              "data": "\n",
+              "end": 22,
+              "raw": "\n",
+              "start": 21,
+              "type": "Text"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "elseif": false,
+        "end": 51,
+        "start": 0,
+        "test": {
+          "end": 8,
+          "name": "foo",
+          "start": 5,
+          "type": "Identifier"
+        },
+        "type": "IfBlock"
+      }
+    ],
+    "type": "Fragment"
+  },
+  "js": [],
+  "options": null,
+  "start": 0,
+  "type": "Root"
+}

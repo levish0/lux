@@ -1,4 +1,5 @@
-use serde::Serialize;
+use serde::ser::SerializeMap;
+use serde::{Serialize, Serializer};
 use swc_ecma_ast as swc;
 
 use crate::span::Span;
@@ -13,23 +14,45 @@ use crate::text::Text;
  *   value: true | ExpressionTag | Array<Text | ExpressionTag>;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct Attribute {
-    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
     pub value: AttributeValue,
 }
 
-#[derive(Debug, Clone, Serialize)]
+impl Serialize for Attribute {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("name_loc", &self.name_loc)?;
+        map.serialize_entry("value", &self.value)?;
+        map.end()
+    }
+}
+
+#[derive(Debug, Clone)]
 pub enum AttributeValue {
     True,
     Expression(ExpressionTag),
     Sequence(Vec<AttributeSequenceValue>),
 }
 
+impl Serialize for AttributeValue {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        match self {
+            AttributeValue::True => s.serialize_bool(true),
+            AttributeValue::Expression(e) => e.serialize(s),
+            AttributeValue::Sequence(items) => items.serialize(s),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize)]
+#[serde(untagged)]
 pub enum AttributeSequenceValue {
     Text(Text),
     Expression(ExpressionTag),

@@ -36,16 +36,21 @@ pub struct Root {
 impl Serialize for Root {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         let mut map = s.serialize_map(None)?;
-        map.serialize_entry("type", "Root")?;
+        map.serialize_entry("css", &self.css)?;
+        map.serialize_entry("js", &Vec::<()>::new())?;
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("type", "Root")?;
         map.serialize_entry("fragment", &self.fragment)?;
-        map.serialize_entry("css", &self.css)?;
-        map.serialize_entry("instance", &self.instance)?;
-        map.serialize_entry("module", &self.module)?;
         map.serialize_entry("options", &self.options)?;
-        map.serialize_entry("comments", &self.comments)?;
-        map.serialize_entry("ts", &self.ts)?;
+        if self.instance.is_some() || self.module.is_some() {
+            if self.module.is_some() {
+                map.serialize_entry("module", &self.module)?;
+            }
+            if self.instance.is_some() {
+                map.serialize_entry("instance", &self.instance)?;
+            }
+        }
         map.end()
     }
 }
@@ -64,6 +69,7 @@ pub struct Script {
     pub context: ScriptContext,
     pub content: swc::Program,
     pub content_comments: Vec<crate::text::JsComment>,
+    pub content_end: usize,
     pub attributes: Vec<Attribute>,
 }
 
@@ -77,6 +83,7 @@ impl Serialize for Script {
         map.serialize_entry("content", &crate::utils::estree::ProgramWithComments {
             program: &self.content,
             comments: &self.content_comments,
+            content_end: self.content_end,
         })?;
         map.serialize_entry("attributes", &self.attributes)?;
         map.end()
@@ -84,6 +91,7 @@ impl Serialize for Script {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum ScriptContext {
     Default,
     Module,

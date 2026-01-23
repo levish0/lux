@@ -106,12 +106,25 @@ impl<'a> Serialize for ProgramRef<'a> {
 pub struct ProgramWithComments<'a> {
     pub program: &'a swc::Program,
     pub comments: &'a [crate::text::JsComment],
+    pub content_end: usize,
 }
 
 impl<'a> Serialize for ProgramWithComments<'a> {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         let value = serde_json::to_value(self.program).map_err(S::Error::custom)?;
         let mut transformed = transform_value(value);
+
+        // Fix Program.end for empty body: extend to content end
+        if let Value::Object(ref mut obj) = transformed {
+            let body_is_empty = obj
+                .get("body")
+                .and_then(|b| b.as_array())
+                .map(|arr| arr.is_empty())
+                .unwrap_or(true);
+            if body_is_empty && self.content_end > 0 {
+                obj.insert("end".to_string(), Value::Number(self.content_end.into()));
+            }
+        }
 
         if !self.comments.is_empty() {
             if let Value::Object(ref mut obj) = transformed {

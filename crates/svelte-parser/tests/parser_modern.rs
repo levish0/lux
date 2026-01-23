@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::Path;
 
+use serde_json::Value;
 use svelte_parser::{ParseOptions, parse};
 
 fn fixture_dir() -> &'static Path {
@@ -10,18 +11,14 @@ fn fixture_dir() -> &'static Path {
     ))
 }
 
-fn output_dir() -> &'static Path {
-    Path::new(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/tests/parser-modern/output"
-    ))
-}
-
 fn parse_fixture(name: &str) {
     let dir = fixture_dir().join(name);
     let input_path = dir.join("input.svelte");
     let source = fs::read_to_string(&input_path)
-        .unwrap_or_else(|e| panic!("Failed to read {}: {}", input_path.display(), e));
+        .unwrap_or_else(|e| panic!("Failed to read {}: {}", input_path.display(), e))
+        .replace("\r\n", "\n")
+        .trim_end()
+        .to_string();
 
     let options = if name.starts_with("loose") {
         ParseOptions { loose: true }
@@ -32,12 +29,44 @@ fn parse_fixture(name: &str) {
     let root = parse(&source, options)
         .unwrap_or_else(|errs| panic!("Parse failed for {}: {:?}", name, errs));
 
-    // Save parsed output as JSON
-    let out_dir = output_dir();
-    fs::create_dir_all(out_dir).ok();
-    let out_path = out_dir.join(format!("{}.json", name));
-    let json = serde_json::to_string_pretty(&root).unwrap();
-    fs::write(&out_path, &json).unwrap();
+    // Serialize and strip "comments" like Svelte's test.ts
+    let mut actual: Value = serde_json::to_value(&root).unwrap();
+    if let Value::Object(ref mut obj) = actual {
+        obj.remove("comments");
+    }
+
+    // Save _actual.json for debugging
+    let actual_json = serde_json::to_string_pretty(&actual).unwrap();
+    fs::write(dir.join("_actual.json"), &actual_json).unwrap();
+
+    // Compare against reference output.json
+    let expected_path = dir.join("output.json");
+    let expected_str = fs::read_to_string(&expected_path)
+        .unwrap_or_else(|e| panic!("Failed to read {}: {}", expected_path.display(), e));
+    let mut expected: Value = serde_json::from_str(&expected_str).unwrap();
+
+    // Strip "loc" fields from both (not implemented yet)
+    strip_field(&mut actual, "loc");
+    strip_field(&mut expected, "loc");
+
+    assert_eq!(actual, expected, "Mismatch for fixture '{}'", name);
+}
+
+fn strip_field(value: &mut Value, field: &str) {
+    match value {
+        Value::Object(obj) => {
+            obj.remove(field);
+            for (_, v) in obj.iter_mut() {
+                strip_field(v, field);
+            }
+        }
+        Value::Array(arr) => {
+            for v in arr.iter_mut() {
+                strip_field(v, field);
+            }
+        }
+        _ => {}
+    }
 }
 
 #[test]

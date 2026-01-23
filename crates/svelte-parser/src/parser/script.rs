@@ -36,6 +36,7 @@ pub fn script_parser(parser_input: &mut ParserInput) -> ParseResult<Script> {
     // Read content until </script>
     let content_start = parser_input.current_token_start();
     let content_text = read_until_closing_script(parser_input)?;
+    let content_end = content_start + content_text.len();
     let content_offset = content_start as u32;
 
     // Consume </script>
@@ -51,6 +52,7 @@ pub fn script_parser(parser_input: &mut ParserInput) -> ParseResult<Script> {
         context,
         content,
         content_comments,
+        content_end,
         attributes: attributes
             .into_iter()
             .filter_map(|a| match a {

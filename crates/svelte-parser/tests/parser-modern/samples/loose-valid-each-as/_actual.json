@@ -1,25 +1,38 @@
 {
-  "type": "Root",
-  "start": 0,
-  "end": 120,
+  "css": null,
+  "end": 119,
   "fragment": {
-    "type": "Fragment",
     "nodes": [
       {
-        "type": "Text",
-        "start": 43,
-        "end": 45,
         "data": "\n\n",
-        "raw": "\n\n"
+        "end": 45,
+        "raw": "\n\n",
+        "start": 43,
+        "type": "Text"
       }
-    ]
+    ],
+    "type": "Fragment"
   },
-  "css": null,
   "instance": {
-    "type": "Script",
-    "start": 0,
-    "end": 43,
-    "context": "Default",
+    "attributes": [
+      {
+        "end": 17,
+        "name": "lang",
+        "name_loc": {
+          "end": 12,
+          "start": 8
+        },
+        "start": 8,
+        "value": [
+          {
+            "data": "ts",
+            "end": 16,
+            "raw": "ts",
+            "start": 14
+          }
+        ]
+      }
+    ],
     "content": {
       "body": [
         {
@@ -55,32 +68,13 @@
       "start": 20,
       "type": "Program"
     },
-    "attributes": [
-      {
-        "start": 8,
-        "end": 17,
-        "name": "lang",
-        "name_loc": {
-          "start": 8,
-          "end": 12
-        },
-        "value": {
-          "Sequence": [
-            {
-              "Text": {
-                "start": 14,
-                "end": 16,
-                "data": "ts",
-                "raw": "ts"
-              }
-            }
-          ]
-        }
-      }
-    ]
+    "context": "default",
+    "end": 43,
+    "start": 0,
+    "type": "Script"
   },
-  "module": null,
+  "js": [],
   "options": null,
-  "comments": [],
-  "ts": true
+  "start": 0,
+  "type": "Root"
 }

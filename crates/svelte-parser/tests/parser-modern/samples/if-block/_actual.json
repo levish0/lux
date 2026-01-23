@@ -1,0 +1,38 @@
+{
+  "css": null,
+  "end": 17,
+  "fragment": {
+    "nodes": [
+      {
+        "alternate": null,
+        "consequent": {
+          "nodes": [
+            {
+              "data": "bar",
+              "end": 12,
+              "raw": "bar",
+              "start": 9,
+              "type": "Text"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "elseif": false,
+        "end": 17,
+        "start": 0,
+        "test": {
+          "end": 8,
+          "name": "foo",
+          "start": 5,
+          "type": "Identifier"
+        },
+        "type": "IfBlock"
+      }
+    ],
+    "type": "Fragment"
+  },
+  "js": [],
+  "options": null,
+  "start": 0,
+  "type": "Root"
+}

@@ -727,6 +727,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "svelte-analyzer"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "swc_ecma_ast",
+]
+
+[[package]]
 name = "svelte-ast"
 version = "0.1.0"
 dependencies = [
