@@ -61,7 +61,7 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
         // Push this element onto stack before parsing children
         parser_input
             .state
-            .push_element(name.clone(), has_shadowrootmode);
+            .push_element(has_shadowrootmode);
 
         let nodes = if loose {
             parse_children_loose(parser_input, &name)?

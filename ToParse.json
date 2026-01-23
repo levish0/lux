@@ -1,0 +1,144 @@
+{
+  "css": null,
+  "js": [],
+  "start": 0,
+  "end": 97,
+  "type": "Root",
+  "fragment": {
+    "type": "Fragment",
+    "nodes": [
+      {
+        "type": "Text",
+        "start": 34,
+        "end": 36,
+        "data": "\n\n",
+        "raw": "\n\n"
+      },
+      {
+        "type": "RegularElement",
+        "start": 36,
+        "end": 96,
+        "name": "button",
+        "name_loc": {
+          "start": 37,
+          "end": 43
+        },
+        "attributes": [
+          {
+            "type": "OnDirective",
+            "start": 44,
+            "end": 68,
+            "name": "click",
+            "name_loc": {
+              "start": 44,
+              "end": 52
+            },
+            "expression": {
+              "async": false,
+              "body": {
+                "argument": {
+                  "end": 65,
+                  "name": "count",
+                  "start": 60,
+                  "type": "Identifier"
+                },
+                "end": 67,
+                "operator": "++",
+                "prefix": false,
+                "start": 60,
+                "type": "UpdateExpression"
+              },
+              "end": 67,
+              "expression": true,
+              "generator": false,
+              "id": null,
+              "params": [],
+              "start": 54,
+              "type": "ArrowFunctionExpression"
+            },
+            "modifiers": []
+          }
+        ],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 69,
+              "end": 79,
+              "data": "\n\tclicks: ",
+              "raw": "\n\tclicks: "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 79,
+              "end": 86,
+              "expression": {
+                "end": 85,
+                "name": "count",
+                "start": 80,
+                "type": "Identifier"
+              }
+            },
+            {
+              "type": "Text",
+              "start": 86,
+              "end": 87,
+              "data": "\n",
+              "raw": "\n"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Text",
+        "start": 96,
+        "end": 97,
+        "data": "\n",
+        "raw": "\n"
+      }
+    ]
+  },
+  "options": null,
+  "instance": {
+    "type": "Script",
+    "start": 0,
+    "end": 34,
+    "context": "default",
+    "content": {
+      "body": [
+        {
+          "declarations": [
+            {
+              "end": 23,
+              "id": {
+                "end": 19,
+                "name": "count",
+                "start": 14,
+                "type": "Identifier"
+              },
+              "init": {
+                "end": 23,
+                "raw": "0",
+                "start": 22,
+                "type": "Literal",
+                "value": 0
+              },
+              "start": 14,
+              "type": "VariableDeclarator"
+            }
+          ],
+          "end": 24,
+          "kind": "let",
+          "start": 10,
+          "type": "VariableDeclaration"
+        }
+      ],
+      "end": 25,
+      "sourceType": "module",
+      "start": 8,
+      "type": "Program"
+    },
+    "attributes": []
+  }
+}
