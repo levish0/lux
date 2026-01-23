@@ -12,6 +12,16 @@
               "body": {
                 "body": [],
                 "end": 26,
+                "loc": {
+                  "end": {
+                    "column": 26,
+                    "line": 1
+                  },
+                  "start": {
+                    "column": 24,
+                    "line": 1
+                  }
+                },
                 "start": 24,
                 "type": "BlockStatement"
               },
@@ -19,9 +29,29 @@
               "expression": false,
               "generator": false,
               "id": null,
+              "loc": {
+                "end": {
+                  "column": 26,
+                  "line": 1
+                },
+                "start": {
+                  "column": 14,
+                  "line": 1
+                }
+              },
               "params": [
                 {
                   "end": 19,
+                  "loc": {
+                    "end": {
+                      "column": 19,
+                      "line": 1
+                    },
+                    "start": {
+                      "column": 15,
+                      "line": 1
+                    }
+                  },
                   "name": "node",
                   "start": 15,
                   "type": "Identifier"
@@ -40,6 +70,16 @@
               "body": {
                 "body": [],
                 "end": 49,
+                "loc": {
+                  "end": {
+                    "column": 49,
+                    "line": 1
+                  },
+                  "start": {
+                    "column": 47,
+                    "line": 1
+                  }
+                },
                 "start": 47,
                 "type": "BlockStatement"
               },
@@ -47,9 +87,29 @@
               "expression": false,
               "generator": false,
               "id": null,
+              "loc": {
+                "end": {
+                  "column": 49,
+                  "line": 1
+                },
+                "start": {
+                  "column": 37,
+                  "line": 1
+                }
+              },
               "params": [
                 {
                   "end": 42,
+                  "loc": {
+                    "end": {
+                      "column": 42,
+                      "line": 1
+                    },
+                    "start": {
+                      "column": 38,
+                      "line": 1
+                    }
+                  },
                   "name": "node",
                   "start": 38,
                   "type": "Identifier"
@@ -69,8 +129,16 @@
         },
         "name": "div",
         "name_loc": {
-          "end": 4,
-          "start": 1
+          "end": {
+            "character": 4,
+            "column": 4,
+            "line": 1
+          },
+          "start": {
+            "character": 1,
+            "column": 1,
+            "line": 1
+          }
         },
         "start": 0,
         "type": "RegularElement"

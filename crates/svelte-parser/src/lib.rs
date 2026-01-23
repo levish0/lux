@@ -22,7 +22,7 @@ pub struct ParseOptions {
 
 pub fn parse(source: &str, options: ParseOptions) -> Result<Root, Vec<ParseError>> {
     let ts = detect_typescript(source);
-    let context = ParseContext::new(ts, options.loose);
+    let context = ParseContext::new(source, ts, options.loose);
 
     let input_source = LocatingSlice::new(source);
     let mut parser_input: ParserInput = Stateful {
@@ -374,8 +374,10 @@ mod tests {
         let root = parse("<div></div>", ParseOptions::default()).unwrap();
         match &root.fragment.nodes[0] {
             FragmentNode::RegularElement(el) => {
-                assert_eq!(el.name_loc.start, 1);
-                assert_eq!(el.name_loc.end, 4);
+                assert_eq!(el.name_loc.start.character, 1);
+                assert_eq!(el.name_loc.end.character, 4);
+                assert_eq!(el.name_loc.start.line, 1);
+                assert_eq!(el.name_loc.start.column, 1);
             }
             _ => panic!("expected RegularElement"),
         }

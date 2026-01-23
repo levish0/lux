@@ -1,7 +1,39 @@
+use std::cell::RefCell;
+
 use serde::ser::Error as SerError;
 use serde::{Serialize, Serializer};
 use serde_json::{Map, Value};
 use swc_ecma_ast as swc;
+
+thread_local! {
+    static LOC_LINE_STARTS: RefCell<Option<Vec<usize>>> = RefCell::new(None);
+}
+
+/// Set the source for loc computation. Call before serializing AST nodes.
+pub fn set_loc_source(source: &str) {
+    let line_starts: Vec<usize> = std::iter::once(0)
+        .chain(
+            source
+                .bytes()
+                .enumerate()
+                .filter_map(|(i, b)| if b == b'\n' { Some(i + 1) } else { None }),
+        )
+        .collect();
+    LOC_LINE_STARTS.with(|ls| *ls.borrow_mut() = Some(line_starts));
+}
+
+/// Clear the loc source after serialization.
+pub fn clear_loc_source() {
+    LOC_LINE_STARTS.with(|ls| *ls.borrow_mut() = None);
+}
+
+fn offset_to_line_col(offset: usize, line_starts: &[usize]) -> (usize, usize) {
+    let line_idx = match line_starts.binary_search(&offset) {
+        Ok(idx) => idx,
+        Err(idx) => idx.saturating_sub(1),
+    };
+    (line_idx + 1, offset - line_starts[line_idx])
+}
 
 /// Wrapper for serializing an expression in ESTree format via `serialize_map`.
 pub struct ExprWrapper<'a>(pub &'a Box<swc::Expr>);
@@ -107,6 +139,41 @@ impl<'a> Serialize for ProgramRef<'a> {
     }
 }
 
+/// Wrapper for serializing an Identifier with character-inclusive loc.
+/// Used for manually-created Identifiers (e.g. snippet expression name)
+/// where reference Svelte uses its own locate function.
+pub struct IdentWithCharLoc<'a>(pub &'a Box<swc::Ident>);
+
+impl<'a> Serialize for IdentWithCharLoc<'a> {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        use serde::ser::SerializeMap;
+        let ident = self.0.as_ref();
+        let start = ident.span.lo.0 as usize;
+        let end = ident.span.hi.0 as usize;
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "Identifier")?;
+        map.serialize_entry("start", &start)?;
+        map.serialize_entry("end", &end)?;
+        map.serialize_entry("name", ident.sym.as_str())?;
+
+        // loc with character (like name_loc format)
+        LOC_LINE_STARTS.with(|ls| -> Result<(), S::Error> {
+            if let Some(ref line_starts) = *ls.borrow() {
+                let (sl, sc) = offset_to_line_col(start, line_starts);
+                let (el, ec) = offset_to_line_col(end, line_starts);
+                let loc = serde_json::json!({
+                    "start": {"line": sl, "column": sc, "character": start},
+                    "end": {"line": el, "column": ec, "character": end}
+                });
+                map.serialize_entry("loc", &loc).map_err(serde::ser::Error::custom)?;
+            }
+            Ok(())
+        }).map_err(serde::ser::Error::custom)?;
+
+        map.end()
+    }
+}
+
 /// Wrapper for serializing a Program with leadingComments/trailingComments attached.
 /// Comments are positioned relative to body statements:
 /// - Before first statement → leadingComments on Program
@@ -116,6 +183,8 @@ pub struct ProgramWithComments<'a> {
     pub comments: &'a [crate::text::JsComment],
     pub content_start: usize,
     pub content_end: usize,
+    pub script_start: usize,
+    pub script_end: usize,
 }
 
 impl<'a> Serialize for ProgramWithComments<'a> {
@@ -132,6 +201,23 @@ impl<'a> Serialize for ProgramWithComments<'a> {
                 );
                 obj.insert("end".to_string(), Value::Number(self.content_end.into()));
             }
+            // Program.loc uses script tag boundaries (matching reference Svelte behavior)
+            LOC_LINE_STARTS.with(|ls| {
+                if let Some(ref line_starts) = *ls.borrow() {
+                    let (sl, sc) = offset_to_line_col(self.script_start, line_starts);
+                    let (el, ec) = offset_to_line_col(self.script_end, line_starts);
+                    let mut loc_obj = Map::new();
+                    let mut start_obj = Map::new();
+                    start_obj.insert("line".to_string(), Value::Number(sl.into()));
+                    start_obj.insert("column".to_string(), Value::Number(sc.into()));
+                    let mut end_obj = Map::new();
+                    end_obj.insert("line".to_string(), Value::Number(el.into()));
+                    end_obj.insert("column".to_string(), Value::Number(ec.into()));
+                    loc_obj.insert("start".to_string(), Value::Object(start_obj));
+                    loc_obj.insert("end".to_string(), Value::Object(end_obj));
+                    obj.insert("loc".to_string(), Value::Object(loc_obj));
+                }
+            });
         }
 
         if !self.comments.is_empty() {
@@ -975,6 +1061,29 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
         result
             .entry("expression".to_string())
             .or_insert(Value::Bool(!is_block));
+    }
+
+    // 8. Compute loc from final start/end
+    if let (Some(start), Some(end)) = (
+        result.get("start").and_then(|v| v.as_u64()),
+        result.get("end").and_then(|v| v.as_u64()),
+    ) {
+        LOC_LINE_STARTS.with(|ls| {
+            if let Some(ref line_starts) = *ls.borrow() {
+                let (sl, sc) = offset_to_line_col(start as usize, line_starts);
+                let (el, ec) = offset_to_line_col(end as usize, line_starts);
+                let mut loc_obj = Map::new();
+                let mut start_obj = Map::new();
+                start_obj.insert("line".to_string(), Value::Number(sl.into()));
+                start_obj.insert("column".to_string(), Value::Number(sc.into()));
+                let mut end_obj = Map::new();
+                end_obj.insert("line".to_string(), Value::Number(el.into()));
+                end_obj.insert("column".to_string(), Value::Number(ec.into()));
+                loc_obj.insert("start".to_string(), Value::Object(start_obj));
+                loc_obj.insert("end".to_string(), Value::Object(end_obj));
+                result.insert("loc".to_string(), Value::Object(loc_obj));
+            }
+        });
     }
 
     Value::Object(result)

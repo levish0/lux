@@ -27,3 +27,4 @@ swc_ecma_ast = { version = "20.0.0", features = ["serde-impl"] }
 swc_ecma_visit = "20.0.0"
 swc_common = { version = "18.0.1", features = ["sourcemap"] }
 rayon = "1.11.0"
+line-span = "0.1.5"

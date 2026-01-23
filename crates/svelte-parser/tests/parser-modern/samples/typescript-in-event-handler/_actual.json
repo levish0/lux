@@ -24,15 +24,45 @@
                         "end": 126,
                         "id": {
                           "end": 114,
+                          "loc": {
+                            "end": {
+                              "column": 20,
+                              "line": 7
+                            },
+                            "start": {
+                              "column": 8,
+                              "line": 7
+                            }
+                          },
                           "name": "next",
                           "start": 102,
                           "type": "Identifier",
                           "typeAnnotation": {
                             "end": 114,
+                            "loc": {
+                              "end": {
+                                "column": 20,
+                                "line": 7
+                              },
+                              "start": {
+                                "column": 12,
+                                "line": 7
+                              }
+                            },
                             "start": 106,
                             "type": "TSTypeAnnotation",
                             "typeAnnotation": {
                               "end": 114,
+                              "loc": {
+                                "end": {
+                                  "column": 20,
+                                  "line": 7
+                                },
+                                "start": {
+                                  "column": 14,
+                                  "line": 7
+                                }
+                              },
                               "start": 108,
                               "type": "TSNumberKeyword"
                             }
@@ -42,13 +72,43 @@
                           "end": 126,
                           "left": {
                             "end": 122,
+                            "loc": {
+                              "end": {
+                                "column": 28,
+                                "line": 7
+                              },
+                              "start": {
+                                "column": 23,
+                                "line": 7
+                              }
+                            },
                             "name": "count",
                             "start": 117,
                             "type": "Identifier"
                           },
+                          "loc": {
+                            "end": {
+                              "column": 32,
+                              "line": 7
+                            },
+                            "start": {
+                              "column": 23,
+                              "line": 7
+                            }
+                          },
                           "operator": "+",
                           "right": {
                             "end": 126,
+                            "loc": {
+                              "end": {
+                                "column": 32,
+                                "line": 7
+                              },
+                              "start": {
+                                "column": 31,
+                                "line": 7
+                              }
+                            },
                             "raw": "1",
                             "start": 125,
                             "type": "Literal",
@@ -57,12 +117,32 @@
                           "start": 117,
                           "type": "BinaryExpression"
                         },
+                        "loc": {
+                          "end": {
+                            "column": 32,
+                            "line": 7
+                          },
+                          "start": {
+                            "column": 8,
+                            "line": 7
+                          }
+                        },
                         "start": 102,
                         "type": "VariableDeclarator"
                       }
                     ],
                     "end": 127,
                     "kind": "const",
+                    "loc": {
+                      "end": {
+                        "column": 33,
+                        "line": 7
+                      },
+                      "start": {
+                        "column": 2,
+                        "line": 7
+                      }
+                    },
                     "start": 96,
                     "type": "VariableDeclaration"
                   },
@@ -72,13 +152,43 @@
                       "end": 142,
                       "left": {
                         "end": 135,
+                        "loc": {
+                          "end": {
+                            "column": 7,
+                            "line": 8
+                          },
+                          "start": {
+                            "column": 2,
+                            "line": 8
+                          }
+                        },
                         "name": "count",
                         "start": 130,
                         "type": "Identifier"
                       },
+                      "loc": {
+                        "end": {
+                          "column": 14,
+                          "line": 8
+                        },
+                        "start": {
+                          "column": 2,
+                          "line": 8
+                        }
+                      },
                       "operator": "=",
                       "right": {
                         "end": 142,
+                        "loc": {
+                          "end": {
+                            "column": 14,
+                            "line": 8
+                          },
+                          "start": {
+                            "column": 10,
+                            "line": 8
+                          }
+                        },
                         "name": "next",
                         "start": 138,
                         "type": "Identifier"
@@ -86,11 +196,31 @@
                       "start": 130,
                       "type": "AssignmentExpression"
                     },
+                    "loc": {
+                      "end": {
+                        "column": 15,
+                        "line": 8
+                      },
+                      "start": {
+                        "column": 2,
+                        "line": 8
+                      }
+                    },
                     "start": 130,
                     "type": "ExpressionStatement"
                   }
                 ],
                 "end": 146,
+                "loc": {
+                  "end": {
+                    "column": 2,
+                    "line": 9
+                  },
+                  "start": {
+                    "column": 30,
+                    "line": 6
+                  }
+                },
                 "start": 92,
                 "type": "BlockStatement"
               },
@@ -98,22 +228,72 @@
               "expression": false,
               "generator": false,
               "id": null,
+              "loc": {
+                "end": {
+                  "column": 2,
+                  "line": 9
+                },
+                "start": {
+                  "column": 11,
+                  "line": 6
+                }
+              },
               "params": [
                 {
                   "end": 87,
+                  "loc": {
+                    "end": {
+                      "column": 25,
+                      "line": 6
+                    },
+                    "start": {
+                      "column": 12,
+                      "line": 6
+                    }
+                  },
                   "name": "e",
                   "start": 74,
                   "type": "Identifier",
                   "typeAnnotation": {
                     "end": 87,
+                    "loc": {
+                      "end": {
+                        "column": 25,
+                        "line": 6
+                      },
+                      "start": {
+                        "column": 13,
+                        "line": 6
+                      }
+                    },
                     "start": 75,
                     "type": "TSTypeAnnotation",
                     "typeAnnotation": {
                       "end": 87,
+                      "loc": {
+                        "end": {
+                          "column": 25,
+                          "line": 6
+                        },
+                        "start": {
+                          "column": 15,
+                          "line": 6
+                        }
+                      },
                       "start": 77,
                       "type": "TSTypeReference",
                       "typeName": {
                         "end": 87,
+                        "loc": {
+                          "end": {
+                            "column": 25,
+                            "line": 6
+                          },
+                          "start": {
+                            "column": 15,
+                            "line": 6
+                          }
+                        },
                         "name": "MouseEvent",
                         "start": 77,
                         "type": "Identifier"
@@ -128,8 +308,16 @@
             "modifiers": [],
             "name": "click",
             "name_loc": {
-              "end": 71,
-              "start": 63
+              "end": {
+                "character": 71,
+                "column": 9,
+                "line": 6
+              },
+              "start": {
+                "character": 63,
+                "column": 1,
+                "line": 6
+              }
             },
             "start": 63,
             "type": "OnDirective"
@@ -149,6 +337,16 @@
               "end": 164,
               "expression": {
                 "end": 163,
+                "loc": {
+                  "end": {
+                    "column": 15,
+                    "line": 10
+                  },
+                  "start": {
+                    "column": 10,
+                    "line": 10
+                  }
+                },
                 "name": "count",
                 "start": 158,
                 "type": "Identifier"
@@ -161,8 +359,16 @@
         },
         "name": "button",
         "name_loc": {
-          "end": 61,
-          "start": 55
+          "end": {
+            "character": 61,
+            "column": 7,
+            "line": 5
+          },
+          "start": {
+            "character": 55,
+            "column": 1,
+            "line": 5
+          }
         },
         "start": 54,
         "type": "RegularElement"
@@ -176,8 +382,16 @@
         "end": 17,
         "name": "lang",
         "name_loc": {
-          "end": 12,
-          "start": 8
+          "end": {
+            "character": 12,
+            "column": 12,
+            "line": 1
+          },
+          "start": {
+            "character": 8,
+            "column": 8,
+            "line": 1
+          }
         },
         "start": 8,
         "type": "Attribute",
@@ -200,6 +414,16 @@
               "end": 41,
               "id": {
                 "end": 29,
+                "loc": {
+                  "end": {
+                    "column": 10,
+                    "line": 2
+                  },
+                  "start": {
+                    "column": 5,
+                    "line": 2
+                  }
+                },
                 "name": "count",
                 "start": 24,
                 "type": "Identifier"
@@ -208,6 +432,16 @@
                 "arguments": [
                   {
                     "end": 40,
+                    "loc": {
+                      "end": {
+                        "column": 21,
+                        "line": 2
+                      },
+                      "start": {
+                        "column": 20,
+                        "line": 2
+                      }
+                    },
                     "raw": "0",
                     "start": 39,
                     "type": "Literal",
@@ -216,14 +450,44 @@
                 ],
                 "callee": {
                   "end": 38,
+                  "loc": {
+                    "end": {
+                      "column": 19,
+                      "line": 2
+                    },
+                    "start": {
+                      "column": 13,
+                      "line": 2
+                    }
+                  },
                   "name": "$state",
                   "start": 32,
                   "type": "Identifier"
                 },
                 "end": 41,
+                "loc": {
+                  "end": {
+                    "column": 22,
+                    "line": 2
+                  },
+                  "start": {
+                    "column": 13,
+                    "line": 2
+                  }
+                },
                 "optional": false,
                 "start": 32,
                 "type": "CallExpression"
+              },
+              "loc": {
+                "end": {
+                  "column": 22,
+                  "line": 2
+                },
+                "start": {
+                  "column": 5,
+                  "line": 2
+                }
               },
               "start": 24,
               "type": "VariableDeclarator"
@@ -231,11 +495,31 @@
           ],
           "end": 42,
           "kind": "let",
+          "loc": {
+            "end": {
+              "column": 23,
+              "line": 2
+            },
+            "start": {
+              "column": 1,
+              "line": 2
+            }
+          },
           "start": 20,
           "type": "VariableDeclaration"
         }
       ],
       "end": 43,
+      "loc": {
+        "end": {
+          "column": 9,
+          "line": 3
+        },
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
       "sourceType": "module",
       "start": 18,
       "type": "Program"

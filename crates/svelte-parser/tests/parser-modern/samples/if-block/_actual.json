@@ -22,6 +22,16 @@
         "start": 0,
         "test": {
           "end": 8,
+          "loc": {
+            "end": {
+              "column": 8,
+              "line": 1
+            },
+            "start": {
+              "column": 5,
+              "line": 1
+            }
+          },
           "name": "foo",
           "start": 5,
           "type": "Identifier"

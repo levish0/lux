@@ -32,8 +32,16 @@
               },
               "name": "Comp",
               "name_loc": {
-                "end": 12,
-                "start": 8
+                "end": {
+                  "character": 12,
+                  "column": 6,
+                  "line": 2
+                },
+                "start": {
+                  "character": 8,
+                  "column": 2,
+                  "line": 2
+                }
               },
               "start": 7,
               "type": "Component"
@@ -43,8 +51,16 @@
         },
         "name": "div",
         "name_loc": {
-          "end": 4,
-          "start": 1
+          "end": {
+            "character": 4,
+            "column": 4,
+            "line": 1
+          },
+          "start": {
+            "character": 1,
+            "column": 1,
+            "line": 1
+          }
         },
         "start": 0,
         "type": "RegularElement"
@@ -74,8 +90,16 @@
                   "end": 44,
                   "name": "foo",
                   "name_loc": {
-                    "end": 38,
-                    "start": 35
+                    "end": {
+                      "character": 38,
+                      "column": 10,
+                      "line": 6
+                    },
+                    "start": {
+                      "character": 35,
+                      "column": 7,
+                      "line": 6
+                    }
                   },
                   "start": 35,
                   "type": "Attribute",
@@ -83,6 +107,16 @@
                     "end": 44,
                     "expression": {
                       "end": 43,
+                      "loc": {
+                        "end": {
+                          "column": 15,
+                          "line": 6
+                        },
+                        "start": {
+                          "column": 12,
+                          "line": 6
+                        }
+                      },
                       "name": "bar",
                       "start": 40,
                       "type": "Identifier"
@@ -99,8 +133,16 @@
               },
               "name": "Comp",
               "name_loc": {
-                "end": 34,
-                "start": 30
+                "end": {
+                  "character": 34,
+                  "column": 6,
+                  "line": 6
+                },
+                "start": {
+                  "character": 30,
+                  "column": 2,
+                  "line": 6
+                }
               },
               "start": 29,
               "type": "Component"
@@ -110,8 +152,16 @@
         },
         "name": "div",
         "name_loc": {
-          "end": 26,
-          "start": 23
+          "end": {
+            "character": 26,
+            "column": 4,
+            "line": 5
+          },
+          "start": {
+            "character": 23,
+            "column": 1,
+            "line": 5
+          }
         },
         "start": 22,
         "type": "RegularElement"
@@ -144,8 +194,16 @@
               },
               "name": "span",
               "name_loc": {
-                "end": 65,
-                "start": 61
+                "end": {
+                  "character": 65,
+                  "column": 6,
+                  "line": 10
+                },
+                "start": {
+                  "character": 61,
+                  "column": 2,
+                  "line": 10
+                }
               },
               "start": 60,
               "type": "RegularElement"
@@ -155,8 +213,16 @@
         },
         "name": "div",
         "name_loc": {
-          "end": 57,
-          "start": 54
+          "end": {
+            "character": 57,
+            "column": 4,
+            "line": 9
+          },
+          "start": {
+            "character": 54,
+            "column": 1,
+            "line": 9
+          }
         },
         "start": 53,
         "type": "RegularElement"
@@ -189,8 +255,16 @@
               },
               "name": "Comp.",
               "name_loc": {
-                "end": 87,
-                "start": 82
+                "end": {
+                  "character": 87,
+                  "column": 7,
+                  "line": 14
+                },
+                "start": {
+                  "character": 82,
+                  "column": 2,
+                  "line": 14
+                }
               },
               "start": 81,
               "type": "Component"
@@ -200,8 +274,16 @@
         },
         "name": "div",
         "name_loc": {
-          "end": 78,
-          "start": 75
+          "end": {
+            "character": 78,
+            "column": 4,
+            "line": 13
+          },
+          "start": {
+            "character": 75,
+            "column": 1,
+            "line": 13
+          }
         },
         "start": 74,
         "type": "RegularElement"
@@ -234,8 +316,16 @@
               },
               "name": "comp.",
               "name_loc": {
-                "end": 109,
-                "start": 104
+                "end": {
+                  "character": 109,
+                  "column": 7,
+                  "line": 18
+                },
+                "start": {
+                  "character": 104,
+                  "column": 2,
+                  "line": 18
+                }
               },
               "start": 103,
               "type": "Component"
@@ -245,8 +335,16 @@
         },
         "name": "div",
         "name_loc": {
-          "end": 100,
-          "start": 97
+          "end": {
+            "character": 100,
+            "column": 4,
+            "line": 17
+          },
+          "start": {
+            "character": 97,
+            "column": 1,
+            "line": 17
+          }
         },
         "start": 96,
         "type": "RegularElement"
@@ -286,8 +384,16 @@
               },
               "name": "div",
               "name_loc": {
-                "end": 133,
-                "start": 130
+                "end": {
+                  "character": 133,
+                  "column": 5,
+                  "line": 22
+                },
+                "start": {
+                  "character": 130,
+                  "column": 2,
+                  "line": 22
+                }
               },
               "start": 129,
               "type": "RegularElement"
@@ -300,6 +406,16 @@
         "start": 118,
         "test": {
           "end": 126,
+          "loc": {
+            "end": {
+              "column": 8,
+              "line": 21
+            },
+            "start": {
+              "column": 5,
+              "line": 21
+            }
+          },
           "name": "foo",
           "start": 123,
           "type": "Identifier"
@@ -330,8 +446,16 @@
                   "end": 168,
                   "name": "foo",
                   "name_loc": {
-                    "end": 162,
-                    "start": 159
+                    "end": {
+                      "character": 162,
+                      "column": 10,
+                      "line": 26
+                    },
+                    "start": {
+                      "character": 159,
+                      "column": 7,
+                      "line": 26
+                    }
                   },
                   "start": 159,
                   "type": "Attribute",
@@ -339,6 +463,16 @@
                     "end": 168,
                     "expression": {
                       "end": 167,
+                      "loc": {
+                        "end": {
+                          "column": 15,
+                          "line": 26
+                        },
+                        "start": {
+                          "column": 12,
+                          "line": 26
+                        }
+                      },
                       "name": "bar",
                       "start": 164,
                       "type": "Identifier"
@@ -355,8 +489,16 @@
               },
               "name": "Comp",
               "name_loc": {
-                "end": 158,
-                "start": 154
+                "end": {
+                  "character": 158,
+                  "column": 6,
+                  "line": 26
+                },
+                "start": {
+                  "character": 154,
+                  "column": 2,
+                  "line": 26
+                }
               },
               "start": 153,
               "type": "Component"
@@ -369,6 +511,16 @@
         "start": 142,
         "test": {
           "end": 150,
+          "loc": {
+            "end": {
+              "column": 8,
+              "line": 25
+            },
+            "start": {
+              "column": 5,
+              "line": 25
+            }
+          },
           "name": "foo",
           "start": 147,
           "type": "Identifier"
@@ -411,8 +563,16 @@
               },
               "name": "p",
               "name_loc": {
-                "end": 184,
-                "start": 183
+                "end": {
+                  "character": 184,
+                  "column": 2,
+                  "line": 30
+                },
+                "start": {
+                  "character": 183,
+                  "column": 1,
+                  "line": 30
+                }
               },
               "start": 182,
               "type": "RegularElement"
@@ -433,8 +593,16 @@
               },
               "name": "open-ended",
               "name_loc": {
-                "end": 204,
-                "start": 194
+                "end": {
+                  "character": 204,
+                  "column": 11,
+                  "line": 32
+                },
+                "start": {
+                  "character": 194,
+                  "column": 1,
+                  "line": 32
+                }
               },
               "start": 193,
               "type": "RegularElement"
@@ -444,8 +612,16 @@
         },
         "name": "div",
         "name_loc": {
-          "end": 180,
-          "start": 177
+          "end": {
+            "character": 180,
+            "column": 4,
+            "line": 29
+          },
+          "start": {
+            "character": 177,
+            "column": 1,
+            "line": 29
+          }
         },
         "start": 176,
         "type": "RegularElement"

@@ -29,6 +29,16 @@
                     "end": 96,
                     "expression": {
                       "end": 95,
+                      "loc": {
+                        "end": {
+                          "column": 10,
+                          "line": 6
+                        },
+                        "start": {
+                          "column": 7,
+                          "line": 6
+                        }
+                      },
                       "name": "key",
                       "start": 92,
                       "type": "Identifier"
@@ -47,6 +57,16 @@
                     "end": 105,
                     "expression": {
                       "end": 104,
+                      "loc": {
+                        "end": {
+                          "column": 19,
+                          "line": 6
+                        },
+                        "start": {
+                          "column": 14,
+                          "line": 6
+                        }
+                      },
                       "name": "value",
                       "start": 99,
                       "type": "Identifier"
@@ -59,8 +79,16 @@
               },
               "name": "div",
               "name_loc": {
-                "end": 90,
-                "start": 87
+                "end": {
+                  "character": 90,
+                  "column": 5,
+                  "line": 6
+                },
+                "start": {
+                  "character": 87,
+                  "column": 2,
+                  "line": 6
+                }
               },
               "start": 86,
               "type": "RegularElement"
@@ -79,6 +107,16 @@
           "elements": [
             {
               "end": 63,
+              "loc": {
+                "end": {
+                  "column": 18,
+                  "line": 5
+                },
+                "start": {
+                  "column": 15,
+                  "line": 5
+                }
+              },
               "name": "key",
               "start": 60,
               "type": "Identifier"
@@ -87,12 +125,42 @@
               "end": 82,
               "left": {
                 "end": 70,
+                "loc": {
+                  "end": {
+                    "column": 25,
+                    "line": 5
+                  },
+                  "start": {
+                    "column": 20,
+                    "line": 5
+                  }
+                },
                 "name": "value",
                 "start": 65,
                 "type": "Identifier"
               },
+              "loc": {
+                "end": {
+                  "column": 37,
+                  "line": 5
+                },
+                "start": {
+                  "column": 20,
+                  "line": 5
+                }
+              },
               "right": {
                 "end": 82,
+                "loc": {
+                  "end": {
+                    "column": 37,
+                    "line": 5
+                  },
+                  "start": {
+                    "column": 28,
+                    "line": 5
+                  }
+                },
                 "raw": "'default'",
                 "start": 73,
                 "type": "Literal",
@@ -103,12 +171,32 @@
             }
           ],
           "end": 83,
+          "loc": {
+            "end": {
+              "column": 38,
+              "line": 5
+            },
+            "start": {
+              "column": 14,
+              "line": 5
+            }
+          },
           "start": 59,
           "type": "ArrayPattern"
         },
         "end": 119,
         "expression": {
           "end": 55,
+          "loc": {
+            "end": {
+              "column": 10,
+              "line": 5
+            },
+            "start": {
+              "column": 7,
+              "line": 5
+            }
+          },
           "name": "arr",
           "start": 52,
           "type": "Identifier"
@@ -125,8 +213,16 @@
         "end": 17,
         "name": "lang",
         "name_loc": {
-          "end": 12,
-          "start": 8
+          "end": {
+            "character": 12,
+            "column": 12,
+            "line": 1
+          },
+          "start": {
+            "character": 8,
+            "column": 8,
+            "line": 1
+          }
         },
         "start": 8,
         "type": "Attribute",
@@ -149,6 +245,16 @@
               "end": 32,
               "id": {
                 "end": 27,
+                "loc": {
+                  "end": {
+                    "column": 8,
+                    "line": 2
+                  },
+                  "start": {
+                    "column": 5,
+                    "line": 2
+                  }
+                },
                 "name": "arr",
                 "start": 24,
                 "type": "Identifier"
@@ -156,8 +262,28 @@
               "init": {
                 "elements": [],
                 "end": 32,
+                "loc": {
+                  "end": {
+                    "column": 13,
+                    "line": 2
+                  },
+                  "start": {
+                    "column": 11,
+                    "line": 2
+                  }
+                },
                 "start": 30,
                 "type": "ArrayExpression"
+              },
+              "loc": {
+                "end": {
+                  "column": 13,
+                  "line": 2
+                },
+                "start": {
+                  "column": 5,
+                  "line": 2
+                }
               },
               "start": 24,
               "type": "VariableDeclarator"
@@ -165,11 +291,31 @@
           ],
           "end": 33,
           "kind": "let",
+          "loc": {
+            "end": {
+              "column": 14,
+              "line": 2
+            },
+            "start": {
+              "column": 1,
+              "line": 2
+            }
+          },
           "start": 20,
           "type": "VariableDeclaration"
         }
       ],
       "end": 34,
+      "loc": {
+        "end": {
+          "column": 9,
+          "line": 3
+        },
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
       "sourceType": "module",
       "start": 18,
       "type": "Program"

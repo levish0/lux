@@ -29,6 +29,16 @@
                     "end": 66,
                     "expression": {
                       "end": 65,
+                      "loc": {
+                        "end": {
+                          "column": 8,
+                          "line": 4
+                        },
+                        "start": {
+                          "column": 5,
+                          "line": 4
+                        }
+                      },
                       "name": "msg",
                       "start": 62,
                       "type": "Identifier"
@@ -41,8 +51,16 @@
               },
               "name": "p",
               "name_loc": {
-                "end": 60,
-                "start": 59
+                "end": {
+                  "character": 60,
+                  "column": 3,
+                  "line": 4
+                },
+                "start": {
+                  "character": 59,
+                  "column": 2,
+                  "line": 4
+                }
               },
               "start": 58,
               "type": "RegularElement"
@@ -60,6 +78,18 @@
         "end": 81,
         "expression": {
           "end": 42,
+          "loc": {
+            "end": {
+              "character": 42,
+              "column": 13,
+              "line": 3
+            },
+            "start": {
+              "character": 39,
+              "column": 10,
+              "line": 3
+            }
+          },
           "name": "foo",
           "start": 39,
           "type": "Identifier"
@@ -67,15 +97,45 @@
         "parameters": [
           {
             "end": 54,
+            "loc": {
+              "end": {
+                "column": 25,
+                "line": 3
+              },
+              "start": {
+                "column": 14,
+                "line": 3
+              }
+            },
             "name": "msg",
             "start": 43,
             "type": "Identifier",
             "typeAnnotation": {
               "end": 54,
+              "loc": {
+                "end": {
+                  "column": 25,
+                  "line": 3
+                },
+                "start": {
+                  "column": 17,
+                  "line": 3
+                }
+              },
               "start": 46,
               "type": "TSTypeAnnotation",
               "typeAnnotation": {
                 "end": 54,
+                "loc": {
+                  "end": {
+                    "column": 25,
+                    "line": 3
+                  },
+                  "start": {
+                    "column": 19,
+                    "line": 3
+                  }
+                },
                 "start": 48,
                 "type": "TSStringKeyword"
               }
@@ -98,6 +158,16 @@
           "arguments": [
             {
               "end": 99,
+              "loc": {
+                "end": {
+                  "column": 16,
+                  "line": 7
+                },
+                "start": {
+                  "column": 13,
+                  "line": 7
+                }
+              },
               "name": "msg",
               "start": 96,
               "type": "Identifier"
@@ -105,11 +175,31 @@
           ],
           "callee": {
             "end": 95,
+            "loc": {
+              "end": {
+                "column": 12,
+                "line": 7
+              },
+              "start": {
+                "column": 9,
+                "line": 7
+              }
+            },
             "name": "foo",
             "start": 92,
             "type": "Identifier"
           },
           "end": 100,
+          "loc": {
+            "end": {
+              "column": 17,
+              "line": 7
+            },
+            "start": {
+              "column": 9,
+              "line": 7
+            }
+          },
           "optional": false,
           "start": 92,
           "type": "CallExpression"
@@ -126,8 +216,16 @@
         "end": 17,
         "name": "lang",
         "name_loc": {
-          "end": 12,
-          "start": 8
+          "end": {
+            "character": 12,
+            "column": 12,
+            "line": 1
+          },
+          "start": {
+            "character": 8,
+            "column": 8,
+            "line": 1
+          }
         },
         "start": 8,
         "type": "Attribute",
@@ -145,6 +243,16 @@
     "content": {
       "body": [],
       "end": 18,
+      "loc": {
+        "end": {
+          "column": 27,
+          "line": 1
+        },
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
       "sourceType": "module",
       "start": 18,
       "type": "Program"

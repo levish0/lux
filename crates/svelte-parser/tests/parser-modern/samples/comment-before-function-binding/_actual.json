@@ -21,6 +21,16 @@
                   "async": false,
                   "body": {
                     "end": 79,
+                    "loc": {
+                      "end": {
+                        "column": 12,
+                        "line": 7
+                      },
+                      "start": {
+                        "column": 7,
+                        "line": 7
+                      }
+                    },
                     "name": "value",
                     "start": 74,
                     "type": "Identifier"
@@ -29,6 +39,16 @@
                   "expression": true,
                   "generator": false,
                   "id": null,
+                  "loc": {
+                    "end": {
+                      "column": 12,
+                      "line": 7
+                    },
+                    "start": {
+                      "column": 1,
+                      "line": 7
+                    }
+                  },
                   "params": [],
                   "start": 68,
                   "type": "ArrowFunctionExpression"
@@ -39,9 +59,29 @@
                     "end": 112,
                     "left": {
                       "end": 94,
+                      "loc": {
+                        "end": {
+                          "column": 13,
+                          "line": 8
+                        },
+                        "start": {
+                          "column": 8,
+                          "line": 8
+                        }
+                      },
                       "name": "value",
                       "start": 89,
                       "type": "Identifier"
+                    },
+                    "loc": {
+                      "end": {
+                        "column": 31,
+                        "line": 8
+                      },
+                      "start": {
+                        "column": 8,
+                        "line": 8
+                      }
                     },
                     "operator": "=",
                     "right": {
@@ -49,8 +89,28 @@
                       "callee": {
                         "computed": false,
                         "end": 110,
+                        "loc": {
+                          "end": {
+                            "column": 29,
+                            "line": 8
+                          },
+                          "start": {
+                            "column": 16,
+                            "line": 8
+                          }
+                        },
                         "object": {
                           "end": 98,
+                          "loc": {
+                            "end": {
+                              "column": 17,
+                              "line": 8
+                            },
+                            "start": {
+                              "column": 16,
+                              "line": 8
+                            }
+                          },
                           "name": "v",
                           "start": 97,
                           "type": "Identifier"
@@ -58,6 +118,16 @@
                         "optional": false,
                         "property": {
                           "end": 110,
+                          "loc": {
+                            "end": {
+                              "column": 29,
+                              "line": 8
+                            },
+                            "start": {
+                              "column": 18,
+                              "line": 8
+                            }
+                          },
                           "name": "toLowerCase",
                           "start": 99,
                           "type": "Identifier"
@@ -66,6 +136,16 @@
                         "type": "MemberExpression"
                       },
                       "end": 112,
+                      "loc": {
+                        "end": {
+                          "column": 31,
+                          "line": 8
+                        },
+                        "start": {
+                          "column": 16,
+                          "line": 8
+                        }
+                      },
                       "optional": false,
                       "start": 97,
                       "type": "CallExpression"
@@ -77,9 +157,29 @@
                   "expression": true,
                   "generator": false,
                   "id": null,
+                  "loc": {
+                    "end": {
+                      "column": 31,
+                      "line": 8
+                    },
+                    "start": {
+                      "column": 1,
+                      "line": 8
+                    }
+                  },
                   "params": [
                     {
                       "end": 84,
+                      "loc": {
+                        "end": {
+                          "column": 3,
+                          "line": 8
+                        },
+                        "start": {
+                          "column": 2,
+                          "line": 8
+                        }
+                      },
                       "name": "v",
                       "start": 83,
                       "type": "Identifier"
@@ -97,11 +197,33 @@
                   "value": "* ( "
                 }
               ],
+              "loc": {
+                "end": {
+                  "column": 31,
+                  "line": 8
+                },
+                "start": {
+                  "column": 1,
+                  "line": 7
+                }
+              },
               "start": 68,
               "type": "SequenceExpression"
             },
             "modifiers": [],
             "name": "value",
+            "name_loc": {
+              "end": {
+                "character": 54,
+                "column": 17,
+                "line": 5
+              },
+              "start": {
+                "character": 44,
+                "column": 7,
+                "line": 5
+              }
+            },
             "start": 44,
             "type": "BindDirective"
           }
@@ -113,8 +235,16 @@
         },
         "name": "input",
         "name_loc": {
-          "end": 43,
-          "start": 38
+          "end": {
+            "character": 43,
+            "column": 6,
+            "line": 5
+          },
+          "start": {
+            "character": 38,
+            "column": 1,
+            "line": 5
+          }
         },
         "start": 37,
         "type": "RegularElement"
@@ -132,16 +262,46 @@
               "end": 24,
               "id": {
                 "end": 19,
+                "loc": {
+                  "end": {
+                    "column": 10,
+                    "line": 2
+                  },
+                  "start": {
+                    "column": 5,
+                    "line": 2
+                  }
+                },
                 "name": "value",
                 "start": 14,
                 "type": "Identifier"
               },
               "init": {
                 "end": 24,
+                "loc": {
+                  "end": {
+                    "column": 15,
+                    "line": 2
+                  },
+                  "start": {
+                    "column": 13,
+                    "line": 2
+                  }
+                },
                 "raw": "''",
                 "start": 22,
                 "type": "Literal",
                 "value": ""
+              },
+              "loc": {
+                "end": {
+                  "column": 15,
+                  "line": 2
+                },
+                "start": {
+                  "column": 5,
+                  "line": 2
+                }
               },
               "start": 14,
               "type": "VariableDeclarator"
@@ -149,11 +309,31 @@
           ],
           "end": 25,
           "kind": "let",
+          "loc": {
+            "end": {
+              "column": 16,
+              "line": 2
+            },
+            "start": {
+              "column": 1,
+              "line": 2
+            }
+          },
           "start": 10,
           "type": "VariableDeclaration"
         }
       ],
       "end": 26,
+      "loc": {
+        "end": {
+          "column": 9,
+          "line": 3
+        },
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
       "sourceType": "module",
       "start": 8,
       "type": "Program"

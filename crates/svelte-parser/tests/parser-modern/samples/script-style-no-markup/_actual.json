@@ -78,6 +78,16 @@
     "content": {
       "body": [],
       "end": 44,
+      "loc": {
+        "end": {
+          "column": 9,
+          "line": 3
+        },
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
       "sourceType": "module",
       "start": 8,
       "trailingComments": [

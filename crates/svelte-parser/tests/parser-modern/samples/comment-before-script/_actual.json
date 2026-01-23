@@ -25,8 +25,16 @@
         "end": 45,
         "name": "lang",
         "name_loc": {
-          "end": 40,
-          "start": 36
+          "end": {
+            "character": 40,
+            "column": 12,
+            "line": 2
+          },
+          "start": {
+            "character": 36,
+            "column": 8,
+            "line": 2
+          }
         },
         "start": 36,
         "type": "Attribute",
@@ -49,27 +57,77 @@
               "end": 65,
               "id": {
                 "end": 65,
+                "loc": {
+                  "end": {
+                    "column": 18,
+                    "line": 3
+                  },
+                  "start": {
+                    "column": 5,
+                    "line": 3
+                  }
+                },
                 "name": "count",
                 "start": 52,
                 "type": "Identifier",
                 "typeAnnotation": {
                   "end": 65,
+                  "loc": {
+                    "end": {
+                      "column": 18,
+                      "line": 3
+                    },
+                    "start": {
+                      "column": 10,
+                      "line": 3
+                    }
+                  },
                   "start": 57,
                   "type": "TSTypeAnnotation",
                   "typeAnnotation": {
                     "end": 65,
+                    "loc": {
+                      "end": {
+                        "column": 18,
+                        "line": 3
+                      },
+                      "start": {
+                        "column": 12,
+                        "line": 3
+                      }
+                    },
                     "start": 59,
                     "type": "TSNumberKeyword"
                   }
                 }
               },
               "init": null,
+              "loc": {
+                "end": {
+                  "column": 18,
+                  "line": 3
+                },
+                "start": {
+                  "column": 5,
+                  "line": 3
+                }
+              },
               "start": 52,
               "type": "VariableDeclarator"
             }
           ],
           "end": 66,
           "kind": "let",
+          "loc": {
+            "end": {
+              "column": 19,
+              "line": 3
+            },
+            "start": {
+              "column": 1,
+              "line": 3
+            }
+          },
           "start": 48,
           "type": "VariableDeclaration"
         }
@@ -81,6 +139,16 @@
           "value": "should not error out"
         }
       ],
+      "loc": {
+        "end": {
+          "column": 9,
+          "line": 4
+        },
+        "start": {
+          "column": 0,
+          "line": 2
+        }
+      },
       "sourceType": "module",
       "start": 46,
       "type": "Program"

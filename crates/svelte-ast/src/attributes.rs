@@ -2,7 +2,7 @@ use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
 use swc_ecma_ast as swc;
 
-use crate::span::Span;
+use crate::span::{SourceLocation, Span};
 use crate::tags::ExpressionTag;
 use crate::text::Text;
 
@@ -18,7 +18,7 @@ use crate::text::Text;
 pub struct Attribute {
     pub span: Span,
     pub name: String,
-    pub name_loc: Option<Span>,
+    pub name_loc: Option<SourceLocation>,
     pub value: AttributeValue,
 }
 
@@ -80,7 +80,7 @@ pub enum AttributeSequenceValue {
 pub struct SpreadAttribute {
     #[serde(flatten)]
     pub span: Span,
-    pub name_loc: Option<Span>,
+    pub name_loc: Option<SourceLocation>,
     #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
 }
@@ -97,7 +97,7 @@ pub struct SpreadAttribute {
 pub struct BindDirective {
     pub span: Span,
     pub name: String,
-    pub name_loc: Option<Span>,
+    pub name_loc: Option<SourceLocation>,
     pub expression: Box<swc::Expr>,
     pub leading_comments: Vec<crate::text::JsComment>,
 }
@@ -131,6 +131,7 @@ impl Serialize for BindDirective {
 
         map.serialize_entry("modifiers", &Vec::<String>::new())?;
         map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("name_loc", &self.name_loc)?;
         map.end()
     }
 }
@@ -148,7 +149,7 @@ pub struct ClassDirective {
     #[serde(flatten)]
     pub span: Span,
     pub name: String,
-    pub name_loc: Option<Span>,
+    pub name_loc: Option<SourceLocation>,
     #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
 }
@@ -167,7 +168,7 @@ pub struct StyleDirective {
     #[serde(flatten)]
     pub span: Span,
     pub name: String,
-    pub name_loc: Option<Span>,
+    pub name_loc: Option<SourceLocation>,
     pub value: AttributeValue,
     pub modifiers: Vec<StyleModifier>,
 }
@@ -191,7 +192,7 @@ pub struct OnDirective {
     #[serde(flatten)]
     pub span: Span,
     pub name: String,
-    pub name_loc: Option<Span>,
+    pub name_loc: Option<SourceLocation>,
     #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub expression: Option<Box<swc::Expr>>,
     pub modifiers: Vec<EventModifier>,
@@ -226,7 +227,7 @@ pub struct TransitionDirective {
     #[serde(flatten)]
     pub span: Span,
     pub name: String,
-    pub name_loc: Option<Span>,
+    pub name_loc: Option<SourceLocation>,
     #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub expression: Option<Box<swc::Expr>>,
     pub modifiers: Vec<TransitionModifier>,
@@ -253,7 +254,7 @@ pub struct AnimateDirective {
     #[serde(flatten)]
     pub span: Span,
     pub name: String,
-    pub name_loc: Option<Span>,
+    pub name_loc: Option<SourceLocation>,
     #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub expression: Option<Box<swc::Expr>>,
 }
@@ -271,7 +272,7 @@ pub struct UseDirective {
     #[serde(flatten)]
     pub span: Span,
     pub name: String,
-    pub name_loc: Option<Span>,
+    pub name_loc: Option<SourceLocation>,
     #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub expression: Option<Box<swc::Expr>>,
 }
@@ -289,7 +290,7 @@ pub struct LetDirective {
     #[serde(flatten)]
     pub span: Span,
     pub name: String,
-    pub name_loc: Option<Span>,
+    pub name_loc: Option<SourceLocation>,
     #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub expression: Option<Box<swc::Expr>>,
 }

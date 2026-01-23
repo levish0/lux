@@ -1,4 +1,5 @@
-use serde::Serialize;
+use serde::ser::SerializeMap;
+use serde::{Serialize, Serializer};
 use swc_ecma_ast as swc;
 
 use crate::root::Fragment;
@@ -106,15 +107,39 @@ pub struct KeyBlock {
  *   body: Fragment;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct SnippetBlock {
-    #[serde(flatten)]
     pub span: Span,
-    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_ident")]
     pub expression: Box<swc::Ident>,
-    #[serde(rename = "typeParams", skip_serializing_if = "Option::is_none")]
     pub type_params: Option<String>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_pats")]
     pub parameters: Vec<swc::Pat>,
     pub body: Fragment,
+}
+
+impl Serialize for SnippetBlock {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("type", "SnippetBlock")?;
+
+        // Expression: Identifier with character-inclusive loc (matches reference Svelte)
+        map.serialize_entry(
+            "expression",
+            &crate::utils::estree::IdentWithCharLoc(&self.expression),
+        )?;
+
+        if let Some(ref tp) = self.type_params {
+            map.serialize_entry("typeParams", tp)?;
+        }
+
+        // Parameters go through normal ESTree transform
+        let params_val = serde_json::to_value(&self.parameters)
+            .map_err(serde::ser::Error::custom)?;
+        let params_transformed = crate::utils::estree::transform_value_pub(params_val);
+        map.serialize_entry("parameters", &params_transformed)?;
+
+        map.serialize_entry("body", &self.body)?;
+        map.end()
+    }
 }

@@ -1105,8 +1105,16 @@
         },
         "name": "h1",
         "name_loc": {
-          "end": 811,
-          "start": 809
+          "end": {
+            "character": 811,
+            "column": 3,
+            "line": 46
+          },
+          "start": {
+            "character": 809,
+            "column": 1,
+            "line": 46
+          }
         },
         "start": 808,
         "type": "RegularElement"

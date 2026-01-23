@@ -22,6 +22,16 @@
                     "end": 50,
                     "expression": {
                       "end": 49,
+                      "loc": {
+                        "end": {
+                          "column": 9,
+                          "line": 2
+                        },
+                        "start": {
+                          "column": 5,
+                          "line": 2
+                        }
+                      },
                       "name": "name",
                       "start": 45,
                       "type": "Identifier"
@@ -41,6 +51,16 @@
                     "expression": {
                       "alternate": {
                         "end": 81,
+                        "loc": {
+                          "end": {
+                            "column": 41,
+                            "line": 2
+                          },
+                          "start": {
+                            "column": 31,
+                            "line": 2
+                          }
+                        },
                         "raw": "'not cool'",
                         "start": 71,
                         "type": "Literal",
@@ -48,15 +68,45 @@
                       },
                       "consequent": {
                         "end": 68,
+                        "loc": {
+                          "end": {
+                            "column": 28,
+                            "line": 2
+                          },
+                          "start": {
+                            "column": 22,
+                            "line": 2
+                          }
+                        },
                         "raw": "'cool'",
                         "start": 62,
                         "type": "Literal",
                         "value": "cool"
                       },
                       "end": 81,
+                      "loc": {
+                        "end": {
+                          "column": 41,
+                          "line": 2
+                        },
+                        "start": {
+                          "column": 15,
+                          "line": 2
+                        }
+                      },
                       "start": 55,
                       "test": {
                         "end": 59,
+                        "loc": {
+                          "end": {
+                            "column": 19,
+                            "line": 2
+                          },
+                          "start": {
+                            "column": 15,
+                            "line": 2
+                          }
+                        },
                         "name": "cool",
                         "start": 55,
                         "type": "Identifier"
@@ -71,8 +121,16 @@
               },
               "name": "p",
               "name_loc": {
-                "end": 43,
-                "start": 42
+                "end": {
+                  "character": 43,
+                  "column": 3,
+                  "line": 2
+                },
+                "start": {
+                  "character": 42,
+                  "column": 2,
+                  "line": 2
+                }
               },
               "start": 41,
               "type": "RegularElement"
@@ -89,23 +147,63 @@
         },
         "context": {
           "end": 38,
+          "loc": {
+            "end": {
+              "column": 38,
+              "line": 1
+            },
+            "start": {
+              "column": 17,
+              "line": 1
+            }
+          },
           "properties": [
             {
               "computed": false,
               "end": 23,
               "key": {
                 "end": 23,
+                "loc": {
+                  "end": {
+                    "column": 23,
+                    "line": 1
+                  },
+                  "start": {
+                    "column": 19,
+                    "line": 1
+                  }
+                },
                 "name": "name",
                 "start": 19,
                 "type": "Identifier"
               },
               "kind": "init",
+              "loc": {
+                "end": {
+                  "column": 23,
+                  "line": 1
+                },
+                "start": {
+                  "column": 19,
+                  "line": 1
+                }
+              },
               "method": false,
               "shorthand": true,
               "start": 19,
               "type": "Property",
               "value": {
                 "end": 23,
+                "loc": {
+                  "end": {
+                    "column": 23,
+                    "line": 1
+                  },
+                  "start": {
+                    "column": 19,
+                    "line": 1
+                  }
+                },
                 "name": "name",
                 "start": 19,
                 "type": "Identifier"
@@ -116,11 +214,31 @@
               "end": 36,
               "key": {
                 "end": 29,
+                "loc": {
+                  "end": {
+                    "column": 29,
+                    "line": 1
+                  },
+                  "start": {
+                    "column": 25,
+                    "line": 1
+                  }
+                },
                 "name": "cool",
                 "start": 25,
                 "type": "Identifier"
               },
               "kind": "init",
+              "loc": {
+                "end": {
+                  "column": 36,
+                  "line": 1
+                },
+                "start": {
+                  "column": 25,
+                  "line": 1
+                }
+              },
               "method": false,
               "shorthand": true,
               "start": 25,
@@ -129,12 +247,42 @@
                 "end": 36,
                 "left": {
                   "end": 29,
+                  "loc": {
+                    "end": {
+                      "column": 29,
+                      "line": 1
+                    },
+                    "start": {
+                      "column": 25,
+                      "line": 1
+                    }
+                  },
                   "name": "cool",
                   "start": 25,
                   "type": "Identifier"
                 },
+                "loc": {
+                  "end": {
+                    "column": 36,
+                    "line": 1
+                  },
+                  "start": {
+                    "column": 25,
+                    "line": 1
+                  }
+                },
                 "right": {
                   "end": 36,
+                  "loc": {
+                    "end": {
+                      "column": 36,
+                      "line": 1
+                    },
+                    "start": {
+                      "column": 32,
+                      "line": 1
+                    }
+                  },
                   "raw": "true",
                   "start": 32,
                   "type": "Literal",
@@ -151,6 +299,16 @@
         "end": 94,
         "expression": {
           "end": 13,
+          "loc": {
+            "end": {
+              "column": 13,
+              "line": 1
+            },
+            "start": {
+              "column": 7,
+              "line": 1
+            }
+          },
           "name": "people",
           "start": 7,
           "type": "Identifier"
@@ -184,6 +342,16 @@
                     "end": 164,
                     "expression": {
                       "end": 163,
+                      "loc": {
+                        "end": {
+                          "column": 9,
+                          "line": 6
+                        },
+                        "start": {
+                          "column": 5,
+                          "line": 6
+                        }
+                      },
                       "name": "name",
                       "start": 159,
                       "type": "Identifier"
@@ -203,6 +371,16 @@
                     "expression": {
                       "alternate": {
                         "end": 195,
+                        "loc": {
+                          "end": {
+                            "column": 41,
+                            "line": 6
+                          },
+                          "start": {
+                            "column": 31,
+                            "line": 6
+                          }
+                        },
                         "raw": "'not cool'",
                         "start": 185,
                         "type": "Literal",
@@ -210,15 +388,45 @@
                       },
                       "consequent": {
                         "end": 182,
+                        "loc": {
+                          "end": {
+                            "column": 28,
+                            "line": 6
+                          },
+                          "start": {
+                            "column": 22,
+                            "line": 6
+                          }
+                        },
                         "raw": "'cool'",
                         "start": 176,
                         "type": "Literal",
                         "value": "cool"
                       },
                       "end": 195,
+                      "loc": {
+                        "end": {
+                          "column": 41,
+                          "line": 6
+                        },
+                        "start": {
+                          "column": 15,
+                          "line": 6
+                        }
+                      },
                       "start": 169,
                       "test": {
                         "end": 173,
+                        "loc": {
+                          "end": {
+                            "column": 19,
+                            "line": 6
+                          },
+                          "start": {
+                            "column": 15,
+                            "line": 6
+                          }
+                        },
                         "name": "cool",
                         "start": 169,
                         "type": "Identifier"
@@ -233,8 +441,16 @@
               },
               "name": "p",
               "name_loc": {
-                "end": 157,
-                "start": 156
+                "end": {
+                  "character": 157,
+                  "column": 3,
+                  "line": 6
+                },
+                "start": {
+                  "character": 156,
+                  "column": 2,
+                  "line": 6
+                }
               },
               "start": 155,
               "type": "RegularElement"
@@ -251,17 +467,47 @@
         },
         "context": {
           "end": 152,
+          "loc": {
+            "end": {
+              "column": 56,
+              "line": 5
+            },
+            "start": {
+              "column": 17,
+              "line": 5
+            }
+          },
           "properties": [
             {
               "computed": false,
               "end": 137,
               "key": {
                 "end": 119,
+                "loc": {
+                  "end": {
+                    "column": 23,
+                    "line": 5
+                  },
+                  "start": {
+                    "column": 19,
+                    "line": 5
+                  }
+                },
                 "name": "name",
                 "start": 115,
                 "type": "Identifier"
               },
               "kind": "init",
+              "loc": {
+                "end": {
+                  "column": 41,
+                  "line": 5
+                },
+                "start": {
+                  "column": 19,
+                  "line": 5
+                }
+              },
               "method": false,
               "shorthand": true,
               "start": 115,
@@ -270,24 +516,74 @@
                 "end": 137,
                 "left": {
                   "end": 119,
+                  "loc": {
+                    "end": {
+                      "column": 23,
+                      "line": 5
+                    },
+                    "start": {
+                      "column": 19,
+                      "line": 5
+                    }
+                  },
                   "name": "name",
                   "start": 115,
                   "type": "Identifier"
+                },
+                "loc": {
+                  "end": {
+                    "column": 41,
+                    "line": 5
+                  },
+                  "start": {
+                    "column": 19,
+                    "line": 5
+                  }
                 },
                 "right": {
                   "end": 137,
                   "expressions": [
                     {
                       "end": 135,
+                      "loc": {
+                        "end": {
+                          "column": 39,
+                          "line": 5
+                        },
+                        "start": {
+                          "column": 34,
+                          "line": 5
+                        }
+                      },
                       "raw": "\"Doe\"",
                       "start": 130,
                       "type": "Literal",
                       "value": "Doe"
                     }
                   ],
+                  "loc": {
+                    "end": {
+                      "column": 41,
+                      "line": 5
+                    },
+                    "start": {
+                      "column": 26,
+                      "line": 5
+                    }
+                  },
                   "quasis": [
                     {
                       "end": 128,
+                      "loc": {
+                        "end": {
+                          "column": 32,
+                          "line": 5
+                        },
+                        "start": {
+                          "column": 27,
+                          "line": 5
+                        }
+                      },
                       "start": 123,
                       "tail": false,
                       "type": "TemplateElement",
@@ -298,6 +594,16 @@
                     },
                     {
                       "end": 136,
+                      "loc": {
+                        "end": {
+                          "column": 40,
+                          "line": 5
+                        },
+                        "start": {
+                          "column": 40,
+                          "line": 5
+                        }
+                      },
                       "start": 136,
                       "tail": true,
                       "type": "TemplateElement",
@@ -319,11 +625,31 @@
               "end": 150,
               "key": {
                 "end": 143,
+                "loc": {
+                  "end": {
+                    "column": 47,
+                    "line": 5
+                  },
+                  "start": {
+                    "column": 43,
+                    "line": 5
+                  }
+                },
                 "name": "cool",
                 "start": 139,
                 "type": "Identifier"
               },
               "kind": "init",
+              "loc": {
+                "end": {
+                  "column": 54,
+                  "line": 5
+                },
+                "start": {
+                  "column": 43,
+                  "line": 5
+                }
+              },
               "method": false,
               "shorthand": true,
               "start": 139,
@@ -332,12 +658,42 @@
                 "end": 150,
                 "left": {
                   "end": 143,
+                  "loc": {
+                    "end": {
+                      "column": 47,
+                      "line": 5
+                    },
+                    "start": {
+                      "column": 43,
+                      "line": 5
+                    }
+                  },
                   "name": "cool",
                   "start": 139,
                   "type": "Identifier"
                 },
+                "loc": {
+                  "end": {
+                    "column": 54,
+                    "line": 5
+                  },
+                  "start": {
+                    "column": 43,
+                    "line": 5
+                  }
+                },
                 "right": {
                   "end": 150,
+                  "loc": {
+                    "end": {
+                      "column": 54,
+                      "line": 5
+                    },
+                    "start": {
+                      "column": 50,
+                      "line": 5
+                    }
+                  },
                   "raw": "true",
                   "start": 146,
                   "type": "Literal",
@@ -354,6 +710,16 @@
         "end": 208,
         "expression": {
           "end": 109,
+          "loc": {
+            "end": {
+              "column": 13,
+              "line": 5
+            },
+            "start": {
+              "column": 7,
+              "line": 5
+            }
+          },
           "name": "people",
           "start": 103,
           "type": "Identifier"
@@ -387,6 +753,16 @@
                     "end": 300,
                     "expression": {
                       "end": 299,
+                      "loc": {
+                        "end": {
+                          "column": 9,
+                          "line": 10
+                        },
+                        "start": {
+                          "column": 5,
+                          "line": 10
+                        }
+                      },
                       "name": "name",
                       "start": 295,
                       "type": "Identifier"
@@ -406,6 +782,16 @@
                     "expression": {
                       "alternate": {
                         "end": 331,
+                        "loc": {
+                          "end": {
+                            "column": 41,
+                            "line": 10
+                          },
+                          "start": {
+                            "column": 31,
+                            "line": 10
+                          }
+                        },
                         "raw": "'not cool'",
                         "start": 321,
                         "type": "Literal",
@@ -413,15 +799,45 @@
                       },
                       "consequent": {
                         "end": 318,
+                        "loc": {
+                          "end": {
+                            "column": 28,
+                            "line": 10
+                          },
+                          "start": {
+                            "column": 22,
+                            "line": 10
+                          }
+                        },
                         "raw": "'cool'",
                         "start": 312,
                         "type": "Literal",
                         "value": "cool"
                       },
                       "end": 331,
+                      "loc": {
+                        "end": {
+                          "column": 41,
+                          "line": 10
+                        },
+                        "start": {
+                          "column": 15,
+                          "line": 10
+                        }
+                      },
                       "start": 305,
                       "test": {
                         "end": 309,
+                        "loc": {
+                          "end": {
+                            "column": 19,
+                            "line": 10
+                          },
+                          "start": {
+                            "column": 15,
+                            "line": 10
+                          }
+                        },
                         "name": "cool",
                         "start": 305,
                         "type": "Identifier"
@@ -436,8 +852,16 @@
               },
               "name": "p",
               "name_loc": {
-                "end": 293,
-                "start": 292
+                "end": {
+                  "character": 293,
+                  "column": 3,
+                  "line": 10
+                },
+                "start": {
+                  "character": 292,
+                  "column": 2,
+                  "line": 10
+                }
               },
               "start": 291,
               "type": "RegularElement"
@@ -454,17 +878,47 @@
         },
         "context": {
           "end": 288,
+          "loc": {
+            "end": {
+              "column": 78,
+              "line": 9
+            },
+            "start": {
+              "column": 17,
+              "line": 9
+            }
+          },
           "properties": [
             {
               "computed": false,
               "end": 273,
               "key": {
                 "end": 233,
+                "loc": {
+                  "end": {
+                    "column": 23,
+                    "line": 9
+                  },
+                  "start": {
+                    "column": 19,
+                    "line": 9
+                  }
+                },
                 "name": "name",
                 "start": 229,
                 "type": "Identifier"
               },
               "kind": "init",
+              "loc": {
+                "end": {
+                  "column": 63,
+                  "line": 9
+                },
+                "start": {
+                  "column": 19,
+                  "line": 9
+                }
+              },
               "method": false,
               "shorthand": true,
               "start": 229,
@@ -473,9 +927,29 @@
                 "end": 273,
                 "left": {
                   "end": 233,
+                  "loc": {
+                    "end": {
+                      "column": 23,
+                      "line": 9
+                    },
+                    "start": {
+                      "column": 19,
+                      "line": 9
+                    }
+                  },
                   "name": "name",
                   "start": 229,
                   "type": "Identifier"
+                },
+                "loc": {
+                  "end": {
+                    "column": 63,
+                    "line": 9
+                  },
+                  "start": {
+                    "column": 19,
+                    "line": 9
+                  }
                 },
                 "right": {
                   "arguments": [],
@@ -489,15 +963,45 @@
                             "expressions": [
                               {
                                 "end": 265,
+                                "loc": {
+                                  "end": {
+                                    "column": 55,
+                                    "line": 9
+                                  },
+                                  "start": {
+                                    "column": 50,
+                                    "line": 9
+                                  }
+                                },
                                 "raw": "\"Doe\"",
                                 "start": 260,
                                 "type": "Literal",
                                 "value": "Doe"
                               }
                             ],
+                            "loc": {
+                              "end": {
+                                "column": 57,
+                                "line": 9
+                              },
+                              "start": {
+                                "column": 42,
+                                "line": 9
+                              }
+                            },
                             "quasis": [
                               {
                                 "end": 258,
+                                "loc": {
+                                  "end": {
+                                    "column": 48,
+                                    "line": 9
+                                  },
+                                  "start": {
+                                    "column": 43,
+                                    "line": 9
+                                  }
+                                },
                                 "start": 253,
                                 "tail": false,
                                 "type": "TemplateElement",
@@ -508,6 +1012,16 @@
                               },
                               {
                                 "end": 266,
+                                "loc": {
+                                  "end": {
+                                    "column": 56,
+                                    "line": 9
+                                  },
+                                  "start": {
+                                    "column": 56,
+                                    "line": 9
+                                  }
+                                },
                                 "start": 266,
                                 "tail": true,
                                 "type": "TemplateElement",
@@ -521,11 +1035,31 @@
                             "type": "TemplateLiteral"
                           },
                           "end": 268,
+                          "loc": {
+                            "end": {
+                              "column": 58,
+                              "line": 9
+                            },
+                            "start": {
+                              "column": 35,
+                              "line": 9
+                            }
+                          },
                           "start": 245,
                           "type": "ReturnStatement"
                         }
                       ],
                       "end": 270,
+                      "loc": {
+                        "end": {
+                          "column": 60,
+                          "line": 9
+                        },
+                        "start": {
+                          "column": 33,
+                          "line": 9
+                        }
+                      },
                       "start": 243,
                       "type": "BlockStatement"
                     },
@@ -533,11 +1067,31 @@
                     "expression": false,
                     "generator": false,
                     "id": null,
+                    "loc": {
+                      "end": {
+                        "column": 60,
+                        "line": 9
+                      },
+                      "start": {
+                        "column": 27,
+                        "line": 9
+                      }
+                    },
                     "params": [],
                     "start": 237,
                     "type": "ArrowFunctionExpression"
                   },
                   "end": 273,
+                  "loc": {
+                    "end": {
+                      "column": 63,
+                      "line": 9
+                    },
+                    "start": {
+                      "column": 26,
+                      "line": 9
+                    }
+                  },
                   "optional": false,
                   "start": 236,
                   "type": "CallExpression"
@@ -551,11 +1105,31 @@
               "end": 286,
               "key": {
                 "end": 279,
+                "loc": {
+                  "end": {
+                    "column": 69,
+                    "line": 9
+                  },
+                  "start": {
+                    "column": 65,
+                    "line": 9
+                  }
+                },
                 "name": "cool",
                 "start": 275,
                 "type": "Identifier"
               },
               "kind": "init",
+              "loc": {
+                "end": {
+                  "column": 76,
+                  "line": 9
+                },
+                "start": {
+                  "column": 65,
+                  "line": 9
+                }
+              },
               "method": false,
               "shorthand": true,
               "start": 275,
@@ -564,12 +1138,42 @@
                 "end": 286,
                 "left": {
                   "end": 279,
+                  "loc": {
+                    "end": {
+                      "column": 69,
+                      "line": 9
+                    },
+                    "start": {
+                      "column": 65,
+                      "line": 9
+                    }
+                  },
                   "name": "cool",
                   "start": 275,
                   "type": "Identifier"
                 },
+                "loc": {
+                  "end": {
+                    "column": 76,
+                    "line": 9
+                  },
+                  "start": {
+                    "column": 65,
+                    "line": 9
+                  }
+                },
                 "right": {
                   "end": 286,
+                  "loc": {
+                    "end": {
+                      "column": 76,
+                      "line": 9
+                    },
+                    "start": {
+                      "column": 72,
+                      "line": 9
+                    }
+                  },
                   "raw": "true",
                   "start": 282,
                   "type": "Literal",
@@ -586,6 +1190,16 @@
         "end": 344,
         "expression": {
           "end": 223,
+          "loc": {
+            "end": {
+              "column": 13,
+              "line": 9
+            },
+            "start": {
+              "column": 7,
+              "line": 9
+            }
+          },
           "name": "people",
           "start": 217,
           "type": "Identifier"

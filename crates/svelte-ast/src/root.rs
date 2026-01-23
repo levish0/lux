@@ -87,6 +87,8 @@ impl Serialize for Script {
                 comments: &self.content_comments,
                 content_start: self.content_start,
                 content_end: self.content_end,
+                script_start: self.span.start,
+                script_end: self.span.end,
             },
         )?;
         map.serialize_entry("attributes", &self.attributes)?;

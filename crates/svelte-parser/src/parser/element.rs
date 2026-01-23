@@ -4,7 +4,7 @@ use svelte_ast::elements::{
 };
 use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::Fragment;
-use svelte_ast::span::Span;
+use svelte_ast::span::{SourceLocation, Span};
 use winnow::Result as ParseResult;
 use winnow::combinator::{opt, peek, repeat_till};
 use winnow::prelude::*;
@@ -29,7 +29,7 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
         tag_name_parser(parser_input)?
     };
     let name_end = parser_input.input.previous_token_end();
-    let name_loc = Span::new(name_start, name_end);
+    let name_loc = parser_input.state.locator.locate_span(name_start, name_end);
 
     // parse attributes (in loose mode, might stop at EOF or unexpected tokens)
     let attributes = if loose {
@@ -59,9 +59,7 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
         Fragment { nodes: vec![] }
     } else {
         // Push this element onto stack before parsing children
-        parser_input
-            .state
-            .push_element(has_shadowrootmode);
+        parser_input.state.push_element(has_shadowrootmode);
 
         let nodes = if loose {
             parse_children_loose(parser_input, &name)?
@@ -238,7 +236,7 @@ fn closing_tag_parser<'a, 'i>(
 
 fn classify_element(
     name: &str,
-    name_loc: Span,
+    name_loc: SourceLocation,
     attributes: Vec<AttributeNode>,
     fragment: Fragment,
     span: Span,

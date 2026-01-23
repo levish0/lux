@@ -2,6 +2,7 @@ use std::fs;
 use std::path::Path;
 
 use serde_json::Value;
+use svelte_ast::utils::estree::{set_loc_source, clear_loc_source};
 use svelte_parser::{ParseOptions, parse};
 
 fn fixture_dir() -> &'static Path {
@@ -29,8 +30,10 @@ fn parse_fixture(name: &str) {
     let root = parse(&source, options)
         .unwrap_or_else(|errs| panic!("Parse failed for {}: {:?}", name, errs));
 
-    // Serialize and strip "comments" like Svelte's test.ts
+    // Serialize with loc enabled
+    set_loc_source(&source);
     let mut actual: Value = serde_json::to_value(&root).unwrap();
+    clear_loc_source();
     if let Value::Object(ref mut obj) = actual {
         obj.remove("comments");
     }
@@ -43,33 +46,11 @@ fn parse_fixture(name: &str) {
     let expected_path = dir.join("output.json");
     let expected_str = fs::read_to_string(&expected_path)
         .unwrap_or_else(|e| panic!("Failed to read {}: {}", expected_path.display(), e));
-    let mut expected: Value = serde_json::from_str(&expected_str).unwrap();
-
-    // Strip "loc" and "name_loc" fields from both (not implemented yet - requires line/column tracking)
-    strip_field(&mut actual, "loc");
-    strip_field(&mut expected, "loc");
-    strip_field(&mut actual, "name_loc");
-    strip_field(&mut expected, "name_loc");
+    let expected: Value = serde_json::from_str(&expected_str).unwrap();
 
     assert_eq!(actual, expected, "Mismatch for fixture '{}'", name);
 }
 
-fn strip_field(value: &mut Value, field: &str) {
-    match value {
-        Value::Object(obj) => {
-            obj.remove(field);
-            for (_, v) in obj.iter_mut() {
-                strip_field(v, field);
-            }
-        }
-        Value::Array(arr) => {
-            for v in arr.iter_mut() {
-                strip_field(v, field);
-            }
-        }
-        _ => {}
-    }
-}
 
 #[test]
 fn fixture_if_block() {

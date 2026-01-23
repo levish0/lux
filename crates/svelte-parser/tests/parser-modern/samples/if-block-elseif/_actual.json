@@ -34,8 +34,16 @@
                     },
                     "name": "p",
                     "name_loc": {
-                      "end": 62,
-                      "start": 61
+                      "end": {
+                        "character": 62,
+                        "column": 3,
+                        "line": 4
+                      },
+                      "start": {
+                        "character": 61,
+                        "column": 2,
+                        "line": 4
+                      }
                     },
                     "start": 60,
                     "type": "RegularElement"
@@ -57,13 +65,43 @@
                 "end": 57,
                 "left": {
                   "end": 53,
+                  "loc": {
+                    "end": {
+                      "column": 11,
+                      "line": 3
+                    },
+                    "start": {
+                      "column": 10,
+                      "line": 3
+                    }
+                  },
                   "name": "x",
                   "start": 52,
                   "type": "Identifier"
                 },
+                "loc": {
+                  "end": {
+                    "column": 15,
+                    "line": 3
+                  },
+                  "start": {
+                    "column": 10,
+                    "line": 3
+                  }
+                },
                 "operator": "<",
                 "right": {
                   "end": 57,
+                  "loc": {
+                    "end": {
+                      "column": 15,
+                      "line": 3
+                    },
+                    "start": {
+                      "column": 14,
+                      "line": 3
+                    }
+                  },
                   "raw": "5",
                   "start": 56,
                   "type": "Literal",
@@ -103,8 +141,16 @@
               },
               "name": "p",
               "name_loc": {
-                "end": 16,
-                "start": 15
+                "end": {
+                  "character": 16,
+                  "column": 3,
+                  "line": 2
+                },
+                "start": {
+                  "character": 15,
+                  "column": 2,
+                  "line": 2
+                }
               },
               "start": 14,
               "type": "RegularElement"
@@ -126,13 +172,43 @@
           "end": 11,
           "left": {
             "end": 6,
+            "loc": {
+              "end": {
+                "column": 6,
+                "line": 1
+              },
+              "start": {
+                "column": 5,
+                "line": 1
+              }
+            },
             "name": "x",
             "start": 5,
             "type": "Identifier"
           },
+          "loc": {
+            "end": {
+              "column": 11,
+              "line": 1
+            },
+            "start": {
+              "column": 5,
+              "line": 1
+            }
+          },
           "operator": ">",
           "right": {
             "end": 11,
+            "loc": {
+              "end": {
+                "column": 11,
+                "line": 1
+              },
+              "start": {
+                "column": 9,
+                "line": 1
+              }
+            },
             "raw": "10",
             "start": 9,
             "type": "Literal",

@@ -9,8 +9,16 @@
             "end": 31,
             "name": "shadowrootmode",
             "name_loc": {
-              "end": 24,
-              "start": 10
+              "end": {
+                "character": 24,
+                "column": 24,
+                "line": 1
+              },
+              "start": {
+                "character": 10,
+                "column": 10,
+                "line": 1
+              }
             },
             "start": 10,
             "type": "Attribute",
@@ -49,8 +57,16 @@
                     },
                     "name": "slot",
                     "name_loc": {
-                      "end": 42,
-                      "start": 38
+                      "end": {
+                        "character": 42,
+                        "column": 9,
+                        "line": 2
+                      },
+                      "start": {
+                        "character": 38,
+                        "column": 5,
+                        "line": 2
+                      }
                     },
                     "start": 37,
                     "type": "RegularElement"
@@ -60,8 +76,16 @@
               },
               "name": "p",
               "name_loc": {
-                "end": 36,
-                "start": 35
+                "end": {
+                  "character": 36,
+                  "column": 3,
+                  "line": 2
+                },
+                "start": {
+                  "character": 35,
+                  "column": 2,
+                  "line": 2
+                }
               },
               "start": 34,
               "type": "RegularElement"
@@ -78,8 +102,16 @@
         },
         "name": "template",
         "name_loc": {
-          "end": 9,
-          "start": 1
+          "end": {
+            "character": 9,
+            "column": 9,
+            "line": 1
+          },
+          "start": {
+            "character": 1,
+            "column": 1,
+            "line": 1
+          }
         },
         "start": 0,
         "type": "RegularElement"
@@ -117,8 +149,16 @@
                     },
                     "name": "slot",
                     "name_loc": {
-                      "end": 87,
-                      "start": 83
+                      "end": {
+                        "character": 87,
+                        "column": 9,
+                        "line": 5
+                      },
+                      "start": {
+                        "character": 83,
+                        "column": 5,
+                        "line": 5
+                      }
                     },
                     "start": 82,
                     "type": "SlotElement"
@@ -128,8 +168,16 @@
               },
               "name": "p",
               "name_loc": {
-                "end": 81,
-                "start": 80
+                "end": {
+                  "character": 81,
+                  "column": 3,
+                  "line": 5
+                },
+                "start": {
+                  "character": 80,
+                  "column": 2,
+                  "line": 5
+                }
               },
               "start": 79,
               "type": "RegularElement"
@@ -146,8 +194,16 @@
         },
         "name": "template",
         "name_loc": {
-          "end": 76,
-          "start": 68
+          "end": {
+            "character": 76,
+            "column": 9,
+            "line": 4
+          },
+          "start": {
+            "character": 68,
+            "column": 1,
+            "line": 4
+          }
         },
         "start": 67,
         "type": "RegularElement"
@@ -168,8 +224,16 @@
         },
         "name": "slot",
         "name_loc": {
-          "end": 117,
-          "start": 113
+          "end": {
+            "character": 117,
+            "column": 5,
+            "line": 7
+          },
+          "start": {
+            "character": 113,
+            "column": 1,
+            "line": 7
+          }
         },
         "start": 112,
         "type": "SlotElement"

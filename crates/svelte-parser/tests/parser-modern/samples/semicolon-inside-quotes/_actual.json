@@ -95,8 +95,16 @@
         },
         "name": "h1",
         "name_loc": {
-          "end": 3,
-          "start": 1
+          "end": {
+            "character": 3,
+            "column": 3,
+            "line": 1
+          },
+          "start": {
+            "character": 1,
+            "column": 1,
+            "line": 1
+          }
         },
         "start": 0,
         "type": "RegularElement"

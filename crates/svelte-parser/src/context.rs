@@ -1,8 +1,46 @@
+use line_span::LineSpanExt;
 use svelte_ast::css::StyleSheet;
 use svelte_ast::root::Script;
+use svelte_ast::span::{Position, SourceLocation};
 use svelte_ast::text::JsComment;
 
 use crate::error::ParseError;
+
+/// Converts byte offsets to line/column positions using binary search.
+#[derive(Debug)]
+pub struct Locator {
+    /// Byte offset of the start of each line (sorted).
+    line_starts: Vec<usize>,
+}
+
+impl Locator {
+    /// Build the locator from source using `line_span`.
+    pub fn new(source: &str) -> Self {
+        let line_starts: Vec<usize> = source.line_spans().map(|s| s.range().start).collect();
+        Self { line_starts }
+    }
+
+    /// Convert a byte offset to a Position { line (1-based), column (0-based), character }.
+    pub fn locate(&self, offset: usize) -> Position {
+        let line_idx = match self.line_starts.binary_search(&offset) {
+            Ok(idx) => idx,
+            Err(idx) => idx - 1,
+        };
+        Position {
+            line: line_idx + 1,
+            column: offset - self.line_starts[line_idx],
+            character: offset,
+        }
+    }
+
+    /// Convert byte offsets to a SourceLocation.
+    pub fn locate_span(&self, start: usize, end: usize) -> SourceLocation {
+        SourceLocation {
+            start: self.locate(start),
+            end: self.locate(end),
+        }
+    }
+}
 
 /// Info about an element currently being parsed (for stack tracking)
 #[derive(Debug, Clone)]
@@ -14,6 +52,7 @@ pub struct ElementStackEntry {
 pub struct ParseContext {
     pub ts: bool,
     pub loose: bool,
+    pub locator: Locator,
     pub comments: Vec<JsComment>,
     pub errors: Vec<ParseError>,
     pub instance: Option<Script>,
@@ -26,10 +65,11 @@ pub struct ParseContext {
 }
 
 impl ParseContext {
-    pub fn new(ts: bool, loose: bool) -> Self {
+    pub fn new(source: &str, ts: bool, loose: bool) -> Self {
         Self {
             ts,
             loose,
+            locator: Locator::new(source),
             comments: Vec::new(),
             errors: Vec::new(),
             instance: None,
@@ -49,9 +89,8 @@ impl ParseContext {
     }
 
     pub fn push_element(&mut self, has_shadowrootmode: bool) {
-        self.element_stack.push(ElementStackEntry {
-            has_shadowrootmode,
-        });
+        self.element_stack
+            .push(ElementStackEntry { has_shadowrootmode });
     }
 
     pub fn pop_element(&mut self) {

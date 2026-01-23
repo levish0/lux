@@ -4,7 +4,7 @@ use svelte_ast::attributes::{
     TransitionDirective, TransitionModifier, UseDirective,
 };
 use svelte_ast::node::AttributeNode;
-use svelte_ast::span::Span;
+use svelte_ast::span::{SourceLocation, Span};
 use svelte_ast::tags::{AttachTag, ExpressionTag};
 use svelte_ast::text::Text;
 use swc_ecma_ast as swc;
@@ -95,7 +95,12 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
         return Ok(AttributeNode::Attribute(Attribute {
             span: Span::new(start, end),
             name: String::new(),
-            name_loc: Some(Span::new(expr_offset as usize, expr_offset as usize)),
+            name_loc: Some(
+                parser_input
+                    .state
+                    .locator
+                    .locate_span(expr_offset as usize, expr_offset as usize),
+            ),
             value: AttributeValue::Expression(ExpressionTag {
                 span: expr_span,
                 expression,
@@ -134,7 +139,7 @@ fn named_attribute_parser(parser_input: &mut ParserInput) -> ParseResult<Attribu
     })
     .parse_next(parser_input)?;
     let name_end = parser_input.previous_token_end();
-    let name_loc = Span::new(name_start, name_end);
+    let name_loc = parser_input.state.locator.locate_span(name_start, name_end);
 
     // Check for directive prefix
     if let Some(colon_pos) = full_name.find(':') {
@@ -200,7 +205,7 @@ fn parse_bind_directive(
     parser_input: &mut ParserInput,
     start: usize,
     name: &str,
-    name_loc: Span,
+    name_loc: SourceLocation,
 ) -> ParseResult<AttributeNode> {
     let (expr, leading_comments) = parse_bind_directive_value(parser_input, name)?;
     let end = parser_input.previous_token_end();
@@ -248,7 +253,7 @@ fn parse_on_directive(
     parser_input: &mut ParserInput,
     start: usize,
     name_and_modifiers: &str,
-    name_loc: Span,
+    name_loc: SourceLocation,
 ) -> ParseResult<AttributeNode> {
     let parts: Vec<&str> = name_and_modifiers.split('|').collect();
     let name = parts[0];
@@ -273,7 +278,7 @@ fn parse_class_directive(
     parser_input: &mut ParserInput,
     start: usize,
     name: &str,
-    name_loc: Span,
+    name_loc: SourceLocation,
 ) -> ParseResult<AttributeNode> {
     let expression = parse_optional_directive_value(parser_input)?;
     let end = parser_input.previous_token_end();
@@ -298,7 +303,7 @@ fn parse_style_directive(
     parser_input: &mut ParserInput,
     start: usize,
     name_and_modifiers: &str,
-    name_loc: Span,
+    name_loc: SourceLocation,
 ) -> ParseResult<AttributeNode> {
     let parts: Vec<&str> = name_and_modifiers.split('|').collect();
     let name = parts[0];
@@ -334,7 +339,7 @@ fn parse_transition_directive(
     parser_input: &mut ParserInput,
     start: usize,
     name_and_modifiers: &str,
-    name_loc: Span,
+    name_loc: SourceLocation,
     intro: bool,
     outro: bool,
 ) -> ParseResult<AttributeNode> {
@@ -367,7 +372,7 @@ fn parse_animate_directive(
     parser_input: &mut ParserInput,
     start: usize,
     name: &str,
-    name_loc: Span,
+    name_loc: SourceLocation,
 ) -> ParseResult<AttributeNode> {
     let expression = parse_optional_directive_value(parser_input)?;
     let end = parser_input.previous_token_end();
@@ -384,7 +389,7 @@ fn parse_use_directive(
     parser_input: &mut ParserInput,
     start: usize,
     name: &str,
-    name_loc: Span,
+    name_loc: SourceLocation,
 ) -> ParseResult<AttributeNode> {
     let expression = parse_optional_directive_value(parser_input)?;
     let end = parser_input.previous_token_end();
@@ -401,7 +406,7 @@ fn parse_let_directive(
     parser_input: &mut ParserInput,
     start: usize,
     name: &str,
-    name_loc: Span,
+    name_loc: SourceLocation,
 ) -> ParseResult<AttributeNode> {
     let expression = parse_optional_directive_value(parser_input)?;
     let end = parser_input.previous_token_end();

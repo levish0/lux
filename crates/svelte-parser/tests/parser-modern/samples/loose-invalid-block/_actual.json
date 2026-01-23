@@ -36,6 +36,16 @@
               "start": 7,
               "test": {
                 "end": 17,
+                "loc": {
+                  "end": {
+                    "column": 10,
+                    "line": 2
+                  },
+                  "start": {
+                    "column": 10,
+                    "line": 2
+                  }
+                },
                 "name": "",
                 "start": 17,
                 "type": "Identifier"
@@ -62,6 +72,16 @@
         "start": 0,
         "test": {
           "end": 5,
+          "loc": {
+            "end": {
+              "column": 5,
+              "line": 1
+            },
+            "start": {
+              "column": 5,
+              "line": 1
+            }
+          },
           "name": "",
           "start": 5,
           "type": "Identifier"
@@ -92,6 +112,16 @@
         "end": 51,
         "expression": {
           "end": 42,
+          "loc": {
+            "end": {
+              "column": 7,
+              "line": 6
+            },
+            "start": {
+              "column": 7,
+              "line": 6
+            }
+          },
           "name": "",
           "start": 42,
           "type": "Identifier"
@@ -122,6 +152,18 @@
         "end": 75,
         "expression": {
           "end": 63,
+          "loc": {
+            "end": {
+              "character": 63,
+              "column": 10,
+              "line": 9
+            },
+            "start": {
+              "character": 63,
+              "column": 10,
+              "line": 9
+            }
+          },
           "name": "",
           "start": 63,
           "type": "Identifier"
@@ -153,6 +195,18 @@
         "end": 102,
         "expression": {
           "end": 90,
+          "loc": {
+            "end": {
+              "character": 90,
+              "column": 13,
+              "line": 12
+            },
+            "start": {
+              "character": 87,
+              "column": 10,
+              "line": 12
+            }
+          },
           "name": "foo",
           "start": 87,
           "type": "Identifier"
