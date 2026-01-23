@@ -1,11 +1,13 @@
 pub mod attribute;
 pub mod block;
+pub mod bracket;
 pub mod comment;
 pub mod css;
 pub mod element;
 pub mod expression;
 pub mod fragment;
 pub mod script;
+pub mod swc_parse;
 pub mod tag;
 pub mod text;
 

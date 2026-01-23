@@ -3,14 +3,16 @@ use svelte_ast::node::FragmentNode;
 use svelte_ast::root::Fragment;
 use svelte_ast::span::Span;
 use swc_ecma_ast as swc;
-use winnow::combinator::{peek, repeat_till};
+use winnow::combinator::{opt, peek, repeat_till};
 use winnow::prelude::*;
 use winnow::stream::Location;
-use winnow::token::{any, literal, take_while};
+use winnow::token::{literal, take, take_while};
 use winnow::Result as ParseResult;
 
 use super::ParserInput;
+use super::bracket::{read_until_chars_balanced, read_until_close_brace, read_until_keyword_balanced};
 use super::fragment::fragment_node_parser;
+use super::swc_parse::{parse_expression, parse_param_list, parse_pattern};
 
 /// Dispatch `{#block}` to the appropriate block parser.
 pub fn block_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNode> {
@@ -35,11 +37,12 @@ pub fn block_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNode>
 
 /// Parse `{#if test}...{:else if test}...{:else}...{/if}`
 fn if_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult<FragmentNode> {
-    // whitespace before test expression
     take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
     // read test expression up to }
-    let test = read_expression_until_close(parser_input)?;
+    let offset = parser_input.current_token_start();
+    let content = read_until_close_brace(parser_input)?;
+    let test = parse_expression(content, parser_input.state.ts, offset as u32)?;
     literal("}").parse_next(parser_input)?;
 
     // parse consequent body until {:else}, {:else if}, or {/if}
@@ -72,30 +75,26 @@ fn if_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult<
 }
 
 fn parse_if_alternate(parser_input: &mut ParserInput) -> ParseResult<Option<Fragment>> {
-    // Check if we have {:else if ...} or {:else} or {/if}
-    let peeked: ParseResult<&str> = peek(literal("{:else")).parse_next(parser_input);
-    if peeked.is_err() {
+    // Try to consume {:else - if not present, no alternate
+    if opt(literal("{:else")).parse_next(parser_input)?.is_none() {
         return Ok(None);
     }
-
-    literal("{:else").parse_next(parser_input)?;
 
     // Check for {:else if ...} vs {:else}
     let ws: &str =
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
-    let is_else_if: ParseResult<&str> = peek(literal("if")).parse_next(parser_input);
 
-    if is_else_if.is_ok() && !ws.is_empty() {
+    if !ws.is_empty() && opt(literal("if")).parse_next(parser_input)?.is_some() {
         // {:else if test}...
-        literal("if").parse_next(parser_input)?;
         take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
-        let start = parser_input.current_token_start();
-        // We need start to be from {:else if - back up
-        // Actually, for the nested IfBlock, start should be from {#if equivalent
-        let nested_start = start - "{:else if ".len(); // approximate
+        let nested_start = parser_input.current_token_start();
+        // Adjust start back to {:else if position
+        let nested_start = nested_start - "{:else if ".len();
 
-        let test = read_expression_until_close(parser_input)?;
+        let offset = parser_input.current_token_start();
+        let content = read_until_close_brace(parser_input)?;
+        let test = parse_expression(content, parser_input.state.ts, offset as u32)?;
         literal("}").parse_next(parser_input)?;
 
         let (consequent_nodes, _): (Vec<FragmentNode>, _) = repeat_till(
@@ -149,24 +148,23 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
 
     // Read expression until " as " keyword
     let expr_offset = parser_input.current_token_start();
-    let expr_text = read_until_keyword(parser_input, " as ")?;
-    let expression = swc_parse_expr_from_str(&expr_text, parser_input.state.ts, expr_offset as u32)?;
+    let expr_text = read_until_keyword_balanced(parser_input, " as ")?;
+    let expression = parse_expression(expr_text, parser_input.state.ts, expr_offset as u32)?;
 
     literal(" as ").parse_next(parser_input)?;
     take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
     // Read context pattern until , or ( or } at depth 0
     let ctx_offset = parser_input.current_token_start();
-    let context_text = read_until_any_balanced(parser_input, &[',', '(', '}'])?;
+    let context_text = read_until_chars_balanced(parser_input, &[',', '(', '}'])?;
     let context = if context_text.trim().is_empty() {
         None
     } else {
-        Some(swc_parse_pattern(&context_text, parser_input.state.ts, ctx_offset as u32)?)
+        Some(parse_pattern(context_text, parser_input.state.ts, ctx_offset as u32)?)
     };
 
     // Optional index
-    let index = if peek(any).parse_next(parser_input)? == ',' {
-        any.parse_next(parser_input)?; // consume ,
+    let index = if opt(literal(",")).parse_next(parser_input)?.is_some() {
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
         let idx: &str =
             take_while(1.., |c: char| c.is_ascii_alphanumeric() || c == '_')
@@ -178,9 +176,10 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
     };
 
     // Optional key
-    let key = if peek(any).parse_next(parser_input)? == '(' {
-        any.parse_next(parser_input)?; // consume (
-        let key_expr = read_expression_until_char(parser_input, ')')?;
+    let key = if opt(literal("(")).parse_next(parser_input)?.is_some() {
+        let key_offset = parser_input.current_token_start();
+        let key_content = read_until_close_paren(parser_input)?;
+        let key_expr = parse_expression(key_content, parser_input.state.ts, key_offset as u32)?;
         literal(")").parse_next(parser_input)?;
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
         Some(key_expr)
@@ -199,9 +198,7 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
     .parse_next(parser_input)?;
 
     // Optional {:else} fallback
-    let has_else: ParseResult<&str> = peek(literal("{:else}")).parse_next(parser_input);
-    let fallback = if has_else.is_ok() {
-        literal("{:else}").parse_next(parser_input)?;
+    let fallback = if opt(literal("{:else}")).parse_next(parser_input)?.is_some() {
         let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
             0..,
             fragment_node_parser,
@@ -231,7 +228,9 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
 fn key_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult<FragmentNode> {
     take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
-    let expression = read_expression_until_close(parser_input)?;
+    let offset = parser_input.current_token_start();
+    let content = read_until_close_brace(parser_input)?;
+    let expression = parse_expression(content, parser_input.state.ts, offset as u32)?;
     literal("}").parse_next(parser_input)?;
 
     let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
@@ -254,7 +253,9 @@ fn key_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult
 fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult<FragmentNode> {
     take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
-    let expression = read_expression_until_close(parser_input)?;
+    let offset = parser_input.current_token_start();
+    let content = read_until_close_brace(parser_input)?;
+    let expression = parse_expression(content, parser_input.state.ts, offset as u32)?;
     literal("}").parse_next(parser_input)?;
 
     // Parse pending body
@@ -279,14 +280,13 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
     let mut error: Option<Box<swc::Pat>> = None;
 
     // {:then value}
-    let has_then: ParseResult<&str> = peek(literal("{:then")).parse_next(parser_input);
-    if has_then.is_ok() {
-        literal("{:then").parse_next(parser_input)?;
+    if opt(literal("{:then")).parse_next(parser_input)?.is_some() {
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
-        if peek(any).parse_next(parser_input)? != '}' {
+
+        if opt(peek(literal("}"))).parse_next(parser_input)?.is_none() {
             let pat_offset = parser_input.current_token_start();
-            let pat_text = read_until_char(parser_input, '}')?;
-            value = Some(swc_parse_pattern(&pat_text, parser_input.state.ts, pat_offset as u32)?);
+            let pat_content = read_until_close_brace(parser_input)?;
+            value = Some(parse_pattern(pat_content, parser_input.state.ts, pat_offset as u32)?);
         }
         literal("}").parse_next(parser_input)?;
 
@@ -300,14 +300,13 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
     }
 
     // {:catch error}
-    let has_catch: ParseResult<&str> = peek(literal("{:catch")).parse_next(parser_input);
-    if has_catch.is_ok() {
-        literal("{:catch").parse_next(parser_input)?;
+    if opt(literal("{:catch")).parse_next(parser_input)?.is_some() {
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
-        if peek(any).parse_next(parser_input)? != '}' {
+
+        if opt(peek(literal("}"))).parse_next(parser_input)?.is_none() {
             let pat_offset = parser_input.current_token_start();
-            let pat_text = read_until_char(parser_input, '}')?;
-            error = Some(swc_parse_pattern(&pat_text, parser_input.state.ts, pat_offset as u32)?);
+            let pat_content = read_until_close_brace(parser_input)?;
+            error = Some(parse_pattern(pat_content, parser_input.state.ts, pat_offset as u32)?);
         }
         literal("}").parse_next(parser_input)?;
 
@@ -345,12 +344,12 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
 
     // Parse parameters
     literal("(").parse_next(parser_input)?;
-    let params_text = read_until_char(parser_input, ')')?;
+    let params_content = read_until_close_paren(parser_input)?;
     literal(")").parse_next(parser_input)?;
     take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
     literal("}").parse_next(parser_input)?;
 
-    let parameters = parse_param_list(&params_text, parser_input.state.ts)?;
+    let parameters = parse_param_list(params_content, parser_input.state.ts)?;
 
     let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
         0..,
@@ -372,142 +371,13 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
 
 // --- Helper parsers ---
 
-/// Read expression text (without braces) until `}`, without consuming the `}`.
-fn read_expression_until_close(parser_input: &mut ParserInput) -> ParseResult<Box<swc::Expr>> {
-    let offset = parser_input.current_token_start();
-    let text = read_until_close_brace(parser_input)?;
-    swc_parse_expr_from_str(&text, parser_input.state.ts, offset as u32)
-}
-
-fn read_expression_until_char(
-    parser_input: &mut ParserInput,
-    end_char: char,
-) -> ParseResult<Box<swc::Expr>> {
-    let offset = parser_input.current_token_start();
-    let text = read_until_char(parser_input, end_char)?;
-    swc_parse_expr_from_str(&text, parser_input.state.ts, offset as u32)
-}
-
-/// Read text until `}` without consuming it. Handles nested braces.
-fn read_until_close_brace(parser_input: &mut ParserInput) -> ParseResult<String> {
-    let mut buf = String::new();
-    let mut depth: u32 = 0;
-    loop {
-        let c = peek(any).parse_next(parser_input)?;
-        if c == '}' && depth == 0 {
-            break;
-        }
-        let c: char = any.parse_next(parser_input)?;
-        buf.push(c);
-        match c {
-            '{' => depth += 1,
-            '}' => depth -= 1,
-            '"' | '\'' => {
-                collect_string_inline(parser_input, c, &mut buf)?;
-            }
-            '`' => {
-                collect_template_inline(parser_input, &mut buf)?;
-            }
-            _ => {}
-        }
-    }
-    Ok(buf)
-}
-
-/// Read text until a specific character without consuming it.
-fn read_until_char(parser_input: &mut ParserInput, end: char) -> ParseResult<String> {
-    let mut buf = String::new();
-    loop {
-        let c = peek(any).parse_next(parser_input)?;
-        if c == end {
-            break;
-        }
-        let c: char = any.parse_next(parser_input)?;
-        buf.push(c);
-    }
-    Ok(buf)
-}
-
-/// Read text until a keyword appears (not inside strings/braces).
-fn read_until_keyword(parser_input: &mut ParserInput, keyword: &str) -> ParseResult<String> {
-    let mut buf = String::new();
-    let kw_len = keyword.len();
-    loop {
-        if buf.len() >= kw_len - 1 {
-            let check: ParseResult<&str> =
-                peek(literal(keyword)).parse_next(parser_input);
-            if check.is_ok() {
-                break;
-            }
-        }
-        let c: char = any.parse_next(parser_input)?;
-        buf.push(c);
-    }
-    Ok(buf)
-}
-
-/// Read text until one of the given characters at depth 0.
-/// Handles nested braces, brackets, parens, strings, and template literals.
-fn read_until_any_balanced(parser_input: &mut ParserInput, chars: &[char]) -> ParseResult<String> {
-    let mut buf = String::new();
-    let mut depth: u32 = 0; // tracks {}, [], ()
-    loop {
-        let c = peek(any).parse_next(parser_input)?;
-        if depth == 0 && chars.contains(&c) {
-            break;
-        }
-        let c: char = any.parse_next(parser_input)?;
-        buf.push(c);
-        match c {
-            '{' | '(' | '[' => depth += 1,
-            '}' | ')' | ']' => {
-                if depth > 0 {
-                    depth -= 1;
-                }
-            }
-            '"' | '\'' => {
-                collect_string_inline(parser_input, c, &mut buf)?;
-            }
-            '`' => {
-                collect_template_inline(parser_input, &mut buf)?;
-            }
-            _ => {}
-        }
-    }
-    Ok(buf.trim().to_string())
-}
-
-fn collect_string_inline(
-    parser_input: &mut ParserInput,
-    quote: char,
-    out: &mut String,
-) -> ParseResult<()> {
-    loop {
-        let c: char = any.parse_next(parser_input)?;
-        out.push(c);
-        if c == quote {
-            return Ok(());
-        }
-        if c == '\\' {
-            let esc: char = any.parse_next(parser_input)?;
-            out.push(esc);
-        }
-    }
-}
-
-fn collect_template_inline(parser_input: &mut ParserInput, out: &mut String) -> ParseResult<()> {
-    loop {
-        let c: char = any.parse_next(parser_input)?;
-        out.push(c);
-        match c {
-            '`' => return Ok(()),
-            '\\' => {
-                let esc: char = any.parse_next(parser_input)?;
-                out.push(esc);
-            }
-            _ => {}
-        }
-    }
+/// Read until `)` at bracket depth 0, without consuming the `)`.
+fn read_until_close_paren<'i>(input: &mut ParserInput<'i>) -> ParseResult<&'i str> {
+    use super::bracket::find_matching_bracket_for_close_char;
+    let remaining: &str = &input.input;
+    let end = find_matching_bracket_for_close_char(remaining, ')')
+        .ok_or(winnow::error::ContextError::new())?;
+    take(end).parse_next(input)
 }
 
 /// Parser that matches `{:...}` or `{/name}`
@@ -515,16 +385,11 @@ fn block_continuation_or_close<'a>(
     name: &'a str,
 ) -> impl FnMut(&mut ParserInput<'_>) -> ParseResult<()> + 'a {
     move |input: &mut ParserInput| {
-        let r1: ParseResult<&str> = peek(literal("{:")).parse_next(input);
-        if r1.is_ok() {
+        let check: ParseResult<&str> = peek(literal("{:")).parse_next(input);
+        if check.is_ok() {
             return Ok(());
         }
-        let r2: ParseResult<()> = peek(block_close_peek(name)).parse_next(input);
-        if r2.is_ok() {
-            Ok(())
-        } else {
-            Err(winnow::error::ContextError::new())
-        }
+        peek(block_close_peek(name)).parse_next(input)
     }
 }
 
@@ -546,180 +411,5 @@ fn block_close<'a>(name: &'a str) -> impl FnMut(&mut ParserInput<'_>) -> ParseRe
         literal(name).parse_next(input)?;
         literal("}").parse_next(input)?;
         Ok(())
-    }
-}
-
-// --- SWC helpers ---
-
-fn swc_parse_expr_from_str(source: &str, ts: bool, offset: u32) -> ParseResult<Box<swc::Expr>> {
-    use swc_common::input::StringInput;
-    use swc_common::BytePos;
-    use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
-
-    let leading_ws = source.len() - source.trim_start().len();
-    let trimmed = source.trim();
-    let actual_offset = offset + leading_ws as u32;
-
-    let syntax = if ts {
-        Syntax::Typescript(TsSyntax {
-            tsx: true,
-            ..Default::default()
-        })
-    } else {
-        Syntax::Es(EsSyntax {
-            jsx: true,
-            ..Default::default()
-        })
-    };
-
-    let input = StringInput::new(trimmed, BytePos(actual_offset), BytePos(actual_offset + trimmed.len() as u32));
-    let mut parser = swc_ecma_parser::Parser::new(syntax, input, None);
-
-    parser.parse_expr().map_err(|e| {
-        e.into_diagnostic(&swc_common::errors::Handler::with_emitter(
-            true,
-            false,
-            Box::new(swc_common::errors::EmitterWriter::new(
-                Box::new(std::io::sink()),
-                None,
-                false,
-                false,
-            )),
-        ))
-        .cancel();
-        winnow::error::ContextError::new()
-    })
-}
-
-fn swc_parse_pattern(source: &str, ts: bool, offset: u32) -> ParseResult<Box<swc::Pat>> {
-    use swc_common::input::StringInput;
-    use swc_common::BytePos;
-    use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
-
-    let trimmed = source.trim();
-    let leading_ws = source.len() - source.trim_start().len();
-    let actual_offset = offset + leading_ws as u32;
-
-    // Wrap as arrow function params so SWC parses destructuring with defaults correctly
-    let wrapper = format!("({}) => {{}}", trimmed);
-    // Set parse offset so the inner source starts at actual_offset
-    let parse_offset = if actual_offset > 0 { actual_offset - 1 } else { 0 };
-
-    let syntax = if ts {
-        Syntax::Typescript(TsSyntax {
-            tsx: true,
-            ..Default::default()
-        })
-    } else {
-        Syntax::Es(EsSyntax {
-            jsx: true,
-            ..Default::default()
-        })
-    };
-
-    let input = StringInput::new(
-        &wrapper,
-        BytePos(parse_offset),
-        BytePos(parse_offset + wrapper.len() as u32),
-    );
-    let mut parser = swc_ecma_parser::Parser::new(syntax, input, None);
-
-    let expr = parser.parse_expr().map_err(|e| {
-        e.into_diagnostic(&swc_common::errors::Handler::with_emitter(
-            true,
-            false,
-            Box::new(swc_common::errors::EmitterWriter::new(
-                Box::new(std::io::sink()),
-                None,
-                false,
-                false,
-            )),
-        ))
-        .cancel();
-        winnow::error::ContextError::new()
-    })?;
-
-    match *expr {
-        swc::Expr::Arrow(arrow) if !arrow.params.is_empty() => {
-            Ok(Box::new(arrow.params.into_iter().next().unwrap()))
-        }
-        _ => {
-            // Fallback: parse as expression and convert
-            let expr = swc_parse_expr_from_str(source, ts, offset)?;
-            Ok(Box::new(expr_to_pat(*expr)))
-        }
-    }
-}
-
-fn expr_to_pat(expr: swc::Expr) -> swc::Pat {
-    match expr {
-        swc::Expr::Ident(id) => swc::Pat::Ident(swc::BindingIdent {
-            id,
-            type_ann: None,
-        }),
-        swc::Expr::Array(arr) => swc::Pat::Array(swc::ArrayPat {
-            span: arr.span,
-            elems: arr
-                .elems
-                .into_iter()
-                .map(|e| e.map(|e| expr_to_pat(*e.expr)))
-                .collect(),
-            optional: false,
-            type_ann: None,
-        }),
-        swc::Expr::Object(obj) => swc::Pat::Object(swc::ObjectPat {
-            span: obj.span,
-            props: obj
-                .props
-                .into_iter()
-                .filter_map(|p| match p {
-                    swc::PropOrSpread::Prop(prop) => match *prop {
-                        swc::Prop::Shorthand(id) => {
-                            Some(swc::ObjectPatProp::Assign(swc::AssignPatProp {
-                                span: id.span,
-                                key: swc::BindingIdent {
-                                    id,
-                                    type_ann: None,
-                                },
-                                value: None,
-                            }))
-                        }
-                        swc::Prop::KeyValue(kv) => {
-                            Some(swc::ObjectPatProp::KeyValue(swc::KeyValuePatProp {
-                                key: kv.key,
-                                value: Box::new(expr_to_pat(*kv.value)),
-                            }))
-                        }
-                        _ => None,
-                    },
-                    swc::PropOrSpread::Spread(s) => {
-                        Some(swc::ObjectPatProp::Rest(swc::RestPat {
-                            span: s.dot3_token,
-                            dot3_token: s.dot3_token,
-                            arg: Box::new(expr_to_pat(*s.expr)),
-                            type_ann: None,
-                        }))
-                    }
-                })
-                .collect(),
-            optional: false,
-            type_ann: None,
-        }),
-        _ => swc::Pat::Expr(Box::new(expr)),
-    }
-}
-
-fn parse_param_list(source: &str, ts: bool) -> ParseResult<Vec<swc::Pat>> {
-    let trimmed = source.trim();
-    if trimmed.is_empty() {
-        return Ok(vec![]);
-    }
-    // Split by comma (simple approach, doesn't handle commas in nested structures)
-    // For robustness, parse as arrow function params
-    let wrapper = format!("({}) => {{}}", trimmed);
-    let expr = swc_parse_expr_from_str(&wrapper, ts, 0)?;
-    match *expr {
-        swc::Expr::Arrow(arrow) => Ok(arrow.params),
-        _ => Ok(vec![]),
     }
 }

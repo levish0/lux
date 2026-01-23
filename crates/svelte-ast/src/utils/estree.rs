@@ -230,6 +230,11 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
             }
             "BooleanLiteral" | "BoolLit" => {
                 obj.insert("type".to_string(), Value::String("Literal".to_string()));
+                // Add raw field from value
+                if let Some(Value::Bool(b)) = obj.get("value") {
+                    let raw = if *b { "true" } else { "false" };
+                    obj.entry("raw".to_string()).or_insert(Value::String(raw.to_string()));
+                }
             }
             "NullLiteral" => {
                 obj.insert("type".to_string(), Value::String("Literal".to_string()));
@@ -299,9 +304,30 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                     obj.insert("expressions".to_string(), exprs);
                 }
             }
+            "TemplateElement" => {
+                // SWC has cooked/raw at top level, ESTree wraps in value: { cooked, raw }
+                let cooked = obj.remove("cooked");
+                let raw = obj.remove("raw");
+                let mut value_obj = Map::new();
+                if let Some(c) = cooked {
+                    value_obj.insert("cooked".to_string(), c);
+                }
+                if let Some(r) = raw {
+                    value_obj.insert("raw".to_string(), r);
+                }
+                obj.insert("value".to_string(), Value::Object(value_obj));
+            }
             "TaggedTemplateExpression" => {
                 if let Some(exprs) = obj.remove("exprs") {
                     obj.insert("expressions".to_string(), exprs);
+                }
+            }
+            "ParenthesisExpression" | "ParenExpr" => {
+                // Not a valid ESTree type - unwrap to inner expression
+                if let Some(inner) = obj.remove("expression")
+                    .or_else(|| obj.remove("expr"))
+                {
+                    return transform_value(inner);
                 }
             }
             "ObjectExpression" => {
@@ -498,6 +524,22 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                 let key = obj.get("key").cloned();
                 let default_value = obj.remove("value");
 
+                // Helper: extract start/end from raw SWC node (may be in span.start or top-level start)
+                let get_start = |val: &Value| -> Option<Value> {
+                    val.as_object().and_then(|o| {
+                        o.get("start").cloned().or_else(|| {
+                            o.get("span").and_then(|s| s.as_object()).and_then(|s| s.get("start")).cloned()
+                        })
+                    })
+                };
+                let get_end = |val: &Value| -> Option<Value> {
+                    val.as_object().and_then(|o| {
+                        o.get("end").cloned().or_else(|| {
+                            o.get("span").and_then(|s| s.as_object()).and_then(|s| s.get("end")).cloned()
+                        })
+                    })
+                };
+
                 if let Some(ref key_val) = key {
                     match &default_value {
                         Some(Value::Null) | None => {
@@ -511,17 +553,15 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                             assign_pat.insert("left".to_string(), key_val.clone());
                             assign_pat.insert("right".to_string(), default_expr.clone());
                             // Span: start from key, end from default
-                            if let Some(start) = key_val.as_object().and_then(|k| k.get("start")).cloned() {
+                            if let Some(start) = get_start(key_val) {
                                 assign_pat.insert("start".to_string(), start);
                             }
-                            if let Some(end) = default_expr.as_object().and_then(|d| d.get("end")).cloned() {
-                                assign_pat.insert("end".to_string(), end);
-                            }
-                            obj.insert("value".to_string(), Value::Object(assign_pat));
-                            // Update Property end to include default value
-                            if let Some(end) = default_expr.as_object().and_then(|d| d.get("end")).cloned() {
+                            if let Some(end) = get_end(default_expr) {
+                                assign_pat.insert("end".to_string(), end.clone());
+                                // Update Property end to include default value
                                 obj.insert("end".to_string(), end);
                             }
+                            obj.insert("value".to_string(), Value::Object(assign_pat));
                         }
                     }
                 }

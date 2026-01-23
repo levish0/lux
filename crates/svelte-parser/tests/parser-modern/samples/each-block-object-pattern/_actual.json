@@ -126,6 +126,7 @@
               "start": 25,
               "type": "Property",
               "value": {
+                "end": 36,
                 "left": {
                   "end": 29,
                   "name": "cool",
@@ -134,10 +135,12 @@
                 },
                 "right": {
                   "end": 36,
+                  "raw": "true",
                   "start": 32,
                   "type": "Literal",
                   "value": true
                 },
+                "start": 25,
                 "type": "AssignmentPattern"
               }
             }
@@ -264,6 +267,7 @@
               "start": 115,
               "type": "Property",
               "value": {
+                "end": 137,
                 "left": {
                   "end": 119,
                   "name": "name",
@@ -283,25 +287,30 @@
                   ],
                   "quasis": [
                     {
-                      "cooked": "Jane ",
                       "end": 128,
-                      "raw": "Jane ",
                       "start": 123,
                       "tail": false,
-                      "type": "TemplateElement"
+                      "type": "TemplateElement",
+                      "value": {
+                        "cooked": "Jane ",
+                        "raw": "Jane "
+                      }
                     },
                     {
-                      "cooked": "",
                       "end": 136,
-                      "raw": "",
                       "start": 136,
                       "tail": true,
-                      "type": "TemplateElement"
+                      "type": "TemplateElement",
+                      "value": {
+                        "cooked": "",
+                        "raw": ""
+                      }
                     }
                   ],
                   "start": 122,
                   "type": "TemplateLiteral"
                 },
+                "start": 115,
                 "type": "AssignmentPattern"
               }
             },
@@ -320,6 +329,7 @@
               "start": 139,
               "type": "Property",
               "value": {
+                "end": 150,
                 "left": {
                   "end": 143,
                   "name": "cool",
@@ -328,10 +338,12 @@
                 },
                 "right": {
                   "end": 150,
+                  "raw": "true",
                   "start": 146,
                   "type": "Literal",
                   "value": true
                 },
+                "start": 139,
                 "type": "AssignmentPattern"
               }
             }
@@ -458,6 +470,7 @@
               "start": 229,
               "type": "Property",
               "value": {
+                "end": 273,
                 "left": {
                   "end": 233,
                   "name": "name",
@@ -467,69 +480,69 @@
                 "right": {
                   "arguments": [],
                   "callee": {
-                    "end": 271,
-                    "expression": {
-                      "async": false,
-                      "body": {
-                        "body": [
-                          {
-                            "argument": {
-                              "end": 267,
-                              "expressions": [
-                                {
-                                  "end": 265,
-                                  "raw": "\"Doe\"",
-                                  "start": 260,
-                                  "type": "Literal",
-                                  "value": "Doe"
-                                }
-                              ],
-                              "quasis": [
-                                {
+                    "async": false,
+                    "body": {
+                      "body": [
+                        {
+                          "argument": {
+                            "end": 267,
+                            "expressions": [
+                              {
+                                "end": 265,
+                                "raw": "\"Doe\"",
+                                "start": 260,
+                                "type": "Literal",
+                                "value": "Doe"
+                              }
+                            ],
+                            "quasis": [
+                              {
+                                "end": 258,
+                                "start": 253,
+                                "tail": false,
+                                "type": "TemplateElement",
+                                "value": {
                                   "cooked": "Jane ",
-                                  "end": 258,
-                                  "raw": "Jane ",
-                                  "start": 253,
-                                  "tail": false,
-                                  "type": "TemplateElement"
-                                },
-                                {
-                                  "cooked": "",
-                                  "end": 266,
-                                  "raw": "",
-                                  "start": 266,
-                                  "tail": true,
-                                  "type": "TemplateElement"
+                                  "raw": "Jane "
                                 }
-                              ],
-                              "start": 252,
-                              "type": "TemplateLiteral"
-                            },
-                            "end": 268,
-                            "start": 245,
-                            "type": "ReturnStatement"
-                          }
-                        ],
-                        "end": 270,
-                        "start": 243,
-                        "type": "BlockStatement"
-                      },
+                              },
+                              {
+                                "end": 266,
+                                "start": 266,
+                                "tail": true,
+                                "type": "TemplateElement",
+                                "value": {
+                                  "cooked": "",
+                                  "raw": ""
+                                }
+                              }
+                            ],
+                            "start": 252,
+                            "type": "TemplateLiteral"
+                          },
+                          "end": 268,
+                          "start": 245,
+                          "type": "ReturnStatement"
+                        }
+                      ],
                       "end": 270,
-                      "expression": false,
-                      "generator": false,
-                      "id": null,
-                      "params": [],
-                      "start": 237,
-                      "type": "ArrowFunctionExpression"
+                      "start": 243,
+                      "type": "BlockStatement"
                     },
-                    "start": 236,
-                    "type": "ParenthesisExpression"
+                    "end": 270,
+                    "expression": false,
+                    "generator": false,
+                    "id": null,
+                    "params": [],
+                    "start": 237,
+                    "type": "ArrowFunctionExpression"
                   },
                   "end": 273,
                   "optional": false,
                   "start": 236,
                   "type": "CallExpression"
                 },
+                "start": 229,
                 "type": "AssignmentPattern"
               }
             },
@@ -548,6 +561,7 @@
               "start": 275,
               "type": "Property",
               "value": {
+                "end": 286,
                 "left": {
                   "end": 279,
                   "name": "cool",
@@ -556,10 +570,12 @@
                 },
                 "right": {
                   "end": 286,
+                  "raw": "true",
                   "start": 282,
                   "type": "Literal",
                   "value": true
                 },
+                "start": 275,
                 "type": "AssignmentPattern"
               }
             }

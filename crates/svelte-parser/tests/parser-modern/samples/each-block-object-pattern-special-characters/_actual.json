@@ -9,6 +9,68 @@
           "type": "Fragment"
         },
         "context": {
+          "end": 23,
+          "properties": [
+            {
+              "computed": false,
+              "end": 21,
+              "key": {
+                "end": 15,
+                "name": "y",
+                "start": 14,
+                "type": "Identifier"
+              },
+              "kind": "init",
+              "method": false,
+              "shorthand": true,
+              "start": 14,
+              "type": "Property",
+              "value": {
+                "end": 21,
+                "left": {
+                  "end": 15,
+                  "name": "y",
+                  "start": 14,
+                  "type": "Identifier"
+                },
+                "right": {
+                  "end": 21,
+                  "raw": "'z'",
+                  "start": 18,
+                  "type": "Literal",
+                  "value": "z"
+                },
+                "start": 14,
+                "type": "AssignmentPattern"
+              }
+            }
+          ],
+          "start": 12,
+          "type": "ObjectPattern"
+        },
+        "end": 31,
+        "expression": {
+          "end": 8,
+          "name": "x",
+          "start": 7,
+          "type": "Identifier"
+        },
+        "start": 0,
+        "type": "EachBlock"
+      },
+      {
+        "data": "\n\n",
+        "end": 33,
+        "raw": "\n\n",
+        "start": 31,
+        "type": "Text"
+      },
+      {
+        "body": {
+          "nodes": [],
+          "type": "Fragment"
+        },
+        "context": {
           "end": 56,
           "properties": [
             {
@@ -26,6 +88,7 @@
               "start": 47,
               "type": "Property",
               "value": {
+                "end": 54,
                 "left": {
                   "end": 48,
                   "name": "y",
@@ -39,6 +102,7 @@
                   "type": "Literal",
                   "value": "{"
                 },
+                "start": 47,
                 "type": "AssignmentPattern"
               }
             }
@@ -48,12 +112,12 @@
         },
         "end": 64,
         "expression": {
-          "end": 8,
+          "end": 41,
           "name": "x",
-          "start": 7,
+          "start": 40,
           "type": "Identifier"
         },
-        "start": 0,
+        "start": 33,
         "type": "EachBlock"
       },
       {
@@ -62,6 +126,265 @@
         "raw": "\n\n",
         "start": 64,
         "type": "Text"
+      },
+      {
+        "body": {
+          "nodes": [],
+          "type": "Fragment"
+        },
+        "context": {
+          "end": 89,
+          "properties": [
+            {
+              "computed": false,
+              "end": 87,
+              "key": {
+                "end": 81,
+                "name": "y",
+                "start": 80,
+                "type": "Identifier"
+              },
+              "kind": "init",
+              "method": false,
+              "shorthand": true,
+              "start": 80,
+              "type": "Property",
+              "value": {
+                "end": 87,
+                "left": {
+                  "end": 81,
+                  "name": "y",
+                  "start": 80,
+                  "type": "Identifier"
+                },
+                "right": {
+                  "end": 87,
+                  "raw": "']'",
+                  "start": 84,
+                  "type": "Literal",
+                  "value": "]"
+                },
+                "start": 80,
+                "type": "AssignmentPattern"
+              }
+            }
+          ],
+          "start": 78,
+          "type": "ObjectPattern"
+        },
+        "end": 97,
+        "expression": {
+          "end": 74,
+          "name": "x",
+          "start": 73,
+          "type": "Identifier"
+        },
+        "start": 66,
+        "type": "EachBlock"
+      },
+      {
+        "data": "\n\n",
+        "end": 99,
+        "raw": "\n\n",
+        "start": 97,
+        "type": "Text"
+      },
+      {
+        "body": {
+          "nodes": [],
+          "type": "Fragment"
+        },
+        "context": {
+          "end": 127,
+          "properties": [
+            {
+              "computed": false,
+              "end": 125,
+              "key": {
+                "end": 114,
+                "name": "y",
+                "start": 113,
+                "type": "Identifier"
+              },
+              "kind": "init",
+              "method": false,
+              "shorthand": true,
+              "start": 113,
+              "type": "Property",
+              "value": {
+                "end": 125,
+                "left": {
+                  "end": 114,
+                  "name": "y",
+                  "start": 113,
+                  "type": "Identifier"
+                },
+                "right": {
+                  "end": 125,
+                  "expressions": [
+                    {
+                      "end": 123,
+                      "expressions": [],
+                      "quasis": [
+                        {
+                          "end": 122,
+                          "start": 121,
+                          "tail": true,
+                          "type": "TemplateElement",
+                          "value": {
+                            "cooked": "\"",
+                            "raw": "\""
+                          }
+                        }
+                      ],
+                      "start": 120,
+                      "type": "TemplateLiteral"
+                    }
+                  ],
+                  "quasis": [
+                    {
+                      "end": 118,
+                      "start": 118,
+                      "tail": false,
+                      "type": "TemplateElement",
+                      "value": {
+                        "cooked": "",
+                        "raw": ""
+                      }
+                    },
+                    {
+                      "end": 124,
+                      "start": 124,
+                      "tail": true,
+                      "type": "TemplateElement",
+                      "value": {
+                        "cooked": "",
+                        "raw": ""
+                      }
+                    }
+                  ],
+                  "start": 117,
+                  "type": "TemplateLiteral"
+                },
+                "start": 113,
+                "type": "AssignmentPattern"
+              }
+            }
+          ],
+          "start": 111,
+          "type": "ObjectPattern"
+        },
+        "end": 135,
+        "expression": {
+          "end": 107,
+          "name": "x",
+          "start": 106,
+          "type": "Identifier"
+        },
+        "start": 99,
+        "type": "EachBlock"
+      },
+      {
+        "data": "\n\n",
+        "end": 137,
+        "raw": "\n\n",
+        "start": 135,
+        "type": "Text"
+      },
+      {
+        "body": {
+          "nodes": [],
+          "type": "Fragment"
+        },
+        "context": {
+          "end": 168,
+          "properties": [
+            {
+              "computed": false,
+              "end": 166,
+              "key": {
+                "end": 152,
+                "name": "y",
+                "start": 151,
+                "type": "Identifier"
+              },
+              "kind": "init",
+              "method": false,
+              "shorthand": true,
+              "start": 151,
+              "type": "Property",
+              "value": {
+                "end": 166,
+                "left": {
+                  "end": 152,
+                  "name": "y",
+                  "start": 151,
+                  "type": "Identifier"
+                },
+                "right": {
+                  "end": 166,
+                  "expressions": [
+                    {
+                      "end": 164,
+                      "expressions": [],
+                      "quasis": [
+                        {
+                          "end": 163,
+                          "start": 159,
+                          "tail": true,
+                          "type": "TemplateElement",
+                          "value": {
+                            "cooked": "John",
+                            "raw": "John"
+                          }
+                        }
+                      ],
+                      "start": 158,
+                      "type": "TemplateLiteral"
+                    }
+                  ],
+                  "quasis": [
+                    {
+                      "end": 156,
+                      "start": 156,
+                      "tail": false,
+                      "type": "TemplateElement",
+                      "value": {
+                        "cooked": "",
+                        "raw": ""
+                      }
+                    },
+                    {
+                      "end": 165,
+                      "start": 165,
+                      "tail": true,
+                      "type": "TemplateElement",
+                      "value": {
+                        "cooked": "",
+                        "raw": ""
+                      }
+                    }
+                  ],
+                  "start": 155,
+                  "type": "TemplateLiteral"
+                },
+                "start": 151,
+                "type": "AssignmentPattern"
+              }
+            }
+          ],
+          "start": 149,
+          "type": "ObjectPattern"
+        },
+        "end": 176,
+        "expression": {
+          "end": 145,
+          "name": "x",
+          "start": 144,
+          "type": "Identifier"
+        },
+        "start": 137,
+        "type": "EachBlock"
       }
     ],
     "type": "Fragment"

@@ -1,6 +1,6 @@
 use svelte_ast::node::FragmentNode;
 use svelte_ast::root::ScriptContext;
-use winnow::combinator::{alt, not, peek};
+use winnow::combinator::{alt, dispatch, not, opt, peek};
 use winnow::prelude::*;
 use winnow::token::{any, literal, take};
 use winnow::Result;
@@ -18,60 +18,13 @@ use super::text::text_parser;
 pub fn document_parser(parser_input: &mut ParserInput) -> Result<Vec<FragmentNode>> {
     let mut nodes = Vec::new();
     loop {
-        // Skip whitespace-only lookahead check — just try to parse
         if parser_input.input.is_empty() {
             break;
         }
 
-        // Check for <script> at the document level
-        let c = peek(any).parse_next(parser_input)?;
-        if c == '<' {
-            // Peek ahead: "<script" or "<style"
-            let after_lt: Result<&str> = peek(take(7usize)).parse_next(parser_input);
-            if let Ok(s) = after_lt {
-                if s == "<script" {
-                    // Check that the char after "<script" is whitespace or >
-                    let full: Result<&str> = peek(take(8usize)).parse_next(parser_input);
-                    let is_script = match full {
-                        Ok(f) => {
-                            let next_ch = f.chars().last().unwrap();
-                            next_ch == '>' || next_ch.is_ascii_whitespace()
-                        }
-                        Err(_) => false,
-                    };
-                    if is_script {
-                        let script = script_parser(parser_input)?;
-                        match script.context {
-                            ScriptContext::Module => {
-                                parser_input.state.module = Some(script);
-                            }
-                            ScriptContext::Default => {
-                                parser_input.state.instance = Some(script);
-                            }
-                        }
-                        continue;
-                    }
-                }
-                if s.starts_with("<style") {
-                    // Check that the char after "<style" is whitespace or >
-                    let full: Result<&str> = peek(take(7usize)).parse_next(parser_input);
-                    let is_style = match full {
-                        Ok(f) => {
-                            let next_ch = f.chars().last().unwrap();
-                            next_ch == '>' || next_ch.is_ascii_whitespace()
-                        }
-                        Err(_) => {
-                            // Exactly "<style" with nothing after - treat as tag
-                            false
-                        }
-                    };
-                    if is_style {
-                        let stylesheet = style_parser(parser_input)?;
-                        parser_input.state.css = Some(stylesheet);
-                        continue;
-                    }
-                }
-            }
+        // Try to parse <script> or <style> at document level
+        if try_parse_script_or_style(parser_input)? {
+            continue;
         }
 
         // Parse a regular fragment node
@@ -83,24 +36,64 @@ pub fn document_parser(parser_input: &mut ParserInput) -> Result<Vec<FragmentNod
     Ok(nodes)
 }
 
+/// Try to parse a top-level <script> or <style> tag.
+/// Returns true if one was consumed.
+fn try_parse_script_or_style(parser_input: &mut ParserInput) -> Result<bool> {
+    // Only relevant if next char is '<'
+    if opt(peek(literal("<s"))).parse_next(parser_input)?.is_none() {
+        return Ok(false);
+    }
+
+    // Check for <script followed by whitespace or >
+    if is_tag_start(parser_input, "<script") {
+        let script = script_parser(parser_input)?;
+        match script.context {
+            ScriptContext::Module => {
+                parser_input.state.module = Some(script);
+            }
+            ScriptContext::Default => {
+                parser_input.state.instance = Some(script);
+            }
+        }
+        return Ok(true);
+    }
+
+    // Check for <style followed by whitespace or >
+    if is_tag_start(parser_input, "<style") {
+        let stylesheet = style_parser(parser_input)?;
+        parser_input.state.css = Some(stylesheet);
+        return Ok(true);
+    }
+
+    Ok(false)
+}
+
+/// Check if the input starts with `tag_name` followed by whitespace or `>`.
+fn is_tag_start(parser_input: &mut ParserInput, tag_name: &str) -> bool {
+    let remaining: &str = &parser_input.input;
+    if !remaining.starts_with(tag_name) {
+        return false;
+    }
+    // Check char after tag name
+    remaining.as_bytes().get(tag_name.len()).map_or(false, |&ch| {
+        ch == b'>' || ch.is_ascii_whitespace()
+    })
+}
+
 pub(crate) fn fragment_node_parser(parser_input: &mut ParserInput) -> Result<FragmentNode> {
     // Fail on terminators: closing tags, block continuations, block closings
     not(peek(literal("</"))).parse_next(parser_input)?;
     not(peek(literal("{:"))).parse_next(parser_input)?;
     not(peek(literal("{/"))).parse_next(parser_input)?;
 
-    let c = peek(any).parse_next(parser_input)?;
-    match c {
-        '<' => alt((comment_parser, element_parser)).parse_next(parser_input),
-        '{' => {
-            // Peek 2 chars to distinguish {# (block), {@ (special), {expression}
-            let two: Result<&str> = peek(take(2usize)).parse_next(parser_input);
-            match two {
-                Ok("{#") => block_parser(parser_input),
-                Ok("{@") => special_tag_parser(parser_input),
-                _ => expression_tag_parser(parser_input),
-            }
-        }
-        _ => text_parser(parser_input),
+    dispatch! {peek(any);
+        '<' => alt((comment_parser, element_parser)),
+        '{' => dispatch! {peek(take(2usize));
+            "{#" => block_parser,
+            "{@" => special_tag_parser,
+            _ => expression_tag_parser,
+        },
+        _ => text_parser,
     }
+    .parse_next(parser_input)
 }

@@ -5,10 +5,10 @@ use svelte_ast::elements::{
 use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::Fragment;
 use svelte_ast::span::Span;
-use winnow::combinator::{peek, repeat_till};
+use winnow::combinator::{opt, peek, repeat_till};
 use winnow::prelude::*;
 use winnow::stream::Location;
-use winnow::token::{any, literal, take_while};
+use winnow::token::{literal, take_while};
 use winnow::Result as ParseResult;
 
 use super::ParserInput;
@@ -35,10 +35,7 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
     });
 
     // check self-closing /> or >
-    let self_closing = peek(any).parse_next(parser_input)? == '/';
-    if self_closing {
-        literal("/").parse_next(parser_input)?;
-    }
+    let self_closing = opt(literal("/")).parse_next(parser_input)?.is_some();
     literal(">").parse_next(parser_input)?;
 
     // Check shadowroot context BEFORE parsing children (for nested slot detection)
@@ -49,17 +46,17 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
     } else {
         // Push this element onto stack before parsing children
         parser_input.state.push_element(name.clone(), has_shadowrootmode);
-        
+
         let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
             0..,
             fragment_node_parser,
             closing_tag_parser(&name),
         )
         .parse_next(parser_input)?;
-        
+
         // Pop element from stack after parsing children
         parser_input.state.pop_element();
-        
+
         Fragment { nodes }
     };
 
@@ -75,8 +72,10 @@ fn parse_attributes(parser_input: &mut ParserInput) -> ParseResult<Vec<Attribute
         // consume whitespace between attributes
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
         // stop if we hit > or />
-        let next = peek(any).parse_next(parser_input)?;
-        if next == '>' || next == '/' {
+        if opt(peek(literal(">"))).parse_next(parser_input)?.is_some() {
+            break;
+        }
+        if opt(peek(literal("/"))).parse_next(parser_input)?.is_some() {
             break;
         }
         attributes.push(attribute_parser(parser_input)?);

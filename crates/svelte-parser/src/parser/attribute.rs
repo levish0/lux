@@ -8,21 +8,23 @@ use svelte_ast::span::Span;
 use svelte_ast::tags::{AttachTag, ExpressionTag};
 use svelte_ast::text::Text;
 use swc_ecma_ast as swc;
-use winnow::combinator::{opt, peek};
+use winnow::combinator::{dispatch, opt, peek};
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::{any, literal, take_while};
 use winnow::Result as ParseResult;
 
 use super::ParserInput;
+use super::bracket::read_until_close_brace;
+use super::swc_parse::parse_expression;
 
 /// Parse a single attribute, directive, or spread.
 pub fn attribute_parser(parser_input: &mut ParserInput) -> ParseResult<AttributeNode> {
-    let c = peek(any).parse_next(parser_input)?;
-    match c {
-        '{' => spread_or_shorthand_parser(parser_input),
-        _ => named_attribute_parser(parser_input),
+    dispatch! {peek(any);
+        '{' => spread_or_shorthand_parser,
+        _ => named_attribute_parser,
     }
+    .parse_next(parser_input)
 }
 
 /// Parse `{...expr}` spread, `{@attach expr}`, or `{name}` shorthand.
@@ -31,17 +33,14 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
     literal("{").parse_next(parser_input)?;
 
     // Check for @attach: {@attach ...
-    let is_attach: ParseResult<&str> = peek(literal("@attach")).parse_next(parser_input);
-    if is_attach.is_ok() {
-        literal("@attach").parse_next(parser_input)?;
-        // Require at least one whitespace after @attach
+    if opt(literal("@attach")).parse_next(parser_input)?.is_some() {
         take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
         let expr_offset = parser_input.current_token_start() as u32;
         let expr_text = read_until_close_brace(parser_input)?;
         literal("}").parse_next(parser_input)?;
         let end = parser_input.previous_token_end();
 
-        let expression = swc_parse_expr(&expr_text, parser_input.state.ts, expr_offset)?;
+        let expression = parse_expression(expr_text, parser_input.state.ts, expr_offset)?;
 
         return Ok(AttributeNode::AttachTag(AttachTag {
             span: Span::new(start, end),
@@ -50,15 +49,13 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
     }
 
     // Check for spread: {...
-    let is_spread: ParseResult<&str> = peek(literal("...")).parse_next(parser_input);
-    if is_spread.is_ok() {
-        literal("...").parse_next(parser_input)?;
+    if opt(literal("...")).parse_next(parser_input)?.is_some() {
         let expr_offset = parser_input.current_token_start() as u32;
         let expr_text = read_until_close_brace(parser_input)?;
         literal("}").parse_next(parser_input)?;
         let end = parser_input.previous_token_end();
 
-        let expression = swc_parse_expr(&expr_text, parser_input.state.ts, expr_offset)?;
+        let expression = parse_expression(expr_text, parser_input.state.ts, expr_offset)?;
 
         return Ok(AttributeNode::SpreadAttribute(SpreadAttribute {
             span: Span::new(start, end),
@@ -158,7 +155,6 @@ fn parse_bind_directive(
     let expression = parse_optional_directive_value(parser_input)?;
     let end = parser_input.previous_token_end();
 
-    // If no value, the expression is the name itself (shorthand: bind:value)
     let expr = expression.unwrap_or_else(|| {
         Box::new(swc::Expr::Ident(swc::Ident::new(
             name.into(),
@@ -181,7 +177,6 @@ fn parse_on_directive(
     name_and_modifiers: &str,
     name_loc: Span,
 ) -> ParseResult<AttributeNode> {
-    // Split name|modifier1|modifier2
     let parts: Vec<&str> = name_and_modifiers.split('|').collect();
     let name = parts[0];
     let modifiers: Vec<EventModifier> = parts[1..]
@@ -352,8 +347,7 @@ fn parse_let_directive(
 fn parse_optional_directive_value(
     parser_input: &mut ParserInput,
 ) -> ParseResult<Option<Box<swc::Expr>>> {
-    let has_eq = opt(literal("=")).parse_next(parser_input)?.is_some();
-    if !has_eq {
+    if opt(literal("=")).parse_next(parser_input)?.is_none() {
         return Ok(None);
     }
 
@@ -363,46 +357,48 @@ fn parse_optional_directive_value(
     let expr_text = read_until_close_brace(parser_input)?;
     literal("}").parse_next(parser_input)?;
 
-    let expr = swc_parse_expr(&expr_text, parser_input.state.ts, expr_offset)?;
+    let expr = parse_expression(expr_text, parser_input.state.ts, expr_offset)?;
     Ok(Some(expr))
 }
 
 fn parse_attribute_value(parser_input: &mut ParserInput) -> ParseResult<AttributeValue> {
-    let next = peek(any).parse_next(parser_input)?;
-    match next {
-        '"' => parse_quoted_value(parser_input, '"'),
-        '\'' => parse_quoted_value(parser_input, '\''),
-        '{' => {
-            // Expression value: ={expr}
-            let start = parser_input.current_token_start();
-            literal("{").parse_next(parser_input)?;
-            let expr_offset = parser_input.current_token_start() as u32;
-            let expr_text = read_until_close_brace(parser_input)?;
-            literal("}").parse_next(parser_input)?;
-            let end = parser_input.previous_token_end();
-            let expression = swc_parse_expr(&expr_text, parser_input.state.ts, expr_offset)?;
-            Ok(AttributeValue::Expression(ExpressionTag {
-                span: Span::new(start, end),
-                expression,
-            }))
-        }
-        _ => {
-            // Unquoted value
-            let val_start = parser_input.current_token_start();
-            let text: &str = take_while(1.., |c: char| {
-                !c.is_ascii_whitespace() && !matches!(c, '>' | '/' | '=' | '{' | '}' | '<')
-            })
-            .parse_next(parser_input)?;
-            let val_end = parser_input.previous_token_end();
-            Ok(AttributeValue::Sequence(vec![
-                AttributeSequenceValue::Text(Text {
-                    span: Span::new(val_start, val_end),
-                    data: text.to_string(),
-                    raw: text.to_string(),
-                }),
-            ]))
-        }
+    dispatch! {peek(any);
+        '"' => |input: &mut ParserInput| parse_quoted_value(input, '"'),
+        '\'' => |input: &mut ParserInput| parse_quoted_value(input, '\''),
+        '{' => parse_expression_value,
+        _ => parse_unquoted_value,
     }
+    .parse_next(parser_input)
+}
+
+fn parse_expression_value(parser_input: &mut ParserInput) -> ParseResult<AttributeValue> {
+    let start = parser_input.current_token_start();
+    literal("{").parse_next(parser_input)?;
+    let expr_offset = parser_input.current_token_start() as u32;
+    let expr_text = read_until_close_brace(parser_input)?;
+    literal("}").parse_next(parser_input)?;
+    let end = parser_input.previous_token_end();
+    let expression = parse_expression(expr_text, parser_input.state.ts, expr_offset)?;
+    Ok(AttributeValue::Expression(ExpressionTag {
+        span: Span::new(start, end),
+        expression,
+    }))
+}
+
+fn parse_unquoted_value(parser_input: &mut ParserInput) -> ParseResult<AttributeValue> {
+    let val_start = parser_input.current_token_start();
+    let text: &str = take_while(1.., |c: char| {
+        !c.is_ascii_whitespace() && !matches!(c, '>' | '/' | '=' | '{' | '}' | '<')
+    })
+    .parse_next(parser_input)?;
+    let val_end = parser_input.previous_token_end();
+    Ok(AttributeValue::Sequence(vec![
+        AttributeSequenceValue::Text(Text {
+            span: Span::new(val_start, val_end),
+            data: text.to_string(),
+            raw: text.to_string(),
+        }),
+    ]))
 }
 
 /// Parse quoted attribute value with potential embedded expressions.
@@ -414,7 +410,7 @@ fn parse_quoted_value(parser_input: &mut ParserInput, quote: char) -> ParseResul
     let mut text_start = parser_input.current_token_start();
 
     loop {
-        let c = peek(any).parse_next(parser_input)?;
+        let c: char = peek(any).parse_next(parser_input)?;
         if c == quote {
             // Flush text buffer
             if !text_buf.is_empty() {
@@ -446,7 +442,7 @@ fn parse_quoted_value(parser_input: &mut ParserInput, quote: char) -> ParseResul
             let expr_text = read_until_close_brace(parser_input)?;
             literal("}").parse_next(parser_input)?;
             let expr_end = parser_input.previous_token_end();
-            let expression = swc_parse_expr(&expr_text, parser_input.state.ts, expr_offset)?;
+            let expression = parse_expression(expr_text, parser_input.state.ts, expr_offset)?;
             sequence.push(AttributeSequenceValue::ExpressionTag(ExpressionTag {
                 span: Span::new(expr_start, expr_end),
                 expression,
@@ -476,100 +472,4 @@ fn parse_event_modifier(s: &str) -> Option<EventModifier> {
         "trusted" => Some(EventModifier::Trusted),
         _ => None,
     }
-}
-
-// --- SWC helpers ---
-
-fn read_until_close_brace(parser_input: &mut ParserInput) -> ParseResult<String> {
-    let mut buf = String::new();
-    let mut depth: u32 = 0;
-    loop {
-        let c = peek(any).parse_next(parser_input)?;
-        if c == '}' && depth == 0 {
-            break;
-        }
-        let c: char = any.parse_next(parser_input)?;
-        buf.push(c);
-        match c {
-            '{' => depth += 1,
-            '}' => depth -= 1,
-            '"' | '\'' => {
-                collect_string(parser_input, c, &mut buf)?;
-            }
-            '`' => {
-                collect_template(parser_input, &mut buf)?;
-            }
-            _ => {}
-        }
-    }
-    Ok(buf)
-}
-
-fn collect_string(parser_input: &mut ParserInput, quote: char, out: &mut String) -> ParseResult<()> {
-    loop {
-        let c: char = any.parse_next(parser_input)?;
-        out.push(c);
-        if c == quote {
-            return Ok(());
-        }
-        if c == '\\' {
-            let esc: char = any.parse_next(parser_input)?;
-            out.push(esc);
-        }
-    }
-}
-
-fn collect_template(parser_input: &mut ParserInput, out: &mut String) -> ParseResult<()> {
-    loop {
-        let c: char = any.parse_next(parser_input)?;
-        out.push(c);
-        match c {
-            '`' => return Ok(()),
-            '\\' => {
-                let esc: char = any.parse_next(parser_input)?;
-                out.push(esc);
-            }
-            _ => {}
-        }
-    }
-}
-
-fn swc_parse_expr(source: &str, ts: bool, offset: u32) -> ParseResult<Box<swc::Expr>> {
-    use swc_common::BytePos;
-    use swc_common::input::StringInput;
-    use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
-
-    let leading_ws = source.len() - source.trim_start().len();
-    let trimmed = source.trim();
-    let actual_offset = offset + leading_ws as u32;
-
-    let syntax = if ts {
-        Syntax::Typescript(TsSyntax {
-            tsx: true,
-            ..Default::default()
-        })
-    } else {
-        Syntax::Es(EsSyntax {
-            jsx: true,
-            ..Default::default()
-        })
-    };
-
-    let input = StringInput::new(trimmed, BytePos(actual_offset), BytePos(actual_offset + trimmed.len() as u32));
-    let mut parser = swc_ecma_parser::Parser::new(syntax, input, None);
-
-    parser.parse_expr().map_err(|e| {
-        e.into_diagnostic(&swc_common::errors::Handler::with_emitter(
-            true,
-            false,
-            Box::new(swc_common::errors::EmitterWriter::new(
-                Box::new(std::io::sink()),
-                None,
-                false,
-                false,
-            )),
-        ))
-        .cancel();
-        winnow::error::ContextError::new()
-    })
 }

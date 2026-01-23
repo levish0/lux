@@ -37,6 +37,7 @@
               "end": 62,
               "expression": {
                 "end": 61,
+                "raw": "true",
                 "start": 57,
                 "type": "Literal",
                 "value": true
