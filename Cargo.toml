@@ -15,6 +15,7 @@ rust-version = "1.92.0"
 # Internal crates
 svelte-ast = { path = "crates/svelte-ast" }
 svelte-parser = { path = "crates/svelte-parser" }
+svelte-analyzer = {path = "crates/svelte-analyzer"}
 svelte-transformer = { path = "crates/svelte-transformer" }
 
 # External dependencies

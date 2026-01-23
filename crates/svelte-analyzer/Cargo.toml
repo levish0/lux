@@ -1,0 +1,14 @@
+[package]
+name = "svelte-analyzer"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "svelte-analyzer"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+swc_ecma_ast = { workspace = true }
