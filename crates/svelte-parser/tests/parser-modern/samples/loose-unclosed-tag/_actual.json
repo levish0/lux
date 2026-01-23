@@ -2,7 +2,455 @@
   "css": null,
   "end": 204,
   "fragment": {
-    "nodes": [],
+    "nodes": [
+      {
+        "attributes": [],
+        "end": 20,
+        "fragment": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 7,
+              "raw": "\n\t",
+              "start": 5,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 14,
+              "fragment": {
+                "nodes": [
+                  {
+                    "data": "\n",
+                    "end": 14,
+                    "raw": "\n",
+                    "start": 13,
+                    "type": "Text"
+                  }
+                ],
+                "type": "Fragment"
+              },
+              "name": "Comp",
+              "name_loc": {
+                "end": 12,
+                "start": 8
+              },
+              "start": 7,
+              "type": "Component"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "name": "div",
+        "name_loc": {
+          "end": 4,
+          "start": 1
+        },
+        "start": 0,
+        "type": "RegularElement"
+      },
+      {
+        "data": "\n\n",
+        "end": 22,
+        "raw": "\n\n",
+        "start": 20,
+        "type": "Text"
+      },
+      {
+        "attributes": [],
+        "end": 51,
+        "fragment": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 29,
+              "raw": "\n\t",
+              "start": 27,
+              "type": "Text"
+            },
+            {
+              "attributes": [
+                {
+                  "end": 44,
+                  "name": "foo",
+                  "name_loc": {
+                    "end": 38,
+                    "start": 35
+                  },
+                  "start": 35,
+                  "type": "Attribute",
+                  "value": {
+                    "end": 44,
+                    "expression": {
+                      "end": 43,
+                      "name": "bar",
+                      "start": 40,
+                      "type": "Identifier"
+                    },
+                    "start": 39,
+                    "type": "ExpressionTag"
+                  }
+                }
+              ],
+              "end": 45,
+              "fragment": {
+                "nodes": [],
+                "type": "Fragment"
+              },
+              "name": "Comp",
+              "name_loc": {
+                "end": 34,
+                "start": 30
+              },
+              "start": 29,
+              "type": "Component"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "name": "div",
+        "name_loc": {
+          "end": 26,
+          "start": 23
+        },
+        "start": 22,
+        "type": "RegularElement"
+      },
+      {
+        "data": "\n\n",
+        "end": 53,
+        "raw": "\n\n",
+        "start": 51,
+        "type": "Text"
+      },
+      {
+        "attributes": [],
+        "end": 72,
+        "fragment": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 60,
+              "raw": "\n\t",
+              "start": 58,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 66,
+              "fragment": {
+                "nodes": [],
+                "type": "Fragment"
+              },
+              "name": "span",
+              "name_loc": {
+                "end": 65,
+                "start": 61
+              },
+              "start": 60,
+              "type": "RegularElement"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "name": "div",
+        "name_loc": {
+          "end": 57,
+          "start": 54
+        },
+        "start": 53,
+        "type": "RegularElement"
+      },
+      {
+        "data": "\n\n",
+        "end": 74,
+        "raw": "\n\n",
+        "start": 72,
+        "type": "Text"
+      },
+      {
+        "attributes": [],
+        "end": 94,
+        "fragment": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 81,
+              "raw": "\n\t",
+              "start": 79,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 88,
+              "fragment": {
+                "nodes": [],
+                "type": "Fragment"
+              },
+              "name": "Comp.",
+              "name_loc": {
+                "end": 87,
+                "start": 82
+              },
+              "start": 81,
+              "type": "Component"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "name": "div",
+        "name_loc": {
+          "end": 78,
+          "start": 75
+        },
+        "start": 74,
+        "type": "RegularElement"
+      },
+      {
+        "data": "\n\n",
+        "end": 96,
+        "raw": "\n\n",
+        "start": 94,
+        "type": "Text"
+      },
+      {
+        "attributes": [],
+        "end": 116,
+        "fragment": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 103,
+              "raw": "\n\t",
+              "start": 101,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 110,
+              "fragment": {
+                "nodes": [],
+                "type": "Fragment"
+              },
+              "name": "comp.",
+              "name_loc": {
+                "end": 109,
+                "start": 104
+              },
+              "start": 103,
+              "type": "RegularElement"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "name": "div",
+        "name_loc": {
+          "end": 100,
+          "start": 97
+        },
+        "start": 96,
+        "type": "RegularElement"
+      },
+      {
+        "data": "\n\n",
+        "end": 118,
+        "raw": "\n\n",
+        "start": 116,
+        "type": "Text"
+      },
+      {
+        "alternate": null,
+        "consequent": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 129,
+              "raw": "\n\t",
+              "start": 127,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 135,
+              "fragment": {
+                "nodes": [
+                  {
+                    "data": "\n",
+                    "end": 135,
+                    "raw": "\n",
+                    "start": 134,
+                    "type": "Text"
+                  }
+                ],
+                "type": "Fragment"
+              },
+              "name": "div",
+              "name_loc": {
+                "end": 133,
+                "start": 130
+              },
+              "start": 129,
+              "type": "RegularElement"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "elseif": false,
+        "end": 140,
+        "start": 118,
+        "test": {
+          "end": 126,
+          "name": "foo",
+          "start": 123,
+          "type": "Identifier"
+        },
+        "type": "IfBlock"
+      },
+      {
+        "data": "\n\n",
+        "end": 142,
+        "raw": "\n\n",
+        "start": 140,
+        "type": "Text"
+      },
+      {
+        "alternate": null,
+        "consequent": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 153,
+              "raw": "\n\t",
+              "start": 151,
+              "type": "Text"
+            },
+            {
+              "attributes": [
+                {
+                  "end": 168,
+                  "name": "foo",
+                  "name_loc": {
+                    "end": 162,
+                    "start": 159
+                  },
+                  "start": 159,
+                  "type": "Attribute",
+                  "value": {
+                    "end": 168,
+                    "expression": {
+                      "end": 167,
+                      "name": "bar",
+                      "start": 164,
+                      "type": "Identifier"
+                    },
+                    "start": 163,
+                    "type": "ExpressionTag"
+                  }
+                }
+              ],
+              "end": 169,
+              "fragment": {
+                "nodes": [],
+                "type": "Fragment"
+              },
+              "name": "Comp",
+              "name_loc": {
+                "end": 158,
+                "start": 154
+              },
+              "start": 153,
+              "type": "Component"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "elseif": false,
+        "end": 174,
+        "start": 142,
+        "test": {
+          "end": 150,
+          "name": "foo",
+          "start": 147,
+          "type": "Identifier"
+        },
+        "type": "IfBlock"
+      },
+      {
+        "data": "\n\n",
+        "end": 176,
+        "raw": "\n\n",
+        "start": 174,
+        "type": "Text"
+      },
+      {
+        "attributes": [],
+        "end": 204,
+        "fragment": {
+          "nodes": [
+            {
+              "data": "\n",
+              "end": 182,
+              "raw": "\n",
+              "start": 181,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 191,
+              "fragment": {
+                "nodes": [
+                  {
+                    "data": "hi",
+                    "end": 187,
+                    "raw": "hi",
+                    "start": 185,
+                    "type": "Text"
+                  }
+                ],
+                "type": "Fragment"
+              },
+              "name": "p",
+              "name_loc": {
+                "end": 184,
+                "start": 183
+              },
+              "start": 182,
+              "type": "RegularElement"
+            },
+            {
+              "data": "\n\n",
+              "end": 193,
+              "raw": "\n\n",
+              "start": 191,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 204,
+              "fragment": {
+                "nodes": [],
+                "type": "Fragment"
+              },
+              "name": "open-ended",
+              "name_loc": {
+                "end": 204,
+                "start": 194
+              },
+              "start": 193,
+              "type": "RegularElement"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "name": "div",
+        "name_loc": {
+          "end": 180,
+          "start": 177
+        },
+        "start": 176,
+        "type": "RegularElement"
+      }
+    ],
     "type": "Fragment"
   },
   "js": [],

@@ -2,7 +2,367 @@
   "css": null,
   "end": 170,
   "fragment": {
-    "nodes": [],
+    "nodes": [
+      {
+        "attributes": [],
+        "end": 29,
+        "fragment": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 7,
+              "raw": "\n\t",
+              "start": 5,
+              "type": "Text"
+            },
+            {
+              "attributes": [
+                {
+                  "end": 22,
+                  "name": "foo",
+                  "name_loc": {
+                    "end": 16,
+                    "start": 13
+                  },
+                  "start": 13,
+                  "type": "Attribute",
+                  "value": {
+                    "end": 22,
+                    "expression": {
+                      "end": 21,
+                      "name": "bar",
+                      "start": 18,
+                      "type": "Identifier"
+                    },
+                    "start": 17,
+                    "type": "ExpressionTag"
+                  }
+                }
+              ],
+              "end": 23,
+              "fragment": {
+                "nodes": [],
+                "type": "Fragment"
+              },
+              "name": "Comp",
+              "name_loc": {
+                "end": 12,
+                "start": 8
+              },
+              "start": 7,
+              "type": "Component"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "name": "div",
+        "name_loc": {
+          "end": 4,
+          "start": 1
+        },
+        "start": 0,
+        "type": "RegularElement"
+      },
+      {
+        "data": "\n\n",
+        "end": 31,
+        "raw": "\n\n",
+        "start": 29,
+        "type": "Text"
+      },
+      {
+        "attributes": [],
+        "end": 60,
+        "fragment": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 38,
+              "raw": "\n\t",
+              "start": 36,
+              "type": "Text"
+            },
+            {
+              "attributes": [
+                {
+                  "end": 53,
+                  "name": "foo",
+                  "name_loc": {
+                    "end": 47,
+                    "start": 44
+                  },
+                  "start": 44,
+                  "type": "Attribute",
+                  "value": {
+                    "end": 53,
+                    "expression": {
+                      "end": 52,
+                      "name": "bar",
+                      "start": 49,
+                      "type": "Identifier"
+                    },
+                    "start": 48,
+                    "type": "ExpressionTag"
+                  }
+                }
+              ],
+              "end": 54,
+              "fragment": {
+                "nodes": [],
+                "type": "Fragment"
+              },
+              "name": "span",
+              "name_loc": {
+                "end": 43,
+                "start": 39
+              },
+              "start": 38,
+              "type": "RegularElement"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "name": "div",
+        "name_loc": {
+          "end": 35,
+          "start": 32
+        },
+        "start": 31,
+        "type": "RegularElement"
+      },
+      {
+        "data": "\n\n",
+        "end": 62,
+        "raw": "\n\n",
+        "start": 60,
+        "type": "Text"
+      },
+      {
+        "alternate": null,
+        "consequent": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 73,
+              "raw": "\n\t",
+              "start": 71,
+              "type": "Text"
+            },
+            {
+              "attributes": [
+                {
+                  "end": 88,
+                  "name": "foo",
+                  "name_loc": {
+                    "end": 82,
+                    "start": 79
+                  },
+                  "start": 79,
+                  "type": "Attribute",
+                  "value": {
+                    "end": 88,
+                    "expression": {
+                      "end": 87,
+                      "name": "bar",
+                      "start": 84,
+                      "type": "Identifier"
+                    },
+                    "start": 83,
+                    "type": "ExpressionTag"
+                  }
+                }
+              ],
+              "end": 89,
+              "fragment": {
+                "nodes": [],
+                "type": "Fragment"
+              },
+              "name": "Comp",
+              "name_loc": {
+                "end": 78,
+                "start": 74
+              },
+              "start": 73,
+              "type": "Component"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "elseif": false,
+        "end": 94,
+        "start": 62,
+        "test": {
+          "end": 70,
+          "name": "foo",
+          "start": 67,
+          "type": "Identifier"
+        },
+        "type": "IfBlock"
+      },
+      {
+        "data": "\n\n",
+        "end": 96,
+        "raw": "\n\n",
+        "start": 94,
+        "type": "Text"
+      },
+      {
+        "alternate": null,
+        "consequent": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 107,
+              "raw": "\n\t",
+              "start": 105,
+              "type": "Text"
+            },
+            {
+              "attributes": [
+                {
+                  "end": 122,
+                  "name": "foo",
+                  "name_loc": {
+                    "end": 116,
+                    "start": 113
+                  },
+                  "start": 113,
+                  "type": "Attribute",
+                  "value": {
+                    "end": 122,
+                    "expression": {
+                      "end": 121,
+                      "name": "bar",
+                      "start": 118,
+                      "type": "Identifier"
+                    },
+                    "start": 117,
+                    "type": "ExpressionTag"
+                  }
+                }
+              ],
+              "end": 124,
+              "fragment": {
+                "nodes": [],
+                "type": "Fragment"
+              },
+              "name": "Comp",
+              "name_loc": {
+                "end": 112,
+                "start": 108
+              },
+              "start": 107,
+              "type": "Component"
+            },
+            {
+              "alternate": null,
+              "consequent": {
+                "nodes": [
+                  {
+                    "data": "\n\t\t",
+                    "end": 136,
+                    "raw": "\n\t\t",
+                    "start": 133,
+                    "type": "Text"
+                  },
+                  {
+                    "end": 141,
+                    "expression": {
+                      "end": 140,
+                      "name": "bar",
+                      "start": 137,
+                      "type": "Identifier"
+                    },
+                    "start": 136,
+                    "type": "ExpressionTag"
+                  },
+                  {
+                    "data": "\n\t",
+                    "end": 143,
+                    "raw": "\n\t",
+                    "start": 141,
+                    "type": "Text"
+                  }
+                ],
+                "type": "Fragment"
+              },
+              "elseif": false,
+              "end": 148,
+              "start": 124,
+              "test": {
+                "end": 132,
+                "name": "bar",
+                "start": 129,
+                "type": "Identifier"
+              },
+              "type": "IfBlock"
+            },
+            {
+              "data": "\n",
+              "end": 149,
+              "raw": "\n",
+              "start": 148,
+              "type": "Text"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "elseif": false,
+        "end": 154,
+        "start": 96,
+        "test": {
+          "end": 104,
+          "name": "foo",
+          "start": 101,
+          "type": "Identifier"
+        },
+        "type": "IfBlock"
+      },
+      {
+        "data": "\n\n",
+        "end": 156,
+        "raw": "\n\n",
+        "start": 154,
+        "type": "Text"
+      },
+      {
+        "attributes": [
+          {
+            "end": 170,
+            "name": "foo",
+            "name_loc": {
+              "end": 164,
+              "start": 161
+            },
+            "start": 161,
+            "type": "Attribute",
+            "value": {
+              "end": 170,
+              "expression": {
+                "end": 169,
+                "name": "bar",
+                "start": 166,
+                "type": "Identifier"
+              },
+              "start": 165,
+              "type": "ExpressionTag"
+            }
+          }
+        ],
+        "end": 170,
+        "fragment": {
+          "nodes": [],
+          "type": "Fragment"
+        },
+        "name": "div",
+        "name_loc": {
+          "end": 160,
+          "start": 157
+        },
+        "start": 156,
+        "type": "RegularElement"
+      }
+    ],
     "type": "Fragment"
   },
   "js": [],
