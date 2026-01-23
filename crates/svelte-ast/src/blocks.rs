@@ -2,6 +2,7 @@ use serde::Serialize;
 use swc_ecma_ast as swc;
 
 use crate::root::Fragment;
+use crate::span::Span;
 
 /*
  * interface IfBlock extends BaseNode {
@@ -14,6 +15,7 @@ use crate::root::Fragment;
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct IfBlock {
+    pub span: Span,
     pub elseif: bool,
     pub test: Box<swc::Expr>,
     pub consequent: Fragment,
@@ -33,6 +35,7 @@ pub struct IfBlock {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct EachBlock {
+    pub span: Span,
     pub expression: Box<swc::Expr>,
     pub context: Option<Box<swc::Pat>>,
     pub body: Fragment,
@@ -54,6 +57,7 @@ pub struct EachBlock {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct AwaitBlock {
+    pub span: Span,
     pub expression: Box<swc::Expr>,
     pub value: Option<Box<swc::Pat>>,
     pub error: Option<Box<swc::Pat>>,
@@ -71,6 +75,7 @@ pub struct AwaitBlock {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct KeyBlock {
+    pub span: Span,
     pub expression: Box<swc::Expr>,
     pub fragment: Fragment,
 }
@@ -80,12 +85,15 @@ pub struct KeyBlock {
  *   type: 'SnippetBlock';
  *   expression: Identifier;
  *   parameters: Pattern[];
+ *   typeParams?: string;
  *   body: Fragment;
  * }
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SnippetBlock {
+    pub span: Span,
     pub expression: Box<swc::Ident>,
     pub parameters: Vec<swc::Pat>,
+    pub type_params: Option<String>,
     pub body: Fragment,
 }

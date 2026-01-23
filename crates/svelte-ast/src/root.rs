@@ -2,7 +2,11 @@ use serde::Serialize;
 use std::collections::HashMap;
 use swc_ecma_ast as swc;
 
-use crate::node::AstNode;
+use crate::attributes::Attribute;
+use crate::css::StyleSheet;
+use crate::node::FragmentNode;
+use crate::span::Span;
+use crate::text::JsComment;
 
 /*
  * interface Root extends BaseNode {
@@ -12,16 +16,19 @@ use crate::node::AstNode;
  *   css: AST.CSS.StyleSheet | null;
  *   instance: Script | null;
  *   module: Script | null;
+ *   comments: JSComment[];
  *   metadata: { ts: boolean };
  * }
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Root {
-    pub fragment: Box<AstNode>,
-    pub css: Option<Box<AstNode>>,
+    pub span: Span,
+    pub fragment: Fragment,
+    pub css: Option<StyleSheet>,
     pub instance: Option<Script>,
     pub module: Option<Script>,
     pub options: Option<SvelteOptions>,
+    pub comments: Vec<JsComment>,
     pub ts: bool,
 }
 
@@ -35,9 +42,10 @@ pub struct Root {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Script {
+    pub span: Span,
     pub context: ScriptContext,
     pub content: swc::Program,
-    pub attributes: Vec<AstNode>,
+    pub attributes: Vec<Attribute>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -54,7 +62,7 @@ pub enum ScriptContext {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Fragment {
-    pub nodes: Vec<AstNode>,
+    pub nodes: Vec<FragmentNode>,
 }
 
 /*
@@ -65,7 +73,8 @@ pub struct Fragment {
  *   preserveWhitespace?: boolean;
  *   namespace?: 'html' | 'svg' | 'mathml';
  *   css?: 'injected';
- *   customElement?: { tag?: string; shadow?: 'open' | 'none'; props?: Record<string, ...>; };
+ *   customElement?: { tag?: string; shadow?: 'open' | 'none'; props?: Record<string, ...>; extend?: ArrowFunctionExpression | Identifier; };
+ *   attributes: Attribute[];
  * }
  */
 #[derive(Debug, Clone, Serialize)]
@@ -77,6 +86,7 @@ pub struct SvelteOptions {
     pub namespace: Option<Namespace>,
     pub css: Option<CssMode>,
     pub custom_element: Option<CustomElementOptions>,
+    pub attributes: Vec<Attribute>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -96,6 +106,7 @@ pub struct CustomElementOptions {
     pub tag: Option<String>,
     pub shadow: Option<ShadowMode>,
     pub props: Option<HashMap<String, CustomElementProp>>,
+    pub extend: Option<Box<swc::Expr>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]

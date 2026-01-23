@@ -1,6 +1,9 @@
 use serde::Serialize;
 
-use crate::node::AstNode;
+use crate::attributes::Attribute;
+use crate::node::{CssBlockChild, SimpleSelector, StyleSheetChild};
+use crate::span::Span;
+use crate::text::Comment;
 
 /*
  * interface StyleSheet extends BaseNode {
@@ -12,7 +15,9 @@ use crate::node::AstNode;
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct StyleSheet {
-    pub children: Vec<AstNode>,
+    pub span: Span,
+    pub attributes: Vec<Attribute>,
+    pub children: Vec<StyleSheetChild>,
     pub content: CssContent,
 }
 
@@ -21,6 +26,7 @@ pub struct CssContent {
     pub start: u32,
     pub end: u32,
     pub styles: String,
+    pub comment: Option<Comment>,
 }
 
 /*
@@ -32,8 +38,9 @@ pub struct CssContent {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct CssRule {
-    pub prelude: Box<AstNode>,
-    pub block: Box<AstNode>,
+    pub span: Span,
+    pub prelude: SelectorList,
+    pub block: CssBlock,
 }
 
 /*
@@ -46,9 +53,10 @@ pub struct CssRule {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct CssAtrule {
+    pub span: Span,
     pub name: String,
     pub prelude: String,
-    pub block: Option<Box<AstNode>>,
+    pub block: Option<CssBlock>,
 }
 
 /*
@@ -59,7 +67,8 @@ pub struct CssAtrule {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct CssBlock {
-    pub children: Vec<AstNode>,
+    pub span: Span,
+    pub children: Vec<CssBlockChild>,
 }
 
 /*
@@ -71,6 +80,7 @@ pub struct CssBlock {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct CssDeclaration {
+    pub span: Span,
     pub property: String,
     pub value: String,
 }
@@ -83,7 +93,8 @@ pub struct CssDeclaration {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SelectorList {
-    pub children: Vec<AstNode>,
+    pub span: Span,
+    pub children: Vec<ComplexSelector>,
 }
 
 /*
@@ -94,7 +105,8 @@ pub struct SelectorList {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct ComplexSelector {
-    pub children: Vec<AstNode>,
+    pub span: Span,
+    pub children: Vec<RelativeSelector>,
 }
 
 /*
@@ -106,8 +118,9 @@ pub struct ComplexSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct RelativeSelector {
-    pub combinator: Option<Box<AstNode>>,
-    pub selectors: Vec<AstNode>,
+    pub span: Span,
+    pub combinator: Option<CssCombinator>,
+    pub selectors: Vec<SimpleSelector>,
 }
 
 /*
@@ -118,6 +131,7 @@ pub struct RelativeSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct CssCombinator {
+    pub span: Span,
     pub name: String,
 }
 
@@ -129,6 +143,7 @@ pub struct CssCombinator {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct TypeSelector {
+    pub span: Span,
     pub name: String,
 }
 
@@ -140,6 +155,7 @@ pub struct TypeSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct IdSelector {
+    pub span: Span,
     pub name: String,
 }
 
@@ -151,6 +167,7 @@ pub struct IdSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct ClassSelector {
+    pub span: Span,
     pub name: String,
 }
 
@@ -165,6 +182,7 @@ pub struct ClassSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct AttributeSelector {
+    pub span: Span,
     pub name: String,
     pub matcher: Option<String>,
     pub value: Option<String>,
@@ -180,8 +198,9 @@ pub struct AttributeSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct PseudoClassSelector {
+    pub span: Span,
     pub name: String,
-    pub args: Option<Box<AstNode>>,
+    pub args: Option<Box<SelectorList>>,
 }
 
 /*
@@ -192,6 +211,7 @@ pub struct PseudoClassSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct PseudoElementSelector {
+    pub span: Span,
     pub name: String,
 }
 
@@ -202,7 +222,10 @@ pub struct PseudoElementSelector {
  * }
  */
 #[derive(Debug, Clone, Serialize)]
-pub struct NestingSelector;
+pub struct NestingSelector {
+    pub span: Span,
+    pub name: String,
+}
 
 /*
  * interface Percentage extends BaseNode {
@@ -212,6 +235,7 @@ pub struct NestingSelector;
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Percentage {
+    pub span: Span,
     pub value: String,
 }
 
@@ -223,5 +247,6 @@ pub struct Percentage {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Nth {
+    pub span: Span,
     pub value: String,
 }

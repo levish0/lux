@@ -6,46 +6,27 @@ use crate::attributes::{
 };
 use crate::blocks::{AwaitBlock, EachBlock, IfBlock, KeyBlock, SnippetBlock};
 use crate::css::{
-    AttributeSelector, ClassSelector, ComplexSelector, CssAtrule, CssBlock, CssCombinator,
-    CssDeclaration, CssRule, IdSelector, NestingSelector, Nth, Percentage, PseudoClassSelector,
-    PseudoElementSelector, RelativeSelector, SelectorList, StyleSheet, TypeSelector,
+    AttributeSelector, ClassSelector, CssAtrule, CssDeclaration, CssRule, IdSelector,
+    NestingSelector, Nth, Percentage, PseudoClassSelector, PseudoElementSelector, TypeSelector,
 };
 use crate::elements::{
     Component, RegularElement, SlotElement, SvelteBody, SvelteBoundary, SvelteComponent,
     SvelteDocument, SvelteElement, SvelteFragment, SvelteHead, SvelteOptionsRaw, SvelteSelf,
     SvelteWindow, TitleElement,
 };
-use crate::root::{Fragment, Root, Script};
-use crate::span::Span;
 use crate::tags::{AttachTag, ConstTag, DebugTag, ExpressionTag, HtmlTag, RenderTag};
 use crate::text::{Comment, Text};
 
-/// All AST nodes share this structure: a source span + a kind discriminator.
+/*
+ * type FragmentNode = Text | Tag | ElementLike | Block | Comment;
+ */
 #[derive(Debug, Clone, Serialize)]
-pub struct AstNode {
-    pub span: Span,
-    pub kind: NodeKind,
-}
-
-impl AstNode {
-    pub fn new(span: Span, kind: NodeKind) -> Self {
-        Self { span, kind }
-    }
-}
-
-/// Discriminated union of all possible AST node types.
-#[derive(Debug, Clone, Serialize)]
-pub enum NodeKind {
-    // ── Root & Structure ──
-    Root(Root),
-    Fragment(Fragment),
-    Script(Script),
-
-    // ── Text ──
+pub enum FragmentNode {
+    // Text
     Text(Text),
     Comment(Comment),
 
-    // ── Tags ──
+    // Tags
     ExpressionTag(ExpressionTag),
     HtmlTag(HtmlTag),
     ConstTag(ConstTag),
@@ -53,14 +34,14 @@ pub enum NodeKind {
     RenderTag(RenderTag),
     AttachTag(AttachTag),
 
-    // ── Blocks ──
+    // Blocks
     IfBlock(IfBlock),
     EachBlock(EachBlock),
     AwaitBlock(AwaitBlock),
     KeyBlock(KeyBlock),
     SnippetBlock(SnippetBlock),
 
-    // ── Elements ──
+    // Elements
     RegularElement(RegularElement),
     Component(Component),
     SvelteElement(SvelteElement),
@@ -74,9 +55,14 @@ pub enum NodeKind {
     SvelteFragment(SvelteFragment),
     SvelteBoundary(SvelteBoundary),
     TitleElement(TitleElement),
-    SvelteOptions(SvelteOptionsRaw),
+    SvelteOptionsRaw(SvelteOptionsRaw),
+}
 
-    // ── Attributes & Directives ──
+/*
+ * type AttributeNode = Attribute | SpreadAttribute | Directive;
+ */
+#[derive(Debug, Clone, Serialize)]
+pub enum AttributeNode {
     Attribute(Attribute),
     SpreadAttribute(SpreadAttribute),
     BindDirective(BindDirective),
@@ -87,17 +73,34 @@ pub enum NodeKind {
     AnimateDirective(AnimateDirective),
     UseDirective(UseDirective),
     LetDirective(LetDirective),
+}
 
-    // ── CSS ──
-    StyleSheet(StyleSheet),
-    CssRule(CssRule),
-    CssAtrule(CssAtrule),
-    CssBlock(CssBlock),
-    CssDeclaration(CssDeclaration),
-    SelectorList(SelectorList),
-    ComplexSelector(ComplexSelector),
-    RelativeSelector(RelativeSelector),
-    CssCombinator(CssCombinator),
+/*
+ * type StyleSheetChild = Atrule | Rule;
+ */
+#[derive(Debug, Clone, Serialize)]
+pub enum StyleSheetChild {
+    Rule(CssRule),
+    Atrule(CssAtrule),
+}
+
+/*
+ * type CssBlockChild = Declaration | Rule | Atrule;
+ */
+#[derive(Debug, Clone, Serialize)]
+pub enum CssBlockChild {
+    Declaration(CssDeclaration),
+    Rule(CssRule),
+    Atrule(CssAtrule),
+}
+
+/*
+ * type SimpleSelector = TypeSelector | IdSelector | ClassSelector
+ *   | AttributeSelector | PseudoElementSelector | PseudoClassSelector
+ *   | Percentage | Nth | NestingSelector;
+ */
+#[derive(Debug, Clone, Serialize)]
+pub enum SimpleSelector {
     TypeSelector(TypeSelector),
     IdSelector(IdSelector),
     ClassSelector(ClassSelector),

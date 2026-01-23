@@ -1,6 +1,7 @@
 use serde::Serialize;
 use swc_ecma_ast as swc;
 
+use crate::span::Span;
 use crate::tags::ExpressionTag;
 use crate::text::Text;
 
@@ -13,6 +14,7 @@ use crate::text::Text;
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Attribute {
+    pub span: Span,
     pub name: String,
     pub value: AttributeValue,
 }
@@ -38,6 +40,7 @@ pub enum AttributeSequenceValue {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SpreadAttribute {
+    pub span: Span,
     pub expression: Box<swc::Expr>,
 }
 
@@ -50,6 +53,7 @@ pub struct SpreadAttribute {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct BindDirective {
+    pub span: Span,
     pub name: String,
     pub expression: Box<swc::Expr>,
 }
@@ -63,6 +67,7 @@ pub struct BindDirective {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct ClassDirective {
+    pub span: Span,
     pub name: String,
     pub expression: Box<swc::Expr>,
 }
@@ -77,6 +82,7 @@ pub struct ClassDirective {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct StyleDirective {
+    pub span: Span,
     pub name: String,
     pub value: AttributeValue,
     pub modifiers: Vec<StyleModifier>,
@@ -97,6 +103,7 @@ pub enum StyleModifier {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct OnDirective {
+    pub span: Span,
     pub name: String,
     pub expression: Option<Box<swc::Expr>>,
     pub modifiers: Vec<EventModifier>,
@@ -127,6 +134,7 @@ pub enum EventModifier {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct TransitionDirective {
+    pub span: Span,
     pub name: String,
     pub expression: Option<Box<swc::Expr>>,
     pub modifiers: Vec<TransitionModifier>,
@@ -149,6 +157,7 @@ pub enum TransitionModifier {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct AnimateDirective {
+    pub span: Span,
     pub name: String,
     pub expression: Option<Box<swc::Expr>>,
 }
@@ -162,6 +171,7 @@ pub struct AnimateDirective {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct UseDirective {
+    pub span: Span,
     pub name: String,
     pub expression: Option<Box<swc::Expr>>,
 }
@@ -175,6 +185,7 @@ pub struct UseDirective {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct LetDirective {
+    pub span: Span,
     pub name: String,
     pub expression: Option<Box<swc::Expr>>,
 }
