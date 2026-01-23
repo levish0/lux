@@ -3,12 +3,12 @@ use serde::Serialize;
 /// Source position span (byte offsets into the original .svelte source).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub struct Span {
-    pub start: u32,
-    pub end: u32,
+    pub start: usize,
+    pub end: usize,
 }
 
 impl Span {
-    pub fn new(start: u32, end: u32) -> Self {
+    pub fn new(start: usize, end: usize) -> Self {
         Self { start, end }
     }
 

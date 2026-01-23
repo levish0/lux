@@ -10,6 +10,4 @@ description = "svelte-ast"
 
 [dependencies]
 serde = { workspace = true }
-serde_json = { workspace = true }
 swc_ecma_ast = { workspace = true }
-swc_common = { workspace = true }

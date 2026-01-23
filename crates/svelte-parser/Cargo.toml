@@ -9,6 +9,10 @@ rust-version.workspace = true
 description = "svelte-parser"
 
 [dependencies]
+svelte-ast = { workspace = true }
 winnow = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+swc_ecma_parser = { workspace = true }
+swc_ecma_ast = { workspace = true }
+swc_common = { workspace = true }
