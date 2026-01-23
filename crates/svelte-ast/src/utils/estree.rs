@@ -78,10 +78,7 @@ pub fn serialize_idents<S: Serializer>(idents: &[swc::Ident], s: S) -> Result<S:
 }
 
 /// Serialize a `swc::Program` in ESTree format.
-pub fn serialize_program<S: Serializer>(
-    program: &swc::Program,
-    s: S,
-) -> Result<S::Ok, S::Error> {
+pub fn serialize_program<S: Serializer>(program: &swc::Program, s: S) -> Result<S::Ok, S::Error> {
     let value = serde_json::to_value(program).map_err(S::Error::custom)?;
     let transformed = transform_value(value);
     transformed.serialize(s)
@@ -118,7 +115,10 @@ impl<'a> Serialize for ProgramWithComments<'a> {
         // Program.start/end should be the content boundaries (between > and </script>)
         if let Value::Object(ref mut obj) = transformed {
             if self.content_start > 0 || self.content_end > 0 {
-                obj.insert("start".to_string(), Value::Number(self.content_start.into()));
+                obj.insert(
+                    "start".to_string(),
+                    Value::Number(self.content_start.into()),
+                );
                 obj.insert("end".to_string(), Value::Number(self.content_end.into()));
             }
         }
@@ -133,7 +133,9 @@ impl<'a> Serialize for ProgramWithComments<'a> {
 
                 if body_is_empty {
                     // No statements: all comments are trailingComments
-                    let comments_val: Vec<Value> = self.comments.iter()
+                    let comments_val: Vec<Value> = self
+                        .comments
+                        .iter()
                         .map(|c| serde_json::to_value(c).map_err(S::Error::custom))
                         .collect::<Result<_, _>>()?;
                     obj.insert("trailingComments".to_string(), Value::Array(comments_val));
@@ -233,7 +235,8 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                 // Add raw field from value
                 if let Some(Value::Bool(b)) = obj.get("value") {
                     let raw = if *b { "true" } else { "false" };
-                    obj.entry("raw".to_string()).or_insert(Value::String(raw.to_string()));
+                    obj.entry("raw".to_string())
+                        .or_insert(Value::String(raw.to_string()));
                 }
             }
             "NullLiteral" => {
@@ -246,14 +249,23 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
             }
             "RegExpLiteral" => {
                 obj.insert("type".to_string(), Value::String("Literal".to_string()));
-                let pattern = obj.remove("pattern").and_then(|v| v.as_str().map(String::from)).unwrap_or_default();
-                let flags = obj.remove("flags").and_then(|v| v.as_str().map(String::from)).unwrap_or_default();
+                let pattern = obj
+                    .remove("pattern")
+                    .and_then(|v| v.as_str().map(String::from))
+                    .unwrap_or_default();
+                let flags = obj
+                    .remove("flags")
+                    .and_then(|v| v.as_str().map(String::from))
+                    .unwrap_or_default();
                 obj.insert("value".to_string(), Value::Object(Map::new()));
                 let mut regex = Map::new();
                 regex.insert("pattern".to_string(), Value::String(pattern.clone()));
                 regex.insert("flags".to_string(), Value::String(flags.clone()));
                 obj.insert("regex".to_string(), Value::Object(regex));
-                obj.insert("raw".to_string(), Value::String(format!("/{}/{}", pattern, flags)));
+                obj.insert(
+                    "raw".to_string(),
+                    Value::String(format!("/{}/{}", pattern, flags)),
+                );
             }
 
             // --- Expressions ---
@@ -266,7 +278,8 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                     obj.insert("arguments".to_string(), unwrapped);
                 }
                 // ESTree requires optional field
-                obj.entry("optional".to_string()).or_insert(Value::Bool(is_optional));
+                obj.entry("optional".to_string())
+                    .or_insert(Value::Bool(is_optional));
                 // Remove null optional fields
                 remove_if_null(&mut obj, "typeArguments");
                 remove_if_null(&mut obj, "typeParameters");
@@ -324,9 +337,7 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
             }
             "ParenthesisExpression" | "ParenExpr" => {
                 // Not a valid ESTree type - unwrap to inner expression
-                if let Some(inner) = obj.remove("expression")
-                    .or_else(|| obj.remove("expr"))
-                {
+                if let Some(inner) = obj.remove("expression").or_else(|| obj.remove("expr")) {
                     return transform_value(inner);
                 }
             }
@@ -528,14 +539,20 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                 let get_start = |val: &Value| -> Option<Value> {
                     val.as_object().and_then(|o| {
                         o.get("start").cloned().or_else(|| {
-                            o.get("span").and_then(|s| s.as_object()).and_then(|s| s.get("start")).cloned()
+                            o.get("span")
+                                .and_then(|s| s.as_object())
+                                .and_then(|s| s.get("start"))
+                                .cloned()
                         })
                     })
                 };
                 let get_end = |val: &Value| -> Option<Value> {
                     val.as_object().and_then(|o| {
                         o.get("end").cloned().or_else(|| {
-                            o.get("span").and_then(|s| s.as_object()).and_then(|s| s.get("end")).cloned()
+                            o.get("span")
+                                .and_then(|s| s.as_object())
+                                .and_then(|s| s.get("end"))
+                                .cloned()
                         })
                     })
                 };
@@ -549,7 +566,10 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                         Some(default_expr) => {
                             // Has default: value = AssignmentPattern { left: key, right: default }
                             let mut assign_pat = Map::new();
-                            assign_pat.insert("type".to_string(), Value::String("AssignmentPattern".to_string()));
+                            assign_pat.insert(
+                                "type".to_string(),
+                                Value::String("AssignmentPattern".to_string()),
+                            );
                             assign_pat.insert("left".to_string(), key_val.clone());
                             assign_pat.insert("right".to_string(), default_expr.clone());
                             // Span: start from key, end from default
@@ -597,7 +617,10 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                 }
             }
             "ExportNamedDeclaration" | "ExportDeclaration" => {
-                obj.insert("type".to_string(), Value::String("ExportNamedDeclaration".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("ExportNamedDeclaration".to_string()),
+                );
                 if let Some(decl) = obj.remove("decl") {
                     obj.insert("declaration".to_string(), decl);
                 }
@@ -605,17 +628,26 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
 
             // --- TypeScript: Ts* → TS* ---
             "TsTypeAnnotation" => {
-                obj.insert("type".to_string(), Value::String("TSTypeAnnotation".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSTypeAnnotation".to_string()),
+                );
                 if let Some(ta) = obj.remove("typeAnnotation") {
                     obj.insert("typeAnnotation".to_string(), ta);
                 }
             }
             "TsTypeReference" => {
-                obj.insert("type".to_string(), Value::String("TSTypeReference".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSTypeReference".to_string()),
+                );
             }
             "TsKeywordType" => {
                 // {type: "TsKeywordType", kind: "number"} → {type: "TSNumberKeyword"}
-                let kind = obj.remove("kind").and_then(|v| v.as_str().map(String::from)).unwrap_or_default();
+                let kind = obj
+                    .remove("kind")
+                    .and_then(|v| v.as_str().map(String::from))
+                    .unwrap_or_default();
                 let ts_type = match kind.as_str() {
                     "number" => "TSNumberKeyword",
                     "string" => "TSStringKeyword",
@@ -644,118 +676,208 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                 obj.insert("type".to_string(), Value::String("TSUnionType".to_string()));
             }
             "TsIntersectionType" => {
-                obj.insert("type".to_string(), Value::String("TSIntersectionType".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSIntersectionType".to_string()),
+                );
             }
             "TsFunctionType" => {
-                obj.insert("type".to_string(), Value::String("TSFunctionType".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSFunctionType".to_string()),
+                );
             }
             "TsTypeLiteral" => {
-                obj.insert("type".to_string(), Value::String("TSTypeLiteral".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSTypeLiteral".to_string()),
+                );
                 if let Some(members) = obj.remove("members") {
                     obj.insert("members".to_string(), members);
                 }
             }
             "TsPropertySignature" => {
-                obj.insert("type".to_string(), Value::String("TSPropertySignature".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSPropertySignature".to_string()),
+                );
             }
             "TsMethodSignature" => {
-                obj.insert("type".to_string(), Value::String("TSMethodSignature".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSMethodSignature".to_string()),
+                );
             }
             "TsTypeAliasDeclaration" | "TsTypeAliasDecl" => {
-                obj.insert("type".to_string(), Value::String("TSTypeAliasDeclaration".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSTypeAliasDeclaration".to_string()),
+                );
                 obj.remove("declare");
             }
             "TsInterfaceDeclaration" | "TsInterfaceDecl" => {
-                obj.insert("type".to_string(), Value::String("TSInterfaceDeclaration".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSInterfaceDeclaration".to_string()),
+                );
                 obj.remove("declare");
             }
             "TsAsExpression" => {
-                obj.insert("type".to_string(), Value::String("TSAsExpression".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSAsExpression".to_string()),
+                );
             }
             "TsTypeAssertion" => {
-                obj.insert("type".to_string(), Value::String("TSTypeAssertion".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSTypeAssertion".to_string()),
+                );
             }
             "TsNonNullExpression" => {
-                obj.insert("type".to_string(), Value::String("TSNonNullExpression".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSNonNullExpression".to_string()),
+                );
             }
             "TsParameterProperty" => {
-                obj.insert("type".to_string(), Value::String("TSParameterProperty".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSParameterProperty".to_string()),
+                );
             }
             "TsQualifiedName" => {
-                obj.insert("type".to_string(), Value::String("TSQualifiedName".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSQualifiedName".to_string()),
+                );
             }
             "TsTupleType" => {
                 obj.insert("type".to_string(), Value::String("TSTupleType".to_string()));
             }
             "TsLiteralType" => {
-                obj.insert("type".to_string(), Value::String("TSLiteralType".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSLiteralType".to_string()),
+                );
             }
             "TsTypeQuery" => {
                 obj.insert("type".to_string(), Value::String("TSTypeQuery".to_string()));
             }
             "TsTypePredicate" => {
-                obj.insert("type".to_string(), Value::String("TSTypePredicate".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSTypePredicate".to_string()),
+                );
             }
             "TsConditionalType" => {
-                obj.insert("type".to_string(), Value::String("TSConditionalType".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSConditionalType".to_string()),
+                );
             }
             "TsIndexedAccessType" => {
-                obj.insert("type".to_string(), Value::String("TSIndexedAccessType".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSIndexedAccessType".to_string()),
+                );
             }
             "TsMappedType" => {
-                obj.insert("type".to_string(), Value::String("TSMappedType".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSMappedType".to_string()),
+                );
             }
             "TsEnumDeclaration" | "TsEnumDecl" => {
-                obj.insert("type".to_string(), Value::String("TSEnumDeclaration".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSEnumDeclaration".to_string()),
+                );
                 obj.remove("declare");
             }
             "TsModuleDeclaration" | "TsModuleDecl" => {
-                obj.insert("type".to_string(), Value::String("TSModuleDeclaration".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSModuleDeclaration".to_string()),
+                );
                 obj.remove("declare");
             }
             "TsParenthesizedType" => {
-                obj.insert("type".to_string(), Value::String("TSParenthesizedType".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSParenthesizedType".to_string()),
+                );
             }
             "TsTypeOperator" => {
-                obj.insert("type".to_string(), Value::String("TSTypeOperator".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSTypeOperator".to_string()),
+                );
             }
             "TsImportType" => {
-                obj.insert("type".to_string(), Value::String("TSImportType".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSImportType".to_string()),
+                );
             }
             "TsRestType" => {
                 obj.insert("type".to_string(), Value::String("TSRestType".to_string()));
             }
             "TsOptionalType" => {
-                obj.insert("type".to_string(), Value::String("TSOptionalType".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSOptionalType".to_string()),
+                );
             }
             "TsInferType" => {
                 obj.insert("type".to_string(), Value::String("TSInferType".to_string()));
             }
             "TsTypeParameterDeclaration" => {
-                obj.insert("type".to_string(), Value::String("TSTypeParameterDeclaration".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSTypeParameterDeclaration".to_string()),
+                );
             }
             "TsTypeParameterInstantiation" => {
-                obj.insert("type".to_string(), Value::String("TSTypeParameterInstantiation".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSTypeParameterInstantiation".to_string()),
+                );
             }
             "TsTypeParameter" => {
-                obj.insert("type".to_string(), Value::String("TSTypeParameter".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSTypeParameter".to_string()),
+                );
             }
             "TsExpressionWithTypeArguments" => {
-                obj.insert("type".to_string(), Value::String("TSExpressionWithTypeArguments".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSExpressionWithTypeArguments".to_string()),
+                );
             }
             "TsSatisfiesExpression" => {
-                obj.insert("type".to_string(), Value::String("TSSatisfiesExpression".to_string()));
+                obj.insert(
+                    "type".to_string(),
+                    Value::String("TSSatisfiesExpression".to_string()),
+                );
             }
 
             // --- Module types ---
             "Module" => {
                 obj.insert("type".to_string(), Value::String("Program".to_string()));
-                obj.insert("sourceType".to_string(), Value::String("module".to_string()));
+                obj.insert(
+                    "sourceType".to_string(),
+                    Value::String("module".to_string()),
+                );
                 obj.remove("interpreter");
             }
             "Script" => {
                 obj.insert("type".to_string(), Value::String("Program".to_string()));
-                obj.insert("sourceType".to_string(), Value::String("script".to_string()));
+                obj.insert(
+                    "sourceType".to_string(),
+                    Value::String("script".to_string()),
+                );
                 obj.remove("interpreter");
             }
 
@@ -795,12 +917,15 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
     if result.get("type").and_then(|v| v.as_str()) == Some("ArrowFunctionExpression") {
         result.entry("id".to_string()).or_insert(Value::Null);
         // expression: true if body is not a BlockStatement
-        let is_block = result.get("body")
+        let is_block = result
+            .get("body")
             .and_then(|b| b.as_object())
             .and_then(|b| b.get("type"))
             .and_then(|t| t.as_str())
             == Some("BlockStatement");
-        result.entry("expression".to_string()).or_insert(Value::Bool(!is_block));
+        result
+            .entry("expression".to_string())
+            .or_insert(Value::Bool(!is_block));
     }
 
     Value::Object(result)
@@ -817,33 +942,39 @@ fn remove_if_null(obj: &mut Map<String, Value>, key: &str) {
 fn unwrap_expr_or_spread(args: Value) -> Value {
     match args {
         Value::Array(arr) => {
-            Value::Array(arr.into_iter().map(|item| {
-                if let Value::Object(mut obj) = item {
-                    // ExprOrSpread has expr/expression + spread fields, no type field
-                    if obj.contains_key("spread") && !obj.contains_key("type") {
-                        let spread = obj.remove("spread");
-                        let expr = obj.remove("expr")
-                            .or_else(|| obj.remove("expression"));
-                        if let Some(expr_val) = expr {
-                            if spread.is_some() && spread != Some(Value::Null) {
-                                // Spread: wrap in SpreadElement
-                                let mut spread_obj = Map::new();
-                                spread_obj.insert("type".to_string(), Value::String("SpreadElement".to_string()));
-                                spread_obj.insert("argument".to_string(), expr_val);
-                                Value::Object(spread_obj)
+            Value::Array(
+                arr.into_iter()
+                    .map(|item| {
+                        if let Value::Object(mut obj) = item {
+                            // ExprOrSpread has expr/expression + spread fields, no type field
+                            if obj.contains_key("spread") && !obj.contains_key("type") {
+                                let spread = obj.remove("spread");
+                                let expr = obj.remove("expr").or_else(|| obj.remove("expression"));
+                                if let Some(expr_val) = expr {
+                                    if spread.is_some() && spread != Some(Value::Null) {
+                                        // Spread: wrap in SpreadElement
+                                        let mut spread_obj = Map::new();
+                                        spread_obj.insert(
+                                            "type".to_string(),
+                                            Value::String("SpreadElement".to_string()),
+                                        );
+                                        spread_obj.insert("argument".to_string(), expr_val);
+                                        Value::Object(spread_obj)
+                                    } else {
+                                        expr_val
+                                    }
+                                } else {
+                                    Value::Object(obj)
+                                }
                             } else {
-                                expr_val
+                                Value::Object(obj)
                             }
                         } else {
-                            Value::Object(obj)
+                            item
                         }
-                    } else {
-                        Value::Object(obj)
-                    }
-                } else {
-                    item
-                }
-            }).collect())
+                    })
+                    .collect(),
+            )
         }
         other => other,
     }

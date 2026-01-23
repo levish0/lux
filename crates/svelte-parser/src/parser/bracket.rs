@@ -1,6 +1,6 @@
+use winnow::Result as ParseResult;
 use winnow::prelude::*;
 use winnow::token::take;
-use winnow::Result as ParseResult;
 
 use super::ParserInput;
 
@@ -35,11 +35,17 @@ pub fn find_matching_bracket(s: &str, open: char) -> Option<usize> {
                 match next {
                     Some(b'/') => {
                         // line comment - skip until newline
-                        i = s[i..].find('\n').map(|pos| i + pos + 1).unwrap_or(bytes.len());
+                        i = s[i..]
+                            .find('\n')
+                            .map(|pos| i + pos + 1)
+                            .unwrap_or(bytes.len());
                     }
                     Some(b'*') => {
                         // block comment - skip until */
-                        i = s[i + 2..].find("*/").map(|pos| i + 2 + pos + 2).unwrap_or(bytes.len());
+                        i = s[i + 2..]
+                            .find("*/")
+                            .map(|pos| i + 2 + pos + 2)
+                            .unwrap_or(bytes.len());
                     }
                     _ => {
                         i += 1;
@@ -99,10 +105,16 @@ pub fn find_keyword_at_depth_zero(s: &str, kw: &str) -> Option<usize> {
                 let next = bytes.get(i + 1).copied();
                 match next {
                     Some(b'/') => {
-                        i = s[i..].find('\n').map(|pos| i + pos + 1).unwrap_or(bytes.len());
+                        i = s[i..]
+                            .find('\n')
+                            .map(|pos| i + pos + 1)
+                            .unwrap_or(bytes.len());
                     }
                     Some(b'*') => {
-                        i = s[i + 2..].find("*/").map(|pos| i + 2 + pos + 2).unwrap_or(bytes.len());
+                        i = s[i + 2..]
+                            .find("*/")
+                            .map(|pos| i + 2 + pos + 2)
+                            .unwrap_or(bytes.len());
                     }
                     _ => {
                         i += 1;
@@ -153,10 +165,16 @@ pub fn find_char_at_depth_zero(s: &str, chars: &[char]) -> Option<usize> {
                 let next = bytes.get(i + 1).copied();
                 match next {
                     Some(b'/') => {
-                        i = s[i..].find('\n').map(|pos| i + pos + 1).unwrap_or(bytes.len());
+                        i = s[i..]
+                            .find('\n')
+                            .map(|pos| i + pos + 1)
+                            .unwrap_or(bytes.len());
                     }
                     Some(b'*') => {
-                        i = s[i + 2..].find("*/").map(|pos| i + 2 + pos + 2).unwrap_or(bytes.len());
+                        i = s[i + 2..]
+                            .find("*/")
+                            .map(|pos| i + 2 + pos + 2)
+                            .unwrap_or(bytes.len());
                     }
                     _ => {
                         i += 1;
@@ -216,8 +234,7 @@ pub fn scan_expression_content<'i>(input: &mut ParserInput<'i>) -> ParseResult<&
     let _: &str = take(1usize).parse_next(input)?;
 
     let remaining: &str = &input.input;
-    let end = find_matching_bracket(remaining, '{')
-        .ok_or(winnow::error::ContextError::new())?;
+    let end = find_matching_bracket(remaining, '{').ok_or(winnow::error::ContextError::new())?;
 
     // Take the content (everything before the closing })
     let content: &str = take(end).parse_next(input)?;
@@ -245,8 +262,8 @@ pub fn read_until_keyword_balanced<'a, 'i>(
     keyword: &'a str,
 ) -> ParseResult<&'i str> {
     let remaining: &str = &input.input;
-    let end = find_keyword_at_depth_zero(remaining, keyword)
-        .ok_or(winnow::error::ContextError::new())?;
+    let end =
+        find_keyword_at_depth_zero(remaining, keyword).ok_or(winnow::error::ContextError::new())?;
 
     take(end).parse_next(input)
 }
@@ -258,8 +275,7 @@ pub fn read_until_chars_balanced<'i>(
     chars: &[char],
 ) -> ParseResult<&'i str> {
     let remaining: &str = &input.input;
-    let end = find_char_at_depth_zero(remaining, chars)
-        .ok_or(winnow::error::ContextError::new())?;
+    let end = find_char_at_depth_zero(remaining, chars).ok_or(winnow::error::ContextError::new())?;
 
     take(end).parse_next(input)
 }
@@ -288,10 +304,16 @@ pub fn find_matching_bracket_for_close_char(s: &str, close: char) -> Option<usiz
                 let next = bytes.get(i + 1).copied();
                 match next {
                     Some(b'/') => {
-                        i = s[i..].find('\n').map(|pos| i + pos + 1).unwrap_or(bytes.len());
+                        i = s[i..]
+                            .find('\n')
+                            .map(|pos| i + pos + 1)
+                            .unwrap_or(bytes.len());
                     }
                     Some(b'*') => {
-                        i = s[i + 2..].find("*/").map(|pos| i + 2 + pos + 2).unwrap_or(bytes.len());
+                        i = s[i + 2..]
+                            .find("*/")
+                            .map(|pos| i + 2 + pos + 2)
+                            .unwrap_or(bytes.len());
                     }
                     _ => {
                         i += 1;

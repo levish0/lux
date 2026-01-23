@@ -5,11 +5,11 @@ use svelte_ast::elements::{
 use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::Fragment;
 use svelte_ast::span::Span;
+use winnow::Result as ParseResult;
 use winnow::combinator::{opt, peek, repeat_till};
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::{literal, take_while};
-use winnow::Result as ParseResult;
 
 use super::ParserInput;
 use super::attribute::attribute_parser;
@@ -30,9 +30,9 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
     let attributes = parse_attributes(parser_input)?;
 
     // Check if this element has shadowrootmode attribute
-    let has_shadowrootmode = attributes.iter().any(|attr| {
-        matches!(attr, AttributeNode::Attribute(a) if a.name == "shadowrootmode")
-    });
+    let has_shadowrootmode = attributes
+        .iter()
+        .any(|attr| matches!(attr, AttributeNode::Attribute(a) if a.name == "shadowrootmode"));
 
     // check self-closing /> or >
     let self_closing = opt(literal("/")).parse_next(parser_input)?.is_some();
@@ -45,14 +45,13 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
         Fragment { nodes: vec![] }
     } else {
         // Push this element onto stack before parsing children
-        parser_input.state.push_element(name.clone(), has_shadowrootmode);
+        parser_input
+            .state
+            .push_element(name.clone(), has_shadowrootmode);
 
-        let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
-            0..,
-            fragment_node_parser,
-            closing_tag_parser(&name),
-        )
-        .parse_next(parser_input)?;
+        let (nodes, _): (Vec<FragmentNode>, _) =
+            repeat_till(0.., fragment_node_parser, closing_tag_parser(&name))
+                .parse_next(parser_input)?;
 
         // Pop element from stack after parsing children
         parser_input.state.pop_element();
@@ -63,7 +62,14 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
     let end = parser_input.input.previous_token_end();
     let span = Span::new(start, end);
 
-    Ok(classify_element(&name, name_loc, attributes, fragment, span, parent_is_shadowroot || has_shadowrootmode))
+    Ok(classify_element(
+        &name,
+        name_loc,
+        attributes,
+        fragment,
+        span,
+        parent_is_shadowroot || has_shadowrootmode,
+    ))
 }
 
 fn parse_attributes(parser_input: &mut ParserInput) -> ParseResult<Vec<AttributeNode>> {

@@ -6,7 +6,11 @@ use winnow::Result as ParseResult;
 use super::skip_css_whitespace_and_comments;
 
 /// Parse a selector list (comma-separated complex selectors).
-pub fn parse_selector_list(source: &str, pos: &mut usize, offset: u32) -> ParseResult<SelectorList> {
+pub fn parse_selector_list(
+    source: &str,
+    pos: &mut usize,
+    offset: u32,
+) -> ParseResult<SelectorList> {
     let start = *pos;
     let mut children = Vec::new();
 
@@ -29,7 +33,11 @@ pub fn parse_selector_list(source: &str, pos: &mut usize, offset: u32) -> ParseR
 }
 
 /// Parse a complex selector (sequence of relative selectors with combinators).
-fn parse_complex_selector(source: &str, pos: &mut usize, offset: u32) -> ParseResult<ComplexSelector> {
+fn parse_complex_selector(
+    source: &str,
+    pos: &mut usize,
+    offset: u32,
+) -> ParseResult<ComplexSelector> {
     let start = *pos;
     let mut children = Vec::new();
 
@@ -69,7 +77,10 @@ fn parse_complex_selector(source: &str, pos: &mut usize, offset: u32) -> ParseRe
 
             let mut rel = parse_relative_selector(source, pos, offset, false)?;
             rel.combinator = Some(CssCombinator {
-                span: Span::new(comb_start + offset as usize, comb_start + comb_name.len() + offset as usize),
+                span: Span::new(
+                    comb_start + offset as usize,
+                    comb_start + comb_name.len() + offset as usize,
+                ),
                 name: comb_name,
             });
             children.push(rel);
@@ -94,7 +105,12 @@ fn parse_complex_selector(source: &str, pos: &mut usize, offset: u32) -> ParseRe
 }
 
 /// Parse a relative selector (sequence of simple selectors).
-fn parse_relative_selector(source: &str, pos: &mut usize, offset: u32, _is_first: bool) -> ParseResult<RelativeSelector> {
+fn parse_relative_selector(
+    source: &str,
+    pos: &mut usize,
+    offset: u32,
+    _is_first: bool,
+) -> ParseResult<RelativeSelector> {
     let start = *pos;
     let mut selectors = Vec::new();
 
@@ -104,8 +120,13 @@ fn parse_relative_selector(source: &str, pos: &mut usize, offset: u32, _is_first
         }
         let ch = source.as_bytes()[*pos];
         // Stop conditions
-        if ch == b'{' || ch == b',' || ch == b')' || ch.is_ascii_whitespace()
-            || ch == b'>' || ch == b'+' || ch == b'~'
+        if ch == b'{'
+            || ch == b','
+            || ch == b')'
+            || ch.is_ascii_whitespace()
+            || ch == b'>'
+            || ch == b'+'
+            || ch == b'~'
         {
             break;
         }
@@ -125,7 +146,11 @@ fn parse_relative_selector(source: &str, pos: &mut usize, offset: u32, _is_first
 }
 
 /// Parse a single simple selector.
-fn parse_simple_selector(source: &str, pos: &mut usize, offset: u32) -> ParseResult<SimpleSelector> {
+fn parse_simple_selector(
+    source: &str,
+    pos: &mut usize,
+    offset: u32,
+) -> ParseResult<SimpleSelector> {
     let bytes = source.as_bytes();
     let start = *pos;
 
@@ -192,7 +217,11 @@ fn parse_simple_selector(source: &str, pos: &mut usize, offset: u32) -> ParseRes
 }
 
 /// Parse an attribute selector: [name], [name=value], [name~=value i], etc.
-fn parse_attribute_selector(source: &str, pos: &mut usize, offset: u32) -> ParseResult<SimpleSelector> {
+fn parse_attribute_selector(
+    source: &str,
+    pos: &mut usize,
+    offset: u32,
+) -> ParseResult<SimpleSelector> {
     let start = *pos;
     *pos += 1; // consume [
 
@@ -252,7 +281,11 @@ fn parse_attribute_selector(source: &str, pos: &mut usize, offset: u32) -> Parse
 }
 
 /// Parse a pseudo-class selector: :name or :name(args)
-fn parse_pseudo_class_selector(source: &str, pos: &mut usize, offset: u32) -> ParseResult<SimpleSelector> {
+fn parse_pseudo_class_selector(
+    source: &str,
+    pos: &mut usize,
+    offset: u32,
+) -> ParseResult<SimpleSelector> {
     let start = *pos;
     *pos += 1; // consume :
 
@@ -270,7 +303,11 @@ fn parse_pseudo_class_selector(source: &str, pos: &mut usize, offset: u32) -> Pa
             // Try to parse as selector list
             let mut inner_pos = 0;
             let inner_source = args_content.trim();
-            match parse_selector_list(inner_source, &mut inner_pos, offset + (start as u32) + 1 + name.len() as u32 + 1) {
+            match parse_selector_list(
+                inner_source,
+                &mut inner_pos,
+                offset + (start as u32) + 1 + name.len() as u32 + 1,
+            ) {
                 Ok(list) if inner_pos >= inner_source.len() => Some(Box::new(list)),
                 _ => {
                     // Treat as Nth syntax - wrap in a single pseudo selector with Nth child
@@ -310,7 +347,11 @@ fn parse_pseudo_class_selector(source: &str, pos: &mut usize, offset: u32) -> Pa
 }
 
 /// Parse a pseudo-element selector: ::name or ::name(args)
-fn parse_pseudo_element_selector(source: &str, pos: &mut usize, offset: u32) -> ParseResult<SimpleSelector> {
+fn parse_pseudo_element_selector(
+    source: &str,
+    pos: &mut usize,
+    offset: u32,
+) -> ParseResult<SimpleSelector> {
     let start = *pos;
     *pos += 2; // consume ::
 
@@ -323,10 +364,12 @@ fn parse_pseudo_element_selector(source: &str, pos: &mut usize, offset: u32) -> 
         let _args = read_balanced_parens_content(source, pos);
     }
 
-    Ok(SimpleSelector::PseudoElementSelector(PseudoElementSelector {
-        span: Span::new(start + offset as usize, *pos + offset as usize),
-        name,
-    }))
+    Ok(SimpleSelector::PseudoElementSelector(
+        PseudoElementSelector {
+            span: Span::new(start + offset as usize, *pos + offset as usize),
+            name,
+        },
+    ))
 }
 
 /// Read content between balanced parentheses.

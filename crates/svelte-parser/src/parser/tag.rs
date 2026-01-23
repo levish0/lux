@@ -2,11 +2,11 @@ use svelte_ast::node::FragmentNode;
 use svelte_ast::span::Span;
 use svelte_ast::tags::{AttachTag, ConstTag, DebugTag, ExpressionTag, HtmlTag, RenderTag};
 use swc_ecma_ast as swc;
+use winnow::Result as ParseResult;
 use winnow::combinator::{opt, peek};
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::{literal, take_while};
-use winnow::Result as ParseResult;
 
 use super::ParserInput;
 use super::bracket::read_until_close_brace;
@@ -73,9 +73,10 @@ fn debug_tag_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult
     if opt(peek(literal("}"))).parse_next(parser_input)?.is_none() {
         loop {
             take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
-            let name: &str =
-                take_while(1.., |c: char| c.is_ascii_alphanumeric() || c == '_' || c == '$')
-                    .parse_next(parser_input)?;
+            let name: &str = take_while(1.., |c: char| {
+                c.is_ascii_alphanumeric() || c == '_' || c == '$'
+            })
+            .parse_next(parser_input)?;
             identifiers.push(swc::Ident::new(
                 name.into(),
                 swc_common::DUMMY_SP,

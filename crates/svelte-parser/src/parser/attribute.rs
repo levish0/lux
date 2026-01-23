@@ -8,11 +8,11 @@ use svelte_ast::span::Span;
 use svelte_ast::tags::{AttachTag, ExpressionTag};
 use svelte_ast::text::Text;
 use swc_ecma_ast as swc;
+use winnow::Result as ParseResult;
 use winnow::combinator::{dispatch, opt, peek};
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::{any, literal, take_while};
-use winnow::Result as ParseResult;
 
 use super::ParserInput;
 use super::bracket::read_until_close_brace;
@@ -65,8 +65,10 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
     }
 
     // Shorthand: {name} is equivalent to name={name}
-    let name: &str = take_while(1.., |c: char| c.is_ascii_alphanumeric() || c == '_' || c == '$')
-        .parse_next(parser_input)?;
+    let name: &str = take_while(1.., |c: char| {
+        c.is_ascii_alphanumeric() || c == '_' || c == '$'
+    })
+    .parse_next(parser_input)?;
     literal("}").parse_next(parser_input)?;
     let end = parser_input.previous_token_end();
 
@@ -111,13 +113,13 @@ fn named_attribute_parser(parser_input: &mut ParserInput) -> ParseResult<Attribu
             "class" => return parse_class_directive(parser_input, start, rest, name_loc),
             "style" => return parse_style_directive(parser_input, start, rest, name_loc),
             "transition" => {
-                return parse_transition_directive(parser_input, start, rest, name_loc, true, true)
+                return parse_transition_directive(parser_input, start, rest, name_loc, true, true);
             }
             "in" => {
-                return parse_transition_directive(parser_input, start, rest, name_loc, true, false)
+                return parse_transition_directive(parser_input, start, rest, name_loc, true, false);
             }
             "out" => {
-                return parse_transition_directive(parser_input, start, rest, name_loc, false, true)
+                return parse_transition_directive(parser_input, start, rest, name_loc, false, true);
             }
             "animate" => return parse_animate_directive(parser_input, start, rest, name_loc),
             "use" => return parse_use_directive(parser_input, start, rest, name_loc),

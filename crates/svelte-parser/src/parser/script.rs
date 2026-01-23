@@ -7,11 +7,11 @@ use swc_common::comments::{Comment, CommentKind, SingleThreadedComments};
 use swc_common::input::StringInput;
 use swc_ecma_ast as swc;
 use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
+use winnow::Result as ParseResult;
 use winnow::combinator::peek;
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::{any, literal, take_while};
-use winnow::Result as ParseResult;
 
 use super::ParserInput;
 use super::attribute::attribute_parser;
@@ -57,7 +57,6 @@ pub fn script_parser(parser_input: &mut ParserInput) -> ParseResult<Script> {
         attributes,
     })
 }
-
 
 fn parse_script_attributes(parser_input: &mut ParserInput) -> ParseResult<Vec<AttributeNode>> {
     let mut attributes = Vec::new();
@@ -109,7 +108,11 @@ fn read_until_closing_script(parser_input: &mut ParserInput) -> ParseResult<Stri
     Ok(buf)
 }
 
-fn swc_parse_program(source: &str, ts: bool, offset: u32) -> ParseResult<(swc::Program, Vec<JsComment>)> {
+fn swc_parse_program(
+    source: &str,
+    ts: bool,
+    offset: u32,
+) -> ParseResult<(swc::Program, Vec<JsComment>)> {
     let syntax = if ts {
         Syntax::Typescript(TsSyntax {
             tsx: true,
@@ -123,7 +126,11 @@ fn swc_parse_program(source: &str, ts: bool, offset: u32) -> ParseResult<(swc::P
     };
 
     let comments = SingleThreadedComments::default();
-    let input = StringInput::new(source, BytePos(offset), BytePos(offset + source.len() as u32));
+    let input = StringInput::new(
+        source,
+        BytePos(offset),
+        BytePos(offset + source.len() as u32),
+    );
     let mut parser = swc_ecma_parser::Parser::new(syntax, input, Some(&comments));
 
     let module = parser.parse_module().map_err(|e| {

@@ -1,5 +1,5 @@
-use swc_common::input::StringInput;
 use swc_common::BytePos;
+use swc_common::input::StringInput;
 use swc_ecma_ast as swc;
 use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
 use winnow::Result as ParseResult;
@@ -135,10 +135,7 @@ pub fn parse_param_list(source: &str, ts: bool) -> ParseResult<Vec<swc::Pat>> {
 /// Convert an expression AST node to a pattern (for destructuring fallback).
 pub fn expr_to_pat(expr: swc::Expr) -> swc::Pat {
     match expr {
-        swc::Expr::Ident(id) => swc::Pat::Ident(swc::BindingIdent {
-            id,
-            type_ann: None,
-        }),
+        swc::Expr::Ident(id) => swc::Pat::Ident(swc::BindingIdent { id, type_ann: None }),
         swc::Expr::Array(arr) => swc::Pat::Array(swc::ArrayPat {
             span: arr.span,
             elems: arr
@@ -159,10 +156,7 @@ pub fn expr_to_pat(expr: swc::Expr) -> swc::Pat {
                         swc::Prop::Shorthand(id) => {
                             Some(swc::ObjectPatProp::Assign(swc::AssignPatProp {
                                 span: id.span,
-                                key: swc::BindingIdent {
-                                    id,
-                                    type_ann: None,
-                                },
+                                key: swc::BindingIdent { id, type_ann: None },
                                 value: None,
                             }))
                         }
@@ -174,14 +168,12 @@ pub fn expr_to_pat(expr: swc::Expr) -> swc::Pat {
                         }
                         _ => None,
                     },
-                    swc::PropOrSpread::Spread(s) => {
-                        Some(swc::ObjectPatProp::Rest(swc::RestPat {
-                            span: s.dot3_token,
-                            dot3_token: s.dot3_token,
-                            arg: Box::new(expr_to_pat(*s.expr)),
-                            type_ann: None,
-                        }))
-                    }
+                    swc::PropOrSpread::Spread(s) => Some(swc::ObjectPatProp::Rest(swc::RestPat {
+                        span: s.dot3_token,
+                        dot3_token: s.dot3_token,
+                        arg: Box::new(expr_to_pat(*s.expr)),
+                        type_ann: None,
+                    })),
                 })
                 .collect(),
             optional: false,

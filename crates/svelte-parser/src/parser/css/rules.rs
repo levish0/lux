@@ -7,7 +7,11 @@ use super::selectors::parse_selector_list;
 use super::skip_css_whitespace_and_comments;
 
 /// Parse a single stylesheet child (Rule or Atrule).
-pub fn css_child_parser(source: &str, pos: &mut usize, offset: u32) -> ParseResult<StyleSheetChild> {
+pub fn css_child_parser(
+    source: &str,
+    pos: &mut usize,
+    offset: u32,
+) -> ParseResult<StyleSheetChild> {
     let p = skip_css_whitespace_and_comments(source, *pos);
     *pos = p;
 
@@ -61,19 +65,31 @@ fn parse_atrule(source: &str, pos: &mut usize, offset: u32) -> ParseResult<CssAt
     while *pos < bytes.len() {
         match bytes[*pos] {
             b'{' if depth == 0 => break,
-            b'(' => { depth += 1; *pos += 1; }
-            b')' => { depth -= 1; *pos += 1; }
+            b'(' => {
+                depth += 1;
+                *pos += 1;
+            }
+            b')' => {
+                depth -= 1;
+                *pos += 1;
+            }
             b';' if depth == 0 => break,
             b'"' | b'\'' => {
                 let quote = bytes[*pos];
                 *pos += 1;
                 while *pos < bytes.len() && bytes[*pos] != quote {
-                    if bytes[*pos] == b'\\' { *pos += 1; }
+                    if bytes[*pos] == b'\\' {
+                        *pos += 1;
+                    }
                     *pos += 1;
                 }
-                if *pos < bytes.len() { *pos += 1; }
+                if *pos < bytes.len() {
+                    *pos += 1;
+                }
             }
-            _ => { *pos += 1; }
+            _ => {
+                *pos += 1;
+            }
         }
     }
     let prelude = source[prelude_start..*pos].trim().to_string();
@@ -146,8 +162,14 @@ fn is_nested_rule(source: &str, pos: usize) -> bool {
 
     while p < bytes.len() {
         match bytes[p] {
-            b'(' | b'[' => { depth += 1; }
-            b')' | b']' => { if depth > 0 { depth -= 1; } }
+            b'(' | b'[' => {
+                depth += 1;
+            }
+            b')' | b']' => {
+                if depth > 0 {
+                    depth -= 1;
+                }
+            }
             b'{' if depth == 0 => return true,
             b';' if depth == 0 => return false,
             b'}' if depth == 0 => return false,
@@ -156,7 +178,9 @@ fn is_nested_rule(source: &str, pos: usize) -> bool {
                 let quote = bytes[p];
                 p += 1;
                 while p < bytes.len() && bytes[p] != quote {
-                    if bytes[p] == b'\\' { p += 1; }
+                    if bytes[p] == b'\\' {
+                        p += 1;
+                    }
                     p += 1;
                 }
             }
@@ -193,18 +217,30 @@ fn parse_declaration(source: &str, pos: &mut usize, offset: u32) -> ParseResult<
             b'}' if depth == 0 => {
                 break;
             }
-            b'(' => { depth += 1; *pos += 1; }
-            b')' => { depth -= 1; *pos += 1; }
+            b'(' => {
+                depth += 1;
+                *pos += 1;
+            }
+            b')' => {
+                depth -= 1;
+                *pos += 1;
+            }
             b'"' | b'\'' => {
                 let quote = bytes[*pos];
                 *pos += 1;
                 while *pos < bytes.len() && bytes[*pos] != quote {
-                    if bytes[*pos] == b'\\' { *pos += 1; }
+                    if bytes[*pos] == b'\\' {
+                        *pos += 1;
+                    }
                     *pos += 1;
                 }
-                if *pos < bytes.len() { *pos += 1; }
+                if *pos < bytes.len() {
+                    *pos += 1;
+                }
             }
-            _ => { *pos += 1; }
+            _ => {
+                *pos += 1;
+            }
         }
     }
     let value = source[value_start..*pos].trim().to_string();

@@ -3,14 +3,16 @@ use svelte_ast::node::FragmentNode;
 use svelte_ast::root::Fragment;
 use svelte_ast::span::Span;
 use swc_ecma_ast as swc;
+use winnow::Result as ParseResult;
 use winnow::combinator::{opt, peek, repeat_till};
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::{literal, take, take_while};
-use winnow::Result as ParseResult;
 
 use super::ParserInput;
-use super::bracket::{read_until_chars_balanced, read_until_close_brace, read_until_keyword_balanced};
+use super::bracket::{
+    read_until_chars_balanced, read_until_close_brace, read_until_keyword_balanced,
+};
 use super::fragment::fragment_node_parser;
 use super::swc_parse::{parse_expression, parse_param_list, parse_pattern};
 
@@ -81,8 +83,7 @@ fn parse_if_alternate(parser_input: &mut ParserInput) -> ParseResult<Option<Frag
     }
 
     // Check for {:else if ...} vs {:else}
-    let ws: &str =
-        take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+    let ws: &str = take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
     if !ws.is_empty() && opt(literal("if")).parse_next(parser_input)?.is_some() {
         // {:else if test}...
@@ -129,12 +130,9 @@ fn parse_if_alternate(parser_input: &mut ParserInput) -> ParseResult<Option<Frag
         // {:else}
         literal("}").parse_next(parser_input)?;
 
-        let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
-            0..,
-            fragment_node_parser,
-            peek(block_close_peek("if")),
-        )
-        .parse_next(parser_input)?;
+        let (nodes, _): (Vec<FragmentNode>, _) =
+            repeat_till(0.., fragment_node_parser, peek(block_close_peek("if")))
+                .parse_next(parser_input)?;
 
         block_close("if").parse_next(parser_input)?;
 
@@ -160,15 +158,18 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
     let context = if context_text.trim().is_empty() {
         None
     } else {
-        Some(parse_pattern(context_text, parser_input.state.ts, ctx_offset as u32)?)
+        Some(parse_pattern(
+            context_text,
+            parser_input.state.ts,
+            ctx_offset as u32,
+        )?)
     };
 
     // Optional index
     let index = if opt(literal(",")).parse_next(parser_input)?.is_some() {
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
-        let idx: &str =
-            take_while(1.., |c: char| c.is_ascii_alphanumeric() || c == '_')
-                .parse_next(parser_input)?;
+        let idx: &str = take_while(1.., |c: char| c.is_ascii_alphanumeric() || c == '_')
+            .parse_next(parser_input)?;
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
         Some(idx.to_string())
     } else {
@@ -199,12 +200,9 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
 
     // Optional {:else} fallback
     let fallback = if opt(literal("{:else}")).parse_next(parser_input)?.is_some() {
-        let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
-            0..,
-            fragment_node_parser,
-            peek(block_close_peek("each")),
-        )
-        .parse_next(parser_input)?;
+        let (nodes, _): (Vec<FragmentNode>, _) =
+            repeat_till(0.., fragment_node_parser, peek(block_close_peek("each")))
+                .parse_next(parser_input)?;
         Some(Fragment { nodes })
     } else {
         None
@@ -233,12 +231,8 @@ fn key_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult
     let expression = parse_expression(content, parser_input.state.ts, offset as u32)?;
     literal("}").parse_next(parser_input)?;
 
-    let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
-        0..,
-        fragment_node_parser,
-        block_close("key"),
-    )
-    .parse_next(parser_input)?;
+    let (nodes, _): (Vec<FragmentNode>, _) =
+        repeat_till(0.., fragment_node_parser, block_close("key")).parse_next(parser_input)?;
 
     let end = parser_input.previous_token_end();
 
@@ -286,7 +280,11 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
         if opt(peek(literal("}"))).parse_next(parser_input)?.is_none() {
             let pat_offset = parser_input.current_token_start();
             let pat_content = read_until_close_brace(parser_input)?;
-            value = Some(parse_pattern(pat_content, parser_input.state.ts, pat_offset as u32)?);
+            value = Some(parse_pattern(
+                pat_content,
+                parser_input.state.ts,
+                pat_offset as u32,
+            )?);
         }
         literal("}").parse_next(parser_input)?;
 
@@ -306,16 +304,17 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
         if opt(peek(literal("}"))).parse_next(parser_input)?.is_none() {
             let pat_offset = parser_input.current_token_start();
             let pat_content = read_until_close_brace(parser_input)?;
-            error = Some(parse_pattern(pat_content, parser_input.state.ts, pat_offset as u32)?);
+            error = Some(parse_pattern(
+                pat_content,
+                parser_input.state.ts,
+                pat_offset as u32,
+            )?);
         }
         literal("}").parse_next(parser_input)?;
 
-        let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
-            0..,
-            fragment_node_parser,
-            peek(block_close_peek("await")),
-        )
-        .parse_next(parser_input)?;
+        let (nodes, _): (Vec<FragmentNode>, _) =
+            repeat_till(0.., fragment_node_parser, peek(block_close_peek("await")))
+                .parse_next(parser_input)?;
         catch_fragment = Some(Fragment { nodes });
     }
 
@@ -340,7 +339,11 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
     // Read snippet name
     let name: &str = take_while(1.., |c: char| c.is_ascii_alphanumeric() || c == '_')
         .parse_next(parser_input)?;
-    let ident = Box::new(swc::Ident::new(name.into(), swc_common::DUMMY_SP, Default::default()));
+    let ident = Box::new(swc::Ident::new(
+        name.into(),
+        swc_common::DUMMY_SP,
+        Default::default(),
+    ));
 
     // Parse parameters
     literal("(").parse_next(parser_input)?;
@@ -351,12 +354,8 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
 
     let parameters = parse_param_list(params_content, parser_input.state.ts)?;
 
-    let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
-        0..,
-        fragment_node_parser,
-        block_close("snippet"),
-    )
-    .parse_next(parser_input)?;
+    let (nodes, _): (Vec<FragmentNode>, _) =
+        repeat_till(0.., fragment_node_parser, block_close("snippet")).parse_next(parser_input)?;
 
     let end = parser_input.previous_token_end();
 

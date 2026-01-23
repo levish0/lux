@@ -4,11 +4,11 @@ mod selectors;
 use svelte_ast::css::{CssContent, StyleSheet};
 use svelte_ast::node::StyleSheetChild;
 use svelte_ast::span::Span;
+use winnow::Result as ParseResult;
 use winnow::combinator::peek;
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::{any, literal, take_while};
-use winnow::Result as ParseResult;
 
 use super::ParserInput;
 use super::attribute::attribute_parser;

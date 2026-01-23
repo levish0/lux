@@ -1,15 +1,15 @@
 use svelte_ast::node::FragmentNode;
 use svelte_ast::root::ScriptContext;
+use winnow::Result;
 use winnow::combinator::{alt, dispatch, not, opt, peek};
 use winnow::prelude::*;
 use winnow::token::{any, literal, take};
-use winnow::Result;
 
 use super::ParserInput;
 use super::block::block_parser;
 use super::comment::comment_parser;
-use super::element::element_parser;
 use super::css::style_parser;
+use super::element::element_parser;
 use super::script::script_parser;
 use super::tag::{expression_tag_parser, special_tag_parser};
 use super::text::text_parser;
@@ -75,9 +75,10 @@ fn is_tag_start(parser_input: &mut ParserInput, tag_name: &str) -> bool {
         return false;
     }
     // Check char after tag name
-    remaining.as_bytes().get(tag_name.len()).map_or(false, |&ch| {
-        ch == b'>' || ch.is_ascii_whitespace()
-    })
+    remaining
+        .as_bytes()
+        .get(tag_name.len())
+        .map_or(false, |&ch| ch == b'>' || ch.is_ascii_whitespace())
 }
 
 pub(crate) fn fragment_node_parser(parser_input: &mut ParserInput) -> Result<FragmentNode> {

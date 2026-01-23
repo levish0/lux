@@ -61,11 +61,16 @@ impl ParseContext {
     /// Check if any parent element has shadowrootmode attribute
     /// (for deciding if <slot> should be SlotElement or RegularElement)
     pub fn parent_is_shadowroot_template(&self) -> bool {
-        self.element_stack.iter().any(|entry| entry.has_shadowrootmode)
+        self.element_stack
+            .iter()
+            .any(|entry| entry.has_shadowrootmode)
     }
 
     pub fn push_element(&mut self, name: String, has_shadowrootmode: bool) {
-        self.element_stack.push(ElementStackEntry { name, has_shadowrootmode });
+        self.element_stack.push(ElementStackEntry {
+            name,
+            has_shadowrootmode,
+        });
     }
 
     pub fn pop_element(&mut self) {

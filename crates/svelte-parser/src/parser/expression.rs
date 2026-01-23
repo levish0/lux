@@ -1,6 +1,6 @@
 use swc_ecma_ast as swc;
-use winnow::stream::Location;
 use winnow::Result as ParseResult;
+use winnow::stream::Location;
 
 use super::ParserInput;
 use super::bracket::scan_expression_content;

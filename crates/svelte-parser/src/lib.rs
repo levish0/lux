@@ -26,12 +26,13 @@ pub fn parse(source: &str, options: ParseOptions) -> Result<Root, Vec<ParseError
         state: context,
     };
 
-    let nodes = document_parser(&mut parser_input)
-        .map_err(|_| vec![ParseError::new(
+    let nodes = document_parser(&mut parser_input).map_err(|_| {
+        vec![ParseError::new(
             error::ErrorKind::UnexpectedEof,
             Span::new(0, source.len()),
             "Failed to parse template",
-        )])?;
+        )]
+    })?;
 
     let root = Root {
         span: Span::new(0, source.len()),
@@ -248,9 +249,15 @@ mod tests {
     fn parse_comment_between_elements() {
         let root = parse("<p>a</p><!-- sep --><p>b</p>", ParseOptions::default()).unwrap();
         assert_eq!(root.fragment.nodes.len(), 3);
-        assert!(matches!(&root.fragment.nodes[0], FragmentNode::RegularElement(_)));
+        assert!(matches!(
+            &root.fragment.nodes[0],
+            FragmentNode::RegularElement(_)
+        ));
         assert!(matches!(&root.fragment.nodes[1], FragmentNode::Comment(_)));
-        assert!(matches!(&root.fragment.nodes[2], FragmentNode::RegularElement(_)));
+        assert!(matches!(
+            &root.fragment.nodes[2],
+            FragmentNode::RegularElement(_)
+        ));
     }
 
     #[test]
@@ -262,7 +269,10 @@ mod tests {
                 match &el.attributes[0] {
                     svelte_ast::node::AttributeNode::Attribute(attr) => {
                         assert_eq!(attr.name, "disabled");
-                        assert!(matches!(attr.value, svelte_ast::attributes::AttributeValue::True));
+                        assert!(matches!(
+                            attr.value,
+                            svelte_ast::attributes::AttributeValue::True
+                        ));
                     }
                     _ => panic!("expected Attribute"),
                 }
@@ -301,7 +311,11 @@ mod tests {
 
     #[test]
     fn parse_multiple_attributes() {
-        let root = parse(r#"<div id="app" class="main"></div>"#, ParseOptions::default()).unwrap();
+        let root = parse(
+            r#"<div id="app" class="main"></div>"#,
+            ParseOptions::default(),
+        )
+        .unwrap();
         match &root.fragment.nodes[0] {
             FragmentNode::RegularElement(el) => {
                 assert_eq!(el.attributes.len(), 2);
@@ -338,7 +352,10 @@ mod tests {
             FragmentNode::RegularElement(el) => {
                 assert_eq!(el.name, "p");
                 assert_eq!(el.fragment.nodes.len(), 1);
-                assert!(matches!(&el.fragment.nodes[0], FragmentNode::ExpressionTag(_)));
+                assert!(matches!(
+                    &el.fragment.nodes[0],
+                    FragmentNode::ExpressionTag(_)
+                ));
             }
             _ => panic!("expected RegularElement"),
         }
@@ -349,14 +366,20 @@ mod tests {
         // Object literal with nested braces
         let root = parse("{({a: 1})}", ParseOptions::default()).unwrap();
         assert_eq!(root.fragment.nodes.len(), 1);
-        assert!(matches!(&root.fragment.nodes[0], FragmentNode::ExpressionTag(_)));
+        assert!(matches!(
+            &root.fragment.nodes[0],
+            FragmentNode::ExpressionTag(_)
+        ));
     }
 
     #[test]
     fn parse_expression_method_call() {
         let root = parse("{items.map(x => x.name)}", ParseOptions::default()).unwrap();
         assert_eq!(root.fragment.nodes.len(), 1);
-        assert!(matches!(&root.fragment.nodes[0], FragmentNode::ExpressionTag(_)));
+        assert!(matches!(
+            &root.fragment.nodes[0],
+            FragmentNode::ExpressionTag(_)
+        ));
     }
 
     #[test]
@@ -364,8 +387,14 @@ mod tests {
         let root = parse("Count: {count}<br>Done", ParseOptions::default()).unwrap();
         assert_eq!(root.fragment.nodes.len(), 4);
         assert!(matches!(&root.fragment.nodes[0], FragmentNode::Text(_)));
-        assert!(matches!(&root.fragment.nodes[1], FragmentNode::ExpressionTag(_)));
-        assert!(matches!(&root.fragment.nodes[2], FragmentNode::RegularElement(_)));
+        assert!(matches!(
+            &root.fragment.nodes[1],
+            FragmentNode::ExpressionTag(_)
+        ));
+        assert!(matches!(
+            &root.fragment.nodes[2],
+            FragmentNode::RegularElement(_)
+        ));
         assert!(matches!(&root.fragment.nodes[3], FragmentNode::Text(_)));
     }
 
@@ -403,7 +432,11 @@ mod tests {
 
     #[test]
     fn parse_if_else_if_block() {
-        let root = parse("{#if a}1{:else if b}2{:else}3{/if}", ParseOptions::default()).unwrap();
+        let root = parse(
+            "{#if a}1{:else if b}2{:else}3{/if}",
+            ParseOptions::default(),
+        )
+        .unwrap();
         match &root.fragment.nodes[0] {
             FragmentNode::IfBlock(block) => {
                 assert!(!block.elseif);
@@ -439,7 +472,11 @@ mod tests {
 
     #[test]
     fn parse_each_with_index() {
-        let root = parse("{#each items as item, i}text{/each}", ParseOptions::default()).unwrap();
+        let root = parse(
+            "{#each items as item, i}text{/each}",
+            ParseOptions::default(),
+        )
+        .unwrap();
         match &root.fragment.nodes[0] {
             FragmentNode::EachBlock(block) => {
                 assert_eq!(block.index.as_deref(), Some("i"));
@@ -455,7 +492,10 @@ mod tests {
         match &root.fragment.nodes[0] {
             FragmentNode::KeyBlock(block) => {
                 assert_eq!(block.fragment.nodes.len(), 1);
-                assert!(matches!(&block.fragment.nodes[0], FragmentNode::RegularElement(_)));
+                assert!(matches!(
+                    &block.fragment.nodes[0],
+                    FragmentNode::RegularElement(_)
+                ));
             }
             _ => panic!("expected KeyBlock"),
         }
@@ -480,7 +520,11 @@ mod tests {
 
     #[test]
     fn parse_snippet_block() {
-        let root = parse("{#snippet greeting(name)}<p>hi</p>{/snippet}", ParseOptions::default()).unwrap();
+        let root = parse(
+            "{#snippet greeting(name)}<p>hi</p>{/snippet}",
+            ParseOptions::default(),
+        )
+        .unwrap();
         match &root.fragment.nodes[0] {
             FragmentNode::SnippetBlock(block) => {
                 assert_eq!(block.body.nodes.len(), 1);
@@ -540,7 +584,11 @@ mod tests {
 
     #[test]
     fn parse_const_tag() {
-        let root = parse("{#each items as item}{@const doubled = item * 2}{doubled}{/each}", ParseOptions::default()).unwrap();
+        let root = parse(
+            "{#each items as item}{@const doubled = item * 2}{doubled}{/each}",
+            ParseOptions::default(),
+        )
+        .unwrap();
         match &root.fragment.nodes[0] {
             FragmentNode::EachBlock(block) => {
                 assert!(matches!(&block.body.nodes[0], FragmentNode::ConstTag(_)));
@@ -552,7 +600,10 @@ mod tests {
     #[test]
     fn parse_render_tag() {
         let root = parse("{@render greeting()}", ParseOptions::default()).unwrap();
-        assert!(matches!(&root.fragment.nodes[0], FragmentNode::RenderTag(_)));
+        assert!(matches!(
+            &root.fragment.nodes[0],
+            FragmentNode::RenderTag(_)
+        ));
     }
 
     // --- Phase 6: Directives ---
@@ -578,65 +629,69 @@ mod tests {
     fn parse_bind_shorthand() {
         let root = parse(r#"<input bind:value>"#, ParseOptions::default()).unwrap();
         match &root.fragment.nodes[0] {
-            FragmentNode::RegularElement(el) => {
-                match &el.attributes[0] {
-                    svelte_ast::node::AttributeNode::BindDirective(d) => {
-                        assert_eq!(d.name, "value");
-                    }
-                    _ => panic!("expected BindDirective"),
+            FragmentNode::RegularElement(el) => match &el.attributes[0] {
+                svelte_ast::node::AttributeNode::BindDirective(d) => {
+                    assert_eq!(d.name, "value");
                 }
-            }
+                _ => panic!("expected BindDirective"),
+            },
             _ => panic!("expected RegularElement"),
         }
     }
 
     #[test]
     fn parse_on_directive() {
-        let root = parse(r#"<button on:click={handler}></button>"#, ParseOptions::default()).unwrap();
+        let root = parse(
+            r#"<button on:click={handler}></button>"#,
+            ParseOptions::default(),
+        )
+        .unwrap();
         match &root.fragment.nodes[0] {
-            FragmentNode::RegularElement(el) => {
-                match &el.attributes[0] {
-                    svelte_ast::node::AttributeNode::OnDirective(d) => {
-                        assert_eq!(d.name, "click");
-                        assert!(d.expression.is_some());
-                        assert!(d.modifiers.is_empty());
-                    }
-                    _ => panic!("expected OnDirective"),
+            FragmentNode::RegularElement(el) => match &el.attributes[0] {
+                svelte_ast::node::AttributeNode::OnDirective(d) => {
+                    assert_eq!(d.name, "click");
+                    assert!(d.expression.is_some());
+                    assert!(d.modifiers.is_empty());
                 }
-            }
+                _ => panic!("expected OnDirective"),
+            },
             _ => panic!("expected RegularElement"),
         }
     }
 
     #[test]
     fn parse_on_directive_with_modifiers() {
-        let root = parse(r#"<form on:submit|preventDefault={handle}></form>"#, ParseOptions::default()).unwrap();
+        let root = parse(
+            r#"<form on:submit|preventDefault={handle}></form>"#,
+            ParseOptions::default(),
+        )
+        .unwrap();
         match &root.fragment.nodes[0] {
-            FragmentNode::RegularElement(el) => {
-                match &el.attributes[0] {
-                    svelte_ast::node::AttributeNode::OnDirective(d) => {
-                        assert_eq!(d.name, "submit");
-                        assert_eq!(d.modifiers.len(), 1);
-                    }
-                    _ => panic!("expected OnDirective"),
+            FragmentNode::RegularElement(el) => match &el.attributes[0] {
+                svelte_ast::node::AttributeNode::OnDirective(d) => {
+                    assert_eq!(d.name, "submit");
+                    assert_eq!(d.modifiers.len(), 1);
                 }
-            }
+                _ => panic!("expected OnDirective"),
+            },
             _ => panic!("expected RegularElement"),
         }
     }
 
     #[test]
     fn parse_class_directive() {
-        let root = parse(r#"<div class:active={isActive}></div>"#, ParseOptions::default()).unwrap();
+        let root = parse(
+            r#"<div class:active={isActive}></div>"#,
+            ParseOptions::default(),
+        )
+        .unwrap();
         match &root.fragment.nodes[0] {
-            FragmentNode::RegularElement(el) => {
-                match &el.attributes[0] {
-                    svelte_ast::node::AttributeNode::ClassDirective(d) => {
-                        assert_eq!(d.name, "active");
-                    }
-                    _ => panic!("expected ClassDirective"),
+            FragmentNode::RegularElement(el) => match &el.attributes[0] {
+                svelte_ast::node::AttributeNode::ClassDirective(d) => {
+                    assert_eq!(d.name, "active");
                 }
-            }
+                _ => panic!("expected ClassDirective"),
+            },
             _ => panic!("expected RegularElement"),
         }
     }
@@ -645,15 +700,13 @@ mod tests {
     fn parse_use_directive() {
         let root = parse(r#"<div use:tooltip></div>"#, ParseOptions::default()).unwrap();
         match &root.fragment.nodes[0] {
-            FragmentNode::RegularElement(el) => {
-                match &el.attributes[0] {
-                    svelte_ast::node::AttributeNode::UseDirective(d) => {
-                        assert_eq!(d.name, "tooltip");
-                        assert!(d.expression.is_none());
-                    }
-                    _ => panic!("expected UseDirective"),
+            FragmentNode::RegularElement(el) => match &el.attributes[0] {
+                svelte_ast::node::AttributeNode::UseDirective(d) => {
+                    assert_eq!(d.name, "tooltip");
+                    assert!(d.expression.is_none());
                 }
-            }
+                _ => panic!("expected UseDirective"),
+            },
             _ => panic!("expected RegularElement"),
         }
     }
@@ -662,16 +715,14 @@ mod tests {
     fn parse_transition_directive() {
         let root = parse(r#"<div transition:fade></div>"#, ParseOptions::default()).unwrap();
         match &root.fragment.nodes[0] {
-            FragmentNode::RegularElement(el) => {
-                match &el.attributes[0] {
-                    svelte_ast::node::AttributeNode::TransitionDirective(d) => {
-                        assert_eq!(d.name, "fade");
-                        assert!(d.intro);
-                        assert!(d.outro);
-                    }
-                    _ => panic!("expected TransitionDirective"),
+            FragmentNode::RegularElement(el) => match &el.attributes[0] {
+                svelte_ast::node::AttributeNode::TransitionDirective(d) => {
+                    assert_eq!(d.name, "fade");
+                    assert!(d.intro);
+                    assert!(d.outro);
                 }
-            }
+                _ => panic!("expected TransitionDirective"),
+            },
             _ => panic!("expected RegularElement"),
         }
     }
@@ -682,7 +733,10 @@ mod tests {
         match &root.fragment.nodes[0] {
             FragmentNode::RegularElement(el) => {
                 assert_eq!(el.attributes.len(), 1);
-                assert!(matches!(&el.attributes[0], svelte_ast::node::AttributeNode::SpreadAttribute(_)));
+                assert!(matches!(
+                    &el.attributes[0],
+                    svelte_ast::node::AttributeNode::SpreadAttribute(_)
+                ));
             }
             _ => panic!("expected RegularElement"),
         }
@@ -692,22 +746,27 @@ mod tests {
     fn parse_expression_attribute_value() {
         let root = parse(r#"<div class={expr}></div>"#, ParseOptions::default()).unwrap();
         match &root.fragment.nodes[0] {
-            FragmentNode::RegularElement(el) => {
-                match &el.attributes[0] {
-                    svelte_ast::node::AttributeNode::Attribute(a) => {
-                        assert_eq!(a.name, "class");
-                        assert!(matches!(&a.value, svelte_ast::attributes::AttributeValue::Expression(_)));
-                    }
-                    _ => panic!("expected Attribute"),
+            FragmentNode::RegularElement(el) => match &el.attributes[0] {
+                svelte_ast::node::AttributeNode::Attribute(a) => {
+                    assert_eq!(a.name, "class");
+                    assert!(matches!(
+                        &a.value,
+                        svelte_ast::attributes::AttributeValue::Expression(_)
+                    ));
                 }
-            }
+                _ => panic!("expected Attribute"),
+            },
             _ => panic!("expected RegularElement"),
         }
     }
 
     #[test]
     fn parse_mixed_quoted_value() {
-        let root = parse(r#"<div class="foo {bar} baz"></div>"#, ParseOptions::default()).unwrap();
+        let root = parse(
+            r#"<div class="foo {bar} baz"></div>"#,
+            ParseOptions::default(),
+        )
+        .unwrap();
         match &root.fragment.nodes[0] {
             FragmentNode::RegularElement(el) => {
                 match &el.attributes[0] {
@@ -742,26 +801,43 @@ mod tests {
 
     #[test]
     fn parse_script_module() {
-        let root = parse(r#"<script context="module">export const x = 1;</script>"#, ParseOptions::default()).unwrap();
+        let root = parse(
+            r#"<script context="module">export const x = 1;</script>"#,
+            ParseOptions::default(),
+        )
+        .unwrap();
         assert!(root.instance.is_none());
         assert!(root.module.is_some());
     }
 
     #[test]
     fn parse_script_with_markup() {
-        let root = parse("<script>let count = 0;</script>\n<p>{count}</p>", ParseOptions::default()).unwrap();
+        let root = parse(
+            "<script>let count = 0;</script>\n<p>{count}</p>",
+            ParseOptions::default(),
+        )
+        .unwrap();
         assert!(root.instance.is_some());
         // Fragment should contain the newline and <p> element, but not the script tag
         assert!(!root.fragment.nodes.is_empty());
-        let has_script_element = root.fragment.nodes.iter().any(|n| {
-            matches!(n, FragmentNode::RegularElement(el) if el.name == "script")
-        });
-        assert!(!has_script_element, "script should not appear as a fragment element");
+        let has_script_element = root
+            .fragment
+            .nodes
+            .iter()
+            .any(|n| matches!(n, FragmentNode::RegularElement(el) if el.name == "script"));
+        assert!(
+            !has_script_element,
+            "script should not appear as a fragment element"
+        );
     }
 
     #[test]
     fn parse_script_with_attributes() {
-        let root = parse(r#"<script lang="ts">let x: number = 1;</script>"#, ParseOptions { loose: false }).unwrap();
+        let root = parse(
+            r#"<script lang="ts">let x: number = 1;</script>"#,
+            ParseOptions { loose: false },
+        )
+        .unwrap();
         assert!(root.instance.is_some());
         let script = root.instance.unwrap();
         assert_eq!(script.attributes.len(), 1);
@@ -776,7 +852,11 @@ mod tests {
 
     #[test]
     fn parse_style_tag() {
-        let root = parse("<style>div { color: red; }</style>", ParseOptions::default()).unwrap();
+        let root = parse(
+            "<style>div { color: red; }</style>",
+            ParseOptions::default(),
+        )
+        .unwrap();
         assert!(root.css.is_some());
         let css = root.css.unwrap();
         assert_eq!(css.children.len(), 1);
@@ -784,28 +864,45 @@ mod tests {
 
     #[test]
     fn parse_style_not_in_fragment() {
-        let root = parse("<style>p { margin: 0; }</style><p>hi</p>", ParseOptions::default()).unwrap();
+        let root = parse(
+            "<style>p { margin: 0; }</style><p>hi</p>",
+            ParseOptions::default(),
+        )
+        .unwrap();
         assert!(root.css.is_some());
         // Fragment should only have the <p> element, not the style tag
-        let has_style = root.fragment.nodes.iter().any(|n| {
-            matches!(n, FragmentNode::RegularElement(el) if el.name == "style")
-        });
+        let has_style = root
+            .fragment
+            .nodes
+            .iter()
+            .any(|n| matches!(n, FragmentNode::RegularElement(el) if el.name == "style"));
         assert!(!has_style, "style should not appear as a fragment element");
-        assert!(root.fragment.nodes.iter().any(|n| {
-            matches!(n, FragmentNode::RegularElement(el) if el.name == "p")
-        }));
+        assert!(
+            root.fragment
+                .nodes
+                .iter()
+                .any(|n| { matches!(n, FragmentNode::RegularElement(el) if el.name == "p") })
+        );
     }
 
     #[test]
     fn parse_style_multiple_rules() {
-        let root = parse("<style>h1 { font-size: 2em; } p { margin: 0; }</style>", ParseOptions::default()).unwrap();
+        let root = parse(
+            "<style>h1 { font-size: 2em; } p { margin: 0; }</style>",
+            ParseOptions::default(),
+        )
+        .unwrap();
         let css = root.css.unwrap();
         assert_eq!(css.children.len(), 2);
     }
 
     #[test]
     fn parse_style_nesting() {
-        let root = parse("<style>.parent { color: red; .child { color: blue; } }</style>", ParseOptions::default()).unwrap();
+        let root = parse(
+            "<style>.parent { color: red; .child { color: blue; } }</style>",
+            ParseOptions::default(),
+        )
+        .unwrap();
         let css = root.css.unwrap();
         assert_eq!(css.children.len(), 1); // .parent rule
     }
@@ -819,7 +916,11 @@ mod tests {
 
     #[test]
     fn parse_style_nesting_pseudo_class() {
-        let root = parse("<style>div { :global(.foo) { color: red; } }</style>", ParseOptions::default()).unwrap();
+        let root = parse(
+            "<style>div { :global(.foo) { color: red; } }</style>",
+            ParseOptions::default(),
+        )
+        .unwrap();
         let css = root.css.unwrap();
         assert_eq!(css.children.len(), 1);
     }
@@ -829,12 +930,16 @@ mod tests {
         let root = parse(
             "<script>let x = 1;</script>\n<p>hi</p>\n<style>p { color: blue; }</style>",
             ParseOptions::default(),
-        ).unwrap();
+        )
+        .unwrap();
         assert!(root.instance.is_some());
         assert!(root.css.is_some());
         // Fragment should only have newlines and <p>
-        assert!(root.fragment.nodes.iter().any(|n| {
-            matches!(n, FragmentNode::RegularElement(el) if el.name == "p")
-        }));
+        assert!(
+            root.fragment
+                .nodes
+                .iter()
+                .any(|n| { matches!(n, FragmentNode::RegularElement(el) if el.name == "p") })
+        );
     }
 }

@@ -80,12 +80,15 @@ impl Serialize for Script {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("context", &self.context)?;
-        map.serialize_entry("content", &crate::utils::estree::ProgramWithComments {
-            program: &self.content,
-            comments: &self.content_comments,
-            content_start: self.content_start,
-            content_end: self.content_end,
-        })?;
+        map.serialize_entry(
+            "content",
+            &crate::utils::estree::ProgramWithComments {
+                program: &self.content,
+                comments: &self.content_comments,
+                content_start: self.content_start,
+                content_end: self.content_end,
+            },
+        )?;
         map.serialize_entry("attributes", &self.attributes)?;
         map.end()
     }
