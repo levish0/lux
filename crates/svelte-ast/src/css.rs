@@ -15,6 +15,7 @@ use crate::text::Comment;
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct StyleSheet {
+    #[serde(flatten)]
     pub span: Span,
     pub attributes: Vec<Attribute>,
     pub children: Vec<StyleSheetChild>,
@@ -38,6 +39,7 @@ pub struct CssContent {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct CssRule {
+    #[serde(flatten)]
     pub span: Span,
     pub prelude: SelectorList,
     pub block: CssBlock,
@@ -53,6 +55,7 @@ pub struct CssRule {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct CssAtrule {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub prelude: String,
@@ -67,6 +70,7 @@ pub struct CssAtrule {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct CssBlock {
+    #[serde(flatten)]
     pub span: Span,
     pub children: Vec<CssBlockChild>,
 }
@@ -80,6 +84,7 @@ pub struct CssBlock {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct CssDeclaration {
+    #[serde(flatten)]
     pub span: Span,
     pub property: String,
     pub value: String,
@@ -93,6 +98,7 @@ pub struct CssDeclaration {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SelectorList {
+    #[serde(flatten)]
     pub span: Span,
     pub children: Vec<ComplexSelector>,
 }
@@ -105,6 +111,7 @@ pub struct SelectorList {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct ComplexSelector {
+    #[serde(flatten)]
     pub span: Span,
     pub children: Vec<RelativeSelector>,
 }
@@ -118,6 +125,7 @@ pub struct ComplexSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct RelativeSelector {
+    #[serde(flatten)]
     pub span: Span,
     pub combinator: Option<CssCombinator>,
     pub selectors: Vec<SimpleSelector>,
@@ -131,6 +139,7 @@ pub struct RelativeSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct CssCombinator {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
 }
@@ -143,6 +152,7 @@ pub struct CssCombinator {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct TypeSelector {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
 }
@@ -155,6 +165,7 @@ pub struct TypeSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct IdSelector {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
 }
@@ -167,6 +178,7 @@ pub struct IdSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct ClassSelector {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
 }
@@ -182,6 +194,7 @@ pub struct ClassSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct AttributeSelector {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub matcher: Option<String>,
@@ -198,6 +211,7 @@ pub struct AttributeSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct PseudoClassSelector {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub args: Option<Box<SelectorList>>,
@@ -211,6 +225,7 @@ pub struct PseudoClassSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct PseudoElementSelector {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
 }
@@ -223,6 +238,7 @@ pub struct PseudoElementSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct NestingSelector {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
 }
@@ -235,6 +251,7 @@ pub struct NestingSelector {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Percentage {
+    #[serde(flatten)]
     pub span: Span,
     pub value: String,
 }
@@ -247,6 +264,7 @@ pub struct Percentage {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Nth {
+    #[serde(flatten)]
     pub span: Span,
     pub value: String,
 }

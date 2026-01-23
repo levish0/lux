@@ -11,6 +11,7 @@ use crate::span::Span;
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Text {
+    #[serde(flatten)]
     pub span: Span,
     pub data: String,
     pub raw: String,
@@ -24,6 +25,7 @@ pub struct Text {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Comment {
+    #[serde(flatten)]
     pub span: Span,
     pub data: String,
 }
@@ -36,6 +38,7 @@ pub struct Comment {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct JsComment {
+    #[serde(flatten)]
     pub span: Span,
     pub kind: JsCommentKind,
     pub value: String,

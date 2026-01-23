@@ -370,4 +370,362 @@ mod tests {
         assert!(matches!(&root.fragment.nodes[2], FragmentNode::RegularElement(_)));
         assert!(matches!(&root.fragment.nodes[3], FragmentNode::Text(_)));
     }
+
+    #[test]
+    fn parse_if_block() {
+        let root = parse("{#if visible}hello{/if}", ParseOptions::default()).unwrap();
+        assert_eq!(root.fragment.nodes.len(), 1);
+        match &root.fragment.nodes[0] {
+            FragmentNode::IfBlock(block) => {
+                assert!(!block.elseif);
+                assert_eq!(block.consequent.nodes.len(), 1);
+                assert!(matches!(&block.consequent.nodes[0], FragmentNode::Text(_)));
+                assert!(block.alternate.is_none());
+            }
+            _ => panic!("expected IfBlock"),
+        }
+    }
+
+    #[test]
+    fn parse_if_else_block() {
+        let root = parse("{#if show}yes{:else}no{/if}", ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::IfBlock(block) => {
+                assert_eq!(block.consequent.nodes.len(), 1);
+                let alt = block.alternate.as_ref().unwrap();
+                assert_eq!(alt.nodes.len(), 1);
+                match &alt.nodes[0] {
+                    FragmentNode::Text(t) => assert_eq!(t.data, "no"),
+                    _ => panic!("expected Text in alternate"),
+                }
+            }
+            _ => panic!("expected IfBlock"),
+        }
+    }
+
+    #[test]
+    fn parse_if_else_if_block() {
+        let root = parse("{#if a}1{:else if b}2{:else}3{/if}", ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::IfBlock(block) => {
+                assert!(!block.elseif);
+                let alt = block.alternate.as_ref().unwrap();
+                assert_eq!(alt.nodes.len(), 1);
+                match &alt.nodes[0] {
+                    FragmentNode::IfBlock(nested) => {
+                        assert!(nested.elseif);
+                        let nested_alt = nested.alternate.as_ref().unwrap();
+                        assert_eq!(nested_alt.nodes.len(), 1);
+                    }
+                    _ => panic!("expected nested IfBlock"),
+                }
+            }
+            _ => panic!("expected IfBlock"),
+        }
+    }
+
+    #[test]
+    fn parse_each_block() {
+        let root = parse("{#each items as item}text{/each}", ParseOptions::default()).unwrap();
+        assert_eq!(root.fragment.nodes.len(), 1);
+        match &root.fragment.nodes[0] {
+            FragmentNode::EachBlock(block) => {
+                assert_eq!(block.body.nodes.len(), 1);
+                assert!(block.index.is_none());
+                assert!(block.key.is_none());
+                assert!(block.fallback.is_none());
+            }
+            _ => panic!("expected EachBlock"),
+        }
+    }
+
+    #[test]
+    fn parse_each_with_index() {
+        let root = parse("{#each items as item, i}text{/each}", ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::EachBlock(block) => {
+                assert_eq!(block.index.as_deref(), Some("i"));
+            }
+            _ => panic!("expected EachBlock"),
+        }
+    }
+
+    #[test]
+    fn parse_key_block() {
+        let root = parse("{#key value}<p>content</p>{/key}", ParseOptions::default()).unwrap();
+        assert_eq!(root.fragment.nodes.len(), 1);
+        match &root.fragment.nodes[0] {
+            FragmentNode::KeyBlock(block) => {
+                assert_eq!(block.fragment.nodes.len(), 1);
+                assert!(matches!(&block.fragment.nodes[0], FragmentNode::RegularElement(_)));
+            }
+            _ => panic!("expected KeyBlock"),
+        }
+    }
+
+    #[test]
+    fn parse_await_block() {
+        let root = parse(
+            "{#await promise}loading{:then value}done{:catch error}failed{/await}",
+            ParseOptions::default(),
+        )
+        .unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::AwaitBlock(block) => {
+                assert!(block.pending.is_some());
+                assert!(block.then.is_some());
+                assert!(block.catch.is_some());
+            }
+            _ => panic!("expected AwaitBlock"),
+        }
+    }
+
+    #[test]
+    fn parse_snippet_block() {
+        let root = parse("{#snippet greeting(name)}<p>hi</p>{/snippet}", ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::SnippetBlock(block) => {
+                assert_eq!(block.body.nodes.len(), 1);
+                assert_eq!(block.parameters.len(), 1);
+            }
+            _ => panic!("expected SnippetBlock"),
+        }
+    }
+
+    #[test]
+    fn parse_if_with_element_children() {
+        let root = parse("{#if show}<div>hello</div>{/if}", ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::IfBlock(block) => {
+                assert_eq!(block.consequent.nodes.len(), 1);
+                match &block.consequent.nodes[0] {
+                    FragmentNode::RegularElement(el) => {
+                        assert_eq!(el.name, "div");
+                    }
+                    _ => panic!("expected RegularElement"),
+                }
+            }
+            _ => panic!("expected IfBlock"),
+        }
+    }
+
+    // --- Phase 6: Special tags ---
+
+    #[test]
+    fn parse_html_tag() {
+        let root = parse("{@html content}", ParseOptions::default()).unwrap();
+        assert_eq!(root.fragment.nodes.len(), 1);
+        assert!(matches!(&root.fragment.nodes[0], FragmentNode::HtmlTag(_)));
+    }
+
+    #[test]
+    fn parse_debug_tag() {
+        let root = parse("{@debug x, y}", ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::DebugTag(tag) => {
+                assert_eq!(tag.identifiers.len(), 2);
+            }
+            _ => panic!("expected DebugTag"),
+        }
+    }
+
+    #[test]
+    fn parse_debug_tag_empty() {
+        let root = parse("{@debug}", ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::DebugTag(tag) => {
+                assert_eq!(tag.identifiers.len(), 0);
+            }
+            _ => panic!("expected DebugTag"),
+        }
+    }
+
+    #[test]
+    fn parse_const_tag() {
+        let root = parse("{#each items as item}{@const doubled = item * 2}{doubled}{/each}", ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::EachBlock(block) => {
+                assert!(matches!(&block.body.nodes[0], FragmentNode::ConstTag(_)));
+            }
+            _ => panic!("expected EachBlock"),
+        }
+    }
+
+    #[test]
+    fn parse_render_tag() {
+        let root = parse("{@render greeting()}", ParseOptions::default()).unwrap();
+        assert!(matches!(&root.fragment.nodes[0], FragmentNode::RenderTag(_)));
+    }
+
+    // --- Phase 6: Directives ---
+
+    #[test]
+    fn parse_bind_directive() {
+        let root = parse(r#"<input bind:value={name}>"#, ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::RegularElement(el) => {
+                assert_eq!(el.attributes.len(), 1);
+                match &el.attributes[0] {
+                    svelte_ast::node::AttributeNode::BindDirective(d) => {
+                        assert_eq!(d.name, "value");
+                    }
+                    _ => panic!("expected BindDirective"),
+                }
+            }
+            _ => panic!("expected RegularElement"),
+        }
+    }
+
+    #[test]
+    fn parse_bind_shorthand() {
+        let root = parse(r#"<input bind:value>"#, ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::RegularElement(el) => {
+                match &el.attributes[0] {
+                    svelte_ast::node::AttributeNode::BindDirective(d) => {
+                        assert_eq!(d.name, "value");
+                    }
+                    _ => panic!("expected BindDirective"),
+                }
+            }
+            _ => panic!("expected RegularElement"),
+        }
+    }
+
+    #[test]
+    fn parse_on_directive() {
+        let root = parse(r#"<button on:click={handler}></button>"#, ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::RegularElement(el) => {
+                match &el.attributes[0] {
+                    svelte_ast::node::AttributeNode::OnDirective(d) => {
+                        assert_eq!(d.name, "click");
+                        assert!(d.expression.is_some());
+                        assert!(d.modifiers.is_empty());
+                    }
+                    _ => panic!("expected OnDirective"),
+                }
+            }
+            _ => panic!("expected RegularElement"),
+        }
+    }
+
+    #[test]
+    fn parse_on_directive_with_modifiers() {
+        let root = parse(r#"<form on:submit|preventDefault={handle}></form>"#, ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::RegularElement(el) => {
+                match &el.attributes[0] {
+                    svelte_ast::node::AttributeNode::OnDirective(d) => {
+                        assert_eq!(d.name, "submit");
+                        assert_eq!(d.modifiers.len(), 1);
+                    }
+                    _ => panic!("expected OnDirective"),
+                }
+            }
+            _ => panic!("expected RegularElement"),
+        }
+    }
+
+    #[test]
+    fn parse_class_directive() {
+        let root = parse(r#"<div class:active={isActive}></div>"#, ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::RegularElement(el) => {
+                match &el.attributes[0] {
+                    svelte_ast::node::AttributeNode::ClassDirective(d) => {
+                        assert_eq!(d.name, "active");
+                    }
+                    _ => panic!("expected ClassDirective"),
+                }
+            }
+            _ => panic!("expected RegularElement"),
+        }
+    }
+
+    #[test]
+    fn parse_use_directive() {
+        let root = parse(r#"<div use:tooltip></div>"#, ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::RegularElement(el) => {
+                match &el.attributes[0] {
+                    svelte_ast::node::AttributeNode::UseDirective(d) => {
+                        assert_eq!(d.name, "tooltip");
+                        assert!(d.expression.is_none());
+                    }
+                    _ => panic!("expected UseDirective"),
+                }
+            }
+            _ => panic!("expected RegularElement"),
+        }
+    }
+
+    #[test]
+    fn parse_transition_directive() {
+        let root = parse(r#"<div transition:fade></div>"#, ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::RegularElement(el) => {
+                match &el.attributes[0] {
+                    svelte_ast::node::AttributeNode::TransitionDirective(d) => {
+                        assert_eq!(d.name, "fade");
+                        assert!(d.intro);
+                        assert!(d.outro);
+                    }
+                    _ => panic!("expected TransitionDirective"),
+                }
+            }
+            _ => panic!("expected RegularElement"),
+        }
+    }
+
+    #[test]
+    fn parse_spread_attribute() {
+        let root = parse(r#"<div {...props}></div>"#, ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::RegularElement(el) => {
+                assert_eq!(el.attributes.len(), 1);
+                assert!(matches!(&el.attributes[0], svelte_ast::node::AttributeNode::SpreadAttribute(_)));
+            }
+            _ => panic!("expected RegularElement"),
+        }
+    }
+
+    #[test]
+    fn parse_expression_attribute_value() {
+        let root = parse(r#"<div class={expr}></div>"#, ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::RegularElement(el) => {
+                match &el.attributes[0] {
+                    svelte_ast::node::AttributeNode::Attribute(a) => {
+                        assert_eq!(a.name, "class");
+                        assert!(matches!(&a.value, svelte_ast::attributes::AttributeValue::Expression(_)));
+                    }
+                    _ => panic!("expected Attribute"),
+                }
+            }
+            _ => panic!("expected RegularElement"),
+        }
+    }
+
+    #[test]
+    fn parse_mixed_quoted_value() {
+        let root = parse(r#"<div class="foo {bar} baz"></div>"#, ParseOptions::default()).unwrap();
+        match &root.fragment.nodes[0] {
+            FragmentNode::RegularElement(el) => {
+                match &el.attributes[0] {
+                    svelte_ast::node::AttributeNode::Attribute(a) => {
+                        assert_eq!(a.name, "class");
+                        match &a.value {
+                            svelte_ast::attributes::AttributeValue::Sequence(seq) => {
+                                assert_eq!(seq.len(), 3); // "foo ", {bar}, " baz"
+                            }
+                            _ => panic!("expected Sequence"),
+                        }
+                    }
+                    _ => panic!("expected Attribute"),
+                }
+            }
+            _ => panic!("expected RegularElement"),
+        }
+    }
 }

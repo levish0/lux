@@ -22,6 +22,7 @@ use crate::text::JsComment;
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Root {
+    #[serde(flatten)]
     pub span: Span,
     pub fragment: Fragment,
     pub css: Option<StyleSheet>,
@@ -42,6 +43,7 @@ pub struct Root {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Script {
+    #[serde(flatten)]
     pub span: Span,
     pub context: ScriptContext,
     pub content: swc::Program,
@@ -79,6 +81,7 @@ pub struct Fragment {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SvelteOptions {
+    #[serde(flatten)]
     pub span: Span,
     pub runes: Option<bool>,
     pub immutable: Option<bool>,

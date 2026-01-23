@@ -3,14 +3,13 @@ use svelte_ast::node::FragmentNode;
 use svelte_ast::root::Fragment;
 use svelte_ast::span::Span;
 use swc_ecma_ast as swc;
-use winnow::combinator::{opt, peek, repeat_till};
+use winnow::combinator::{peek, repeat_till};
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::{any, literal, take_while};
 use winnow::Result as ParseResult;
 
 use super::ParserInput;
-use super::expression::{read_expression, scan_expression_text};
 use super::fragment::fragment_node_parser;
 
 /// Dispatch `{#block}` to the appropriate block parser.
@@ -198,7 +197,8 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
     .parse_next(parser_input)?;
 
     // Optional {:else} fallback
-    let fallback = if peek(literal("{:else}")).parse_next(parser_input).is_ok() {
+    let has_else: ParseResult<&str> = peek(literal("{:else}")).parse_next(parser_input);
+    let fallback = if has_else.is_ok() {
         literal("{:else}").parse_next(parser_input)?;
         let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
             0..,
@@ -277,10 +277,10 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
     let mut error: Option<Box<swc::Pat>> = None;
 
     // {:then value}
-    if peek(literal("{:then")).parse_next(parser_input).is_ok() {
+    let has_then: ParseResult<&str> = peek(literal("{:then")).parse_next(parser_input);
+    if has_then.is_ok() {
         literal("{:then").parse_next(parser_input)?;
-        let ws: &str =
-            take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+        take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
         if peek(any).parse_next(parser_input)? != '}' {
             let pat_text = read_until_char(parser_input, '}')?;
             value = Some(swc_parse_pattern(&pat_text, parser_input.state.ts)?);
@@ -297,7 +297,8 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
     }
 
     // {:catch error}
-    if peek(literal("{:catch")).parse_next(parser_input).is_ok() {
+    let has_catch: ParseResult<&str> = peek(literal("{:catch")).parse_next(parser_input);
+    if has_catch.is_ok() {
         literal("{:catch").parse_next(parser_input)?;
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
         if peek(any).parse_next(parser_input)? != '}' {
@@ -383,7 +384,7 @@ fn read_expression_until_char(
 
 /// Read text until `}` without consuming it. Handles nested braces.
 fn read_until_close_brace(parser_input: &mut ParserInput) -> ParseResult<String> {
-    let mut ParseResult = String::new();
+    let mut buf = String::new();
     let mut depth: u32 = 0;
     loop {
         let c = peek(any).parse_next(parser_input)?;
@@ -391,52 +392,52 @@ fn read_until_close_brace(parser_input: &mut ParserInput) -> ParseResult<String>
             break;
         }
         let c: char = any.parse_next(parser_input)?;
-        ParseResult.push(c);
+        buf.push(c);
         match c {
             '{' => depth += 1,
             '}' => depth -= 1,
             '"' | '\'' => {
-                collect_string_inline(parser_input, c, &mut ParseResult)?;
+                collect_string_inline(parser_input, c, &mut buf)?;
             }
             '`' => {
-                collect_template_inline(parser_input, &mut ParseResult)?;
+                collect_template_inline(parser_input, &mut buf)?;
             }
             _ => {}
         }
     }
-    Ok(ParseResult)
+    Ok(buf)
 }
 
 /// Read text until a specific character without consuming it.
 fn read_until_char(parser_input: &mut ParserInput, end: char) -> ParseResult<String> {
-    let mut ParseResult = String::new();
+    let mut buf = String::new();
     loop {
         let c = peek(any).parse_next(parser_input)?;
         if c == end {
             break;
         }
         let c: char = any.parse_next(parser_input)?;
-        ParseResult.push(c);
+        buf.push(c);
     }
-    Ok(ParseResult)
+    Ok(buf)
 }
 
 /// Read text until a keyword appears (not inside strings/braces).
 fn read_until_keyword(parser_input: &mut ParserInput, keyword: &str) -> ParseResult<String> {
-    let mut ParseResult = String::new();
+    let mut buf = String::new();
     let kw_len = keyword.len();
     loop {
-        if ParseResult.len() >= kw_len - 1 {
-            let check: Result<&str, _> =
+        if buf.len() >= kw_len - 1 {
+            let check: ParseResult<&str> =
                 peek(literal(keyword)).parse_next(parser_input);
             if check.is_ok() {
                 break;
             }
         }
         let c: char = any.parse_next(parser_input)?;
-        ParseResult.push(c);
+        buf.push(c);
     }
-    Ok(ParseResult)
+    Ok(buf)
 }
 
 /// Read text until one of the given characters.
@@ -483,10 +484,12 @@ fn block_continuation_or_close<'a>(
     name: &'a str,
 ) -> impl FnMut(&mut ParserInput<'_>) -> ParseResult<()> + 'a {
     move |input: &mut ParserInput| {
-        let r1: Result<&str, _> = peek(literal("{:")).parse_next(input);
-        let r2: Result<&str, _> =
-            peek(block_close_peek_inner(name)).parse_next(input);
-        if r1.is_ok() || r2.is_ok() {
+        let r1: ParseResult<&str> = peek(literal("{:")).parse_next(input);
+        if r1.is_ok() {
+            return Ok(());
+        }
+        let r2: ParseResult<()> = peek(block_close_peek(name)).parse_next(input);
+        if r2.is_ok() {
             Ok(())
         } else {
             Err(winnow::error::ContextError::new())
@@ -494,20 +497,12 @@ fn block_continuation_or_close<'a>(
     }
 }
 
-fn block_close_peek_inner<'a>(
-    name: &'a str,
-) -> impl FnMut(&mut ParserInput<'_>) -> ParseResult<&'_ str> + 'a {
-    move |input: &mut ParserInput| {
-        let close = format!("{{/{}}}", name);
-        literal(close.as_str()).parse_next(input)
-    }
-}
-
 /// Peek for `{/name}` without consuming.
 fn block_close_peek<'a>(name: &'a str) -> impl FnMut(&mut ParserInput<'_>) -> ParseResult<()> + 'a {
     move |input: &mut ParserInput| {
-        let close = format!("{{/{}}}", name);
-        literal(close.as_str()).parse_next(input)?;
+        literal("{/").parse_next(input)?;
+        literal(name).parse_next(input)?;
+        literal("}").parse_next(input)?;
         Ok(())
     }
 }
@@ -515,9 +510,10 @@ fn block_close_peek<'a>(name: &'a str) -> impl FnMut(&mut ParserInput<'_>) -> Pa
 /// Consume `{/name}`.
 fn block_close<'a>(name: &'a str) -> impl FnMut(&mut ParserInput<'_>) -> ParseResult<()> + 'a {
     move |input: &mut ParserInput| {
-        let close = format!("{{/{}}}", name);
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(input)?;
-        literal(close.as_str()).parse_next(input)?;
+        literal("{/").parse_next(input)?;
+        literal(name).parse_next(input)?;
+        literal("}").parse_next(input)?;
         Ok(())
     }
 }
@@ -612,6 +608,7 @@ fn expr_to_pat(expr: swc::Expr) -> swc::Pat {
                     swc::PropOrSpread::Spread(s) => {
                         Some(swc::ObjectPatProp::Rest(swc::RestPat {
                             span: s.dot3_token,
+                            dot3_token: s.dot3_token,
                             arg: Box::new(expr_to_pat(*s.expr)),
                             type_ann: None,
                         }))

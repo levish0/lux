@@ -8,7 +8,7 @@ use super::ParserInput;
 use super::block::block_parser;
 use super::comment::comment_parser;
 use super::element::element_parser;
-use super::tag::expression_tag_parser;
+use super::tag::{expression_tag_parser, special_tag_parser};
 use super::text::text_parser;
 
 pub fn fragment_parser(parser_input: &mut ParserInput) -> Result<Vec<FragmentNode>> {
@@ -25,10 +25,11 @@ pub(crate) fn fragment_node_parser(parser_input: &mut ParserInput) -> Result<Fra
     match c {
         '<' => alt((comment_parser, element_parser)).parse_next(parser_input),
         '{' => {
-            // Peek 2 chars to distinguish {# (block) from {expression}
+            // Peek 2 chars to distinguish {# (block), {@ (special), {expression}
             let two: Result<&str> = peek(take(2usize)).parse_next(parser_input);
             match two {
                 Ok("{#") => block_parser(parser_input),
+                Ok("{@") => special_tag_parser(parser_input),
                 _ => expression_tag_parser(parser_input),
             }
         }

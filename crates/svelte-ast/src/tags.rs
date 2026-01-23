@@ -11,6 +11,7 @@ use crate::span::Span;
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct ExpressionTag {
+    #[serde(flatten)]
     pub span: Span,
     pub expression: Box<swc::Expr>,
 }
@@ -23,6 +24,7 @@ pub struct ExpressionTag {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct HtmlTag {
+    #[serde(flatten)]
     pub span: Span,
     pub expression: Box<swc::Expr>,
 }
@@ -35,6 +37,7 @@ pub struct HtmlTag {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct ConstTag {
+    #[serde(flatten)]
     pub span: Span,
     pub declaration: Box<swc::VarDecl>,
 }
@@ -47,6 +50,7 @@ pub struct ConstTag {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct DebugTag {
+    #[serde(flatten)]
     pub span: Span,
     pub identifiers: Vec<swc::Ident>,
 }
@@ -59,6 +63,7 @@ pub struct DebugTag {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct RenderTag {
+    #[serde(flatten)]
     pub span: Span,
     pub expression: Box<swc::Expr>,
 }
@@ -71,6 +76,7 @@ pub struct RenderTag {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct AttachTag {
+    #[serde(flatten)]
     pub span: Span,
     pub expression: Box<swc::Expr>,
 }

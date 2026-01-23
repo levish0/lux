@@ -1,95 +1,549 @@
-use svelte_ast::attributes::{Attribute, AttributeSequenceValue, AttributeValue};
+use svelte_ast::attributes::{
+    AnimateDirective, Attribute, AttributeSequenceValue, AttributeValue, BindDirective,
+    ClassDirective, EventModifier, LetDirective, OnDirective, SpreadAttribute, StyleDirective,
+    TransitionDirective, TransitionModifier, UseDirective,
+};
 use svelte_ast::node::AttributeNode;
 use svelte_ast::span::Span;
+use svelte_ast::tags::ExpressionTag;
 use svelte_ast::text::Text;
-use winnow::combinator::opt;
+use swc_ecma_ast as swc;
+use winnow::combinator::{opt, peek};
 use winnow::prelude::*;
 use winnow::stream::Location;
-use winnow::token::{literal, take_while};
+use winnow::token::{any, literal, take_while};
 use winnow::Result as ParseResult;
 
 use super::ParserInput;
 
+/// Parse a single attribute, directive, or spread.
 pub fn attribute_parser(parser_input: &mut ParserInput) -> ParseResult<AttributeNode> {
-    let start = parser_input.input.current_token_start();
+    let c = peek(any).parse_next(parser_input)?;
+    match c {
+        '{' => spread_or_shorthand_parser(parser_input),
+        _ => named_attribute_parser(parser_input),
+    }
+}
 
-    let name_start = parser_input.input.current_token_start();
-    let name: &str = take_while(1.., |c: char| {
-        c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | ':' | '.')
+/// Parse `{...expr}` spread or `{name}` shorthand.
+fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<AttributeNode> {
+    let start = parser_input.current_token_start();
+    literal("{").parse_next(parser_input)?;
+
+    // Check for spread: {...
+    let is_spread: ParseResult<&str> = peek(literal("...")).parse_next(parser_input);
+    if is_spread.is_ok() {
+        literal("...").parse_next(parser_input)?;
+        let expr_text = read_until_close_brace(parser_input)?;
+        literal("}").parse_next(parser_input)?;
+        let end = parser_input.previous_token_end();
+
+        let expression = swc_parse_expr(&expr_text, parser_input.state.ts)?;
+
+        return Ok(AttributeNode::SpreadAttribute(SpreadAttribute {
+            span: Span::new(start, end),
+            name_loc: None,
+            expression,
+        }));
+    }
+
+    // Shorthand: {name} is equivalent to name={name}
+    let name: &str = take_while(1.., |c: char| c.is_ascii_alphanumeric() || c == '_' || c == '$')
+        .parse_next(parser_input)?;
+    literal("}").parse_next(parser_input)?;
+    let end = parser_input.previous_token_end();
+
+    let expression = Box::new(swc::Expr::Ident(swc::Ident::new(
+        name.into(),
+        swc_common::DUMMY_SP,
+        Default::default(),
+    )));
+
+    Ok(AttributeNode::Attribute(Attribute {
+        span: Span::new(start, end),
+        name: name.to_string(),
+        name_loc: None,
+        value: AttributeValue::Expression(ExpressionTag {
+            span: Span::new(start, end),
+            expression,
+        }),
+    }))
+}
+
+/// Parse a named attribute or directive.
+fn named_attribute_parser(parser_input: &mut ParserInput) -> ParseResult<AttributeNode> {
+    let start = parser_input.current_token_start();
+
+    // Read the full attribute name (including : for directives and | for modifiers)
+    let name_start = parser_input.current_token_start();
+    let full_name: &str = take_while(1.., |c: char| {
+        c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | ':' | '.' | '|' | '$')
     })
     .parse_next(parser_input)?;
-    let name_end = parser_input.input.previous_token_end();
+    let name_end = parser_input.previous_token_end();
     let name_loc = Span::new(name_start, name_end);
 
-    // Check for = sign
-    let has_value = opt(literal("=")).parse_next(parser_input)?.is_some();
+    // Check for directive prefix
+    if let Some(colon_pos) = full_name.find(':') {
+        let prefix = &full_name[..colon_pos];
+        let rest = &full_name[colon_pos + 1..];
 
+        match prefix {
+            "bind" => return parse_bind_directive(parser_input, start, rest, name_loc),
+            "on" => return parse_on_directive(parser_input, start, rest, name_loc),
+            "class" => return parse_class_directive(parser_input, start, rest, name_loc),
+            "style" => return parse_style_directive(parser_input, start, rest, name_loc),
+            "transition" => {
+                return parse_transition_directive(parser_input, start, rest, name_loc, true, true)
+            }
+            "in" => {
+                return parse_transition_directive(parser_input, start, rest, name_loc, true, false)
+            }
+            "out" => {
+                return parse_transition_directive(parser_input, start, rest, name_loc, false, true)
+            }
+            "animate" => return parse_animate_directive(parser_input, start, rest, name_loc),
+            "use" => return parse_use_directive(parser_input, start, rest, name_loc),
+            "let" => return parse_let_directive(parser_input, start, rest, name_loc),
+            _ => {} // Not a directive, treat as normal attribute with colon in name
+        }
+    }
+
+    // Regular attribute
+    let has_value = opt(literal("=")).parse_next(parser_input)?.is_some();
     let value = if has_value {
         parse_attribute_value(parser_input)?
     } else {
         AttributeValue::True
     };
 
-    let end = parser_input.input.previous_token_end();
+    let end = parser_input.previous_token_end();
 
     Ok(AttributeNode::Attribute(Attribute {
         span: Span::new(start, end),
-        name: name.to_string(),
+        name: full_name.to_string(),
         name_loc: Some(name_loc),
         value,
     }))
 }
 
+// --- Directive parsers ---
+
+fn parse_bind_directive(
+    parser_input: &mut ParserInput,
+    start: usize,
+    name: &str,
+    name_loc: Span,
+) -> ParseResult<AttributeNode> {
+    let expression = parse_optional_directive_value(parser_input)?;
+    let end = parser_input.previous_token_end();
+
+    // If no value, the expression is the name itself (shorthand: bind:value)
+    let expr = expression.unwrap_or_else(|| {
+        Box::new(swc::Expr::Ident(swc::Ident::new(
+            name.into(),
+            swc_common::DUMMY_SP,
+            Default::default(),
+        )))
+    });
+
+    Ok(AttributeNode::BindDirective(BindDirective {
+        span: Span::new(start, end),
+        name: name.to_string(),
+        name_loc: Some(name_loc),
+        expression: expr,
+    }))
+}
+
+fn parse_on_directive(
+    parser_input: &mut ParserInput,
+    start: usize,
+    name_and_modifiers: &str,
+    name_loc: Span,
+) -> ParseResult<AttributeNode> {
+    // Split name|modifier1|modifier2
+    let parts: Vec<&str> = name_and_modifiers.split('|').collect();
+    let name = parts[0];
+    let modifiers: Vec<EventModifier> = parts[1..]
+        .iter()
+        .filter_map(|m| parse_event_modifier(m))
+        .collect();
+
+    let expression = parse_optional_directive_value(parser_input)?;
+    let end = parser_input.previous_token_end();
+
+    Ok(AttributeNode::OnDirective(OnDirective {
+        span: Span::new(start, end),
+        name: name.to_string(),
+        name_loc: Some(name_loc),
+        expression,
+        modifiers,
+    }))
+}
+
+fn parse_class_directive(
+    parser_input: &mut ParserInput,
+    start: usize,
+    name: &str,
+    name_loc: Span,
+) -> ParseResult<AttributeNode> {
+    let expression = parse_optional_directive_value(parser_input)?;
+    let end = parser_input.previous_token_end();
+
+    let expr = expression.unwrap_or_else(|| {
+        Box::new(swc::Expr::Ident(swc::Ident::new(
+            name.into(),
+            swc_common::DUMMY_SP,
+            Default::default(),
+        )))
+    });
+
+    Ok(AttributeNode::ClassDirective(ClassDirective {
+        span: Span::new(start, end),
+        name: name.to_string(),
+        name_loc: Some(name_loc),
+        expression: expr,
+    }))
+}
+
+fn parse_style_directive(
+    parser_input: &mut ParserInput,
+    start: usize,
+    name_and_modifiers: &str,
+    name_loc: Span,
+) -> ParseResult<AttributeNode> {
+    let parts: Vec<&str> = name_and_modifiers.split('|').collect();
+    let name = parts[0];
+    let modifiers = parts[1..]
+        .iter()
+        .filter_map(|m| {
+            if *m == "important" {
+                Some(svelte_ast::attributes::StyleModifier::Important)
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    let has_value = opt(literal("=")).parse_next(parser_input)?.is_some();
+    let value = if has_value {
+        parse_attribute_value(parser_input)?
+    } else {
+        AttributeValue::True
+    };
+    let end = parser_input.previous_token_end();
+
+    Ok(AttributeNode::StyleDirective(StyleDirective {
+        span: Span::new(start, end),
+        name: name.to_string(),
+        name_loc: Some(name_loc),
+        value,
+        modifiers,
+    }))
+}
+
+fn parse_transition_directive(
+    parser_input: &mut ParserInput,
+    start: usize,
+    name_and_modifiers: &str,
+    name_loc: Span,
+    intro: bool,
+    outro: bool,
+) -> ParseResult<AttributeNode> {
+    let parts: Vec<&str> = name_and_modifiers.split('|').collect();
+    let name = parts[0];
+    let modifiers: Vec<TransitionModifier> = parts[1..]
+        .iter()
+        .filter_map(|m| match *m {
+            "local" => Some(TransitionModifier::Local),
+            "global" => Some(TransitionModifier::Global),
+            _ => None,
+        })
+        .collect();
+
+    let expression = parse_optional_directive_value(parser_input)?;
+    let end = parser_input.previous_token_end();
+
+    Ok(AttributeNode::TransitionDirective(TransitionDirective {
+        span: Span::new(start, end),
+        name: name.to_string(),
+        name_loc: Some(name_loc),
+        expression,
+        modifiers,
+        intro,
+        outro,
+    }))
+}
+
+fn parse_animate_directive(
+    parser_input: &mut ParserInput,
+    start: usize,
+    name: &str,
+    name_loc: Span,
+) -> ParseResult<AttributeNode> {
+    let expression = parse_optional_directive_value(parser_input)?;
+    let end = parser_input.previous_token_end();
+
+    Ok(AttributeNode::AnimateDirective(AnimateDirective {
+        span: Span::new(start, end),
+        name: name.to_string(),
+        name_loc: Some(name_loc),
+        expression,
+    }))
+}
+
+fn parse_use_directive(
+    parser_input: &mut ParserInput,
+    start: usize,
+    name: &str,
+    name_loc: Span,
+) -> ParseResult<AttributeNode> {
+    let expression = parse_optional_directive_value(parser_input)?;
+    let end = parser_input.previous_token_end();
+
+    Ok(AttributeNode::UseDirective(UseDirective {
+        span: Span::new(start, end),
+        name: name.to_string(),
+        name_loc: Some(name_loc),
+        expression,
+    }))
+}
+
+fn parse_let_directive(
+    parser_input: &mut ParserInput,
+    start: usize,
+    name: &str,
+    name_loc: Span,
+) -> ParseResult<AttributeNode> {
+    let expression = parse_optional_directive_value(parser_input)?;
+    let end = parser_input.previous_token_end();
+
+    Ok(AttributeNode::LetDirective(LetDirective {
+        span: Span::new(start, end),
+        name: name.to_string(),
+        name_loc: Some(name_loc),
+        expression,
+    }))
+}
+
+// --- Value parsing helpers ---
+
+/// Parse optional `={expr}` value for directives.
+fn parse_optional_directive_value(
+    parser_input: &mut ParserInput,
+) -> ParseResult<Option<Box<swc::Expr>>> {
+    let has_eq = opt(literal("=")).parse_next(parser_input)?.is_some();
+    if !has_eq {
+        return Ok(None);
+    }
+
+    // Must be {expr}
+    literal("{").parse_next(parser_input)?;
+    let expr_text = read_until_close_brace(parser_input)?;
+    literal("}").parse_next(parser_input)?;
+
+    let expr = swc_parse_expr(&expr_text, parser_input.state.ts)?;
+    Ok(Some(expr))
+}
+
 fn parse_attribute_value(parser_input: &mut ParserInput) -> ParseResult<AttributeValue> {
-    let next = winnow::token::any.parse_next(parser_input)?;
+    let next = peek(any).parse_next(parser_input)?;
     match next {
-        '"' => {
-            let val_start = parser_input.input.current_token_start();
-            let content: &str =
-                take_while(0.., |c: char| c != '"').parse_next(parser_input)?;
-            let val_end = parser_input.input.previous_token_end();
-            literal("\"").parse_next(parser_input)?;
-            Ok(AttributeValue::Sequence(vec![
-                AttributeSequenceValue::Text(Text {
-                    span: Span::new(val_start, val_end),
-                    data: content.to_string(),
-                    raw: content.to_string(),
-                }),
-            ]))
-        }
-        '\'' => {
-            let val_start = parser_input.input.current_token_start();
-            let content: &str =
-                take_while(0.., |c: char| c != '\'').parse_next(parser_input)?;
-            let val_end = parser_input.input.previous_token_end();
-            literal("'").parse_next(parser_input)?;
-            Ok(AttributeValue::Sequence(vec![
-                AttributeSequenceValue::Text(Text {
-                    span: Span::new(val_start, val_end),
-                    data: content.to_string(),
-                    raw: content.to_string(),
-                }),
-            ]))
+        '"' => parse_quoted_value(parser_input, '"'),
+        '\'' => parse_quoted_value(parser_input, '\''),
+        '{' => {
+            // Expression value: ={expr}
+            let start = parser_input.current_token_start();
+            literal("{").parse_next(parser_input)?;
+            let expr_text = read_until_close_brace(parser_input)?;
+            literal("}").parse_next(parser_input)?;
+            let end = parser_input.previous_token_end();
+            let expression = swc_parse_expr(&expr_text, parser_input.state.ts)?;
+            Ok(AttributeValue::Expression(ExpressionTag {
+                span: Span::new(start, end),
+                expression,
+            }))
         }
         _ => {
-            // Unquoted value: the first char is already consumed
-            let rest: &str = take_while(0.., |c: char| {
+            // Unquoted value
+            let val_start = parser_input.current_token_start();
+            let text: &str = take_while(1.., |c: char| {
                 !c.is_ascii_whitespace() && !matches!(c, '>' | '/' | '=' | '{' | '}' | '<')
             })
             .parse_next(parser_input)?;
-            let val_end = parser_input.input.previous_token_end();
-            // Reconstruct full value: first char + rest
-            let mut full = String::with_capacity(1 + rest.len());
-            full.push(next);
-            full.push_str(rest);
-            let val_start = val_end - full.len();
+            let val_end = parser_input.previous_token_end();
             Ok(AttributeValue::Sequence(vec![
                 AttributeSequenceValue::Text(Text {
                     span: Span::new(val_start, val_end),
-                    data: full.clone(),
-                    raw: full,
+                    data: text.to_string(),
+                    raw: text.to_string(),
                 }),
             ]))
         }
     }
+}
+
+/// Parse quoted attribute value with potential embedded expressions.
+fn parse_quoted_value(parser_input: &mut ParserInput, quote: char) -> ParseResult<AttributeValue> {
+    any.parse_next(parser_input)?; // consume opening quote
+
+    let mut sequence: Vec<AttributeSequenceValue> = Vec::new();
+    let mut text_buf = String::new();
+    let mut text_start = parser_input.current_token_start();
+
+    loop {
+        let c = peek(any).parse_next(parser_input)?;
+        if c == quote {
+            // Flush text buffer
+            if !text_buf.is_empty() {
+                let text_end = parser_input.current_token_start();
+                sequence.push(AttributeSequenceValue::Text(Text {
+                    span: Span::new(text_start, text_end),
+                    data: text_buf.clone(),
+                    raw: text_buf.clone(),
+                }));
+                text_buf.clear();
+            }
+            any.parse_next(parser_input)?; // consume closing quote
+            break;
+        } else if c == '{' {
+            // Flush text buffer
+            if !text_buf.is_empty() {
+                let text_end = parser_input.current_token_start();
+                sequence.push(AttributeSequenceValue::Text(Text {
+                    span: Span::new(text_start, text_end),
+                    data: text_buf.clone(),
+                    raw: text_buf.clone(),
+                }));
+                text_buf.clear();
+            }
+            // Parse expression
+            let expr_start = parser_input.current_token_start();
+            literal("{").parse_next(parser_input)?;
+            let expr_text = read_until_close_brace(parser_input)?;
+            literal("}").parse_next(parser_input)?;
+            let expr_end = parser_input.previous_token_end();
+            let expression = swc_parse_expr(&expr_text, parser_input.state.ts)?;
+            sequence.push(AttributeSequenceValue::Expression(ExpressionTag {
+                span: Span::new(expr_start, expr_end),
+                expression,
+            }));
+            text_start = parser_input.current_token_start();
+        } else {
+            any.parse_next(parser_input)?;
+            text_buf.push(c);
+        }
+    }
+
+    Ok(AttributeValue::Sequence(sequence))
+}
+
+// --- Modifier parsing ---
+
+fn parse_event_modifier(s: &str) -> Option<EventModifier> {
+    match s {
+        "capture" => Some(EventModifier::Capture),
+        "nonpassive" => Some(EventModifier::Nonpassive),
+        "once" => Some(EventModifier::Once),
+        "passive" => Some(EventModifier::Passive),
+        "preventDefault" => Some(EventModifier::PreventDefault),
+        "self" => Some(EventModifier::Self_),
+        "stopImmediatePropagation" => Some(EventModifier::StopImmediatePropagation),
+        "stopPropagation" => Some(EventModifier::StopPropagation),
+        "trusted" => Some(EventModifier::Trusted),
+        _ => None,
+    }
+}
+
+// --- SWC helpers ---
+
+fn read_until_close_brace(parser_input: &mut ParserInput) -> ParseResult<String> {
+    let mut buf = String::new();
+    let mut depth: u32 = 0;
+    loop {
+        let c = peek(any).parse_next(parser_input)?;
+        if c == '}' && depth == 0 {
+            break;
+        }
+        let c: char = any.parse_next(parser_input)?;
+        buf.push(c);
+        match c {
+            '{' => depth += 1,
+            '}' => depth -= 1,
+            '"' | '\'' => {
+                collect_string(parser_input, c, &mut buf)?;
+            }
+            '`' => {
+                collect_template(parser_input, &mut buf)?;
+            }
+            _ => {}
+        }
+    }
+    Ok(buf)
+}
+
+fn collect_string(parser_input: &mut ParserInput, quote: char, out: &mut String) -> ParseResult<()> {
+    loop {
+        let c: char = any.parse_next(parser_input)?;
+        out.push(c);
+        if c == quote {
+            return Ok(());
+        }
+        if c == '\\' {
+            let esc: char = any.parse_next(parser_input)?;
+            out.push(esc);
+        }
+    }
+}
+
+fn collect_template(parser_input: &mut ParserInput, out: &mut String) -> ParseResult<()> {
+    loop {
+        let c: char = any.parse_next(parser_input)?;
+        out.push(c);
+        match c {
+            '`' => return Ok(()),
+            '\\' => {
+                let esc: char = any.parse_next(parser_input)?;
+                out.push(esc);
+            }
+            _ => {}
+        }
+    }
+}
+
+fn swc_parse_expr(source: &str, ts: bool) -> ParseResult<Box<swc::Expr>> {
+    use swc_common::BytePos;
+    use swc_common::input::StringInput;
+    use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
+
+    let trimmed = source.trim();
+    let syntax = if ts {
+        Syntax::Typescript(TsSyntax {
+            tsx: true,
+            ..Default::default()
+        })
+    } else {
+        Syntax::Es(EsSyntax {
+            jsx: true,
+            ..Default::default()
+        })
+    };
+
+    let input = StringInput::new(trimmed, BytePos(0), BytePos(trimmed.len() as u32));
+    let mut parser = swc_ecma_parser::Parser::new(syntax, input, None);
+
+    parser.parse_expr().map_err(|e| {
+        e.into_diagnostic(&swc_common::errors::Handler::with_emitter(
+            true,
+            false,
+            Box::new(swc_common::errors::EmitterWriter::new(
+                Box::new(std::io::sink()),
+                None,
+                false,
+                false,
+            )),
+        ))
+        .cancel();
+        winnow::error::ContextError::new()
+    })
 }

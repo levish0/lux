@@ -16,6 +16,7 @@ use crate::span::Span;
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct RegularElement {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Span,
@@ -33,6 +34,7 @@ pub struct RegularElement {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Component {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Span,
@@ -51,6 +53,7 @@ pub struct Component {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SvelteElement {
+    #[serde(flatten)]
     pub span: Span,
     pub name_loc: Span,
     pub tag: Box<swc::Expr>,
@@ -69,6 +72,7 @@ pub struct SvelteElement {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SvelteComponent {
+    #[serde(flatten)]
     pub span: Span,
     pub name_loc: Span,
     pub expression: Box<swc::Expr>,
@@ -86,6 +90,7 @@ pub struct SvelteComponent {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SvelteSelf {
+    #[serde(flatten)]
     pub span: Span,
     pub name_loc: Span,
     pub attributes: Vec<AttributeNode>,
@@ -102,6 +107,7 @@ pub struct SvelteSelf {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SlotElement {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Span,
@@ -118,6 +124,7 @@ pub struct SlotElement {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SvelteHead {
+    #[serde(flatten)]
     pub span: Span,
     pub name_loc: Span,
     pub fragment: Fragment,
@@ -133,6 +140,7 @@ pub struct SvelteHead {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SvelteBody {
+    #[serde(flatten)]
     pub span: Span,
     pub name_loc: Span,
     pub attributes: Vec<AttributeNode>,
@@ -149,6 +157,7 @@ pub struct SvelteBody {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SvelteWindow {
+    #[serde(flatten)]
     pub span: Span,
     pub name_loc: Span,
     pub attributes: Vec<AttributeNode>,
@@ -165,6 +174,7 @@ pub struct SvelteWindow {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SvelteDocument {
+    #[serde(flatten)]
     pub span: Span,
     pub name_loc: Span,
     pub attributes: Vec<AttributeNode>,
@@ -181,6 +191,7 @@ pub struct SvelteDocument {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SvelteFragment {
+    #[serde(flatten)]
     pub span: Span,
     pub name_loc: Span,
     pub attributes: Vec<AttributeNode>,
@@ -197,6 +208,7 @@ pub struct SvelteFragment {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SvelteBoundary {
+    #[serde(flatten)]
     pub span: Span,
     pub name_loc: Span,
     pub attributes: Vec<AttributeNode>,
@@ -213,6 +225,7 @@ pub struct SvelteBoundary {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct TitleElement {
+    #[serde(flatten)]
     pub span: Span,
     pub name_loc: Span,
     pub attributes: Vec<AttributeNode>,
@@ -228,6 +241,7 @@ pub struct TitleElement {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SvelteOptionsRaw {
+    #[serde(flatten)]
     pub span: Span,
     pub name_loc: Span,
     pub attributes: Vec<Attribute>,

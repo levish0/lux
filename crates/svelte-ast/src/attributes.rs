@@ -15,6 +15,7 @@ use crate::text::Text;
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct Attribute {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
@@ -43,6 +44,7 @@ pub enum AttributeSequenceValue {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SpreadAttribute {
+    #[serde(flatten)]
     pub span: Span,
     pub name_loc: Option<Span>,
     pub expression: Box<swc::Expr>,
@@ -58,6 +60,7 @@ pub struct SpreadAttribute {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct BindDirective {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
@@ -74,6 +77,7 @@ pub struct BindDirective {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct ClassDirective {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
@@ -91,6 +95,7 @@ pub struct ClassDirective {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct StyleDirective {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
@@ -114,6 +119,7 @@ pub enum StyleModifier {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct OnDirective {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
@@ -147,6 +153,7 @@ pub enum EventModifier {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct TransitionDirective {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
@@ -172,6 +179,7 @@ pub enum TransitionModifier {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct AnimateDirective {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
@@ -188,6 +196,7 @@ pub struct AnimateDirective {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct UseDirective {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
@@ -204,6 +213,7 @@ pub struct UseDirective {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct LetDirective {
+    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,

@@ -15,6 +15,7 @@ use crate::span::Span;
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct IfBlock {
+    #[serde(flatten)]
     pub span: Span,
     pub elseif: bool,
     pub test: Box<swc::Expr>,
@@ -35,6 +36,7 @@ pub struct IfBlock {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct EachBlock {
+    #[serde(flatten)]
     pub span: Span,
     pub expression: Box<swc::Expr>,
     pub context: Option<Box<swc::Pat>>,
@@ -57,6 +59,7 @@ pub struct EachBlock {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct AwaitBlock {
+    #[serde(flatten)]
     pub span: Span,
     pub expression: Box<swc::Expr>,
     pub value: Option<Box<swc::Pat>>,
@@ -75,6 +78,7 @@ pub struct AwaitBlock {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct KeyBlock {
+    #[serde(flatten)]
     pub span: Span,
     pub expression: Box<swc::Expr>,
     pub fragment: Fragment,
@@ -91,6 +95,7 @@ pub struct KeyBlock {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SnippetBlock {
+    #[serde(flatten)]
     pub span: Span,
     pub expression: Box<swc::Ident>,
     pub parameters: Vec<swc::Pat>,
