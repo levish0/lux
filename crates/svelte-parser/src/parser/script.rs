@@ -175,7 +175,7 @@ fn collect_comments(comments: &SingleThreadedComments) -> Vec<JsComment> {
     }
 
     // Sort by start position
-    result.sort_by_key(|c| c.span.start);
+    result.sort_by_key(|c| c.span.map_or(0, |s| s.start));
     result
 }
 
@@ -187,7 +187,7 @@ fn swc_comment_to_js_comment(comment: &Comment) -> JsComment {
         CommentKind::Block => JsCommentKind::Block,
     };
     JsComment {
-        span: Span::new(start, end),
+        span: Some(Span::new(start, end)),
         kind,
         value: comment.text.to_string(),
     }

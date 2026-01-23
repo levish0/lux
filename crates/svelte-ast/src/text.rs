@@ -39,7 +39,7 @@ pub struct Comment {
  */
 #[derive(Debug, Clone)]
 pub struct JsComment {
-    pub span: Span,
+    pub span: Option<Span>,
     pub kind: JsCommentKind,
     pub value: String,
 }
@@ -53,8 +53,10 @@ impl Serialize for JsComment {
         };
         map.serialize_entry("type", type_str)?;
         map.serialize_entry("value", &self.value)?;
-        map.serialize_entry("start", &self.span.start)?;
-        map.serialize_entry("end", &self.span.end)?;
+        if let Some(span) = &self.span {
+            map.serialize_entry("start", &span.start)?;
+            map.serialize_entry("end", &span.end)?;
+        }
         map.end()
     }
 }

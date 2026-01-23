@@ -16,7 +16,7 @@ use winnow::token::{any, literal, take_while};
 
 use super::ParserInput;
 use super::bracket::read_until_close_brace;
-use super::swc_parse::parse_expression;
+use super::swc_parse::{parse_expression, parse_expression_with_comments};
 
 /// Parse a single attribute, directive, or spread.
 pub fn attribute_parser(parser_input: &mut ParserInput) -> ParseResult<AttributeNode> {
@@ -154,23 +154,40 @@ fn parse_bind_directive(
     name: &str,
     name_loc: Span,
 ) -> ParseResult<AttributeNode> {
-    let expression = parse_optional_directive_value(parser_input)?;
+    let (expr, leading_comments) = parse_bind_directive_value(parser_input, name)?;
     let end = parser_input.previous_token_end();
-
-    let expr = expression.unwrap_or_else(|| {
-        Box::new(swc::Expr::Ident(swc::Ident::new(
-            name.into(),
-            swc_common::DUMMY_SP,
-            Default::default(),
-        )))
-    });
 
     Ok(AttributeNode::BindDirective(BindDirective {
         span: Span::new(start, end),
         name: name.to_string(),
         name_loc: Some(name_loc),
         expression: expr,
+        leading_comments,
     }))
+}
+
+/// Parse bind directive value with comment collection.
+fn parse_bind_directive_value(
+    parser_input: &mut ParserInput,
+    name: &str,
+) -> ParseResult<(Box<swc::Expr>, Vec<svelte_ast::text::JsComment>)> {
+    if opt(literal("=")).parse_next(parser_input)?.is_none() {
+        let expr = Box::new(swc::Expr::Ident(swc::Ident::new(
+            name.into(),
+            swc_common::DUMMY_SP,
+            Default::default(),
+        )));
+        return Ok((expr, vec![]));
+    }
+
+    literal("{").parse_next(parser_input)?;
+    let expr_offset = parser_input.current_token_start() as u32;
+    let expr_text = read_until_close_brace(parser_input)?;
+    literal("}").parse_next(parser_input)?;
+
+    let (expr, comments) =
+        parse_expression_with_comments(expr_text, parser_input.state.ts, expr_offset)?;
+    Ok((expr, comments))
 }
 
 fn parse_on_directive(

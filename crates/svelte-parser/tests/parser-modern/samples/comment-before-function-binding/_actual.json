@@ -87,14 +87,19 @@
                   "type": "ArrowFunctionExpression"
                 }
               ],
+              "leadingComments": [
+                {
+                  "end": 66,
+                  "start": 58,
+                  "type": "Block",
+                  "value": "* ( "
+                }
+              ],
               "start": 68,
               "type": "SequenceExpression"
             },
+            "modifiers": [],
             "name": "value",
-            "name_loc": {
-              "end": 54,
-              "start": 44
-            },
             "start": 44,
             "type": "BindDirective"
           }

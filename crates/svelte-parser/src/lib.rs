@@ -5,9 +5,10 @@ mod parser;
 use svelte_ast::attributes::{AttributeSequenceValue, AttributeValue};
 use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::{
-    CustomElementOptions, Fragment, Root, SvelteOptions,
+    CustomElementOptions, Fragment, Root, Script, SvelteOptions,
 };
 use svelte_ast::span::Span;
+use svelte_ast::text::{JsComment, JsCommentKind};
 use swc_ecma_ast as swc;
 use winnow::stream::{LocatingSlice, Stateful};
 
@@ -42,12 +43,18 @@ pub fn parse(source: &str, options: ParseOptions) -> Result<Root, Vec<ParseError
     // Extract svelte:options from fragment (like reference Svelte's post-parse step)
     let options = extract_svelte_options(&mut nodes);
 
+    // Extract HTML comments preceding scripts as leadingComments on Program
+    let mut instance = parser_input.state.instance;
+    let mut module = parser_input.state.module;
+    attach_html_comment_to_script(&nodes, &mut instance);
+    attach_html_comment_to_script(&nodes, &mut module);
+
     let root = Root {
         span: Span::new(0, source.len()),
         fragment: Fragment { nodes },
         css: parser_input.state.css,
-        instance: parser_input.state.instance,
-        module: parser_input.state.module,
+        instance,
+        module,
         options,
         comments: parser_input.state.comments,
         ts,
@@ -154,6 +161,52 @@ fn get_static_text_value(value: &AttributeValue) -> Option<String> {
             None
         }
         _ => None,
+    }
+}
+
+/// If an HTML comment immediately precedes a script tag (with only whitespace between),
+/// attach it as a leadingComment to the Script's Program node.
+fn attach_html_comment_to_script(nodes: &[FragmentNode], script: &mut Option<Script>) {
+    let script = match script.as_mut() {
+        Some(s) => s,
+        None => return,
+    };
+
+    let script_start = script.span.start;
+
+    // Walk backwards through fragment nodes to find a Comment just before the script
+    // Allow only whitespace Text nodes between the comment and the script start
+    let mut comment_data = None;
+
+    for node in nodes.iter().rev() {
+        match node {
+            FragmentNode::Text(t) => {
+                // Only whitespace text is allowed between comment and script
+                if t.span.end <= script_start && t.data.trim().is_empty() {
+                    continue;
+                }
+                break;
+            }
+            FragmentNode::Comment(c) => {
+                if c.span.end <= script_start {
+                    comment_data = Some(c.data.clone());
+                }
+                break;
+            }
+            _ => break,
+        }
+    }
+
+    if let Some(data) = comment_data {
+        // Insert as a leading comment (type: "Line", no positions)
+        script.content_comments.insert(
+            0,
+            JsComment {
+                span: None,
+                kind: JsCommentKind::Line,
+                value: data,
+            },
+        );
     }
 }
 

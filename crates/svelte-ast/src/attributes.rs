@@ -93,14 +93,46 @@ pub struct SpreadAttribute {
  *   expression: Identifier | MemberExpression | SequenceExpression;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct BindDirective {
-    #[serde(flatten)]
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
+    pub leading_comments: Vec<crate::text::JsComment>,
+}
+
+impl Serialize for BindDirective {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        use serde::ser::Error as SerError;
+
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+
+        // Serialize expression with optional leadingComments
+        let expr_value =
+            serde_json::to_value(self.expression.as_ref()).map_err(S::Error::custom)?;
+        let mut transformed = crate::utils::estree::transform_value_pub(expr_value);
+        if !self.leading_comments.is_empty() {
+            if let serde_json::Value::Object(ref mut obj) = transformed {
+                let comments_val: Vec<serde_json::Value> = self
+                    .leading_comments
+                    .iter()
+                    .map(|c| serde_json::to_value(c).unwrap())
+                    .collect();
+                obj.insert(
+                    "leadingComments".to_string(),
+                    serde_json::Value::Array(comments_val),
+                );
+            }
+        }
+        map.serialize_entry("expression", &transformed)?;
+
+        map.serialize_entry("modifiers", &Vec::<String>::new())?;
+        map.serialize_entry("name", &self.name)?;
+        map.end()
+    }
 }
 
 /*

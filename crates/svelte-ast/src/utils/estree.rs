@@ -165,7 +165,8 @@ impl<'a> Serialize for ProgramWithComments<'a> {
 
                     for comment in self.comments {
                         let c_val = serde_json::to_value(comment).map_err(S::Error::custom)?;
-                        if (comment.span.start as u64) < body_start {
+                        let comment_start = comment.span.map_or(0, |s| s.start) as u64;
+                        if comment_start < body_start {
                             leading.push(c_val);
                         } else {
                             trailing.push(c_val);
@@ -184,6 +185,11 @@ impl<'a> Serialize for ProgramWithComments<'a> {
 
         transformed.serialize(s)
     }
+}
+
+/// Transform a serde_json::Value from SWC format to ESTree format (public API).
+pub fn transform_value_pub(value: Value) -> Value {
+    transform_value(value)
 }
 
 /// Transform a serde_json::Value from SWC format to ESTree format.

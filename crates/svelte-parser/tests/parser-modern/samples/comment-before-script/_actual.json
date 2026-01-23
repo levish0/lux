@@ -75,6 +75,12 @@
         }
       ],
       "end": 67,
+      "leadingComments": [
+        {
+          "type": "Line",
+          "value": "should not error out"
+        }
+      ],
       "sourceType": "module",
       "start": 46,
       "type": "Program"

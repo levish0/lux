@@ -1,4 +1,7 @@
+use svelte_ast::span::Span;
+use svelte_ast::text::{JsComment, JsCommentKind};
 use swc_common::BytePos;
+use swc_common::comments::{CommentKind, SingleThreadedComments};
 use swc_common::input::StringInput;
 use swc_ecma_ast as swc;
 use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
@@ -51,6 +54,54 @@ pub fn parse_expression(source: &str, ts: bool, offset: u32) -> ParseResult<Box<
     let mut parser = swc_ecma_parser::Parser::new(make_syntax(ts), input, None);
 
     parser.parse_expr().map_err(swc_error_to_parse_error)
+}
+
+/// Parse a JavaScript/TypeScript expression and collect leading comments.
+/// Returns the expression and any leading comments found before the expression.
+pub fn parse_expression_with_comments(
+    source: &str,
+    ts: bool,
+    offset: u32,
+) -> ParseResult<(Box<swc::Expr>, Vec<JsComment>)> {
+    let leading_ws = source.len() - source.trim_start().len();
+    let trimmed = source.trim();
+    if trimmed.is_empty() {
+        return Err(winnow::error::ContextError::new());
+    }
+    let actual_offset = offset + leading_ws as u32;
+
+    let comments = SingleThreadedComments::default();
+    let input = StringInput::new(
+        trimmed,
+        BytePos(actual_offset),
+        BytePos(actual_offset + trimmed.len() as u32),
+    );
+    let mut parser = swc_ecma_parser::Parser::new(make_syntax(ts), input, Some(&comments));
+
+    let expr = parser.parse_expr().map_err(swc_error_to_parse_error)?;
+
+    // Collect leading comments (comments before the expression start)
+    let (leading_map, _trailing_map) = comments.borrow_all();
+    let mut js_comments = Vec::new();
+    for (_pos, comment_vec) in leading_map.iter() {
+        for comment in comment_vec {
+            let kind = match comment.kind {
+                CommentKind::Line => JsCommentKind::Line,
+                CommentKind::Block => JsCommentKind::Block,
+            };
+            js_comments.push(JsComment {
+                span: Some(Span::new(
+                    comment.span.lo.0 as usize,
+                    comment.span.hi.0 as usize,
+                )),
+                kind,
+                value: comment.text.to_string(),
+            });
+        }
+    }
+    js_comments.sort_by_key(|c| c.span.map_or(0, |s| s.start));
+
+    Ok((expr, js_comments))
 }
 
 /// Parse a destructuring pattern from source text.
