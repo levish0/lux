@@ -274,4 +274,3 @@ fn read_declaration_property<'a>(source: &'a str, pos: &mut usize) -> &'a str {
     }
     &source[start..*pos]
 }
-

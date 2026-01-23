@@ -26,7 +26,12 @@ fn parse_selector_list_inner(
     let start = *pos;
     let mut children = Vec::new();
 
-    children.push(parse_complex_selector(source, pos, offset, inside_pseudo_class)?);
+    children.push(parse_complex_selector(
+        source,
+        pos,
+        offset,
+        inside_pseudo_class,
+    )?);
 
     loop {
         let p = skip_css_whitespace_and_comments(source, *pos);
@@ -35,7 +40,12 @@ fn parse_selector_list_inner(
         }
         *pos = p + 1; // consume comma
         *pos = skip_css_whitespace_and_comments(source, *pos);
-        children.push(parse_complex_selector(source, pos, offset, inside_pseudo_class)?);
+        children.push(parse_complex_selector(
+            source,
+            pos,
+            offset,
+            inside_pseudo_class,
+        )?);
     }
 
     Ok(SelectorList {
@@ -54,7 +64,12 @@ fn parse_complex_selector(
     let start = *pos;
     let mut children = Vec::new();
 
-    children.push(parse_relative_selector(source, pos, offset, inside_pseudo_class)?);
+    children.push(parse_relative_selector(
+        source,
+        pos,
+        offset,
+        inside_pseudo_class,
+    )?);
 
     loop {
         let ws_start = *pos;
@@ -147,7 +162,12 @@ fn parse_relative_selector(
             }
         }
 
-        selectors.push(parse_simple_selector(source, pos, offset, inside_pseudo_class)?);
+        selectors.push(parse_simple_selector(
+            source,
+            pos,
+            offset,
+            inside_pseudo_class,
+        )?);
     }
 
     if selectors.is_empty() {
@@ -245,9 +265,15 @@ fn try_match_nth(source: &str) -> Option<usize> {
     let mut p: usize = 0;
 
     // Match the An+B part
-    if bytes.len() >= 4 && &source[..4] == "even" && (bytes.len() == 4 || !bytes[4].is_ascii_alphanumeric()) {
+    if bytes.len() >= 4
+        && &source[..4] == "even"
+        && (bytes.len() == 4 || !bytes[4].is_ascii_alphanumeric())
+    {
         p = 4;
-    } else if bytes.len() >= 3 && &source[..3] == "odd" && (bytes.len() == 3 || !bytes[3].is_ascii_alphanumeric()) {
+    } else if bytes.len() >= 3
+        && &source[..3] == "odd"
+        && (bytes.len() == 3 || !bytes[3].is_ascii_alphanumeric())
+    {
         p = 3;
     } else {
         // [+-]?\d*n?(\s*[+-]\s*\d+)?
@@ -403,23 +429,16 @@ fn parse_pseudo_class_selector(
             // Parse as selector list with inside_pseudo_class=true (enables nth detection)
             // parse_selector_list_inner will skip leading whitespace/comments
             let mut inner_pos = 0;
-            match parse_selector_list_inner(
-                args_content,
-                &mut inner_pos,
-                inner_offset,
-                true,
-            ) {
+            match parse_selector_list_inner(args_content, &mut inner_pos, inner_offset, true) {
                 Ok(list) => {
                     // Check all content consumed (allow trailing whitespace/comments)
-                    let remaining =
-                        skip_css_whitespace_and_comments(args_content, inner_pos);
+                    let remaining = skip_css_whitespace_and_comments(args_content, inner_pos);
                     if remaining >= args_content.len() {
                         Some(Box::new(list))
                     } else {
                         // Fallback: wrap entire content as Nth
                         let trimmed = args_content.trim();
-                        let leading =
-                            args_content.len() - args_content.trim_start().len();
+                        let leading = args_content.len() - args_content.trim_start().len();
                         let nth_start = inner_offset as usize + leading;
                         let nth_end = nth_start + trimmed.len();
                         let nth_span = Span::new(nth_start, nth_end);
@@ -445,8 +464,7 @@ fn parse_pseudo_class_selector(
                 Err(_) => {
                     // Fallback: wrap entire content as Nth
                     let trimmed = args_content.trim();
-                    let leading =
-                        args_content.len() - args_content.trim_start().len();
+                    let leading = args_content.len() - args_content.trim_start().len();
                     let nth_start = inner_offset as usize + leading;
                     let nth_end = nth_start + trimmed.len();
                     let nth_span = Span::new(nth_start, nth_end);

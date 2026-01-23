@@ -4,9 +4,7 @@ mod parser;
 
 use svelte_ast::attributes::{AttributeSequenceValue, AttributeValue};
 use svelte_ast::node::{AttributeNode, FragmentNode};
-use svelte_ast::root::{
-    CustomElementOptions, Fragment, Root, Script, SvelteOptions,
-};
+use svelte_ast::root::{CustomElementOptions, Fragment, Root, Script, SvelteOptions};
 use svelte_ast::span::Span;
 use svelte_ast::text::{JsComment, JsCommentKind};
 use swc_ecma_ast as swc;
@@ -138,12 +136,10 @@ fn extract_svelte_options(nodes: &mut Vec<FragmentNode>) -> Option<SvelteOptions
 fn get_boolean_attribute_value(value: &AttributeValue) -> Option<bool> {
     match value {
         AttributeValue::True => Some(true),
-        AttributeValue::Expression(expr_tag) => {
-            match expr_tag.expression.as_ref() {
-                swc::Expr::Lit(swc::Lit::Bool(b)) => Some(b.value),
-                _ => None,
-            }
-        }
+        AttributeValue::Expression(expr_tag) => match expr_tag.expression.as_ref() {
+            swc::Expr::Lit(swc::Lit::Bool(b)) => Some(b.value),
+            _ => None,
+        },
         _ => None,
     }
 }

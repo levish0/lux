@@ -150,10 +150,24 @@ fn named_attribute_parser(parser_input: &mut ParserInput) -> ParseResult<Attribu
                 return parse_transition_directive(parser_input, start, rest, name_loc, true, true);
             }
             "in" => {
-                return parse_transition_directive(parser_input, start, rest, name_loc, true, false);
+                return parse_transition_directive(
+                    parser_input,
+                    start,
+                    rest,
+                    name_loc,
+                    true,
+                    false,
+                );
             }
             "out" => {
-                return parse_transition_directive(parser_input, start, rest, name_loc, false, true);
+                return parse_transition_directive(
+                    parser_input,
+                    start,
+                    rest,
+                    name_loc,
+                    false,
+                    true,
+                );
             }
             "animate" => return parse_animate_directive(parser_input, start, rest, name_loc),
             "use" => return parse_use_directive(parser_input, start, rest, name_loc),
@@ -438,7 +452,12 @@ fn parse_expression_value(parser_input: &mut ParserInput) -> ParseResult<Attribu
     literal("}").parse_next(parser_input)?;
     let end = parser_input.previous_token_end();
     let loose = parser_input.state.loose;
-    let expression = super::expression::parse_expression_or_loose(expr_text, parser_input.state.ts, expr_offset, loose)?;
+    let expression = super::expression::parse_expression_or_loose(
+        expr_text,
+        parser_input.state.ts,
+        expr_offset,
+        loose,
+    )?;
     Ok(AttributeValue::Expression(ExpressionTag {
         span: Span::new(start, end),
         expression,

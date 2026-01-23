@@ -153,7 +153,12 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
     let expr_offset = parser_input.current_token_start();
     let (expression, has_as) = match read_until_keyword_balanced(parser_input, " as ") {
         Ok(expr_text) => {
-            let expr = parse_expression_or_loose(expr_text, parser_input.state.ts, expr_offset as u32, loose)?;
+            let expr = parse_expression_or_loose(
+                expr_text,
+                parser_input.state.ts,
+                expr_offset as u32,
+                loose,
+            )?;
             (expr, true)
         }
         Err(_) if loose => {
@@ -197,7 +202,12 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
         let key = if opt(literal("(")).parse_next(parser_input)?.is_some() {
             let key_offset = parser_input.current_token_start();
             let key_content = read_until_close_paren(parser_input)?;
-            let key_expr = parse_expression_or_loose(key_content, parser_input.state.ts, key_offset as u32, loose)?;
+            let key_expr = parse_expression_or_loose(
+                key_content,
+                parser_input.state.ts,
+                key_offset as u32,
+                loose,
+            )?;
             literal(")").parse_next(parser_input)?;
             take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
             Some(key_expr)
@@ -331,7 +341,9 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
             peek(block_continuation_or_close("await")),
         )
         .parse_next(parser_input)?;
-        pending = Some(Fragment { nodes: pending_nodes });
+        pending = Some(Fragment {
+            nodes: pending_nodes,
+        });
 
         // {:then value}
         if opt(literal("{:then")).parse_next(parser_input)?.is_some() {
@@ -414,9 +426,7 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
     let type_params = if parser_input.state.ts {
         let _: &str =
             take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
-        if !parser_input.input.is_empty()
-            && parser_input.input.as_bytes()[0] == b'<'
-        {
+        if !parser_input.input.is_empty() && parser_input.input.as_bytes()[0] == b'<' {
             // Find matching > handling nested <>, strings, etc.
             let remaining: &str = &parser_input.input;
             if let Some(end_offset) = find_matching_angle_bracket(remaining) {

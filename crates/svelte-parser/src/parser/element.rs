@@ -88,6 +88,7 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
         fragment,
         span,
         parent_is_shadowroot || has_shadowrootmode,
+        loose,
     ))
 }
 
@@ -100,7 +101,10 @@ fn parse_children_loose(
 
     loop {
         // Check for our own closing tag
-        if opt(peek(closing_tag_peek(name))).parse_next(parser_input)?.is_some() {
+        if opt(peek(closing_tag_peek(name)))
+            .parse_next(parser_input)?
+            .is_some()
+        {
             // Consume the closing tag
             closing_tag_parser(name).parse_next(parser_input)?;
             return Ok(nodes);
@@ -178,8 +182,10 @@ fn parse_attributes_loose(parser_input: &mut ParserInput) -> ParseResult<Vec<Att
 
         // stop if we hit < (start of new tag) or {/ or {# or {: (block boundaries)
         let remaining: &str = &parser_input.input;
-        if remaining.starts_with('<') || remaining.starts_with("{/")
-            || remaining.starts_with("{#") || remaining.starts_with("{:")
+        if remaining.starts_with('<')
+            || remaining.starts_with("{/")
+            || remaining.starts_with("{#")
+            || remaining.starts_with("{:")
         {
             break;
         }
@@ -237,6 +243,7 @@ fn classify_element(
     fragment: Fragment,
     span: Span,
     is_inside_shadowroot: bool,
+    loose: bool,
 ) -> FragmentNode {
     match name {
         "svelte:head" => FragmentNode::SvelteHead(SvelteHead {
@@ -312,7 +319,10 @@ fn classify_element(
             fragment,
         }),
         _ => {
-            if name.starts_with(char::is_uppercase) || name.contains('.') {
+            if name.starts_with(char::is_uppercase)
+                || (name.contains('.') && !name.ends_with('.'))
+                || (loose && name.ends_with('.'))
+            {
                 FragmentNode::Component(Component {
                     span,
                     name: name.to_string(),

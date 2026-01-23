@@ -371,7 +371,10 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
             "MemberExpression" | "OptionalMemberExpression" => {
                 let is_optional = t == "OptionalMemberExpression";
                 if is_optional {
-                    obj.insert("type".to_string(), Value::String("MemberExpression".to_string()));
+                    obj.insert(
+                        "type".to_string(),
+                        Value::String("MemberExpression".to_string()),
+                    );
                 }
                 // SWC already serializes as "object" and "property"
                 // Also handle legacy "obj"/"prop" field names just in case
