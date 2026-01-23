@@ -46,38 +46,44 @@
               },
               "start": 58,
               "type": "RegularElement"
+            },
+            {
+              "data": "\n",
+              "end": 71,
+              "raw": "\n",
+              "start": 70,
+              "type": "Text"
             }
           ],
           "type": "Fragment"
         },
         "end": 81,
         "expression": {
-          "end": 0,
+          "end": 42,
           "name": "foo",
-          "start": 0,
+          "start": 39,
           "type": "Identifier"
         },
         "parameters": [
           {
-            "end": 12,
+            "end": 54,
             "name": "msg",
-            "start": 1,
+            "start": 43,
             "type": "Identifier",
             "typeAnnotation": {
-              "end": 12,
-              "start": 4,
+              "end": 54,
+              "start": 46,
               "type": "TSTypeAnnotation",
               "typeAnnotation": {
-                "end": 12,
-                "start": 6,
+                "end": 54,
+                "start": 48,
                 "type": "TSStringKeyword"
               }
             }
           }
         ],
         "start": 29,
-        "type": "SnippetBlock",
-        "type_params": null
+        "type": "SnippetBlock"
       },
       {
         "data": "\n\n",

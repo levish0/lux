@@ -112,8 +112,12 @@ pub struct SnippetBlock {
     pub span: Span,
     #[serde(serialize_with = "crate::utils::estree::serialize_boxed_ident")]
     pub expression: Box<swc::Ident>,
+    #[serde(
+        rename = "typeParams",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub type_params: Option<String>,
     #[serde(serialize_with = "crate::utils::estree::serialize_pats")]
     pub parameters: Vec<swc::Pat>,
-    pub type_params: Option<String>,
     pub body: Fragment,
 }

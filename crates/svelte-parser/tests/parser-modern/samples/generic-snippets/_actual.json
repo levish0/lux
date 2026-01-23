@@ -9,6 +9,145 @@
         "raw": "\n\n",
         "start": 28,
         "type": "Text"
+      },
+      {
+        "body": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 76,
+              "raw": "\n\t",
+              "start": 74,
+              "type": "Text"
+            },
+            {
+              "end": 81,
+              "expression": {
+                "end": 80,
+                "name": "val",
+                "start": 77,
+                "type": "Identifier"
+              },
+              "start": 76,
+              "type": "ExpressionTag"
+            },
+            {
+              "data": "\n",
+              "end": 82,
+              "raw": "\n",
+              "start": 81,
+              "type": "Text"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "end": 92,
+        "expression": {
+          "end": 47,
+          "name": "generic",
+          "start": 40,
+          "type": "Identifier"
+        },
+        "parameters": [
+          {
+            "end": 72,
+            "name": "val",
+            "start": 66,
+            "type": "Identifier",
+            "typeAnnotation": {
+              "end": 72,
+              "start": 69,
+              "type": "TSTypeAnnotation",
+              "typeAnnotation": {
+                "end": 72,
+                "start": 71,
+                "type": "TSTypeReference",
+                "typeName": {
+                  "end": 72,
+                  "name": "T",
+                  "start": 71,
+                  "type": "Identifier"
+                }
+              }
+            }
+          }
+        ],
+        "start": 30,
+        "type": "SnippetBlock",
+        "typeParams": "T extends string"
+      },
+      {
+        "data": "\n\n",
+        "end": 94,
+        "raw": "\n\n",
+        "start": 92,
+        "type": "Text"
+      },
+      {
+        "body": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 176,
+              "raw": "\n\t",
+              "start": 174,
+              "type": "Text"
+            },
+            {
+              "end": 181,
+              "expression": {
+                "end": 180,
+                "name": "val",
+                "start": 177,
+                "type": "Identifier"
+              },
+              "start": 176,
+              "type": "ExpressionTag"
+            },
+            {
+              "data": "\n",
+              "end": 182,
+              "raw": "\n",
+              "start": 181,
+              "type": "Text"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "end": 192,
+        "expression": {
+          "end": 119,
+          "name": "complex_generic",
+          "start": 104,
+          "type": "Identifier"
+        },
+        "parameters": [
+          {
+            "end": 172,
+            "name": "val",
+            "start": 166,
+            "type": "Identifier",
+            "typeAnnotation": {
+              "end": 172,
+              "start": 169,
+              "type": "TSTypeAnnotation",
+              "typeAnnotation": {
+                "end": 172,
+                "start": 171,
+                "type": "TSTypeReference",
+                "typeName": {
+                  "end": 172,
+                  "name": "T",
+                  "start": 171,
+                  "type": "Identifier"
+                }
+              }
+            }
+          }
+        ],
+        "start": 94,
+        "type": "SnippetBlock",
+        "typeParams": "T extends { bracket: \"<\" } | \"<\" | Set<\"<>\">"
       }
     ],
     "type": "Fragment"

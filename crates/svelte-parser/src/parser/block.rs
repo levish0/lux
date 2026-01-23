@@ -336,36 +336,123 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
 fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult<FragmentNode> {
     take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
-    // Read snippet name
+    // Read snippet name with actual positions
+    let name_start = parser_input.current_token_start();
     let name: &str = take_while(1.., |c: char| c.is_ascii_alphanumeric() || c == '_')
         .parse_next(parser_input)?;
+    let name_end = parser_input.current_token_start();
     let ident = Box::new(swc::Ident::new(
         name.into(),
-        swc_common::DUMMY_SP,
+        swc_common::Span::new(
+            swc_common::BytePos(name_start as u32),
+            swc_common::BytePos(name_end as u32),
+        ),
         Default::default(),
     ));
 
-    // Parse parameters
+    // Optional generic type params: <T extends string>
+    let type_params = if parser_input.state.ts {
+        let _: &str =
+            take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+        if !parser_input.input.is_empty()
+            && parser_input.input.as_bytes()[0] == b'<'
+        {
+            // Find matching > handling nested <>, strings, etc.
+            let remaining: &str = &parser_input.input;
+            if let Some(end_offset) = find_matching_angle_bracket(remaining) {
+                let content = &remaining[1..end_offset]; // between < and >
+                let type_params_str = content.to_string();
+                let _: &str = take(end_offset + 1).parse_next(parser_input)?;
+                Some(type_params_str)
+            } else {
+                None
+            }
+        } else {
+            // No generics, but we consumed whitespace - that's fine, we'll
+            // skip whitespace again before ( anyway
+            None
+        }
+    } else {
+        None
+    };
+
+    take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+
+    // Parse parameters with correct offset
+    let paren_offset = parser_input.current_token_start();
     literal("(").parse_next(parser_input)?;
     let params_content = read_until_close_paren(parser_input)?;
     literal(")").parse_next(parser_input)?;
     take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
     literal("}").parse_next(parser_input)?;
 
-    let parameters = parse_param_list(params_content, parser_input.state.ts)?;
+    let parameters = parse_param_list(params_content, parser_input.state.ts, paren_offset as u32)?;
 
+    // Use peek terminator so trailing text before {/snippet} is captured in the body
     let (nodes, _): (Vec<FragmentNode>, _) =
-        repeat_till(0.., fragment_node_parser, block_close("snippet")).parse_next(parser_input)?;
+        repeat_till(0.., fragment_node_parser, peek(block_close_peek("snippet")))
+            .parse_next(parser_input)?;
+
+    // Consume {/snippet}
+    literal("{/snippet}").parse_next(parser_input)?;
 
     let end = parser_input.previous_token_end();
 
     Ok(FragmentNode::SnippetBlock(SnippetBlock {
         span: Span::new(start, end),
         expression: ident,
+        type_params,
         parameters,
-        type_params: None,
         body: Fragment { nodes },
     }))
+}
+
+/// Find the position of the matching `>` for an opening `<` at position 0.
+/// Handles nested `<>`, string literals, and escaped chars.
+/// Returns the byte offset of the closing `>`, or None if not found.
+fn find_matching_angle_bracket(s: &str) -> Option<usize> {
+    let bytes = s.as_bytes();
+    if bytes.is_empty() || bytes[0] != b'<' {
+        return None;
+    }
+    let mut depth: u32 = 1;
+    let mut i = 1;
+
+    while i < bytes.len() && depth > 0 {
+        match bytes[i] {
+            b'<' => {
+                depth += 1;
+                i += 1;
+            }
+            b'>' => {
+                depth -= 1;
+                if depth == 0 {
+                    return Some(i);
+                }
+                i += 1;
+            }
+            b'"' | b'\'' | b'`' => {
+                let quote = bytes[i];
+                i += 1;
+                while i < bytes.len() && bytes[i] != quote {
+                    if bytes[i] == b'\\' {
+                        i += 1;
+                        if i >= bytes.len() {
+                            break;
+                        }
+                    }
+                    i += 1;
+                }
+                if i < bytes.len() {
+                    i += 1; // past closing quote
+                }
+            }
+            _ => {
+                i += 1;
+            }
+        }
+    }
+    None
 }
 
 // --- Helper parsers ---

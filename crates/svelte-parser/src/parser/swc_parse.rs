@@ -118,14 +118,16 @@ pub fn parse_var_decl(source: &str, ts: bool) -> ParseResult<Box<swc::VarDecl>> 
 }
 
 /// Parse a parameter list from source text (for snippet params).
-pub fn parse_param_list(source: &str, ts: bool) -> ParseResult<Vec<swc::Pat>> {
+/// `offset` is the position of the `(` in the overall source document.
+pub fn parse_param_list(source: &str, ts: bool, offset: u32) -> ParseResult<Vec<swc::Pat>> {
     let trimmed = source.trim();
     if trimmed.is_empty() {
         return Ok(vec![]);
     }
 
-    let wrapper = format!("({}) => {{}}", trimmed);
-    let expr = parse_expression(&wrapper, ts, 0)?;
+    // Wrap as (content) => {} and parse at offset so SWC positions are correct
+    let wrapper = format!("({}) => {{}}", source);
+    let expr = parse_expression(&wrapper, ts, offset)?;
     match *expr {
         swc::Expr::Arrow(arrow) => Ok(arrow.params),
         _ => Ok(vec![]),
