@@ -1,4 +1,4 @@
-name: svelte-ts build
+name: svelte-rs build
 
 on:
   push:

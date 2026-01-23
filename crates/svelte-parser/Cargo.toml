@@ -10,6 +10,5 @@ description = "svelte-parser"
 
 [dependencies]
 winnow = { workspace = true }
-paste = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

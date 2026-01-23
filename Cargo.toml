@@ -13,15 +13,15 @@ rust-version = "1.92.0"
 
 [workspace.dependencies]
 # Internal crates
+svelte-ast = { path = "crates/svelte-ast" }
 svelte-parser = { path = "crates/svelte-parser" }
 svelte-transformer = { path = "crates/svelte-transformer" }
 
 # External dependencies
-[dependencies]
 winnow = { version = "0.7.14", features = ["simd"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 swc_ecma_parser = "33.0.0"
-swc_ecma_ast = "20.0.0"
+swc_ecma_ast = { version = "20.0.0", features = ["serde-impl"] }
 swc_ecma_visit = "20.0.0"
 swc_common = { version = "18.0.1", features = ["sourcemap"] }
