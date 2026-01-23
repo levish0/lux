@@ -1,7 +1,6 @@
 use serde::Serialize;
 use swc_ecma_ast as swc;
 
-use crate::attributes::Attribute;
 use crate::node::AttributeNode;
 use crate::root::Fragment;
 use crate::span::Span;
@@ -244,5 +243,5 @@ pub struct SvelteOptionsRaw {
     #[serde(flatten)]
     pub span: Span,
     pub name_loc: Span,
-    pub attributes: Vec<Attribute>,
+    pub attributes: Vec<AttributeNode>,
 }

@@ -45,7 +45,18 @@ impl Serialize for AttributeValue {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         match self {
             AttributeValue::True => s.serialize_bool(true),
-            AttributeValue::Expression(e) => e.serialize(s),
+            AttributeValue::Expression(e) => {
+                // Need to include "type": "ExpressionTag" since we're not in a tagged enum
+                let mut map = s.serialize_map(None)?;
+                map.serialize_entry("type", "ExpressionTag")?;
+                map.serialize_entry("start", &e.span.start)?;
+                map.serialize_entry("end", &e.span.end)?;
+                map.serialize_entry(
+                    "expression",
+                    &crate::utils::estree::ExprWrapper(&e.expression),
+                )?;
+                map.end()
+            }
             AttributeValue::Sequence(items) => items.serialize(s),
         }
     }

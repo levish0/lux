@@ -27,6 +27,8 @@ pub struct ParseContext {
     pub css: Option<StyleSheet>,
     /// Stack of elements currently being parsed
     pub element_stack: Vec<ElementStackEntry>,
+    /// When true, quoted attribute values are parsed as plain text (no expression interpolation)
+    pub text_only_attributes: bool,
 }
 
 impl ParseContext {
@@ -43,6 +45,7 @@ impl ParseContext {
             module: None,
             css: None,
             element_stack: Vec::new(),
+            text_only_attributes: false,
         }
     }
 

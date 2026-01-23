@@ -59,6 +59,9 @@ pub fn script_parser(parser_input: &mut ParserInput) -> ParseResult<Script> {
 }
 
 fn parse_script_attributes(parser_input: &mut ParserInput) -> ParseResult<Vec<AttributeNode>> {
+    // Script tag attributes should not have expression interpolation in quoted values
+    // e.g. generics="T extends { foo: number }" should be plain text
+    parser_input.state.text_only_attributes = true;
     let mut attributes = Vec::new();
     loop {
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
@@ -68,6 +71,7 @@ fn parse_script_attributes(parser_input: &mut ParserInput) -> ParseResult<Vec<At
         }
         attributes.push(attribute_parser(parser_input)?);
     }
+    parser_input.state.text_only_attributes = false;
     Ok(attributes)
 }
 

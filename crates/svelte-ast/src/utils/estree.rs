@@ -3,6 +3,17 @@ use serde::{Serialize, Serializer};
 use serde_json::{Map, Value};
 use swc_ecma_ast as swc;
 
+/// Wrapper for serializing an expression in ESTree format via `serialize_map`.
+pub struct ExprWrapper<'a>(pub &'a Box<swc::Expr>);
+
+impl<'a> Serialize for ExprWrapper<'a> {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let value = serde_json::to_value(self.0.as_ref()).map_err(S::Error::custom)?;
+        let transformed = transform_value(value);
+        transformed.serialize(s)
+    }
+}
+
 /// Serialize a `Box<swc::Expr>` in ESTree format.
 pub fn serialize_boxed_expr<S: Serializer>(expr: &Box<swc::Expr>, s: S) -> Result<S::Ok, S::Error> {
     let value = serde_json::to_value(expr.as_ref()).map_err(S::Error::custom)?;

@@ -4,62 +4,6 @@
   "fragment": {
     "nodes": [
       {
-        "attributes": [
-          {
-            "end": 49,
-            "name": "customElement",
-            "name_loc": {
-              "end": 29,
-              "start": 16
-            },
-            "start": 16,
-            "type": "Attribute",
-            "value": [
-              {
-                "data": "my-custom-element",
-                "end": 48,
-                "raw": "my-custom-element",
-                "start": 31,
-                "type": "Text"
-              }
-            ]
-          },
-          {
-            "end": 62,
-            "name": "runes",
-            "name_loc": {
-              "end": 55,
-              "start": 50
-            },
-            "start": 50,
-            "type": "Attribute",
-            "value": {
-              "end": 62,
-              "expression": {
-                "end": 61,
-                "raw": "true",
-                "start": 57,
-                "type": "Literal",
-                "value": true
-              },
-              "start": 56
-            }
-          }
-        ],
-        "end": 65,
-        "fragment": {
-          "nodes": [],
-          "type": "Fragment"
-        },
-        "name": "svelte:options",
-        "name_loc": {
-          "end": 15,
-          "start": 1
-        },
-        "start": 0,
-        "type": "RegularElement"
-      },
-      {
         "data": "\n\n",
         "end": 67,
         "raw": "\n\n",
@@ -108,22 +52,11 @@
         "type": "Attribute",
         "value": [
           {
-            "data": "T extends ",
-            "end": 142,
-            "raw": "T extends ",
+            "data": "T extends { foo: number }",
+            "end": 157,
+            "raw": "T extends { foo: number }",
             "start": 132,
             "type": "Text"
-          },
-          {
-            "end": 157,
-            "expression": {
-              "end": 147,
-              "name": "foo",
-              "start": 144,
-              "type": "Identifier"
-            },
-            "start": 142,
-            "type": "ExpressionTag"
           }
         ]
       }
@@ -186,7 +119,57 @@
     "start": 67,
     "type": "Script"
   },
-  "options": null,
+  "options": {
+    "attributes": [
+      {
+        "end": 49,
+        "name": "customElement",
+        "name_loc": {
+          "end": 29,
+          "start": 16
+        },
+        "start": 16,
+        "type": "Attribute",
+        "value": [
+          {
+            "data": "my-custom-element",
+            "end": 48,
+            "raw": "my-custom-element",
+            "start": 31,
+            "type": "Text"
+          }
+        ]
+      },
+      {
+        "end": 62,
+        "name": "runes",
+        "name_loc": {
+          "end": 55,
+          "start": 50
+        },
+        "start": 50,
+        "type": "Attribute",
+        "value": {
+          "end": 62,
+          "expression": {
+            "end": 61,
+            "raw": "true",
+            "start": 57,
+            "type": "Literal",
+            "value": true
+          },
+          "start": 56,
+          "type": "ExpressionTag"
+        }
+      }
+    ],
+    "customElement": {
+      "tag": "my-custom-element"
+    },
+    "end": 65,
+    "runes": true,
+    "start": 0
+  },
   "start": 0,
   "type": "Root"
 }

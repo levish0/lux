@@ -1,6 +1,6 @@
 use svelte_ast::elements::{
     Component, RegularElement, SlotElement, SvelteBody, SvelteBoundary, SvelteDocument,
-    SvelteFragment, SvelteHead, SvelteSelf, SvelteWindow, TitleElement,
+    SvelteFragment, SvelteHead, SvelteOptionsRaw, SvelteSelf, SvelteWindow, TitleElement,
 };
 use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::Fragment;
@@ -159,6 +159,11 @@ fn classify_element(
             name_loc,
             attributes,
             fragment,
+        }),
+        "svelte:options" => FragmentNode::SvelteOptionsRaw(SvelteOptionsRaw {
+            span,
+            name_loc,
+            attributes,
         }),
         "slot" => {
             // Inside <template shadowrootmode="...">, slot is a native HTML slot, not Svelte's

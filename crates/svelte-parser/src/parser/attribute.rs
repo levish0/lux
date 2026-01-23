@@ -426,7 +426,7 @@ fn parse_quoted_value(parser_input: &mut ParserInput, quote: char) -> ParseResul
             }
             any.parse_next(parser_input)?; // consume closing quote
             break;
-        } else if c == '{' {
+        } else if c == '{' && !parser_input.state.text_only_attributes {
             // Flush text buffer
             if !text_buf.is_empty() {
                 let text_end = parser_input.current_token_start();

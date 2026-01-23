@@ -137,12 +137,19 @@ impl Serialize for Fragment {
 pub struct SvelteOptions {
     #[serde(flatten)]
     pub span: Span,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub runes: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub immutable: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub accessors: Option<bool>,
+    #[serde(rename = "preserveWhitespace", skip_serializing_if = "Option::is_none")]
     pub preserve_whitespace: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub namespace: Option<Namespace>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub css: Option<CssMode>,
+    #[serde(rename = "customElement", skip_serializing_if = "Option::is_none")]
     pub custom_element: Option<CustomElementOptions>,
     pub attributes: Vec<AttributeNode>,
 }
@@ -161,10 +168,16 @@ pub enum CssMode {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct CustomElementOptions {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tag: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub shadow: Option<ShadowMode>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub props: Option<HashMap<String, CustomElementProp>>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
+    #[serde(
+        serialize_with = "crate::utils::estree::serialize_opt_expr",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub extend: Option<Box<swc::Expr>>,
 }
 

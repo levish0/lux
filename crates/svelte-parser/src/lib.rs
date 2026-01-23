@@ -2,8 +2,13 @@ mod context;
 pub mod error;
 mod parser;
 
-use svelte_ast::root::{Fragment, Root};
+use svelte_ast::attributes::{AttributeSequenceValue, AttributeValue};
+use svelte_ast::node::{AttributeNode, FragmentNode};
+use svelte_ast::root::{
+    CustomElementOptions, Fragment, Root, SvelteOptions,
+};
 use svelte_ast::span::Span;
+use swc_ecma_ast as swc;
 use winnow::stream::{LocatingSlice, Stateful};
 
 use crate::context::ParseContext;
@@ -26,7 +31,7 @@ pub fn parse(source: &str, options: ParseOptions) -> Result<Root, Vec<ParseError
         state: context,
     };
 
-    let nodes = document_parser(&mut parser_input).map_err(|_| {
+    let mut nodes = document_parser(&mut parser_input).map_err(|_| {
         vec![ParseError::new(
             error::ErrorKind::UnexpectedEof,
             Span::new(0, source.len()),
@@ -34,13 +39,16 @@ pub fn parse(source: &str, options: ParseOptions) -> Result<Root, Vec<ParseError
         )]
     })?;
 
+    // Extract svelte:options from fragment (like reference Svelte's post-parse step)
+    let options = extract_svelte_options(&mut nodes);
+
     let root = Root {
         span: Span::new(0, source.len()),
         fragment: Fragment { nodes },
         css: parser_input.state.css,
         instance: parser_input.state.instance,
         module: parser_input.state.module,
-        options: None,
+        options,
         comments: parser_input.state.comments,
         ts,
     };
@@ -54,6 +62,99 @@ pub fn parse(source: &str, options: ParseOptions) -> Result<Root, Vec<ParseError
 
 fn detect_typescript(source: &str) -> bool {
     source.contains("<script lang=\"ts\"") || source.contains("<script lang='ts'")
+}
+
+/// Extract svelte:options from fragment nodes and build SvelteOptions.
+/// Removes the SvelteOptionsRaw node from the fragment.
+fn extract_svelte_options(nodes: &mut Vec<FragmentNode>) -> Option<SvelteOptions> {
+    let options_index = nodes
+        .iter()
+        .position(|n| matches!(n, FragmentNode::SvelteOptionsRaw(_)));
+
+    let options_index = options_index?;
+    let node = nodes.remove(options_index);
+
+    let (span, attributes) = match node {
+        FragmentNode::SvelteOptionsRaw(raw) => (raw.span, raw.attributes),
+        _ => unreachable!(),
+    };
+
+    let mut svelte_options = SvelteOptions {
+        span,
+        runes: None,
+        immutable: None,
+        accessors: None,
+        preserve_whitespace: None,
+        namespace: None,
+        css: None,
+        custom_element: None,
+        attributes: attributes.clone(),
+    };
+
+    // Extract typed fields from attributes
+    for attr in &attributes {
+        if let AttributeNode::Attribute(a) = attr {
+            match a.name.as_str() {
+                "runes" => {
+                    svelte_options.runes = get_boolean_attribute_value(&a.value);
+                }
+                "immutable" => {
+                    svelte_options.immutable = get_boolean_attribute_value(&a.value);
+                }
+                "accessors" => {
+                    svelte_options.accessors = get_boolean_attribute_value(&a.value);
+                }
+                "preserveWhitespace" => {
+                    svelte_options.preserve_whitespace = get_boolean_attribute_value(&a.value);
+                }
+                "customElement" => {
+                    let tag = get_static_text_value(&a.value);
+                    if let Some(tag) = tag {
+                        svelte_options.custom_element = Some(CustomElementOptions {
+                            tag: Some(tag),
+                            shadow: None,
+                            props: None,
+                            extend: None,
+                        });
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    Some(svelte_options)
+}
+
+/// Get boolean value from an attribute value.
+/// Handles: `runes={true}`, `runes={false}`, `runes` (bare = true)
+fn get_boolean_attribute_value(value: &AttributeValue) -> Option<bool> {
+    match value {
+        AttributeValue::True => Some(true),
+        AttributeValue::Expression(expr_tag) => {
+            match expr_tag.expression.as_ref() {
+                swc::Expr::Lit(swc::Lit::Bool(b)) => Some(b.value),
+                _ => None,
+            }
+        }
+        _ => None,
+    }
+}
+
+/// Get static text value from a quoted attribute.
+/// Handles: `customElement="my-tag"`
+fn get_static_text_value(value: &AttributeValue) -> Option<String> {
+    match value {
+        AttributeValue::Sequence(items) => {
+            if items.len() == 1 {
+                if let AttributeSequenceValue::Text(t) = &items[0] {
+                    return Some(t.data.clone());
+                }
+            }
+            None
+        }
+        _ => None,
+    }
 }
 
 #[cfg(test)]
