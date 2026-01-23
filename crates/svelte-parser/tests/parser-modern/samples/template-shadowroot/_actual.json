@@ -53,7 +53,7 @@
                       "start": 38
                     },
                     "start": 37,
-                    "type": "SlotElement"
+                    "type": "RegularElement"
                   }
                 ],
                 "type": "Fragment"

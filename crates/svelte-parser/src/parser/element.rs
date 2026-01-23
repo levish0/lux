@@ -29,6 +29,11 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
     // parse attributes
     let attributes = parse_attributes(parser_input)?;
 
+    // Check if this element has shadowrootmode attribute
+    let has_shadowrootmode = attributes.iter().any(|attr| {
+        matches!(attr, AttributeNode::Attribute(a) if a.name == "shadowrootmode")
+    });
+
     // check self-closing /> or >
     let self_closing = peek(any).parse_next(parser_input)? == '/';
     if self_closing {
@@ -36,22 +41,32 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
     }
     literal(">").parse_next(parser_input)?;
 
+    // Check shadowroot context BEFORE parsing children (for nested slot detection)
+    let parent_is_shadowroot = parser_input.state.parent_is_shadowroot_template();
+
     let fragment = if self_closing || is_void_element(&name) {
         Fragment { nodes: vec![] }
     } else {
+        // Push this element onto stack before parsing children
+        parser_input.state.push_element(name.clone(), has_shadowrootmode);
+        
         let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
             0..,
             fragment_node_parser,
             closing_tag_parser(&name),
         )
         .parse_next(parser_input)?;
+        
+        // Pop element from stack after parsing children
+        parser_input.state.pop_element();
+        
         Fragment { nodes }
     };
 
     let end = parser_input.input.previous_token_end();
     let span = Span::new(start, end);
 
-    Ok(classify_element(&name, name_loc, attributes, fragment, span))
+    Ok(classify_element(&name, name_loc, attributes, fragment, span, parent_is_shadowroot || has_shadowrootmode))
 }
 
 fn parse_attributes(parser_input: &mut ParserInput) -> ParseResult<Vec<AttributeNode>> {
@@ -96,6 +111,7 @@ fn classify_element(
     attributes: Vec<AttributeNode>,
     fragment: Fragment,
     span: Span,
+    is_inside_shadowroot: bool,
 ) -> FragmentNode {
     match name {
         "svelte:head" => FragmentNode::SvelteHead(SvelteHead {
@@ -139,13 +155,26 @@ fn classify_element(
             attributes,
             fragment,
         }),
-        "slot" => FragmentNode::SlotElement(SlotElement {
-            span,
-            name: name.to_string(),
-            name_loc,
-            attributes,
-            fragment,
-        }),
+        "slot" => {
+            // Inside <template shadowrootmode="...">, slot is a native HTML slot, not Svelte's
+            if is_inside_shadowroot {
+                FragmentNode::RegularElement(RegularElement {
+                    span,
+                    name: name.to_string(),
+                    name_loc,
+                    attributes,
+                    fragment,
+                })
+            } else {
+                FragmentNode::SlotElement(SlotElement {
+                    span,
+                    name: name.to_string(),
+                    name_loc,
+                    attributes,
+                    fragment,
+                })
+            }
+        }
         "title" => FragmentNode::TitleElement(TitleElement {
             span,
             name_loc,
