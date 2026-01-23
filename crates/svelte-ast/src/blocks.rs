@@ -42,7 +42,7 @@ pub struct EachBlock {
     pub span: Span,
     #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_opt_pat")]
+    #[serde(serialize_with = "crate::utils::estree::serialize_opt_pat_adjusted")]
     pub context: Option<Box<swc::Pat>>,
     pub body: Fragment,
     #[serde(skip_serializing_if = "Option::is_none")]

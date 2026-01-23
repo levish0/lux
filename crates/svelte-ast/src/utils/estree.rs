@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 
+use line_span::LineSpanExt;
 use serde::ser::Error as SerError;
 use serde::{Serialize, Serializer};
 use serde_json::{Map, Value};
@@ -7,18 +8,15 @@ use swc_ecma_ast as swc;
 
 thread_local! {
     static LOC_LINE_STARTS: RefCell<Option<Vec<usize>>> = RefCell::new(None);
+    // When true, adds +1 to columns for nodes not on line 1.
+    // This matches reference Svelte's pattern parsing behavior where a space
+    // is removed from line 1 to compensate for an added `(` wrapper.
+    static LOC_PATTERN_COLUMN_ADJUST: RefCell<bool> = RefCell::new(false);
 }
 
 /// Set the source for loc computation. Call before serializing AST nodes.
 pub fn set_loc_source(source: &str) {
-    let line_starts: Vec<usize> = std::iter::once(0)
-        .chain(
-            source
-                .bytes()
-                .enumerate()
-                .filter_map(|(i, b)| if b == b'\n' { Some(i + 1) } else { None }),
-        )
-        .collect();
+    let line_starts: Vec<usize> = source.line_spans().map(|s| s.range().start).collect();
     LOC_LINE_STARTS.with(|ls| *ls.borrow_mut() = Some(line_starts));
 }
 
@@ -27,12 +25,21 @@ pub fn clear_loc_source() {
     LOC_LINE_STARTS.with(|ls| *ls.borrow_mut() = None);
 }
 
+/// Enable pattern column adjustment (+1 for lines > 1).
+pub fn set_pattern_column_adjust(v: bool) {
+    LOC_PATTERN_COLUMN_ADJUST.with(|f| *f.borrow_mut() = v);
+}
+
 fn offset_to_line_col(offset: usize, line_starts: &[usize]) -> (usize, usize) {
-    let line_idx = match line_starts.binary_search(&offset) {
-        Ok(idx) => idx,
-        Err(idx) => idx.saturating_sub(1),
+    let line_idx = line_starts.binary_search(&offset).unwrap_or_else(|idx| idx.saturating_sub(1));
+    let line = line_idx + 1;
+    let col = offset - line_starts[line_idx];
+    let adjust = if line > 1 {
+        LOC_PATTERN_COLUMN_ADJUST.with(|f| if *f.borrow() { 1 } else { 0 })
+    } else {
+        0
     };
-    (line_idx + 1, offset - line_starts[line_idx])
+    (line, col + adjust)
 }
 
 /// Wrapper for serializing an expression in ESTree format via `serialize_map`.
@@ -84,6 +91,25 @@ pub fn serialize_opt_pat<S: Serializer>(
         Some(p) => serialize_boxed_pat(p, s),
         None => s.serialize_none(),
     }
+}
+
+/// Serialize an `Option<Box<swc::Pat>>` with pattern column adjustment.
+/// Used for EachBlock context where reference Svelte's parsing trick
+/// shifts columns by +1 for lines > 1.
+pub fn serialize_opt_pat_adjusted<S: Serializer>(
+    pat: &Option<Box<swc::Pat>>,
+    s: S,
+) -> Result<S::Ok, S::Error> {
+    set_pattern_column_adjust(true);
+    let result = match pat {
+        Some(p) => serialize_boxed_pat(p, s),
+        None => {
+            set_pattern_column_adjust(false);
+            return s.serialize_none();
+        }
+    };
+    set_pattern_column_adjust(false);
+    result
 }
 
 /// Serialize a `Vec<swc::Pat>` in ESTree format.
@@ -1063,27 +1089,29 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
             .or_insert(Value::Bool(!is_block));
     }
 
-    // 8. Compute loc from final start/end
+    // 8. Compute loc from final start/end (skip zero-length nodes)
     if let (Some(start), Some(end)) = (
         result.get("start").and_then(|v| v.as_u64()),
         result.get("end").and_then(|v| v.as_u64()),
     ) {
-        LOC_LINE_STARTS.with(|ls| {
-            if let Some(ref line_starts) = *ls.borrow() {
-                let (sl, sc) = offset_to_line_col(start as usize, line_starts);
-                let (el, ec) = offset_to_line_col(end as usize, line_starts);
-                let mut loc_obj = Map::new();
-                let mut start_obj = Map::new();
-                start_obj.insert("line".to_string(), Value::Number(sl.into()));
-                start_obj.insert("column".to_string(), Value::Number(sc.into()));
-                let mut end_obj = Map::new();
-                end_obj.insert("line".to_string(), Value::Number(el.into()));
-                end_obj.insert("column".to_string(), Value::Number(ec.into()));
-                loc_obj.insert("start".to_string(), Value::Object(start_obj));
-                loc_obj.insert("end".to_string(), Value::Object(end_obj));
-                result.insert("loc".to_string(), Value::Object(loc_obj));
-            }
-        });
+        if start < end {
+            LOC_LINE_STARTS.with(|ls| {
+                if let Some(ref line_starts) = *ls.borrow() {
+                    let (sl, sc) = offset_to_line_col(start as usize, line_starts);
+                    let (el, ec) = offset_to_line_col(end as usize, line_starts);
+                    let mut loc_obj = Map::new();
+                    let mut start_obj = Map::new();
+                    start_obj.insert("line".to_string(), Value::Number(sl.into()));
+                    start_obj.insert("column".to_string(), Value::Number(sc.into()));
+                    let mut end_obj = Map::new();
+                    end_obj.insert("line".to_string(), Value::Number(el.into()));
+                    end_obj.insert("column".to_string(), Value::Number(ec.into()));
+                    loc_obj.insert("start".to_string(), Value::Object(start_obj));
+                    loc_obj.insert("end".to_string(), Value::Object(end_obj));
+                    result.insert("loc".to_string(), Value::Object(loc_obj));
+                }
+            });
+        }
     }
 
     Value::Object(result)
