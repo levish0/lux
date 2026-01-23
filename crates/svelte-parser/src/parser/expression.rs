@@ -4,6 +4,7 @@ use swc_ecma_ast as swc;
 use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
 use winnow::combinator::peek;
 use winnow::prelude::*;
+use winnow::stream::Location;
 use winnow::token::any;
 use winnow::Result as ParseResult;
 use super::ParserInput;
@@ -11,9 +12,11 @@ use super::ParserInput;
 /// Read a JS/TS expression enclosed in `{ ... }`.
 /// Consumes from `{` to matching `}`, parses with SWC.
 pub fn read_expression(parser_input: &mut ParserInput) -> ParseResult<Box<swc::Expr>> {
+    // Position of `{` - expression text starts at offset + 1
+    let brace_offset = parser_input.current_token_start();
     let expr_str = scan_expression_text(parser_input)?;
     let ts = parser_input.state.ts;
-    swc_parse_expression(&expr_str, ts)
+    swc_parse_expression(&expr_str, ts, (brace_offset + 1) as u32)
 }
 
 /// Consume `{` ... `}` with brace matching, return the inner text.
@@ -151,7 +154,7 @@ fn collect_block_comment(parser_input: &mut ParserInput, out: &mut String) -> Pa
     }
 }
 
-fn swc_parse_expression(source: &str, ts: bool) -> ParseResult<Box<swc::Expr>> {
+fn swc_parse_expression(source: &str, ts: bool, offset: u32) -> ParseResult<Box<swc::Expr>> {
     let syntax = if ts {
         Syntax::Typescript(TsSyntax {
             tsx: true,
@@ -164,7 +167,7 @@ fn swc_parse_expression(source: &str, ts: bool) -> ParseResult<Box<swc::Expr>> {
         })
     };
 
-    let input = StringInput::new(source, BytePos(0), BytePos(source.len() as u32));
+    let input = StringInput::new(source, BytePos(offset), BytePos(offset + source.len() as u32));
     let mut parser = swc_ecma_parser::Parser::new(syntax, input, None);
 
     parser.parse_expr().map_err(|e| {

@@ -13,6 +13,7 @@ use crate::span::Span;
 pub struct ExpressionTag {
     #[serde(flatten)]
     pub span: Span,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
 }
 
@@ -26,6 +27,7 @@ pub struct ExpressionTag {
 pub struct HtmlTag {
     #[serde(flatten)]
     pub span: Span,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
 }
 
@@ -39,6 +41,7 @@ pub struct HtmlTag {
 pub struct ConstTag {
     #[serde(flatten)]
     pub span: Span,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_var_decl")]
     pub declaration: Box<swc::VarDecl>,
 }
 
@@ -52,6 +55,7 @@ pub struct ConstTag {
 pub struct DebugTag {
     #[serde(flatten)]
     pub span: Span,
+    #[serde(serialize_with = "crate::utils::estree::serialize_idents")]
     pub identifiers: Vec<swc::Ident>,
 }
 
@@ -65,6 +69,7 @@ pub struct DebugTag {
 pub struct RenderTag {
     #[serde(flatten)]
     pub span: Span,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
 }
 
@@ -78,5 +83,6 @@ pub struct RenderTag {
 pub struct AttachTag {
     #[serde(flatten)]
     pub span: Span,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
 }

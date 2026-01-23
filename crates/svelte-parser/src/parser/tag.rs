@@ -142,8 +142,9 @@ use winnow::combinator::peek;
 
 /// Read expression text until `}` without consuming the `}`.
 fn read_expression_until_close(parser_input: &mut ParserInput) -> ParseResult<Box<swc::Expr>> {
+    let offset = parser_input.current_token_start();
     let text = read_until_close_brace(parser_input)?;
-    swc_parse_expr(&text, parser_input.state.ts)
+    swc_parse_expr(&text, parser_input.state.ts, offset as u32)
 }
 
 /// Read text until `}` without consuming it. Handles nested braces.
@@ -201,12 +202,15 @@ fn collect_template(parser_input: &mut ParserInput, out: &mut String) -> ParseRe
     }
 }
 
-fn swc_parse_expr(source: &str, ts: bool) -> ParseResult<Box<swc::Expr>> {
+fn swc_parse_expr(source: &str, ts: bool, offset: u32) -> ParseResult<Box<swc::Expr>> {
     use swc_common::BytePos;
     use swc_common::input::StringInput;
     use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
 
+    let leading_ws = source.len() - source.trim_start().len();
     let trimmed = source.trim();
+    let actual_offset = offset + leading_ws as u32;
+
     let syntax = if ts {
         Syntax::Typescript(TsSyntax {
             tsx: true,
@@ -219,7 +223,7 @@ fn swc_parse_expr(source: &str, ts: bool) -> ParseResult<Box<swc::Expr>> {
         })
     };
 
-    let input = StringInput::new(trimmed, BytePos(0), BytePos(trimmed.len() as u32));
+    let input = StringInput::new(trimmed, BytePos(actual_offset), BytePos(actual_offset + trimmed.len() as u32));
     let mut parser = swc_ecma_parser::Parser::new(syntax, input, None);
 
     parser.parse_expr().map_err(|e| {

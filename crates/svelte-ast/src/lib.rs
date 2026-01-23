@@ -7,3 +7,4 @@ pub mod root;
 pub mod span;
 pub mod tags;
 pub mod text;
+pub mod utils;

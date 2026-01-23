@@ -1,0 +1,358 @@
+{
+  "start": 0,
+  "end": 821,
+  "fragment": {
+    "nodes": [
+      {
+        "type": "RegularElement",
+        "start": 0,
+        "end": 806,
+        "name": "style",
+        "name_loc": {
+          "start": 1,
+          "end": 6
+        },
+        "attributes": [],
+        "fragment": {
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 7,
+              "end": 80,
+              "data": "\n    /* test that all these are parsed correctly */\n\th1:nth-of-type(2n+1)",
+              "raw": "\n    /* test that all these are parsed correctly */\n\th1:nth-of-type(2n+1)"
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 80,
+              "end": 112,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 112,
+              "end": 154,
+              "data": "\n    h1:nth-child(-n + 3 of li.important) ",
+              "raw": "\n    h1:nth-child(-n + 3 of li.important) "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 154,
+              "end": 186,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 186,
+              "end": 207,
+              "data": "\n    h1:nth-child(1) ",
+              "raw": "\n    h1:nth-child(1) "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 207,
+              "end": 239,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 239,
+              "end": 260,
+              "data": "\n    h1:nth-child(p) ",
+              "raw": "\n    h1:nth-child(p) "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 260,
+              "end": 292,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 292,
+              "end": 315,
+              "data": "\n    h1:nth-child(n+7) ",
+              "raw": "\n    h1:nth-child(n+7) "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 315,
+              "end": 347,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 347,
+              "end": 371,
+              "data": "\n    h1:nth-child(even) ",
+              "raw": "\n    h1:nth-child(even) "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 371,
+              "end": 403,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 403,
+              "end": 426,
+              "data": "\n    h1:nth-child(odd) ",
+              "raw": "\n    h1:nth-child(odd) "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 426,
+              "end": 458,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 458,
+              "end": 493,
+              "data": "\n    h1:nth-child(\n        n\n    ) ",
+              "raw": "\n    h1:nth-child(\n        n\n    ) "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 493,
+              "end": 525,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 525,
+              "end": 545,
+              "data": "\n    h1:global(nav) ",
+              "raw": "\n    h1:global(nav) "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 545,
+              "end": 577,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 577,
+              "end": 601,
+              "data": "\n\t\th1:nth-of-type(10n+1)",
+              "raw": "\n\t\th1:nth-of-type(10n+1)"
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 601,
+              "end": 633,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 633,
+              "end": 657,
+              "data": "\n\t\th1:nth-of-type(-2n+3)",
+              "raw": "\n\t\th1:nth-of-type(-2n+3)"
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 657,
+              "end": 689,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 689,
+              "end": 711,
+              "data": "\n\t\th1:nth-of-type(+12)",
+              "raw": "\n\t\th1:nth-of-type(+12)"
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 711,
+              "end": 743,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 743,
+              "end": 765,
+              "data": "\n\t\th1:nth-of-type(+3n)",
+              "raw": "\n\t\th1:nth-of-type(+3n)"
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 765,
+              "end": 797,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 9,
+                  "end": 19
+                },
+                "ctxt": 0,
+                "value": "background",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 797,
+              "end": 798,
+              "data": "\n",
+              "raw": "\n"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Text",
+        "start": 806,
+        "end": 808,
+        "data": "\n\n",
+        "raw": "\n\n"
+      },
+      {
+        "type": "RegularElement",
+        "start": 808,
+        "end": 820,
+        "name": "h1",
+        "name_loc": {
+          "start": 809,
+          "end": 811
+        },
+        "attributes": [],
+        "fragment": {
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 812,
+              "end": 815,
+              "data": "Foo",
+              "raw": "Foo"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Text",
+        "start": 820,
+        "end": 821,
+        "data": "\n",
+        "raw": "\n"
+      }
+    ]
+  },
+  "css": null,
+  "instance": null,
+  "module": null,
+  "options": null,
+  "comments": [],
+  "ts": false
+}

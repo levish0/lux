@@ -47,6 +47,7 @@ pub struct SpreadAttribute {
     #[serde(flatten)]
     pub span: Span,
     pub name_loc: Option<Span>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
 }
 
@@ -64,6 +65,7 @@ pub struct BindDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
 }
 
@@ -81,6 +83,7 @@ pub struct ClassDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
 }
 
@@ -123,6 +126,7 @@ pub struct OnDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub expression: Option<Box<swc::Expr>>,
     pub modifiers: Vec<EventModifier>,
 }
@@ -157,6 +161,7 @@ pub struct TransitionDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub expression: Option<Box<swc::Expr>>,
     pub modifiers: Vec<TransitionModifier>,
     pub intro: bool,
@@ -183,6 +188,7 @@ pub struct AnimateDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub expression: Option<Box<swc::Expr>>,
 }
 
@@ -200,6 +206,7 @@ pub struct UseDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub expression: Option<Box<swc::Expr>>,
 }
 
@@ -217,5 +224,6 @@ pub struct LetDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<Span>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub expression: Option<Box<swc::Expr>>,
 }

@@ -1,0 +1,117 @@
+{
+  "start": 0,
+  "end": 52,
+  "fragment": {
+    "nodes": [
+      {
+        "type": "IfBlock",
+        "start": 0,
+        "end": 51,
+        "elseif": false,
+        "test": {
+          "type": "Identifier",
+          "span": {
+            "start": 0,
+            "end": 3
+          },
+          "ctxt": 0,
+          "value": "foo",
+          "optional": false
+        },
+        "consequent": {
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 9,
+              "end": 11,
+              "data": "\n\t",
+              "raw": "\n\t"
+            },
+            {
+              "type": "RegularElement",
+              "start": 11,
+              "end": 21,
+              "name": "p",
+              "name_loc": {
+                "start": 12,
+                "end": 13
+              },
+              "attributes": [],
+              "fragment": {
+                "nodes": [
+                  {
+                    "type": "Text",
+                    "start": 14,
+                    "end": 17,
+                    "data": "foo",
+                    "raw": "foo"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 21,
+              "end": 22,
+              "data": "\n",
+              "raw": "\n"
+            }
+          ]
+        },
+        "alternate": {
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 29,
+              "end": 31,
+              "data": "\n\t",
+              "raw": "\n\t"
+            },
+            {
+              "type": "RegularElement",
+              "start": 31,
+              "end": 45,
+              "name": "p",
+              "name_loc": {
+                "start": 32,
+                "end": 33
+              },
+              "attributes": [],
+              "fragment": {
+                "nodes": [
+                  {
+                    "type": "Text",
+                    "start": 34,
+                    "end": 41,
+                    "data": "not foo",
+                    "raw": "not foo"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 45,
+              "end": 46,
+              "data": "\n",
+              "raw": "\n"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Text",
+        "start": 51,
+        "end": 52,
+        "data": "\n",
+        "raw": "\n"
+      }
+    ]
+  },
+  "css": null,
+  "instance": null,
+  "module": null,
+  "options": null,
+  "comments": [],
+  "ts": false
+}

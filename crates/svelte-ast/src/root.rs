@@ -46,6 +46,7 @@ pub struct Script {
     #[serde(flatten)]
     pub span: Span,
     pub context: ScriptContext,
+    #[serde(serialize_with = "crate::utils::estree::serialize_program")]
     pub content: swc::Program,
     pub attributes: Vec<Attribute>,
 }
@@ -110,6 +111,7 @@ pub struct CustomElementOptions {
     pub tag: Option<String>,
     pub shadow: Option<ShadowMode>,
     pub props: Option<HashMap<String, CustomElementProp>>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub extend: Option<Box<swc::Expr>>,
 }
 

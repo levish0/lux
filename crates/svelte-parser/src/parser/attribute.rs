@@ -34,11 +34,12 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
     let is_spread: ParseResult<&str> = peek(literal("...")).parse_next(parser_input);
     if is_spread.is_ok() {
         literal("...").parse_next(parser_input)?;
+        let expr_offset = parser_input.current_token_start() as u32;
         let expr_text = read_until_close_brace(parser_input)?;
         literal("}").parse_next(parser_input)?;
         let end = parser_input.previous_token_end();
 
-        let expression = swc_parse_expr(&expr_text, parser_input.state.ts)?;
+        let expression = swc_parse_expr(&expr_text, parser_input.state.ts, expr_offset)?;
 
         return Ok(AttributeNode::SpreadAttribute(SpreadAttribute {
             span: Span::new(start, end),
@@ -339,10 +340,11 @@ fn parse_optional_directive_value(
 
     // Must be {expr}
     literal("{").parse_next(parser_input)?;
+    let expr_offset = parser_input.current_token_start() as u32;
     let expr_text = read_until_close_brace(parser_input)?;
     literal("}").parse_next(parser_input)?;
 
-    let expr = swc_parse_expr(&expr_text, parser_input.state.ts)?;
+    let expr = swc_parse_expr(&expr_text, parser_input.state.ts, expr_offset)?;
     Ok(Some(expr))
 }
 
@@ -355,10 +357,11 @@ fn parse_attribute_value(parser_input: &mut ParserInput) -> ParseResult<Attribut
             // Expression value: ={expr}
             let start = parser_input.current_token_start();
             literal("{").parse_next(parser_input)?;
+            let expr_offset = parser_input.current_token_start() as u32;
             let expr_text = read_until_close_brace(parser_input)?;
             literal("}").parse_next(parser_input)?;
             let end = parser_input.previous_token_end();
-            let expression = swc_parse_expr(&expr_text, parser_input.state.ts)?;
+            let expression = swc_parse_expr(&expr_text, parser_input.state.ts, expr_offset)?;
             Ok(AttributeValue::Expression(ExpressionTag {
                 span: Span::new(start, end),
                 expression,
@@ -420,10 +423,11 @@ fn parse_quoted_value(parser_input: &mut ParserInput, quote: char) -> ParseResul
             // Parse expression
             let expr_start = parser_input.current_token_start();
             literal("{").parse_next(parser_input)?;
+            let expr_offset = parser_input.current_token_start() as u32;
             let expr_text = read_until_close_brace(parser_input)?;
             literal("}").parse_next(parser_input)?;
             let expr_end = parser_input.previous_token_end();
-            let expression = swc_parse_expr(&expr_text, parser_input.state.ts)?;
+            let expression = swc_parse_expr(&expr_text, parser_input.state.ts, expr_offset)?;
             sequence.push(AttributeSequenceValue::Expression(ExpressionTag {
                 span: Span::new(expr_start, expr_end),
                 expression,
@@ -511,12 +515,15 @@ fn collect_template(parser_input: &mut ParserInput, out: &mut String) -> ParseRe
     }
 }
 
-fn swc_parse_expr(source: &str, ts: bool) -> ParseResult<Box<swc::Expr>> {
+fn swc_parse_expr(source: &str, ts: bool, offset: u32) -> ParseResult<Box<swc::Expr>> {
     use swc_common::BytePos;
     use swc_common::input::StringInput;
     use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
 
+    let leading_ws = source.len() - source.trim_start().len();
     let trimmed = source.trim();
+    let actual_offset = offset + leading_ws as u32;
+
     let syntax = if ts {
         Syntax::Typescript(TsSyntax {
             tsx: true,
@@ -529,7 +536,7 @@ fn swc_parse_expr(source: &str, ts: bool) -> ParseResult<Box<swc::Expr>> {
         })
     };
 
-    let input = StringInput::new(trimmed, BytePos(0), BytePos(trimmed.len() as u32));
+    let input = StringInput::new(trimmed, BytePos(actual_offset), BytePos(actual_offset + trimmed.len() as u32));
     let mut parser = swc_ecma_parser::Parser::new(syntax, input, None);
 
     parser.parse_expr().map_err(|e| {

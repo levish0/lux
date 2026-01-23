@@ -1,0 +1,175 @@
+{
+  "start": 0,
+  "end": 387,
+  "fragment": {
+    "nodes": [
+      {
+        "type": "RegularElement",
+        "start": 0,
+        "end": 386,
+        "name": "style",
+        "name_loc": {
+          "start": 1,
+          "end": 6
+        },
+        "attributes": [],
+        "fragment": {
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 7,
+              "end": 88,
+              "data": "\n    /* test that all these are parsed correctly */\n\t::view-transition-old(x-y)  ",
+              "raw": "\n    /* test that all these are parsed correctly */\n\t::view-transition-old(x-y)  "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 88,
+              "end": 109,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 3,
+                  "end": 8
+                },
+                "ctxt": 0,
+                "value": "color",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 109,
+              "end": 148,
+              "data": "\n\t:global(::view-transition-old(x-y))  ",
+              "raw": "\n\t:global(::view-transition-old(x-y))  "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 148,
+              "end": 169,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 3,
+                  "end": 8
+                },
+                "ctxt": 0,
+                "value": "color",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 169,
+              "end": 200,
+              "data": "\n\t::highlight(rainbow-color-1) ",
+              "raw": "\n\t::highlight(rainbow-color-1) "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 200,
+              "end": 218,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 3,
+                  "end": 8
+                },
+                "ctxt": 0,
+                "value": "color",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 218,
+              "end": 246,
+              "data": "\n\tcustom-element::part(foo) ",
+              "raw": "\n\tcustom-element::part(foo) "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 246,
+              "end": 264,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 3,
+                  "end": 8
+                },
+                "ctxt": 0,
+                "value": "color",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 264,
+              "end": 286,
+              "data": "\n\t::slotted(.content) ",
+              "raw": "\n\t::slotted(.content) "
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 286,
+              "end": 304,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 3,
+                  "end": 8
+                },
+                "ctxt": 0,
+                "value": "color",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 304,
+              "end": 359,
+              "data": "\n\t:is( /*button*/\n\t\tbutton, /*p after h1*/\n\t\th1 + p\n\t\t)",
+              "raw": "\n\t:is( /*button*/\n\t\tbutton, /*p after h1*/\n\t\th1 + p\n\t\t)"
+            },
+            {
+              "type": "ExpressionTag",
+              "start": 359,
+              "end": 377,
+              "expression": {
+                "type": "Identifier",
+                "span": {
+                  "start": 3,
+                  "end": 8
+                },
+                "ctxt": 0,
+                "value": "color",
+                "optional": false
+              }
+            },
+            {
+              "type": "Text",
+              "start": 377,
+              "end": 378,
+              "data": "\n",
+              "raw": "\n"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Text",
+        "start": 386,
+        "end": 387,
+        "data": "\n",
+        "raw": "\n"
+      }
+    ]
+  },
+  "css": null,
+  "instance": null,
+  "module": null,
+  "options": null,
+  "comments": [],
+  "ts": false
+}

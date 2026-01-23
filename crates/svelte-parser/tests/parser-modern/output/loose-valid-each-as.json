@@ -1,0 +1,66 @@
+{
+  "start": 0,
+  "end": 120,
+  "fragment": {
+    "nodes": [
+      {
+        "type": "RegularElement",
+        "start": 0,
+        "end": 43,
+        "name": "script",
+        "name_loc": {
+          "start": 1,
+          "end": 7
+        },
+        "attributes": [
+          {
+            "type": "Attribute",
+            "start": 8,
+            "end": 17,
+            "name": "lang",
+            "name_loc": {
+              "start": 8,
+              "end": 12
+            },
+            "value": {
+              "Sequence": [
+                {
+                  "Text": {
+                    "start": 14,
+                    "end": 16,
+                    "data": "ts",
+                    "raw": "ts"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "fragment": {
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 18,
+              "end": 34,
+              "data": "\n\tlet arr = [];\n",
+              "raw": "\n\tlet arr = [];\n"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Text",
+        "start": 43,
+        "end": 45,
+        "data": "\n\n",
+        "raw": "\n\n"
+      }
+    ]
+  },
+  "css": null,
+  "instance": null,
+  "module": null,
+  "options": null,
+  "comments": [],
+  "ts": true
+}

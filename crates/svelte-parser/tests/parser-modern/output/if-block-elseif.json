@@ -1,0 +1,172 @@
+{
+  "start": 0,
+  "end": 90,
+  "fragment": {
+    "nodes": [
+      {
+        "type": "IfBlock",
+        "start": 0,
+        "end": 89,
+        "elseif": false,
+        "test": {
+          "type": "BinaryExpression",
+          "span": {
+            "start": 0,
+            "end": 6
+          },
+          "operator": ">",
+          "left": {
+            "type": "Identifier",
+            "span": {
+              "start": 0,
+              "end": 1
+            },
+            "ctxt": 0,
+            "value": "x",
+            "optional": false
+          },
+          "right": {
+            "type": "NumericLiteral",
+            "span": {
+              "start": 4,
+              "end": 6
+            },
+            "value": 10.0,
+            "raw": "10"
+          }
+        },
+        "consequent": {
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 12,
+              "end": 14,
+              "data": "\n\t",
+              "raw": "\n\t"
+            },
+            {
+              "type": "RegularElement",
+              "start": 14,
+              "end": 41,
+              "name": "p",
+              "name_loc": {
+                "start": 15,
+                "end": 16
+              },
+              "attributes": [],
+              "fragment": {
+                "nodes": [
+                  {
+                    "type": "Text",
+                    "start": 17,
+                    "end": 37,
+                    "data": "x is greater than 10",
+                    "raw": "x is greater than 10"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 41,
+              "end": 42,
+              "data": "\n",
+              "raw": "\n"
+            }
+          ]
+        },
+        "alternate": {
+          "nodes": [
+            {
+              "type": "IfBlock",
+              "start": 42,
+              "end": 89,
+              "elseif": true,
+              "test": {
+                "type": "BinaryExpression",
+                "span": {
+                  "start": 0,
+                  "end": 5
+                },
+                "operator": "<",
+                "left": {
+                  "type": "Identifier",
+                  "span": {
+                    "start": 0,
+                    "end": 1
+                  },
+                  "ctxt": 0,
+                  "value": "x",
+                  "optional": false
+                },
+                "right": {
+                  "type": "NumericLiteral",
+                  "span": {
+                    "start": 4,
+                    "end": 5
+                  },
+                  "value": 5.0,
+                  "raw": "5"
+                }
+              },
+              "consequent": {
+                "nodes": [
+                  {
+                    "type": "Text",
+                    "start": 58,
+                    "end": 60,
+                    "data": "\n\t",
+                    "raw": "\n\t"
+                  },
+                  {
+                    "type": "RegularElement",
+                    "start": 60,
+                    "end": 83,
+                    "name": "p",
+                    "name_loc": {
+                      "start": 61,
+                      "end": 62
+                    },
+                    "attributes": [],
+                    "fragment": {
+                      "nodes": [
+                        {
+                          "type": "Text",
+                          "start": 63,
+                          "end": 79,
+                          "data": "x is less than 5",
+                          "raw": "x is less than 5"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Text",
+                    "start": 83,
+                    "end": 84,
+                    "data": "\n",
+                    "raw": "\n"
+                  }
+                ]
+              },
+              "alternate": null
+            }
+          ]
+        }
+      },
+      {
+        "type": "Text",
+        "start": 89,
+        "end": 90,
+        "data": "\n",
+        "raw": "\n"
+      }
+    ]
+  },
+  "css": null,
+  "instance": null,
+  "module": null,
+  "options": null,
+  "comments": [],
+  "ts": false
+}

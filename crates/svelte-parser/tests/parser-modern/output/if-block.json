@@ -1,0 +1,49 @@
+{
+  "start": 0,
+  "end": 18,
+  "fragment": {
+    "nodes": [
+      {
+        "type": "IfBlock",
+        "start": 0,
+        "end": 17,
+        "elseif": false,
+        "test": {
+          "type": "Identifier",
+          "span": {
+            "start": 0,
+            "end": 3
+          },
+          "ctxt": 0,
+          "value": "foo",
+          "optional": false
+        },
+        "consequent": {
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 9,
+              "end": 12,
+              "data": "bar",
+              "raw": "bar"
+            }
+          ]
+        },
+        "alternate": null
+      },
+      {
+        "type": "Text",
+        "start": 17,
+        "end": 18,
+        "data": "\n",
+        "raw": "\n"
+      }
+    ]
+  },
+  "css": null,
+  "instance": null,
+  "module": null,
+  "options": null,
+  "comments": [],
+  "ts": false
+}

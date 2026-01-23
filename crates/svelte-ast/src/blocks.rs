@@ -18,6 +18,7 @@ pub struct IfBlock {
     #[serde(flatten)]
     pub span: Span,
     pub elseif: bool,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub test: Box<swc::Expr>,
     pub consequent: Fragment,
     pub alternate: Option<Fragment>,
@@ -38,11 +39,14 @@ pub struct IfBlock {
 pub struct EachBlock {
     #[serde(flatten)]
     pub span: Span,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_opt_pat")]
     pub context: Option<Box<swc::Pat>>,
     pub body: Fragment,
     pub fallback: Option<Fragment>,
     pub index: Option<String>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub key: Option<Box<swc::Expr>>,
 }
 
@@ -61,8 +65,11 @@ pub struct EachBlock {
 pub struct AwaitBlock {
     #[serde(flatten)]
     pub span: Span,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_opt_pat")]
     pub value: Option<Box<swc::Pat>>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_opt_pat")]
     pub error: Option<Box<swc::Pat>>,
     pub pending: Option<Fragment>,
     pub then: Option<Fragment>,
@@ -80,6 +87,7 @@ pub struct AwaitBlock {
 pub struct KeyBlock {
     #[serde(flatten)]
     pub span: Span,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
     pub fragment: Fragment,
 }
@@ -97,7 +105,9 @@ pub struct KeyBlock {
 pub struct SnippetBlock {
     #[serde(flatten)]
     pub span: Span,
+    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_ident")]
     pub expression: Box<swc::Ident>,
+    #[serde(serialize_with = "crate::utils::estree::serialize_pats")]
     pub parameters: Vec<swc::Pat>,
     pub type_params: Option<String>,
     pub body: Fragment,

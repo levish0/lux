@@ -21,6 +21,7 @@ use crate::text::{Comment, Text};
  * type FragmentNode = Text | Tag | ElementLike | Block | Comment;
  */
 #[derive(Debug, Clone, Serialize)]
+#[serde(tag = "type")]
 pub enum FragmentNode {
     // Text
     Text(Text),
@@ -62,6 +63,7 @@ pub enum FragmentNode {
  * type AttributeNode = Attribute | SpreadAttribute | Directive;
  */
 #[derive(Debug, Clone, Serialize)]
+#[serde(tag = "type")]
 pub enum AttributeNode {
     Attribute(Attribute),
     SpreadAttribute(SpreadAttribute),
@@ -79,6 +81,7 @@ pub enum AttributeNode {
  * type StyleSheetChild = Atrule | Rule;
  */
 #[derive(Debug, Clone, Serialize)]
+#[serde(tag = "type")]
 pub enum StyleSheetChild {
     Rule(CssRule),
     Atrule(CssAtrule),
@@ -88,6 +91,7 @@ pub enum StyleSheetChild {
  * type CssBlockChild = Declaration | Rule | Atrule;
  */
 #[derive(Debug, Clone, Serialize)]
+#[serde(tag = "type")]
 pub enum CssBlockChild {
     Declaration(CssDeclaration),
     Rule(CssRule),
@@ -100,6 +104,7 @@ pub enum CssBlockChild {
  *   | Percentage | Nth | NestingSelector;
  */
 #[derive(Debug, Clone, Serialize)]
+#[serde(tag = "type")]
 pub enum SimpleSelector {
     TypeSelector(TypeSelector),
     IdSelector(IdSelector),

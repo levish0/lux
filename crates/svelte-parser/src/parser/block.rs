@@ -148,18 +148,20 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
     take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
     // Read expression until " as " keyword
+    let expr_offset = parser_input.current_token_start();
     let expr_text = read_until_keyword(parser_input, " as ")?;
-    let expression = swc_parse_expr_from_str(&expr_text, parser_input.state.ts)?;
+    let expression = swc_parse_expr_from_str(&expr_text, parser_input.state.ts, expr_offset as u32)?;
 
     literal(" as ").parse_next(parser_input)?;
     take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
     // Read context pattern until , or ( or }
+    let ctx_offset = parser_input.current_token_start();
     let context_text = read_until_any(parser_input, &[',', '(', '}'])?;
     let context = if context_text.trim().is_empty() {
         None
     } else {
-        Some(swc_parse_pattern(&context_text, parser_input.state.ts)?)
+        Some(swc_parse_pattern(&context_text, parser_input.state.ts, ctx_offset as u32)?)
     };
 
     // Optional index
@@ -282,8 +284,9 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
         literal("{:then").parse_next(parser_input)?;
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
         if peek(any).parse_next(parser_input)? != '}' {
+            let pat_offset = parser_input.current_token_start();
             let pat_text = read_until_char(parser_input, '}')?;
-            value = Some(swc_parse_pattern(&pat_text, parser_input.state.ts)?);
+            value = Some(swc_parse_pattern(&pat_text, parser_input.state.ts, pat_offset as u32)?);
         }
         literal("}").parse_next(parser_input)?;
 
@@ -302,8 +305,9 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
         literal("{:catch").parse_next(parser_input)?;
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
         if peek(any).parse_next(parser_input)? != '}' {
+            let pat_offset = parser_input.current_token_start();
             let pat_text = read_until_char(parser_input, '}')?;
-            error = Some(swc_parse_pattern(&pat_text, parser_input.state.ts)?);
+            error = Some(swc_parse_pattern(&pat_text, parser_input.state.ts, pat_offset as u32)?);
         }
         literal("}").parse_next(parser_input)?;
 
@@ -370,16 +374,18 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
 
 /// Read expression text (without braces) until `}`, without consuming the `}`.
 fn read_expression_until_close(parser_input: &mut ParserInput) -> ParseResult<Box<swc::Expr>> {
+    let offset = parser_input.current_token_start();
     let text = read_until_close_brace(parser_input)?;
-    swc_parse_expr_from_str(&text, parser_input.state.ts)
+    swc_parse_expr_from_str(&text, parser_input.state.ts, offset as u32)
 }
 
 fn read_expression_until_char(
     parser_input: &mut ParserInput,
     end_char: char,
 ) -> ParseResult<Box<swc::Expr>> {
+    let offset = parser_input.current_token_start();
     let text = read_until_char(parser_input, end_char)?;
-    swc_parse_expr_from_str(&text, parser_input.state.ts)
+    swc_parse_expr_from_str(&text, parser_input.state.ts, offset as u32)
 }
 
 /// Read text until `}` without consuming it. Handles nested braces.
@@ -520,12 +526,15 @@ fn block_close<'a>(name: &'a str) -> impl FnMut(&mut ParserInput<'_>) -> ParseRe
 
 // --- SWC helpers ---
 
-fn swc_parse_expr_from_str(source: &str, ts: bool) -> ParseResult<Box<swc::Expr>> {
+fn swc_parse_expr_from_str(source: &str, ts: bool, offset: u32) -> ParseResult<Box<swc::Expr>> {
     use swc_common::input::StringInput;
     use swc_common::BytePos;
     use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
 
+    let leading_ws = source.len() - source.trim_start().len();
     let trimmed = source.trim();
+    let actual_offset = offset + leading_ws as u32;
+
     let syntax = if ts {
         Syntax::Typescript(TsSyntax {
             tsx: true,
@@ -538,7 +547,7 @@ fn swc_parse_expr_from_str(source: &str, ts: bool) -> ParseResult<Box<swc::Expr>
         })
     };
 
-    let input = StringInput::new(trimmed, BytePos(0), BytePos(trimmed.len() as u32));
+    let input = StringInput::new(trimmed, BytePos(actual_offset), BytePos(actual_offset + trimmed.len() as u32));
     let mut parser = swc_ecma_parser::Parser::new(syntax, input, None);
 
     parser.parse_expr().map_err(|e| {
@@ -557,9 +566,9 @@ fn swc_parse_expr_from_str(source: &str, ts: bool) -> ParseResult<Box<swc::Expr>
     })
 }
 
-fn swc_parse_pattern(source: &str, ts: bool) -> ParseResult<Box<swc::Pat>> {
+fn swc_parse_pattern(source: &str, ts: bool, offset: u32) -> ParseResult<Box<swc::Pat>> {
     // Parse as expression first, then convert to pattern
-    let expr = swc_parse_expr_from_str(source, ts)?;
+    let expr = swc_parse_expr_from_str(source, ts, offset)?;
     // Simple conversion: Ident → BindingIdent, ArrayExpr → ArrayPat, ObjectExpr → ObjectPat
     Ok(Box::new(expr_to_pat(*expr)))
 }
@@ -630,7 +639,7 @@ fn parse_param_list(source: &str, ts: bool) -> ParseResult<Vec<swc::Pat>> {
     // Split by comma (simple approach, doesn't handle commas in nested structures)
     // For robustness, parse as arrow function params
     let wrapper = format!("({}) => {{}}", trimmed);
-    let expr = swc_parse_expr_from_str(&wrapper, ts)?;
+    let expr = swc_parse_expr_from_str(&wrapper, ts, 0)?;
     match *expr {
         swc::Expr::Arrow(arrow) => Ok(arrow.params),
         _ => Ok(vec![]),

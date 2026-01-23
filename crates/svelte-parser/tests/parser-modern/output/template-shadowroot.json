@@ -1,0 +1,181 @@
+{
+  "start": 0,
+  "end": 125,
+  "fragment": {
+    "nodes": [
+      {
+        "type": "RegularElement",
+        "start": 0,
+        "end": 66,
+        "name": "template",
+        "name_loc": {
+          "start": 1,
+          "end": 9
+        },
+        "attributes": [
+          {
+            "type": "Attribute",
+            "start": 10,
+            "end": 31,
+            "name": "shadowrootmode",
+            "name_loc": {
+              "start": 10,
+              "end": 24
+            },
+            "value": {
+              "Sequence": [
+                {
+                  "Text": {
+                    "start": 26,
+                    "end": 30,
+                    "data": "open",
+                    "raw": "open"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "fragment": {
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 32,
+              "end": 34,
+              "data": "\n\t",
+              "raw": "\n\t"
+            },
+            {
+              "type": "RegularElement",
+              "start": 34,
+              "end": 54,
+              "name": "p",
+              "name_loc": {
+                "start": 35,
+                "end": 36
+              },
+              "attributes": [],
+              "fragment": {
+                "nodes": [
+                  {
+                    "type": "SlotElement",
+                    "start": 37,
+                    "end": 50,
+                    "name": "slot",
+                    "name_loc": {
+                      "start": 38,
+                      "end": 42
+                    },
+                    "attributes": [],
+                    "fragment": {
+                      "nodes": []
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 54,
+              "end": 55,
+              "data": "\n",
+              "raw": "\n"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Text",
+        "start": 66,
+        "end": 67,
+        "data": "\n",
+        "raw": "\n"
+      },
+      {
+        "type": "RegularElement",
+        "start": 67,
+        "end": 111,
+        "name": "template",
+        "name_loc": {
+          "start": 68,
+          "end": 76
+        },
+        "attributes": [],
+        "fragment": {
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 77,
+              "end": 79,
+              "data": "\n\t",
+              "raw": "\n\t"
+            },
+            {
+              "type": "RegularElement",
+              "start": 79,
+              "end": 99,
+              "name": "p",
+              "name_loc": {
+                "start": 80,
+                "end": 81
+              },
+              "attributes": [],
+              "fragment": {
+                "nodes": [
+                  {
+                    "type": "SlotElement",
+                    "start": 82,
+                    "end": 95,
+                    "name": "slot",
+                    "name_loc": {
+                      "start": 83,
+                      "end": 87
+                    },
+                    "attributes": [],
+                    "fragment": {
+                      "nodes": []
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Text",
+              "start": 99,
+              "end": 100,
+              "data": "\n",
+              "raw": "\n"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Text",
+        "start": 111,
+        "end": 112,
+        "data": "\n",
+        "raw": "\n"
+      },
+      {
+        "type": "SlotElement",
+        "start": 112,
+        "end": 125,
+        "name": "slot",
+        "name_loc": {
+          "start": 113,
+          "end": 117
+        },
+        "attributes": [],
+        "fragment": {
+          "nodes": []
+        }
+      }
+    ]
+  },
+  "css": null,
+  "instance": null,
+  "module": null,
+  "options": null,
+  "comments": [],
+  "ts": false
+}
