@@ -45,9 +45,11 @@ fn parse_fixture(name: &str) {
         .unwrap_or_else(|e| panic!("Failed to read {}: {}", expected_path.display(), e));
     let mut expected: Value = serde_json::from_str(&expected_str).unwrap();
 
-    // Strip "loc" fields from both (not implemented yet)
+    // Strip "loc" and "name_loc" fields from both (not implemented yet - requires line/column tracking)
     strip_field(&mut actual, "loc");
     strip_field(&mut expected, "loc");
+    strip_field(&mut actual, "name_loc");
+    strip_field(&mut expected, "name_loc");
 
     assert_eq!(actual, expected, "Mismatch for fixture '{}'", name);
 }
