@@ -39,35 +39,16 @@
                             "children": [
                               {
                                 "combinator": null,
-                                "end": 77,
-                                "selectors": [
-                                  {
-                                    "end": 77,
-                                    "name": "2n",
-                                    "start": 75,
-                                    "type": "TypeSelector"
-                                  }
-                                ],
-                                "start": 75,
-                                "type": "RelativeSelector"
-                              },
-                              {
-                                "combinator": {
-                                  "end": 78,
-                                  "name": "+",
-                                  "start": 77,
-                                  "type": "Combinator"
-                                },
                                 "end": 79,
                                 "selectors": [
                                   {
                                     "end": 79,
-                                    "name": "1",
-                                    "start": 78,
-                                    "type": "TypeSelector"
+                                    "start": 75,
+                                    "type": "Nth",
+                                    "value": "2n+1"
                                   }
                                 ],
-                                "start": 78,
+                                "start": 75,
                                 "type": "RelativeSelector"
                               }
                             ],
@@ -139,65 +120,14 @@
                             "children": [
                               {
                                 "combinator": null,
-                                "end": 132,
-                                "selectors": [
-                                  {
-                                    "end": 132,
-                                    "name": "-n",
-                                    "start": 130,
-                                    "type": "TypeSelector"
-                                  }
-                                ],
-                                "start": 130,
-                                "type": "RelativeSelector"
-                              },
-                              {
-                                "combinator": {
-                                  "end": 134,
-                                  "name": "+",
-                                  "start": 133,
-                                  "type": "Combinator"
-                                },
-                                "end": 136,
-                                "selectors": [
-                                  {
-                                    "end": 136,
-                                    "name": "3",
-                                    "start": 135,
-                                    "type": "TypeSelector"
-                                  }
-                                ],
-                                "start": 135,
-                                "type": "RelativeSelector"
-                              },
-                              {
-                                "combinator": {
-                                  "end": 137,
-                                  "name": " ",
-                                  "start": 136,
-                                  "type": "Combinator"
-                                },
-                                "end": 139,
-                                "selectors": [
-                                  {
-                                    "end": 139,
-                                    "name": "of",
-                                    "start": 137,
-                                    "type": "TypeSelector"
-                                  }
-                                ],
-                                "start": 137,
-                                "type": "RelativeSelector"
-                              },
-                              {
-                                "combinator": {
-                                  "end": 140,
-                                  "name": " ",
-                                  "start": 139,
-                                  "type": "Combinator"
-                                },
                                 "end": 152,
                                 "selectors": [
+                                  {
+                                    "end": 140,
+                                    "start": 130,
+                                    "type": "Nth",
+                                    "value": "-n + 3 of "
+                                  },
                                   {
                                     "end": 142,
                                     "name": "li",
@@ -211,7 +141,7 @@
                                     "type": "ClassSelector"
                                   }
                                 ],
-                                "start": 140,
+                                "start": 130,
                                 "type": "RelativeSelector"
                               }
                             ],
@@ -287,9 +217,9 @@
                                 "selectors": [
                                   {
                                     "end": 205,
-                                    "name": "1",
                                     "start": 204,
-                                    "type": "TypeSelector"
+                                    "type": "Nth",
+                                    "value": "1"
                                   }
                                 ],
                                 "start": 204,
@@ -445,35 +375,16 @@
                             "children": [
                               {
                                 "combinator": null,
-                                "end": 311,
-                                "selectors": [
-                                  {
-                                    "end": 311,
-                                    "name": "n",
-                                    "start": 310,
-                                    "type": "TypeSelector"
-                                  }
-                                ],
-                                "start": 310,
-                                "type": "RelativeSelector"
-                              },
-                              {
-                                "combinator": {
-                                  "end": 312,
-                                  "name": "+",
-                                  "start": 311,
-                                  "type": "Combinator"
-                                },
                                 "end": 313,
                                 "selectors": [
                                   {
                                     "end": 313,
-                                    "name": "7",
-                                    "start": 312,
-                                    "type": "TypeSelector"
+                                    "start": 310,
+                                    "type": "Nth",
+                                    "value": "n+7"
                                   }
                                 ],
-                                "start": 312,
+                                "start": 310,
                                 "type": "RelativeSelector"
                               }
                             ],
@@ -549,9 +460,9 @@
                                 "selectors": [
                                   {
                                     "end": 369,
-                                    "name": "even",
                                     "start": 365,
-                                    "type": "TypeSelector"
+                                    "type": "Nth",
+                                    "value": "even"
                                   }
                                 ],
                                 "start": 365,
@@ -630,9 +541,9 @@
                                 "selectors": [
                                   {
                                     "end": 424,
-                                    "name": "odd",
                                     "start": 421,
-                                    "type": "TypeSelector"
+                                    "type": "Nth",
+                                    "value": "odd"
                                   }
                                 ],
                                 "start": 421,
@@ -707,26 +618,26 @@
                             "children": [
                               {
                                 "combinator": null,
-                                "end": 477,
+                                "end": 486,
                                 "selectors": [
                                   {
-                                    "end": 477,
-                                    "name": "n",
-                                    "start": 476,
-                                    "type": "TypeSelector"
+                                    "end": 486,
+                                    "start": 485,
+                                    "type": "Nth",
+                                    "value": "n"
                                   }
                                 ],
-                                "start": 476,
+                                "start": 485,
                                 "type": "RelativeSelector"
                               }
                             ],
-                            "end": 477,
-                            "start": 476,
+                            "end": 486,
+                            "start": 485,
                             "type": "ComplexSelector"
                           }
                         ],
-                        "end": 477,
-                        "start": 476,
+                        "end": 486,
+                        "start": 485,
                         "type": "SelectorList"
                       },
                       "end": 492,
@@ -869,35 +780,16 @@
                             "children": [
                               {
                                 "combinator": null,
-                                "end": 598,
-                                "selectors": [
-                                  {
-                                    "end": 598,
-                                    "name": "10n",
-                                    "start": 595,
-                                    "type": "TypeSelector"
-                                  }
-                                ],
-                                "start": 595,
-                                "type": "RelativeSelector"
-                              },
-                              {
-                                "combinator": {
-                                  "end": 599,
-                                  "name": "+",
-                                  "start": 598,
-                                  "type": "Combinator"
-                                },
                                 "end": 600,
                                 "selectors": [
                                   {
                                     "end": 600,
-                                    "name": "1",
-                                    "start": 599,
-                                    "type": "TypeSelector"
+                                    "start": 595,
+                                    "type": "Nth",
+                                    "value": "10n+1"
                                   }
                                 ],
-                                "start": 599,
+                                "start": 595,
                                 "type": "RelativeSelector"
                               }
                             ],
@@ -969,35 +861,16 @@
                             "children": [
                               {
                                 "combinator": null,
-                                "end": 654,
-                                "selectors": [
-                                  {
-                                    "end": 654,
-                                    "name": "-2n",
-                                    "start": 651,
-                                    "type": "TypeSelector"
-                                  }
-                                ],
-                                "start": 651,
-                                "type": "RelativeSelector"
-                              },
-                              {
-                                "combinator": {
-                                  "end": 655,
-                                  "name": "+",
-                                  "start": 654,
-                                  "type": "Combinator"
-                                },
                                 "end": 656,
                                 "selectors": [
                                   {
                                     "end": 656,
-                                    "name": "3",
-                                    "start": 655,
-                                    "type": "TypeSelector"
+                                    "start": 651,
+                                    "type": "Nth",
+                                    "value": "-2n+3"
                                   }
                                 ],
-                                "start": 655,
+                                "start": 651,
                                 "type": "RelativeSelector"
                               }
                             ],

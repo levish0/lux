@@ -8,7 +8,7 @@ use winnow::Result as ParseResult;
 use winnow::combinator::peek;
 use winnow::prelude::*;
 use winnow::stream::Location;
-use winnow::token::{any, literal, take_while};
+use winnow::token::{literal, take_until, take_while};
 
 use super::ParserInput;
 use super::attribute::attribute_parser;
@@ -32,8 +32,9 @@ pub fn style_parser(parser_input: &mut ParserInput) -> ParseResult<StyleSheet> {
 
     let content_start = parser_input.current_token_start() as u32;
 
-    // Read raw content until </style>
-    let styles = read_until_closing_style(parser_input)?;
+    // Read raw content until </style> (zero-allocation slice)
+    let styles: &str = take_until(0.., "</style>").parse_next(parser_input)?;
+    let styles = styles.to_string();
     let content_end = parser_input.current_token_start() as u32;
 
     // Consume </style>
@@ -66,27 +67,14 @@ fn parse_style_attributes(parser_input: &mut ParserInput) -> ParseResult<Vec<Att
     let mut attributes = Vec::new();
     loop {
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
-        let next = peek(any).parse_next(parser_input)?;
-        if next == '>' || next == '/' {
+        // Stop at > or /
+        let check: ParseResult<&str> = peek(take_while(1.., ['>', '/'])).parse_next(parser_input);
+        if check.is_ok() {
             break;
         }
         attributes.push(attribute_parser(parser_input)?);
     }
     Ok(attributes)
-}
-
-/// Read raw text content until `</style>` without consuming the closing tag.
-fn read_until_closing_style(parser_input: &mut ParserInput) -> ParseResult<String> {
-    let mut buf = String::new();
-    loop {
-        let check: ParseResult<&str> = peek(literal("</style>")).parse_next(parser_input);
-        if check.is_ok() {
-            break;
-        }
-        let c: char = any.parse_next(parser_input)?;
-        buf.push(c);
-    }
-    Ok(buf)
 }
 
 /// Parse CSS content string into stylesheet children.
@@ -96,13 +84,11 @@ fn parse_stylesheet_content(source: &str, offset: u32) -> ParseResult<Vec<StyleS
     let mut children = Vec::new();
 
     loop {
-        // Skip whitespace and comments
         pos = skip_css_whitespace_and_comments(source, pos);
         if pos >= source.len() {
             break;
         }
 
-        // Parse a rule or at-rule
         let child = css_child_parser(source, &mut pos, offset)?;
         children.push(child);
     }
@@ -111,14 +97,12 @@ fn parse_stylesheet_content(source: &str, offset: u32) -> ParseResult<Vec<StyleS
 }
 
 /// Skip CSS whitespace and comments, returning new position.
-pub(crate) fn skip_css_whitespace_and_comments(source: &str, mut pos: usize) -> usize {
+pub fn skip_css_whitespace_and_comments(source: &str, mut pos: usize) -> usize {
     let bytes = source.as_bytes();
     loop {
-        // Skip whitespace
         while pos < bytes.len() && bytes[pos].is_ascii_whitespace() {
             pos += 1;
         }
-        // Skip /* ... */ comments
         if pos + 1 < bytes.len() && bytes[pos] == b'/' && bytes[pos + 1] == b'*' {
             pos += 2;
             while pos + 1 < bytes.len() {
@@ -133,4 +117,61 @@ pub(crate) fn skip_css_whitespace_and_comments(source: &str, mut pos: usize) -> 
         break;
     }
     pos
+}
+
+/// Read a CSS identifier (shared between rules and selectors sub-parsers).
+/// Handles escape sequences per CSS spec:
+/// - Unicode escape: `\HHHHHH` (1-6 hex digits, optional trailing whitespace) → resolved codepoint
+/// - Simple escape: `\X` → keeps `\X` verbatim (like reference Svelte)
+pub fn read_css_ident(source: &str, pos: &mut usize) -> String {
+    let bytes = source.as_bytes();
+    let mut ident = String::new();
+
+    while *pos < bytes.len() {
+        let ch = bytes[*pos];
+        if ch == b'\\' && *pos + 1 < bytes.len() {
+            *pos += 1; // skip backslash
+            // Check for unicode escape (1-6 hex digits)
+            let hex_start = *pos;
+            let mut hex_count = 0;
+            while *pos < bytes.len() && hex_count < 6 && bytes[*pos].is_ascii_hexdigit() {
+                *pos += 1;
+                hex_count += 1;
+            }
+            if hex_count > 0 {
+                // Unicode escape: resolve to codepoint
+                let hex_str = &source[hex_start..*pos];
+                if let Ok(cp) = u32::from_str_radix(hex_str, 16) {
+                    if let Some(c) = char::from_u32(cp) {
+                        ident.push(c);
+                    }
+                }
+                // Optional trailing whitespace consumed
+                if *pos < bytes.len() && bytes[*pos].is_ascii_whitespace() {
+                    *pos += 1;
+                }
+            } else {
+                // Simple escape: backslash + next char kept verbatim
+                ident.push('\\');
+                // Get the char (could be multi-byte)
+                let ch_str = &source[*pos..];
+                if let Some(c) = ch_str.chars().next() {
+                    ident.push(c);
+                    *pos += c.len_utf8();
+                }
+            }
+        } else if ch.is_ascii_alphanumeric() || ch == b'-' || ch == b'_' || ch > 127 {
+            // Regular ident char (ASCII or non-ASCII)
+            let ch_str = &source[*pos..];
+            if let Some(c) = ch_str.chars().next() {
+                ident.push(c);
+                *pos += c.len_utf8();
+            } else {
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+    ident
 }

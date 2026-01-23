@@ -27,7 +27,7 @@
                   "end": 86,
                   "selectors": [
                     {
-                      "end": 86,
+                      "end": 81,
                       "name": "view-transition-old",
                       "start": 60,
                       "type": "PseudoElementSelector"
@@ -83,7 +83,7 @@
                                 "end": 145,
                                 "selectors": [
                                   {
-                                    "end": 145,
+                                    "end": 140,
                                     "name": "view-transition-old",
                                     "start": 119,
                                     "type": "PseudoElementSelector"
@@ -149,7 +149,7 @@
                   "end": 199,
                   "selectors": [
                     {
-                      "end": 199,
+                      "end": 182,
                       "name": "highlight",
                       "start": 171,
                       "type": "PseudoElementSelector"
@@ -202,7 +202,7 @@
                       "type": "TypeSelector"
                     },
                     {
-                      "end": 245,
+                      "end": 240,
                       "name": "part",
                       "start": 234,
                       "type": "PseudoElementSelector"
@@ -249,7 +249,7 @@
                   "end": 285,
                   "selectors": [
                     {
-                      "end": 285,
+                      "end": 275,
                       "name": "slotted",
                       "start": 266,
                       "type": "PseudoElementSelector"
@@ -302,26 +302,66 @@
                             "children": [
                               {
                                 "combinator": null,
-                                "end": 358,
+                                "end": 330,
                                 "selectors": [
                                   {
-                                    "end": 358,
-                                    "start": 310,
-                                    "type": "Nth",
-                                    "value": "/*button*/\n\t\tbutton, /*p after h1*/\n\t\th1 + p"
+                                    "end": 330,
+                                    "name": "button",
+                                    "start": 324,
+                                    "type": "TypeSelector"
                                   }
                                 ],
-                                "start": 310,
+                                "start": 324,
                                 "type": "RelativeSelector"
                               }
                             ],
-                            "end": 358,
-                            "start": 310,
+                            "end": 330,
+                            "start": 324,
+                            "type": "ComplexSelector"
+                          },
+                          {
+                            "children": [
+                              {
+                                "combinator": null,
+                                "end": 351,
+                                "selectors": [
+                                  {
+                                    "end": 351,
+                                    "name": "h1",
+                                    "start": 349,
+                                    "type": "TypeSelector"
+                                  }
+                                ],
+                                "start": 349,
+                                "type": "RelativeSelector"
+                              },
+                              {
+                                "combinator": {
+                                  "end": 353,
+                                  "name": "+",
+                                  "start": 352,
+                                  "type": "Combinator"
+                                },
+                                "end": 355,
+                                "selectors": [
+                                  {
+                                    "end": 355,
+                                    "name": "p",
+                                    "start": 354,
+                                    "type": "TypeSelector"
+                                  }
+                                ],
+                                "start": 352,
+                                "type": "RelativeSelector"
+                              }
+                            ],
+                            "end": 355,
+                            "start": 349,
                             "type": "ComplexSelector"
                           }
                         ],
-                        "end": 358,
-                        "start": 310,
+                        "end": 355,
+                        "start": 324,
                         "type": "SelectorList"
                       },
                       "end": 359,

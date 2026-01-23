@@ -84,7 +84,7 @@ pub fn find_keyword_at_depth_zero(s: &str, kw: &str) -> Option<usize> {
     let mut i = 0;
 
     while i < bytes.len() {
-        if depth == 0 && s[i..].starts_with(kw) {
+        if depth == 0 && bytes[i..].starts_with(kw.as_bytes()) {
             return Some(i);
         }
 

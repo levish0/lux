@@ -4,7 +4,7 @@ use svelte_ast::span::Span;
 use winnow::Result as ParseResult;
 
 use super::selectors::parse_selector_list;
-use super::skip_css_whitespace_and_comments;
+use super::{read_css_ident, skip_css_whitespace_and_comments};
 
 /// Parse a single stylesheet child (Rule or Atrule).
 pub fn css_child_parser(
@@ -197,7 +197,7 @@ fn parse_declaration(source: &str, pos: &mut usize, offset: u32) -> ParseResult<
     let bytes = source.as_bytes();
 
     // Read property name
-    let property = read_declaration_property(source, pos);
+    let property = read_declaration_property(source, pos).to_string();
 
     // Skip whitespace and consume :
     *pos = skip_css_whitespace_and_comments(source, *pos);
@@ -259,7 +259,7 @@ fn parse_declaration(source: &str, pos: &mut usize, offset: u32) -> ParseResult<
 }
 
 /// Read a declaration property name.
-fn read_declaration_property(source: &str, pos: &mut usize) -> String {
+fn read_declaration_property<'a>(source: &'a str, pos: &mut usize) -> &'a str {
     let start = *pos;
     let bytes = source.as_bytes();
 
@@ -272,23 +272,6 @@ fn read_declaration_property(source: &str, pos: &mut usize) -> String {
             break;
         }
     }
-    source[start..*pos].to_string()
+    &source[start..*pos]
 }
 
-/// Read a CSS identifier.
-fn read_css_ident(source: &str, pos: &mut usize) -> String {
-    let start = *pos;
-    let bytes = source.as_bytes();
-
-    while *pos < bytes.len() {
-        let ch = bytes[*pos];
-        if ch.is_ascii_alphanumeric() || ch == b'-' || ch == b'_' {
-            *pos += 1;
-        } else if ch > 127 {
-            *pos += 1;
-        } else {
-            break;
-        }
-    }
-    source[start..*pos].to_string()
-}
