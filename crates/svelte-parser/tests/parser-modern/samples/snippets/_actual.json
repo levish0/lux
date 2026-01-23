@@ -91,13 +91,10 @@
         "expression": {
           "arguments": [
             {
-              "expression": {
-                "end": 99,
-                "name": "msg",
-                "start": 96,
-                "type": "Identifier"
-              },
-              "spread": null
+              "end": 99,
+              "name": "msg",
+              "start": 96,
+              "type": "Identifier"
             }
           ],
           "callee": {
@@ -107,6 +104,7 @@
             "type": "Identifier"
           },
           "end": 100,
+          "optional": false,
           "start": 92,
           "type": "CallExpression"
         },
@@ -126,12 +124,14 @@
           "start": 8
         },
         "start": 8,
+        "type": "Attribute",
         "value": [
           {
             "data": "ts",
             "end": 16,
             "raw": "ts",
-            "start": 14
+            "start": 14,
+            "type": "Text"
           }
         ]
       }

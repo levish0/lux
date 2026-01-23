@@ -52,10 +52,10 @@ impl Serialize for AttributeValue {
 }
 
 #[derive(Debug, Clone, Serialize)]
-#[serde(untagged)]
+#[serde(tag = "type")]
 pub enum AttributeSequenceValue {
     Text(Text),
-    Expression(ExpressionTag),
+    ExpressionTag(ExpressionTag),
 }
 
 /*

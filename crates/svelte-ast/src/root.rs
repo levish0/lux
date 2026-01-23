@@ -3,9 +3,8 @@ use serde::{Serialize, Serializer};
 use std::collections::HashMap;
 use swc_ecma_ast as swc;
 
-use crate::attributes::Attribute;
 use crate::css::StyleSheet;
-use crate::node::FragmentNode;
+use crate::node::{AttributeNode, FragmentNode};
 use crate::span::Span;
 use crate::text::JsComment;
 
@@ -68,9 +67,10 @@ pub struct Script {
     pub span: Span,
     pub context: ScriptContext,
     pub content: swc::Program,
-    pub content_comments: Vec<crate::text::JsComment>,
+    pub content_comments: Vec<JsComment>,
+    pub content_start: usize,
     pub content_end: usize,
-    pub attributes: Vec<Attribute>,
+    pub attributes: Vec<AttributeNode>,
 }
 
 impl Serialize for Script {
@@ -83,6 +83,7 @@ impl Serialize for Script {
         map.serialize_entry("content", &crate::utils::estree::ProgramWithComments {
             program: &self.content,
             comments: &self.content_comments,
+            content_start: self.content_start,
             content_end: self.content_end,
         })?;
         map.serialize_entry("attributes", &self.attributes)?;
@@ -140,7 +141,7 @@ pub struct SvelteOptions {
     pub namespace: Option<Namespace>,
     pub css: Option<CssMode>,
     pub custom_element: Option<CustomElementOptions>,
-    pub attributes: Vec<Attribute>,
+    pub attributes: Vec<AttributeNode>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]

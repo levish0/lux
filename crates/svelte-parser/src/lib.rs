@@ -765,7 +765,11 @@ mod tests {
         assert!(root.instance.is_some());
         let script = root.instance.unwrap();
         assert_eq!(script.attributes.len(), 1);
-        assert_eq!(script.attributes[0].name, "lang");
+        if let svelte_ast::node::AttributeNode::Attribute(attr) = &script.attributes[0] {
+            assert_eq!(attr.name, "lang");
+        } else {
+            panic!("Expected Attribute variant");
+        }
     }
 
     // --- Phase 7: CSS parsing ---

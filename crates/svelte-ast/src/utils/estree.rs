@@ -106,6 +106,7 @@ impl<'a> Serialize for ProgramRef<'a> {
 pub struct ProgramWithComments<'a> {
     pub program: &'a swc::Program,
     pub comments: &'a [crate::text::JsComment],
+    pub content_start: usize,
     pub content_end: usize,
 }
 
@@ -114,14 +115,10 @@ impl<'a> Serialize for ProgramWithComments<'a> {
         let value = serde_json::to_value(self.program).map_err(S::Error::custom)?;
         let mut transformed = transform_value(value);
 
-        // Fix Program.end for empty body: extend to content end
+        // Program.start/end should be the content boundaries (between > and </script>)
         if let Value::Object(ref mut obj) = transformed {
-            let body_is_empty = obj
-                .get("body")
-                .and_then(|b| b.as_array())
-                .map(|arr| arr.is_empty())
-                .unwrap_or(true);
-            if body_is_empty && self.content_end > 0 {
+            if self.content_start > 0 || self.content_end > 0 {
+                obj.insert("start".to_string(), Value::Number(self.content_start.into()));
                 obj.insert("end".to_string(), Value::Number(self.content_end.into()));
             }
         }
@@ -256,17 +253,24 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
 
             // --- Expressions ---
             "CallExpression" | "OptionalCallExpression" => {
-                if let Some(args) = obj.remove("args") {
-                    obj.insert("arguments".to_string(), args);
+                let is_optional = t == "OptionalCallExpression";
+                // SWC may serialize as "args" or "arguments"
+                let args = obj.remove("args").or_else(|| obj.remove("arguments"));
+                if let Some(args) = args {
+                    let unwrapped = unwrap_expr_or_spread(args);
+                    obj.insert("arguments".to_string(), unwrapped);
                 }
-                // Remove typeArgs/typeParameters when null
-                if obj.get("typeArguments") == Some(&Value::Null) {
-                    obj.remove("typeArguments");
-                }
+                // ESTree requires optional field
+                obj.entry("optional".to_string()).or_insert(Value::Bool(is_optional));
+                // Remove null optional fields
+                remove_if_null(&mut obj, "typeArguments");
+                remove_if_null(&mut obj, "typeParameters");
             }
             "NewExpression" => {
-                if let Some(args) = obj.remove("args") {
-                    obj.insert("arguments".to_string(), args);
+                let args = obj.remove("args").or_else(|| obj.remove("arguments"));
+                if let Some(args) = args {
+                    let unwrapped = unwrap_expr_or_spread(args);
+                    obj.insert("arguments".to_string(), unwrapped);
                 }
             }
             "BinaryExpression" | "LogicalExpression" | "AssignmentExpression" => {
@@ -475,6 +479,53 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                 obj.insert("shorthand".to_string(), Value::Bool(false));
                 obj.insert("computed".to_string(), Value::Bool(false));
             }
+            "KeyValuePatternProperty" => {
+                obj.insert("type".to_string(), Value::String("Property".to_string()));
+                obj.insert("kind".to_string(), Value::String("init".to_string()));
+                obj.insert("method".to_string(), Value::Bool(false));
+                obj.insert("shorthand".to_string(), Value::Bool(false));
+                obj.insert("computed".to_string(), Value::Bool(false));
+            }
+            "AssignmentPatternProperty" => {
+                // SWC's AssignPatProp → ESTree Property (shorthand: true)
+                // key is the identifier, value is the optional default
+                obj.insert("type".to_string(), Value::String("Property".to_string()));
+                obj.insert("kind".to_string(), Value::String("init".to_string()));
+                obj.insert("method".to_string(), Value::Bool(false));
+                obj.insert("shorthand".to_string(), Value::Bool(true));
+                obj.insert("computed".to_string(), Value::Bool(false));
+
+                let key = obj.get("key").cloned();
+                let default_value = obj.remove("value");
+
+                if let Some(ref key_val) = key {
+                    match &default_value {
+                        Some(Value::Null) | None => {
+                            // No default: value = key (same identifier)
+                            obj.insert("value".to_string(), key_val.clone());
+                        }
+                        Some(default_expr) => {
+                            // Has default: value = AssignmentPattern { left: key, right: default }
+                            let mut assign_pat = Map::new();
+                            assign_pat.insert("type".to_string(), Value::String("AssignmentPattern".to_string()));
+                            assign_pat.insert("left".to_string(), key_val.clone());
+                            assign_pat.insert("right".to_string(), default_expr.clone());
+                            // Span: start from key, end from default
+                            if let Some(start) = key_val.as_object().and_then(|k| k.get("start")).cloned() {
+                                assign_pat.insert("start".to_string(), start);
+                            }
+                            if let Some(end) = default_expr.as_object().and_then(|d| d.get("end")).cloned() {
+                                assign_pat.insert("end".to_string(), end);
+                            }
+                            obj.insert("value".to_string(), Value::Object(assign_pat));
+                            // Update Property end to include default value
+                            if let Some(end) = default_expr.as_object().and_then(|d| d.get("end")).cloned() {
+                                obj.insert("end".to_string(), end);
+                            }
+                        }
+                    }
+                }
+            }
             "AssignmentProperty" => {
                 obj.insert("type".to_string(), Value::String("Property".to_string()));
                 obj.insert("kind".to_string(), Value::String("init".to_string()));
@@ -678,11 +729,82 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
     obj.remove("declare");
     obj.remove("isAbstract");
 
-    // 5. Recursively transform all remaining values
-    let result: Map<String, Value> = obj
+    // 5. Remove null optional fields common across many node types
+    remove_if_null(&mut obj, "returnType");
+    remove_if_null(&mut obj, "typeParameters");
+    remove_if_null(&mut obj, "typeParams");
+    remove_if_null(&mut obj, "superTypeParams");
+
+    // 6. Recursively transform all remaining values
+    let mut result: Map<String, Value> = obj
         .into_iter()
         .map(|(k, v)| (k, transform_value(v)))
         .collect();
 
+    // 7. Post-transform fixes that require recursed children
+    // Extend Identifier span to include typeAnnotation
+    if result.get("type").and_then(|v| v.as_str()) == Some("Identifier") {
+        if let Some(Value::Object(ta)) = result.get("typeAnnotation") {
+            if let Some(ta_end) = ta.get("end").and_then(|e| e.as_u64()) {
+                result.insert("end".to_string(), Value::Number(ta_end.into()));
+            }
+        }
+    }
+
+    // Add missing fields for ArrowFunctionExpression
+    if result.get("type").and_then(|v| v.as_str()) == Some("ArrowFunctionExpression") {
+        result.entry("id".to_string()).or_insert(Value::Null);
+        // expression: true if body is not a BlockStatement
+        let is_block = result.get("body")
+            .and_then(|b| b.as_object())
+            .and_then(|b| b.get("type"))
+            .and_then(|t| t.as_str())
+            == Some("BlockStatement");
+        result.entry("expression".to_string()).or_insert(Value::Bool(!is_block));
+    }
+
     Value::Object(result)
+}
+
+/// Remove a field from the map if its value is null.
+fn remove_if_null(obj: &mut Map<String, Value>, key: &str) {
+    if obj.get(key) == Some(&Value::Null) {
+        obj.remove(key);
+    }
+}
+
+/// Unwrap ExprOrSpread array: [{expr/expression, spread}] → [expr] or [SpreadElement]
+fn unwrap_expr_or_spread(args: Value) -> Value {
+    match args {
+        Value::Array(arr) => {
+            Value::Array(arr.into_iter().map(|item| {
+                if let Value::Object(mut obj) = item {
+                    // ExprOrSpread has expr/expression + spread fields, no type field
+                    if obj.contains_key("spread") && !obj.contains_key("type") {
+                        let spread = obj.remove("spread");
+                        let expr = obj.remove("expr")
+                            .or_else(|| obj.remove("expression"));
+                        if let Some(expr_val) = expr {
+                            if spread.is_some() && spread != Some(Value::Null) {
+                                // Spread: wrap in SpreadElement
+                                let mut spread_obj = Map::new();
+                                spread_obj.insert("type".to_string(), Value::String("SpreadElement".to_string()));
+                                spread_obj.insert("argument".to_string(), expr_val);
+                                Value::Object(spread_obj)
+                            } else {
+                                expr_val
+                            }
+                        } else {
+                            Value::Object(obj)
+                        }
+                    } else {
+                        Value::Object(obj)
+                    }
+                } else {
+                    item
+                }
+            }).collect())
+        }
+        other => other,
+    }
 }

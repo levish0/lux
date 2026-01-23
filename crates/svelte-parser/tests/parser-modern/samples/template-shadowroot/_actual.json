@@ -19,7 +19,8 @@
                 "data": "open",
                 "end": 30,
                 "raw": "open",
-                "start": 26
+                "start": 26,
+                "type": "Text"
               }
             ]
           }

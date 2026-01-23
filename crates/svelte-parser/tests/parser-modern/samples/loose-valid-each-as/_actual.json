@@ -9,6 +9,112 @@
         "raw": "\n\n",
         "start": 43,
         "type": "Text"
+      },
+      {
+        "body": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 86,
+              "raw": "\n\t",
+              "start": 84,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 111,
+              "fragment": {
+                "nodes": [
+                  {
+                    "end": 96,
+                    "expression": {
+                      "end": 95,
+                      "name": "key",
+                      "start": 92,
+                      "type": "Identifier"
+                    },
+                    "start": 91,
+                    "type": "ExpressionTag"
+                  },
+                  {
+                    "data": ": ",
+                    "end": 98,
+                    "raw": ": ",
+                    "start": 96,
+                    "type": "Text"
+                  },
+                  {
+                    "end": 105,
+                    "expression": {
+                      "end": 104,
+                      "name": "value",
+                      "start": 99,
+                      "type": "Identifier"
+                    },
+                    "start": 98,
+                    "type": "ExpressionTag"
+                  }
+                ],
+                "type": "Fragment"
+              },
+              "name": "div",
+              "name_loc": {
+                "end": 90,
+                "start": 87
+              },
+              "start": 86,
+              "type": "RegularElement"
+            },
+            {
+              "data": "\n",
+              "end": 112,
+              "raw": "\n",
+              "start": 111,
+              "type": "Text"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "context": {
+          "elements": [
+            {
+              "end": 63,
+              "name": "key",
+              "start": 60,
+              "type": "Identifier"
+            },
+            {
+              "end": 82,
+              "left": {
+                "end": 70,
+                "name": "value",
+                "start": 65,
+                "type": "Identifier"
+              },
+              "right": {
+                "end": 82,
+                "raw": "'default'",
+                "start": 73,
+                "type": "Literal",
+                "value": "default"
+              },
+              "start": 65,
+              "type": "AssignmentPattern"
+            }
+          ],
+          "end": 83,
+          "start": 59,
+          "type": "ArrayPattern"
+        },
+        "end": 119,
+        "expression": {
+          "end": 55,
+          "name": "arr",
+          "start": 52,
+          "type": "Identifier"
+        },
+        "start": 45,
+        "type": "EachBlock"
       }
     ],
     "type": "Fragment"
@@ -23,12 +129,14 @@
           "start": 8
         },
         "start": 8,
+        "type": "Attribute",
         "value": [
           {
             "data": "ts",
             "end": 16,
             "raw": "ts",
-            "start": 14
+            "start": 14,
+            "type": "Text"
           }
         ]
       }
@@ -61,9 +169,9 @@
           "type": "VariableDeclaration"
         }
       ],
-      "end": 33,
+      "end": 34,
       "sourceType": "module",
-      "start": 20,
+      "start": 18,
       "type": "Program"
     },
     "context": "default",

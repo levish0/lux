@@ -44,9 +44,11 @@ pub struct EachBlock {
     #[serde(serialize_with = "crate::utils::estree::serialize_opt_pat")]
     pub context: Option<Box<swc::Pat>>,
     pub body: Fragment,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub fallback: Option<Fragment>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub index: Option<String>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
+    #[serde(skip_serializing_if = "Option::is_none", serialize_with = "crate::utils::estree::serialize_opt_expr")]
     pub key: Option<Box<swc::Expr>>,
 }
 

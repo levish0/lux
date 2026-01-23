@@ -155,9 +155,9 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
     literal(" as ").parse_next(parser_input)?;
     take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
-    // Read context pattern until , or ( or }
+    // Read context pattern until , or ( or } at depth 0
     let ctx_offset = parser_input.current_token_start();
-    let context_text = read_until_any(parser_input, &[',', '(', '}'])?;
+    let context_text = read_until_any_balanced(parser_input, &[',', '(', '}'])?;
     let context = if context_text.trim().is_empty() {
         None
     } else {
@@ -446,10 +446,35 @@ fn read_until_keyword(parser_input: &mut ParserInput, keyword: &str) -> ParseRes
     Ok(buf)
 }
 
-/// Read text until one of the given characters.
-fn read_until_any(parser_input: &mut ParserInput, chars: &[char]) -> ParseResult<String> {
-    let text: &str = take_while(0.., |c: char| !chars.contains(&c)).parse_next(parser_input)?;
-    Ok(text.trim().to_string())
+/// Read text until one of the given characters at depth 0.
+/// Handles nested braces, brackets, parens, strings, and template literals.
+fn read_until_any_balanced(parser_input: &mut ParserInput, chars: &[char]) -> ParseResult<String> {
+    let mut buf = String::new();
+    let mut depth: u32 = 0; // tracks {}, [], ()
+    loop {
+        let c = peek(any).parse_next(parser_input)?;
+        if depth == 0 && chars.contains(&c) {
+            break;
+        }
+        let c: char = any.parse_next(parser_input)?;
+        buf.push(c);
+        match c {
+            '{' | '(' | '[' => depth += 1,
+            '}' | ')' | ']' => {
+                if depth > 0 {
+                    depth -= 1;
+                }
+            }
+            '"' | '\'' => {
+                collect_string_inline(parser_input, c, &mut buf)?;
+            }
+            '`' => {
+                collect_template_inline(parser_input, &mut buf)?;
+            }
+            _ => {}
+        }
+    }
+    Ok(buf.trim().to_string())
 }
 
 fn collect_string_inline(
@@ -567,10 +592,63 @@ fn swc_parse_expr_from_str(source: &str, ts: bool, offset: u32) -> ParseResult<B
 }
 
 fn swc_parse_pattern(source: &str, ts: bool, offset: u32) -> ParseResult<Box<swc::Pat>> {
-    // Parse as expression first, then convert to pattern
-    let expr = swc_parse_expr_from_str(source, ts, offset)?;
-    // Simple conversion: Ident → BindingIdent, ArrayExpr → ArrayPat, ObjectExpr → ObjectPat
-    Ok(Box::new(expr_to_pat(*expr)))
+    use swc_common::input::StringInput;
+    use swc_common::BytePos;
+    use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
+
+    let trimmed = source.trim();
+    let leading_ws = source.len() - source.trim_start().len();
+    let actual_offset = offset + leading_ws as u32;
+
+    // Wrap as arrow function params so SWC parses destructuring with defaults correctly
+    let wrapper = format!("({}) => {{}}", trimmed);
+    // Set parse offset so the inner source starts at actual_offset
+    let parse_offset = if actual_offset > 0 { actual_offset - 1 } else { 0 };
+
+    let syntax = if ts {
+        Syntax::Typescript(TsSyntax {
+            tsx: true,
+            ..Default::default()
+        })
+    } else {
+        Syntax::Es(EsSyntax {
+            jsx: true,
+            ..Default::default()
+        })
+    };
+
+    let input = StringInput::new(
+        &wrapper,
+        BytePos(parse_offset),
+        BytePos(parse_offset + wrapper.len() as u32),
+    );
+    let mut parser = swc_ecma_parser::Parser::new(syntax, input, None);
+
+    let expr = parser.parse_expr().map_err(|e| {
+        e.into_diagnostic(&swc_common::errors::Handler::with_emitter(
+            true,
+            false,
+            Box::new(swc_common::errors::EmitterWriter::new(
+                Box::new(std::io::sink()),
+                None,
+                false,
+                false,
+            )),
+        ))
+        .cancel();
+        winnow::error::ContextError::new()
+    })?;
+
+    match *expr {
+        swc::Expr::Arrow(arrow) if !arrow.params.is_empty() => {
+            Ok(Box::new(arrow.params.into_iter().next().unwrap()))
+        }
+        _ => {
+            // Fallback: parse as expression and convert
+            let expr = swc_parse_expr_from_str(source, ts, offset)?;
+            Ok(Box::new(expr_to_pat(*expr)))
+        }
+    }
 }
 
 fn expr_to_pat(expr: swc::Expr) -> swc::Pat {

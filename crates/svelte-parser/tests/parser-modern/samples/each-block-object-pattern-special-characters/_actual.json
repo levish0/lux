@@ -2,7 +2,68 @@
   "css": null,
   "end": 176,
   "fragment": {
-    "nodes": [],
+    "nodes": [
+      {
+        "body": {
+          "nodes": [],
+          "type": "Fragment"
+        },
+        "context": {
+          "end": 56,
+          "properties": [
+            {
+              "computed": false,
+              "end": 54,
+              "key": {
+                "end": 48,
+                "name": "y",
+                "start": 47,
+                "type": "Identifier"
+              },
+              "kind": "init",
+              "method": false,
+              "shorthand": true,
+              "start": 47,
+              "type": "Property",
+              "value": {
+                "left": {
+                  "end": 48,
+                  "name": "y",
+                  "start": 47,
+                  "type": "Identifier"
+                },
+                "right": {
+                  "end": 54,
+                  "raw": "'{'",
+                  "start": 51,
+                  "type": "Literal",
+                  "value": "{"
+                },
+                "type": "AssignmentPattern"
+              }
+            }
+          ],
+          "start": 45,
+          "type": "ObjectPattern"
+        },
+        "end": 64,
+        "expression": {
+          "end": 8,
+          "name": "x",
+          "start": 7,
+          "type": "Identifier"
+        },
+        "start": 0,
+        "type": "EachBlock"
+      },
+      {
+        "data": "\n\n",
+        "end": 66,
+        "raw": "\n\n",
+        "start": 64,
+        "type": "Text"
+      }
+    ],
     "type": "Fragment"
   },
   "js": [],

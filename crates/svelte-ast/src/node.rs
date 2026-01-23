@@ -60,7 +60,7 @@ pub enum FragmentNode {
 }
 
 /*
- * type AttributeNode = Attribute | SpreadAttribute | Directive;
+ * type AttributeNode = Attribute | SpreadAttribute | Directive | AttachTag;
  */
 #[derive(Debug, Clone, Serialize)]
 #[serde(tag = "type")]
@@ -75,6 +75,7 @@ pub enum AttributeNode {
     AnimateDirective(AnimateDirective),
     UseDirective(UseDirective),
     LetDirective(LetDirective),
+    AttachTag(AttachTag),
 }
 
 /*

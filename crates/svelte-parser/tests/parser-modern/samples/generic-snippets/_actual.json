@@ -23,12 +23,14 @@
           "start": 8
         },
         "start": 8,
+        "type": "Attribute",
         "value": [
           {
             "data": "ts",
             "end": 16,
             "raw": "ts",
-            "start": 14
+            "start": 14,
+            "type": "Text"
           }
         ]
       }

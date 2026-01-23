@@ -2,7 +2,80 @@
   "css": null,
   "end": 57,
   "fragment": {
-    "nodes": [],
+    "nodes": [
+      {
+        "attributes": [
+          {
+            "end": 27,
+            "expression": {
+              "async": false,
+              "body": {
+                "body": [],
+                "end": 26,
+                "start": 24,
+                "type": "BlockStatement"
+              },
+              "end": 26,
+              "expression": false,
+              "generator": false,
+              "id": null,
+              "params": [
+                {
+                  "end": 19,
+                  "name": "node",
+                  "start": 15,
+                  "type": "Identifier"
+                }
+              ],
+              "start": 14,
+              "type": "ArrowFunctionExpression"
+            },
+            "start": 5,
+            "type": "AttachTag"
+          },
+          {
+            "end": 50,
+            "expression": {
+              "async": false,
+              "body": {
+                "body": [],
+                "end": 49,
+                "start": 47,
+                "type": "BlockStatement"
+              },
+              "end": 49,
+              "expression": false,
+              "generator": false,
+              "id": null,
+              "params": [
+                {
+                  "end": 42,
+                  "name": "node",
+                  "start": 38,
+                  "type": "Identifier"
+                }
+              ],
+              "start": 37,
+              "type": "ArrowFunctionExpression"
+            },
+            "start": 28,
+            "type": "AttachTag"
+          }
+        ],
+        "end": 57,
+        "fragment": {
+          "nodes": [],
+          "type": "Fragment"
+        },
+        "name": "div",
+        "name_loc": {
+          "end": 4,
+          "start": 1
+        },
+        "start": 0,
+        "type": "RegularElement"
+      }
+    ],
     "type": "Fragment"
   },
   "js": [],

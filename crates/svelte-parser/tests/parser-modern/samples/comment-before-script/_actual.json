@@ -29,12 +29,14 @@
           "start": 36
         },
         "start": 36,
+        "type": "Attribute",
         "value": [
           {
             "data": "ts",
             "end": 44,
             "raw": "ts",
-            "start": 42
+            "start": 42,
+            "type": "Text"
           }
         ]
       }
@@ -46,7 +48,7 @@
             {
               "end": 65,
               "id": {
-                "end": 57,
+                "end": 65,
                 "name": "count",
                 "start": 52,
                 "type": "Identifier",
@@ -72,9 +74,9 @@
           "type": "VariableDeclaration"
         }
       ],
-      "end": 66,
+      "end": 67,
       "sourceType": "module",
-      "start": 48,
+      "start": 46,
       "type": "Program"
     },
     "context": "default",

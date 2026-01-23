@@ -52,14 +52,9 @@ pub fn script_parser(parser_input: &mut ParserInput) -> ParseResult<Script> {
         context,
         content,
         content_comments,
+        content_start,
         content_end,
-        attributes: attributes
-            .into_iter()
-            .filter_map(|a| match a {
-                AttributeNode::Attribute(attr) => Some(attr),
-                _ => None,
-            })
-            .collect(),
+        attributes,
     })
 }
 

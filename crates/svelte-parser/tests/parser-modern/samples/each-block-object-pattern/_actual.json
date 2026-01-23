@@ -2,7 +2,582 @@
   "css": null,
   "end": 344,
   "fragment": {
-    "nodes": [],
+    "nodes": [
+      {
+        "body": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 41,
+              "raw": "\n\t",
+              "start": 39,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 86,
+              "fragment": {
+                "nodes": [
+                  {
+                    "end": 50,
+                    "expression": {
+                      "end": 49,
+                      "name": "name",
+                      "start": 45,
+                      "type": "Identifier"
+                    },
+                    "start": 44,
+                    "type": "ExpressionTag"
+                  },
+                  {
+                    "data": " is ",
+                    "end": 54,
+                    "raw": " is ",
+                    "start": 50,
+                    "type": "Text"
+                  },
+                  {
+                    "end": 82,
+                    "expression": {
+                      "alternate": {
+                        "end": 81,
+                        "raw": "'not cool'",
+                        "start": 71,
+                        "type": "Literal",
+                        "value": "not cool"
+                      },
+                      "consequent": {
+                        "end": 68,
+                        "raw": "'cool'",
+                        "start": 62,
+                        "type": "Literal",
+                        "value": "cool"
+                      },
+                      "end": 81,
+                      "start": 55,
+                      "test": {
+                        "end": 59,
+                        "name": "cool",
+                        "start": 55,
+                        "type": "Identifier"
+                      },
+                      "type": "ConditionalExpression"
+                    },
+                    "start": 54,
+                    "type": "ExpressionTag"
+                  }
+                ],
+                "type": "Fragment"
+              },
+              "name": "p",
+              "name_loc": {
+                "end": 43,
+                "start": 42
+              },
+              "start": 41,
+              "type": "RegularElement"
+            },
+            {
+              "data": "\n",
+              "end": 87,
+              "raw": "\n",
+              "start": 86,
+              "type": "Text"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "context": {
+          "end": 38,
+          "properties": [
+            {
+              "computed": false,
+              "end": 23,
+              "key": {
+                "end": 23,
+                "name": "name",
+                "start": 19,
+                "type": "Identifier"
+              },
+              "kind": "init",
+              "method": false,
+              "shorthand": true,
+              "start": 19,
+              "type": "Property",
+              "value": {
+                "end": 23,
+                "name": "name",
+                "start": 19,
+                "type": "Identifier"
+              }
+            },
+            {
+              "computed": false,
+              "end": 36,
+              "key": {
+                "end": 29,
+                "name": "cool",
+                "start": 25,
+                "type": "Identifier"
+              },
+              "kind": "init",
+              "method": false,
+              "shorthand": true,
+              "start": 25,
+              "type": "Property",
+              "value": {
+                "left": {
+                  "end": 29,
+                  "name": "cool",
+                  "start": 25,
+                  "type": "Identifier"
+                },
+                "right": {
+                  "end": 36,
+                  "start": 32,
+                  "type": "Literal",
+                  "value": true
+                },
+                "type": "AssignmentPattern"
+              }
+            }
+          ],
+          "start": 17,
+          "type": "ObjectPattern"
+        },
+        "end": 94,
+        "expression": {
+          "end": 13,
+          "name": "people",
+          "start": 7,
+          "type": "Identifier"
+        },
+        "start": 0,
+        "type": "EachBlock"
+      },
+      {
+        "data": "\n\n",
+        "end": 96,
+        "raw": "\n\n",
+        "start": 94,
+        "type": "Text"
+      },
+      {
+        "body": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 155,
+              "raw": "\n\t",
+              "start": 153,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 200,
+              "fragment": {
+                "nodes": [
+                  {
+                    "end": 164,
+                    "expression": {
+                      "end": 163,
+                      "name": "name",
+                      "start": 159,
+                      "type": "Identifier"
+                    },
+                    "start": 158,
+                    "type": "ExpressionTag"
+                  },
+                  {
+                    "data": " is ",
+                    "end": 168,
+                    "raw": " is ",
+                    "start": 164,
+                    "type": "Text"
+                  },
+                  {
+                    "end": 196,
+                    "expression": {
+                      "alternate": {
+                        "end": 195,
+                        "raw": "'not cool'",
+                        "start": 185,
+                        "type": "Literal",
+                        "value": "not cool"
+                      },
+                      "consequent": {
+                        "end": 182,
+                        "raw": "'cool'",
+                        "start": 176,
+                        "type": "Literal",
+                        "value": "cool"
+                      },
+                      "end": 195,
+                      "start": 169,
+                      "test": {
+                        "end": 173,
+                        "name": "cool",
+                        "start": 169,
+                        "type": "Identifier"
+                      },
+                      "type": "ConditionalExpression"
+                    },
+                    "start": 168,
+                    "type": "ExpressionTag"
+                  }
+                ],
+                "type": "Fragment"
+              },
+              "name": "p",
+              "name_loc": {
+                "end": 157,
+                "start": 156
+              },
+              "start": 155,
+              "type": "RegularElement"
+            },
+            {
+              "data": "\n",
+              "end": 201,
+              "raw": "\n",
+              "start": 200,
+              "type": "Text"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "context": {
+          "end": 152,
+          "properties": [
+            {
+              "computed": false,
+              "end": 137,
+              "key": {
+                "end": 119,
+                "name": "name",
+                "start": 115,
+                "type": "Identifier"
+              },
+              "kind": "init",
+              "method": false,
+              "shorthand": true,
+              "start": 115,
+              "type": "Property",
+              "value": {
+                "left": {
+                  "end": 119,
+                  "name": "name",
+                  "start": 115,
+                  "type": "Identifier"
+                },
+                "right": {
+                  "end": 137,
+                  "expressions": [
+                    {
+                      "end": 135,
+                      "raw": "\"Doe\"",
+                      "start": 130,
+                      "type": "Literal",
+                      "value": "Doe"
+                    }
+                  ],
+                  "quasis": [
+                    {
+                      "cooked": "Jane ",
+                      "end": 128,
+                      "raw": "Jane ",
+                      "start": 123,
+                      "tail": false,
+                      "type": "TemplateElement"
+                    },
+                    {
+                      "cooked": "",
+                      "end": 136,
+                      "raw": "",
+                      "start": 136,
+                      "tail": true,
+                      "type": "TemplateElement"
+                    }
+                  ],
+                  "start": 122,
+                  "type": "TemplateLiteral"
+                },
+                "type": "AssignmentPattern"
+              }
+            },
+            {
+              "computed": false,
+              "end": 150,
+              "key": {
+                "end": 143,
+                "name": "cool",
+                "start": 139,
+                "type": "Identifier"
+              },
+              "kind": "init",
+              "method": false,
+              "shorthand": true,
+              "start": 139,
+              "type": "Property",
+              "value": {
+                "left": {
+                  "end": 143,
+                  "name": "cool",
+                  "start": 139,
+                  "type": "Identifier"
+                },
+                "right": {
+                  "end": 150,
+                  "start": 146,
+                  "type": "Literal",
+                  "value": true
+                },
+                "type": "AssignmentPattern"
+              }
+            }
+          ],
+          "start": 113,
+          "type": "ObjectPattern"
+        },
+        "end": 208,
+        "expression": {
+          "end": 109,
+          "name": "people",
+          "start": 103,
+          "type": "Identifier"
+        },
+        "start": 96,
+        "type": "EachBlock"
+      },
+      {
+        "data": "\n\n",
+        "end": 210,
+        "raw": "\n\n",
+        "start": 208,
+        "type": "Text"
+      },
+      {
+        "body": {
+          "nodes": [
+            {
+              "data": "\n\t",
+              "end": 291,
+              "raw": "\n\t",
+              "start": 289,
+              "type": "Text"
+            },
+            {
+              "attributes": [],
+              "end": 336,
+              "fragment": {
+                "nodes": [
+                  {
+                    "end": 300,
+                    "expression": {
+                      "end": 299,
+                      "name": "name",
+                      "start": 295,
+                      "type": "Identifier"
+                    },
+                    "start": 294,
+                    "type": "ExpressionTag"
+                  },
+                  {
+                    "data": " is ",
+                    "end": 304,
+                    "raw": " is ",
+                    "start": 300,
+                    "type": "Text"
+                  },
+                  {
+                    "end": 332,
+                    "expression": {
+                      "alternate": {
+                        "end": 331,
+                        "raw": "'not cool'",
+                        "start": 321,
+                        "type": "Literal",
+                        "value": "not cool"
+                      },
+                      "consequent": {
+                        "end": 318,
+                        "raw": "'cool'",
+                        "start": 312,
+                        "type": "Literal",
+                        "value": "cool"
+                      },
+                      "end": 331,
+                      "start": 305,
+                      "test": {
+                        "end": 309,
+                        "name": "cool",
+                        "start": 305,
+                        "type": "Identifier"
+                      },
+                      "type": "ConditionalExpression"
+                    },
+                    "start": 304,
+                    "type": "ExpressionTag"
+                  }
+                ],
+                "type": "Fragment"
+              },
+              "name": "p",
+              "name_loc": {
+                "end": 293,
+                "start": 292
+              },
+              "start": 291,
+              "type": "RegularElement"
+            },
+            {
+              "data": "\n",
+              "end": 337,
+              "raw": "\n",
+              "start": 336,
+              "type": "Text"
+            }
+          ],
+          "type": "Fragment"
+        },
+        "context": {
+          "end": 288,
+          "properties": [
+            {
+              "computed": false,
+              "end": 273,
+              "key": {
+                "end": 233,
+                "name": "name",
+                "start": 229,
+                "type": "Identifier"
+              },
+              "kind": "init",
+              "method": false,
+              "shorthand": true,
+              "start": 229,
+              "type": "Property",
+              "value": {
+                "left": {
+                  "end": 233,
+                  "name": "name",
+                  "start": 229,
+                  "type": "Identifier"
+                },
+                "right": {
+                  "arguments": [],
+                  "callee": {
+                    "end": 271,
+                    "expression": {
+                      "async": false,
+                      "body": {
+                        "body": [
+                          {
+                            "argument": {
+                              "end": 267,
+                              "expressions": [
+                                {
+                                  "end": 265,
+                                  "raw": "\"Doe\"",
+                                  "start": 260,
+                                  "type": "Literal",
+                                  "value": "Doe"
+                                }
+                              ],
+                              "quasis": [
+                                {
+                                  "cooked": "Jane ",
+                                  "end": 258,
+                                  "raw": "Jane ",
+                                  "start": 253,
+                                  "tail": false,
+                                  "type": "TemplateElement"
+                                },
+                                {
+                                  "cooked": "",
+                                  "end": 266,
+                                  "raw": "",
+                                  "start": 266,
+                                  "tail": true,
+                                  "type": "TemplateElement"
+                                }
+                              ],
+                              "start": 252,
+                              "type": "TemplateLiteral"
+                            },
+                            "end": 268,
+                            "start": 245,
+                            "type": "ReturnStatement"
+                          }
+                        ],
+                        "end": 270,
+                        "start": 243,
+                        "type": "BlockStatement"
+                      },
+                      "end": 270,
+                      "expression": false,
+                      "generator": false,
+                      "id": null,
+                      "params": [],
+                      "start": 237,
+                      "type": "ArrowFunctionExpression"
+                    },
+                    "start": 236,
+                    "type": "ParenthesisExpression"
+                  },
+                  "end": 273,
+                  "optional": false,
+                  "start": 236,
+                  "type": "CallExpression"
+                },
+                "type": "AssignmentPattern"
+              }
+            },
+            {
+              "computed": false,
+              "end": 286,
+              "key": {
+                "end": 279,
+                "name": "cool",
+                "start": 275,
+                "type": "Identifier"
+              },
+              "kind": "init",
+              "method": false,
+              "shorthand": true,
+              "start": 275,
+              "type": "Property",
+              "value": {
+                "left": {
+                  "end": 279,
+                  "name": "cool",
+                  "start": 275,
+                  "type": "Identifier"
+                },
+                "right": {
+                  "end": 286,
+                  "start": 282,
+                  "type": "Literal",
+                  "value": true
+                },
+                "type": "AssignmentPattern"
+              }
+            }
+          ],
+          "start": 227,
+          "type": "ObjectPattern"
+        },
+        "end": 344,
+        "expression": {
+          "end": 223,
+          "name": "people",
+          "start": 217,
+          "type": "Identifier"
+        },
+        "start": 210,
+        "type": "EachBlock"
+      }
+    ],
     "type": "Fragment"
   },
   "js": [],

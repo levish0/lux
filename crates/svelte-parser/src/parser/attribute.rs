@@ -5,7 +5,7 @@ use svelte_ast::attributes::{
 };
 use svelte_ast::node::AttributeNode;
 use svelte_ast::span::Span;
-use svelte_ast::tags::ExpressionTag;
+use svelte_ast::tags::{AttachTag, ExpressionTag};
 use svelte_ast::text::Text;
 use swc_ecma_ast as swc;
 use winnow::combinator::{opt, peek};
@@ -25,10 +25,29 @@ pub fn attribute_parser(parser_input: &mut ParserInput) -> ParseResult<Attribute
     }
 }
 
-/// Parse `{...expr}` spread or `{name}` shorthand.
+/// Parse `{...expr}` spread, `{@attach expr}`, or `{name}` shorthand.
 fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<AttributeNode> {
     let start = parser_input.current_token_start();
     literal("{").parse_next(parser_input)?;
+
+    // Check for @attach: {@attach ...
+    let is_attach: ParseResult<&str> = peek(literal("@attach")).parse_next(parser_input);
+    if is_attach.is_ok() {
+        literal("@attach").parse_next(parser_input)?;
+        // Require at least one whitespace after @attach
+        take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+        let expr_offset = parser_input.current_token_start() as u32;
+        let expr_text = read_until_close_brace(parser_input)?;
+        literal("}").parse_next(parser_input)?;
+        let end = parser_input.previous_token_end();
+
+        let expression = swc_parse_expr(&expr_text, parser_input.state.ts, expr_offset)?;
+
+        return Ok(AttributeNode::AttachTag(AttachTag {
+            span: Span::new(start, end),
+            expression,
+        }));
+    }
 
     // Check for spread: {...
     let is_spread: ParseResult<&str> = peek(literal("...")).parse_next(parser_input);
@@ -428,7 +447,7 @@ fn parse_quoted_value(parser_input: &mut ParserInput, quote: char) -> ParseResul
             literal("}").parse_next(parser_input)?;
             let expr_end = parser_input.previous_token_end();
             let expression = swc_parse_expr(&expr_text, parser_input.state.ts, expr_offset)?;
-            sequence.push(AttributeSequenceValue::Expression(ExpressionTag {
+            sequence.push(AttributeSequenceValue::ExpressionTag(ExpressionTag {
                 span: Span::new(expr_start, expr_end),
                 expression,
             }));

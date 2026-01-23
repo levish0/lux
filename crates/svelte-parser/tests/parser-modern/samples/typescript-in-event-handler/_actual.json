@@ -23,7 +23,7 @@
                       {
                         "end": 126,
                         "id": {
-                          "end": 106,
+                          "end": 114,
                           "name": "next",
                           "start": 102,
                           "type": "Identifier",
@@ -95,7 +95,9 @@
                 "type": "BlockStatement"
               },
               "end": 146,
+              "expression": false,
               "generator": false,
+              "id": null,
               "params": [
                 {
                   "end": 87,
@@ -115,16 +117,13 @@
                         "name": "MouseEvent",
                         "start": 77,
                         "type": "Identifier"
-                      },
-                      "typeParams": null
+                      }
                     }
                   }
                 }
               ],
-              "returnType": null,
               "start": 73,
-              "type": "ArrowFunctionExpression",
-              "typeParameters": null
+              "type": "ArrowFunctionExpression"
             },
             "modifiers": [],
             "name": "click",
@@ -181,12 +180,14 @@
           "start": 8
         },
         "start": 8,
+        "type": "Attribute",
         "value": [
           {
             "data": "ts",
             "end": 16,
             "raw": "ts",
-            "start": 14
+            "start": 14,
+            "type": "Text"
           }
         ]
       }
@@ -206,14 +207,11 @@
               "init": {
                 "arguments": [
                   {
-                    "expression": {
-                      "end": 40,
-                      "raw": "0",
-                      "start": 39,
-                      "type": "Literal",
-                      "value": 0
-                    },
-                    "spread": null
+                    "end": 40,
+                    "raw": "0",
+                    "start": 39,
+                    "type": "Literal",
+                    "value": 0
                   }
                 ],
                 "callee": {
@@ -223,6 +221,7 @@
                   "type": "Identifier"
                 },
                 "end": 41,
+                "optional": false,
                 "start": 32,
                 "type": "CallExpression"
               },
@@ -236,9 +235,9 @@
           "type": "VariableDeclaration"
         }
       ],
-      "end": 42,
+      "end": 43,
       "sourceType": "module",
-      "start": 20,
+      "start": 18,
       "type": "Program"
     },
     "context": "default",
