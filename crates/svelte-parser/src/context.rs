@@ -22,10 +22,7 @@ impl Locator {
 
     /// Convert a byte offset to a Position { line (1-based), column (0-based), character }.
     pub fn locate(&self, offset: usize) -> Position {
-        let line_idx = match self.line_starts.binary_search(&offset) {
-            Ok(idx) => idx,
-            Err(idx) => idx - 1,
-        };
+        let line_idx = self.line_starts.binary_search(&offset).unwrap_or_else(|idx| idx - 1);
         Position {
             line: line_idx + 1,
             column: offset - self.line_starts[line_idx],

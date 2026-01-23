@@ -26,6 +26,18 @@
               "end": 6,
               "expression": {
                 "end": 6,
+                "loc": {
+                  "end": {
+                    "character": 6,
+                    "column": 6,
+                    "line": 1
+                  },
+                  "start": {
+                    "character": 6,
+                    "column": 6,
+                    "line": 1
+                  }
+                },
                 "name": "",
                 "start": 6,
                 "type": "Identifier"
@@ -146,16 +158,6 @@
               "end": 48,
               "expression": {
                 "end": 47,
-                "loc": {
-                  "end": {
-                    "column": 12,
-                    "line": 4
-                  },
-                  "start": {
-                    "column": 10,
-                    "line": 4
-                  }
-                },
                 "name": "",
                 "start": 45,
                 "type": "Identifier"
@@ -216,16 +218,6 @@
               "end": 73,
               "expression": {
                 "end": 72,
-                "loc": {
-                  "end": {
-                    "column": 16,
-                    "line": 5
-                  },
-                  "start": {
-                    "column": 10,
-                    "line": 5
-                  }
-                },
                 "name": "",
                 "start": 66,
                 "type": "Identifier"
@@ -286,16 +278,6 @@
               "end": 110,
               "expression": {
                 "end": 109,
-                "loc": {
-                  "end": {
-                    "column": 28,
-                    "line": 6
-                  },
-                  "start": {
-                    "column": 20,
-                    "line": 6
-                  }
-                },
                 "name": "",
                 "start": 101,
                 "type": "Identifier"
@@ -339,16 +321,6 @@
             "end": 137,
             "expression": {
               "end": 136,
-              "loc": {
-                "end": {
-                  "column": 21,
-                  "line": 8
-                },
-                "start": {
-                  "column": 19,
-                  "line": 8
-                }
-              },
               "name": "",
               "start": 134,
               "type": "Identifier"
@@ -403,16 +375,6 @@
         "end": 149,
         "expression": {
           "end": 148,
-          "loc": {
-            "end": {
-              "column": 6,
-              "line": 10
-            },
-            "start": {
-              "column": 4,
-              "line": 10
-            }
-          },
           "name": "",
           "start": 146,
           "type": "Identifier"
@@ -431,16 +393,6 @@
         "end": 164,
         "expression": {
           "end": 163,
-          "loc": {
-            "end": {
-              "column": 10,
-              "line": 11
-            },
-            "start": {
-              "column": 1,
-              "line": 11
-            }
-          },
           "name": "",
           "start": 154,
           "type": "Identifier"
@@ -466,16 +418,6 @@
         "start": 166,
         "test": {
           "end": 173,
-          "loc": {
-            "end": {
-              "column": 7,
-              "line": 13
-            },
-            "start": {
-              "column": 5,
-              "line": 13
-            }
-          },
           "name": "",
           "start": 171,
           "type": "Identifier"
@@ -498,11 +440,13 @@
           "end": 201,
           "loc": {
             "end": {
-              "column": 21,
+              "character": 201,
+              "column": 20,
               "line": 15
             },
             "start": {
-              "column": 17,
+              "character": 197,
+              "column": 16,
               "line": 15
             }
           },
@@ -529,16 +473,6 @@
         },
         "key": {
           "end": 208,
-          "loc": {
-            "end": {
-              "column": 27,
-              "line": 15
-            },
-            "start": {
-              "column": 22,
-              "line": 15
-            }
-          },
           "name": "",
           "start": 203,
           "type": "Identifier"
@@ -562,11 +496,13 @@
           "end": 238,
           "loc": {
             "end": {
-              "column": 20,
+              "character": 238,
+              "column": 19,
               "line": 17
             },
             "start": {
-              "column": 16,
+              "character": 234,
+              "column": 15,
               "line": 17
             }
           },
@@ -577,16 +513,6 @@
         "end": 246,
         "expression": {
           "end": 230,
-          "loc": {
-            "end": {
-              "column": 11,
-              "line": 17
-            },
-            "start": {
-              "column": 7,
-              "line": 17
-            }
-          },
           "name": "",
           "start": 226,
           "type": "Identifier"
@@ -607,16 +533,6 @@
         "error": null,
         "expression": {
           "end": 258,
-          "loc": {
-            "end": {
-              "column": 10,
-              "line": 19
-            },
-            "start": {
-              "column": 8,
-              "line": 19
-            }
-          },
           "name": "",
           "start": 256,
           "type": "Identifier"
@@ -643,16 +559,6 @@
         "error": null,
         "expression": {
           "end": 279,
-          "loc": {
-            "end": {
-              "column": 10,
-              "line": 21
-            },
-            "start": {
-              "column": 8,
-              "line": 21
-            }
-          },
           "name": "",
           "start": 277,
           "type": "Identifier"
@@ -668,10 +574,12 @@
           "end": 286,
           "loc": {
             "end": {
+              "character": 286,
               "column": 17,
               "line": 21
             },
             "start": {
+              "character": 285,
               "column": 16,
               "line": 21
             }
@@ -698,10 +606,12 @@
           "end": 315,
           "loc": {
             "end": {
+              "character": 315,
               "column": 18,
               "line": 23
             },
             "start": {
+              "character": 314,
               "column": 17,
               "line": 23
             }
@@ -712,16 +622,6 @@
         },
         "expression": {
           "end": 307,
-          "loc": {
-            "end": {
-              "column": 10,
-              "line": 23
-            },
-            "start": {
-              "column": 8,
-              "line": 23
-            }
-          },
           "name": "",
           "start": 305,
           "type": "Identifier"

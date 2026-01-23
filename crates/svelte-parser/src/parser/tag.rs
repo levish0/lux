@@ -22,6 +22,7 @@ pub fn expression_tag_parser(parser_input: &mut ParserInput) -> ParseResult<Frag
     Ok(FragmentNode::ExpressionTag(ExpressionTag {
         span: Span::new(start, end),
         expression,
+        force_expression_loc: false,
     }))
 }
 

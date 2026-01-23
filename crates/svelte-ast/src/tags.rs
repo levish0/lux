@@ -1,4 +1,5 @@
-use serde::Serialize;
+use serde::ser::SerializeMap;
+use serde::{Serialize, Serializer};
 use swc_ecma_ast as swc;
 
 use crate::span::Span;
@@ -9,12 +10,34 @@ use crate::span::Span;
  *   expression: Expression;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct ExpressionTag {
-    #[serde(flatten)]
     pub span: Span,
-    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
     pub expression: Box<swc::Expr>,
+    /// When true, expression gets character-inclusive loc (shorthand attribute case)
+    pub force_expression_loc: bool,
+}
+
+impl Serialize for ExpressionTag {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("type", "ExpressionTag")?;
+
+        if self.force_expression_loc {
+            crate::utils::estree::set_force_char_loc(true);
+        }
+        let expr_val = serde_json::to_value(self.expression.as_ref())
+            .map_err(serde::ser::Error::custom)?;
+        let expr_transformed = crate::utils::estree::transform_value_pub(expr_val);
+        map.serialize_entry("expression", &expr_transformed)?;
+        if self.force_expression_loc {
+            crate::utils::estree::set_force_char_loc(false);
+        }
+
+        map.end()
+    }
 }
 
 /*

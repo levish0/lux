@@ -594,6 +594,16 @@
                     },
                     {
                       "end": 136,
+                      "loc": {
+                        "end": {
+                          "column": 41,
+                          "line": 5
+                        },
+                        "start": {
+                          "column": 41,
+                          "line": 5
+                        }
+                      },
                       "start": 136,
                       "tail": true,
                       "type": "TemplateElement",
@@ -1002,6 +1012,16 @@
                               },
                               {
                                 "end": 266,
+                                "loc": {
+                                  "end": {
+                                    "column": 57,
+                                    "line": 9
+                                  },
+                                  "start": {
+                                    "column": 57,
+                                    "line": 9
+                                  }
+                                },
                                 "start": 266,
                                 "tail": true,
                                 "type": "TemplateElement",

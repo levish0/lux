@@ -534,6 +534,16 @@
                   "quasis": [
                     {
                       "end": 118,
+                      "loc": {
+                        "end": {
+                          "column": 20,
+                          "line": 7
+                        },
+                        "start": {
+                          "column": 20,
+                          "line": 7
+                        }
+                      },
                       "start": 118,
                       "tail": false,
                       "type": "TemplateElement",
@@ -544,6 +554,16 @@
                     },
                     {
                       "end": 124,
+                      "loc": {
+                        "end": {
+                          "column": 26,
+                          "line": 7
+                        },
+                        "start": {
+                          "column": 26,
+                          "line": 7
+                        }
+                      },
                       "start": 124,
                       "tail": true,
                       "type": "TemplateElement",
@@ -726,6 +746,16 @@
                   "quasis": [
                     {
                       "end": 156,
+                      "loc": {
+                        "end": {
+                          "column": 20,
+                          "line": 9
+                        },
+                        "start": {
+                          "column": 20,
+                          "line": 9
+                        }
+                      },
                       "start": 156,
                       "tail": false,
                       "type": "TemplateElement",
@@ -736,6 +766,16 @@
                     },
                     {
                       "end": 165,
+                      "loc": {
+                        "end": {
+                          "column": 29,
+                          "line": 9
+                        },
+                        "start": {
+                          "column": 29,
+                          "line": 9
+                        }
+                      },
                       "start": 165,
                       "tail": true,
                       "type": "TemplateElement",

@@ -51,10 +51,16 @@ impl Serialize for AttributeValue {
                 map.serialize_entry("type", "ExpressionTag")?;
                 map.serialize_entry("start", &e.span.start)?;
                 map.serialize_entry("end", &e.span.end)?;
+                if e.force_expression_loc {
+                    crate::utils::estree::set_force_char_loc(true);
+                }
                 map.serialize_entry(
                     "expression",
                     &crate::utils::estree::ExprWrapper(&e.expression),
                 )?;
+                if e.force_expression_loc {
+                    crate::utils::estree::set_force_char_loc(false);
+                }
                 map.end()
             }
             AttributeValue::Sequence(items) => items.serialize(s),

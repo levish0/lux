@@ -104,6 +104,7 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
             value: AttributeValue::Expression(ExpressionTag {
                 span: expr_span,
                 expression,
+                force_expression_loc: true,
             }),
         }));
     }
@@ -124,6 +125,7 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
         value: AttributeValue::Expression(ExpressionTag {
             span: Span::new(start, end),
             expression,
+            force_expression_loc: false,
         }),
     }))
 }
@@ -466,6 +468,7 @@ fn parse_expression_value(parser_input: &mut ParserInput) -> ParseResult<Attribu
     Ok(AttributeValue::Expression(ExpressionTag {
         span: Span::new(start, end),
         expression,
+        force_expression_loc: false,
     }))
 }
 
@@ -530,6 +533,7 @@ fn parse_quoted_value(parser_input: &mut ParserInput, quote: char) -> ParseResul
             sequence.push(AttributeSequenceValue::ExpressionTag(ExpressionTag {
                 span: Span::new(expr_start, expr_end),
                 expression,
+                force_expression_loc: false,
             }));
             text_start = parser_input.current_token_start();
         } else {

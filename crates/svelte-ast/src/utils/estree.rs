@@ -9,9 +9,9 @@ use swc_ecma_ast as swc;
 thread_local! {
     static LOC_LINE_STARTS: RefCell<Option<Vec<usize>>> = RefCell::new(None);
     // When true, adds +1 to columns for nodes not on line 1.
-    // This matches reference Svelte's pattern parsing behavior where a space
-    // is removed from line 1 to compensate for an added `(` wrapper.
     static LOC_PATTERN_COLUMN_ADJUST: RefCell<bool> = RefCell::new(false);
+    // When true, empty-name Identifiers with start==end get character-inclusive loc.
+    static FORCE_CHAR_LOC: RefCell<bool> = RefCell::new(false);
 }
 
 /// Set the source for loc computation. Call before serializing AST nodes.
@@ -28,6 +28,11 @@ pub fn clear_loc_source() {
 /// Enable pattern column adjustment (+1 for lines > 1).
 pub fn set_pattern_column_adjust(v: bool) {
     LOC_PATTERN_COLUMN_ADJUST.with(|f| *f.borrow_mut() = v);
+}
+
+/// Set force character-inclusive loc for empty-name Identifiers.
+pub fn set_force_char_loc(v: bool) {
+    FORCE_CHAR_LOC.with(|f| *f.borrow_mut() = v);
 }
 
 fn offset_to_line_col(offset: usize, line_starts: &[usize]) -> (usize, usize) {
@@ -75,6 +80,37 @@ pub fn serialize_opt_expr<S: Serializer>(
     }
 }
 
+/// Serialize an Identifier with character-inclusive loc (like name_loc format).
+/// Used for simple Identifier patterns in EachBlock/AwaitBlock.
+fn serialize_ident_with_char_loc<S: Serializer>(
+    ident: &swc::Ident,
+    s: S,
+) -> Result<S::Ok, S::Error> {
+    use serde::ser::SerializeMap;
+    let start = ident.span.lo.0 as usize;
+    let end = ident.span.hi.0 as usize;
+    let mut map = s.serialize_map(None)?;
+    map.serialize_entry("type", "Identifier")?;
+    map.serialize_entry("start", &start)?;
+    map.serialize_entry("end", &end)?;
+    map.serialize_entry("name", ident.sym.as_str())?;
+
+    LOC_LINE_STARTS.with(|ls| -> Result<(), S::Error> {
+        if let Some(ref line_starts) = *ls.borrow() {
+            let (sl, sc) = offset_to_line_col(start, line_starts);
+            let (el, ec) = offset_to_line_col(end, line_starts);
+            let loc = serde_json::json!({
+                "start": {"line": sl, "column": sc, "character": start},
+                "end": {"line": el, "column": ec, "character": end}
+            });
+            map.serialize_entry("loc", &loc).map_err(serde::ser::Error::custom)?;
+        }
+        Ok(())
+    }).map_err(serde::ser::Error::custom)?;
+
+    map.end()
+}
+
 /// Serialize a `Box<swc::Pat>` in ESTree format.
 pub fn serialize_boxed_pat<S: Serializer>(pat: &Box<swc::Pat>, s: S) -> Result<S::Ok, S::Error> {
     let value = serde_json::to_value(pat.as_ref()).map_err(S::Error::custom)?;
@@ -83,33 +119,44 @@ pub fn serialize_boxed_pat<S: Serializer>(pat: &Box<swc::Pat>, s: S) -> Result<S
 }
 
 /// Serialize an `Option<Box<swc::Pat>>` in ESTree format.
+/// Simple Identifiers get character-inclusive loc (matching reference Svelte).
 pub fn serialize_opt_pat<S: Serializer>(
     pat: &Option<Box<swc::Pat>>,
     s: S,
 ) -> Result<S::Ok, S::Error> {
     match pat {
-        Some(p) => serialize_boxed_pat(p, s),
+        Some(p) => {
+            if let swc::Pat::Ident(ident) = p.as_ref() {
+                serialize_ident_with_char_loc(&ident.id, s)
+            } else {
+                serialize_boxed_pat(p, s)
+            }
+        }
         None => s.serialize_none(),
     }
 }
 
 /// Serialize an `Option<Box<swc::Pat>>` with pattern column adjustment.
 /// Used for EachBlock context where reference Svelte's parsing trick
-/// shifts columns by +1 for lines > 1.
+/// shifts columns by +1 for lines > 1 (only for complex patterns).
+/// Simple Identifiers get character-inclusive loc without adjustment.
 pub fn serialize_opt_pat_adjusted<S: Serializer>(
     pat: &Option<Box<swc::Pat>>,
     s: S,
 ) -> Result<S::Ok, S::Error> {
-    set_pattern_column_adjust(true);
-    let result = match pat {
-        Some(p) => serialize_boxed_pat(p, s),
-        None => {
-            set_pattern_column_adjust(false);
-            return s.serialize_none();
+    match pat {
+        Some(p) => {
+            if let swc::Pat::Ident(ident) = p.as_ref() {
+                serialize_ident_with_char_loc(&ident.id, s)
+            } else {
+                set_pattern_column_adjust(true);
+                let result = serialize_boxed_pat(p, s);
+                set_pattern_column_adjust(false);
+                result
+            }
         }
-    };
-    set_pattern_column_adjust(false);
-    result
+        None => s.serialize_none(),
+    }
 }
 
 /// Serialize a `Vec<swc::Pat>` in ESTree format.
@@ -1089,12 +1136,30 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
             .or_insert(Value::Bool(!is_block));
     }
 
-    // 8. Compute loc from final start/end (skip zero-length nodes)
+    // 8. Compute loc from final start/end
     if let (Some(start), Some(end)) = (
         result.get("start").and_then(|v| v.as_u64()),
         result.get("end").and_then(|v| v.as_u64()),
     ) {
-        if start < end {
+        let is_empty_ident = result.get("type").and_then(|v| v.as_str()) == Some("Identifier")
+            && result.get("name").and_then(|v| v.as_str()) == Some("");
+        if is_empty_ident {
+            // Zero-length empty idents from read_identifier (shorthand attributes)
+            // get character-inclusive loc only when FORCE_CHAR_LOC is set
+            if start == end && FORCE_CHAR_LOC.with(|f| *f.borrow()) {
+                LOC_LINE_STARTS.with(|ls| {
+                    if let Some(ref line_starts) = *ls.borrow() {
+                        let (sl, sc) = offset_to_line_col(start as usize, line_starts);
+                        let loc = serde_json::json!({
+                            "start": {"line": sl, "column": sc, "character": start},
+                            "end": {"line": sl, "column": sc, "character": end}
+                        });
+                        result.insert("loc".to_string(), loc);
+                    }
+                });
+            }
+        } else {
+            // Normal nodes: regular loc
             LOC_LINE_STARTS.with(|ls| {
                 if let Some(ref line_starts) = *ls.borrow() {
                     let (sl, sc) = offset_to_line_col(start as usize, line_starts);
