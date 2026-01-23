@@ -312,7 +312,7 @@ fn classify_element(
             fragment,
         }),
         _ => {
-            if name.starts_with(char::is_uppercase) {
+            if name.starts_with(char::is_uppercase) || name.contains('.') {
                 FragmentNode::Component(Component {
                     span,
                     name: name.to_string(),

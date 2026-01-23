@@ -391,7 +391,10 @@
           "start": 256,
           "type": "Identifier"
         },
-        "pending": null,
+        "pending": {
+          "nodes": [],
+          "type": "Fragment"
+        },
         "start": 248,
         "then": null,
         "type": "AwaitBlock",
@@ -409,29 +412,24 @@
         "end": 295,
         "error": null,
         "expression": {
-          "computed": false,
-          "end": 284,
-          "object": {
-            "end": 278,
-            "name": "x",
-            "start": 277,
-            "type": "Identifier"
-          },
-          "optional": false,
-          "property": {
-            "end": 284,
-            "name": "then",
-            "start": 280,
-            "type": "Identifier"
-          },
+          "end": 279,
+          "name": "",
           "start": 277,
-          "type": "MemberExpression"
+          "type": "Identifier"
         },
         "pending": null,
         "start": 269,
-        "then": null,
+        "then": {
+          "nodes": [],
+          "type": "Fragment"
+        },
         "type": "AwaitBlock",
-        "value": null
+        "value": {
+          "end": 286,
+          "name": "y",
+          "start": 285,
+          "type": "Identifier"
+        }
       },
       {
         "data": "\n\n",
@@ -441,27 +439,22 @@
         "type": "Text"
       },
       {
-        "catch": null,
+        "catch": {
+          "nodes": [],
+          "type": "Fragment"
+        },
         "end": 324,
-        "error": null,
+        "error": {
+          "end": 315,
+          "name": "y",
+          "start": 314,
+          "type": "Identifier"
+        },
         "expression": {
-          "computed": false,
-          "end": 313,
-          "object": {
-            "end": 306,
-            "name": "x",
-            "start": 305,
-            "type": "Identifier"
-          },
-          "optional": false,
-          "property": {
-            "end": 313,
-            "name": "catch",
-            "start": 308,
-            "type": "Identifier"
-          },
+          "end": 307,
+          "name": "",
           "start": 305,
-          "type": "MemberExpression"
+          "type": "Identifier"
         },
         "pending": null,
         "start": 297,

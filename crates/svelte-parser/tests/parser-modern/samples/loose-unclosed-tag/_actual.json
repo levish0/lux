@@ -238,7 +238,7 @@
                 "start": 104
               },
               "start": 103,
-              "type": "RegularElement"
+              "type": "Component"
             }
           ],
           "type": "Fragment"

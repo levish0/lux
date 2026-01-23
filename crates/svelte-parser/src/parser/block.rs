@@ -266,79 +266,109 @@ fn key_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult
 }
 
 /// Parse `{#await expr}...{:then value}...{:catch error}...{/await}`
+/// Also handles inline syntax: `{#await expr then value}` and `{#await expr catch error}`
 fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult<FragmentNode> {
     take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
     let offset = parser_input.current_token_start();
     let loose = parser_input.state.loose;
+    let ts = parser_input.state.ts;
     let content = read_until_close_brace(parser_input)?;
-    let expression = parse_expression_or_loose(content, parser_input.state.ts, offset as u32, loose)?;
     literal("}").parse_next(parser_input)?;
 
-    // Parse pending body
-    let (pending_nodes, _): (Vec<FragmentNode>, _) = repeat_till(
-        0..,
-        fragment_node_parser,
-        peek(block_continuation_or_close("await")),
-    )
-    .parse_next(parser_input)?;
+    // Check for inline "then" or "catch" keywords in the expression content
+    use super::bracket::find_keyword_at_depth_zero;
+    let inline_then_pos = find_keyword_at_depth_zero(content, " then ");
+    let inline_catch_pos = find_keyword_at_depth_zero(content, " catch ");
 
-    let pending = if pending_nodes.is_empty() {
-        None
-    } else {
-        Some(Fragment {
-            nodes: pending_nodes,
-        })
-    };
-
+    let expression;
+    let mut pending: Option<Fragment> = None;
     let mut then_fragment: Option<Fragment> = None;
     let mut catch_fragment: Option<Fragment> = None;
     let mut value: Option<Box<swc::Pat>> = None;
     let mut error: Option<Box<swc::Pat>> = None;
 
-    // {:then value}
-    if opt(literal("{:then")).parse_next(parser_input)?.is_some() {
-        take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+    if let Some(then_pos) = inline_then_pos {
+        // Inline then: {#await expr then value}
+        let expr_text = &content[..then_pos];
+        expression = parse_expression_or_loose(expr_text, ts, offset as u32, loose)?;
 
-        if opt(peek(literal("}"))).parse_next(parser_input)?.is_none() {
-            let pat_offset = parser_input.current_token_start();
-            let pat_content = read_until_close_brace(parser_input)?;
-            value = Some(parse_pattern(
-                pat_content,
-                parser_input.state.ts,
-                pat_offset as u32,
-            )?);
+        let value_text = &content[then_pos + " then ".len()..];
+        if !value_text.trim().is_empty() {
+            let val_offset = offset + then_pos + " then ".len();
+            value = Some(parse_pattern(value_text, ts, val_offset as u32)?);
         }
-        literal("}").parse_next(parser_input)?;
 
-        let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
+        // Parse then body until {/await}
+        let (nodes, _): (Vec<FragmentNode>, _) =
+            repeat_till(0.., fragment_node_parser, peek(block_close_peek("await")))
+                .parse_next(parser_input)?;
+        then_fragment = Some(Fragment { nodes });
+    } else if let Some(catch_pos) = inline_catch_pos {
+        // Inline catch: {#await expr catch error}
+        let expr_text = &content[..catch_pos];
+        expression = parse_expression_or_loose(expr_text, ts, offset as u32, loose)?;
+
+        let error_text = &content[catch_pos + " catch ".len()..];
+        if !error_text.trim().is_empty() {
+            let err_offset = offset + catch_pos + " catch ".len();
+            error = Some(parse_pattern(error_text, ts, err_offset as u32)?);
+        }
+
+        // Parse catch body until {/await}
+        let (nodes, _): (Vec<FragmentNode>, _) =
+            repeat_till(0.., fragment_node_parser, peek(block_close_peek("await")))
+                .parse_next(parser_input)?;
+        catch_fragment = Some(Fragment { nodes });
+    } else {
+        // Normal form: {#await expr}...{:then}...{:catch}...{/await}
+        expression = parse_expression_or_loose(content, ts, offset as u32, loose)?;
+
+        // Parse pending body
+        let (pending_nodes, _): (Vec<FragmentNode>, _) = repeat_till(
             0..,
             fragment_node_parser,
             peek(block_continuation_or_close("await")),
         )
         .parse_next(parser_input)?;
-        then_fragment = Some(Fragment { nodes });
-    }
+        pending = Some(Fragment { nodes: pending_nodes });
 
-    // {:catch error}
-    if opt(literal("{:catch")).parse_next(parser_input)?.is_some() {
-        take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+        // {:then value}
+        if opt(literal("{:then")).parse_next(parser_input)?.is_some() {
+            take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
-        if opt(peek(literal("}"))).parse_next(parser_input)?.is_none() {
-            let pat_offset = parser_input.current_token_start();
-            let pat_content = read_until_close_brace(parser_input)?;
-            error = Some(parse_pattern(
-                pat_content,
-                parser_input.state.ts,
-                pat_offset as u32,
-            )?);
+            if opt(peek(literal("}"))).parse_next(parser_input)?.is_none() {
+                let pat_offset = parser_input.current_token_start();
+                let pat_content = read_until_close_brace(parser_input)?;
+                value = Some(parse_pattern(pat_content, ts, pat_offset as u32)?);
+            }
+            literal("}").parse_next(parser_input)?;
+
+            let (nodes, _): (Vec<FragmentNode>, _) = repeat_till(
+                0..,
+                fragment_node_parser,
+                peek(block_continuation_or_close("await")),
+            )
+            .parse_next(parser_input)?;
+            then_fragment = Some(Fragment { nodes });
         }
-        literal("}").parse_next(parser_input)?;
 
-        let (nodes, _): (Vec<FragmentNode>, _) =
-            repeat_till(0.., fragment_node_parser, peek(block_close_peek("await")))
-                .parse_next(parser_input)?;
-        catch_fragment = Some(Fragment { nodes });
+        // {:catch error}
+        if opt(literal("{:catch")).parse_next(parser_input)?.is_some() {
+            take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+
+            if opt(peek(literal("}"))).parse_next(parser_input)?.is_none() {
+                let pat_offset = parser_input.current_token_start();
+                let pat_content = read_until_close_brace(parser_input)?;
+                error = Some(parse_pattern(pat_content, ts, pat_offset as u32)?);
+            }
+            literal("}").parse_next(parser_input)?;
+
+            let (nodes, _): (Vec<FragmentNode>, _) =
+                repeat_till(0.., fragment_node_parser, peek(block_close_peek("await")))
+                    .parse_next(parser_input)?;
+            catch_fragment = Some(Fragment { nodes });
+        }
     }
 
     block_close("await").parse_next(parser_input)?;
