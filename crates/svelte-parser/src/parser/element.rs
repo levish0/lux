@@ -17,17 +17,26 @@ use super::fragment::fragment_node_parser;
 
 pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNode> {
     let start = parser_input.input.current_token_start();
+    let loose = parser_input.state.loose;
 
     // consume '<'
     literal("<").parse_next(parser_input)?;
 
     let name_start = parser_input.input.current_token_start();
-    let name = tag_name_parser(parser_input)?;
+    let name = if loose {
+        tag_name_parser_loose(parser_input)?
+    } else {
+        tag_name_parser(parser_input)?
+    };
     let name_end = parser_input.input.previous_token_end();
     let name_loc = Span::new(name_start, name_end);
 
-    // parse attributes
-    let attributes = parse_attributes(parser_input)?;
+    // parse attributes (in loose mode, might stop at EOF or unexpected tokens)
+    let attributes = if loose {
+        parse_attributes_loose(parser_input)?
+    } else {
+        parse_attributes(parser_input)?
+    };
 
     // Check if this element has shadowrootmode attribute
     let has_shadowrootmode = attributes
@@ -36,12 +45,17 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
 
     // check self-closing /> or >
     let self_closing = opt(literal("/")).parse_next(parser_input)?.is_some();
-    literal(">").parse_next(parser_input)?;
+    let got_close = if loose {
+        opt(literal(">")).parse_next(parser_input)?.is_some()
+    } else {
+        literal(">").parse_next(parser_input)?;
+        true
+    };
 
     // Check shadowroot context BEFORE parsing children (for nested slot detection)
     let parent_is_shadowroot = parser_input.state.parent_is_shadowroot_template();
 
-    let fragment = if self_closing || is_void_element(&name) {
+    let fragment = if self_closing || is_void_element(&name) || !got_close {
         Fragment { nodes: vec![] }
     } else {
         // Push this element onto stack before parsing children
@@ -49,9 +63,14 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
             .state
             .push_element(name.clone(), has_shadowrootmode);
 
-        let (nodes, _): (Vec<FragmentNode>, _) =
-            repeat_till(0.., fragment_node_parser, closing_tag_parser(&name))
-                .parse_next(parser_input)?;
+        let nodes = if loose {
+            parse_children_loose(parser_input, &name)?
+        } else {
+            let (nodes, _): (Vec<FragmentNode>, _) =
+                repeat_till(0.., fragment_node_parser, closing_tag_parser(&name))
+                    .parse_next(parser_input)?;
+            nodes
+        };
 
         // Pop element from stack after parsing children
         parser_input.state.pop_element();
@@ -70,6 +89,107 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
         span,
         parent_is_shadowroot || has_shadowrootmode,
     ))
+}
+
+/// Parse children in loose mode: stop at own closing tag, parent closing tag, or EOF.
+fn parse_children_loose(
+    parser_input: &mut ParserInput,
+    name: &str,
+) -> ParseResult<Vec<FragmentNode>> {
+    let mut nodes = Vec::new();
+
+    loop {
+        // Check for our own closing tag
+        if opt(peek(closing_tag_peek(name))).parse_next(parser_input)?.is_some() {
+            // Consume the closing tag
+            closing_tag_parser(name).parse_next(parser_input)?;
+            return Ok(nodes);
+        }
+
+        // Check for EOF
+        if parser_input.input.is_empty() {
+            return Ok(nodes);
+        }
+
+        // Check for a parent's closing tag (any </...> that's not ours)
+        if opt(peek(literal("</"))).parse_next(parser_input)?.is_some() {
+            // This is a parent's closing tag, stop here without consuming
+            return Ok(nodes);
+        }
+
+        // Check for block close ({/...}) that might indicate parent boundary
+        if opt(peek(literal("{/"))).parse_next(parser_input)?.is_some() {
+            return Ok(nodes);
+        }
+
+        // Try to parse a node
+        match fragment_node_parser.parse_next(parser_input) {
+            Ok(node) => nodes.push(node),
+            Err(_) => {
+                // Can't parse further, stop
+                return Ok(nodes);
+            }
+        }
+    }
+}
+
+/// Peek for a closing tag without consuming.
+fn closing_tag_peek<'a, 'i>(
+    name: &'a str,
+) -> impl FnMut(&mut ParserInput<'i>) -> ParseResult<()> + 'a {
+    move |input: &mut ParserInput| {
+        literal("</").parse_next(input)?;
+        take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(input)?;
+        literal(name).parse_next(input)?;
+        take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(input)?;
+        literal(">").parse_next(input)?;
+        Ok(())
+    }
+}
+
+/// Parse tag name in loose mode: allows incomplete names ending with '.'
+fn tag_name_parser_loose<'i>(parser_input: &mut ParserInput<'i>) -> ParseResult<String> {
+    let name = take_while(1.., |c: char| {
+        c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.' || c == ':'
+    })
+    .parse_next(parser_input)?;
+    Ok(name.to_string())
+}
+
+/// Parse attributes in loose mode: stops at EOF, > or / like normal,
+/// but also stops if attribute parsing fails.
+fn parse_attributes_loose(parser_input: &mut ParserInput) -> ParseResult<Vec<AttributeNode>> {
+    let mut attributes = Vec::new();
+    loop {
+        take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+
+        // Check for EOF
+        if parser_input.input.is_empty() {
+            break;
+        }
+
+        // stop if we hit > or />
+        if opt(peek(literal(">"))).parse_next(parser_input)?.is_some() {
+            break;
+        }
+        if opt(peek(literal("/"))).parse_next(parser_input)?.is_some() {
+            break;
+        }
+
+        // stop if we hit < (start of new tag) or {/ or {# or {: (block boundaries)
+        let remaining: &str = &parser_input.input;
+        if remaining.starts_with('<') || remaining.starts_with("{/")
+            || remaining.starts_with("{#") || remaining.starts_with("{:")
+        {
+            break;
+        }
+
+        match attribute_parser(parser_input) {
+            Ok(attr) => attributes.push(attr),
+            Err(_) => break, // Can't parse attribute, stop
+        }
+    }
+    Ok(attributes)
 }
 
 fn parse_attributes(parser_input: &mut ParserInput) -> ParseResult<Vec<AttributeNode>> {

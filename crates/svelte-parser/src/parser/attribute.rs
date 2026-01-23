@@ -65,10 +65,44 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
     }
 
     // Shorthand: {name} is equivalent to name={name}
-    let name: &str = take_while(1.., |c: char| {
+    let name: &str = take_while(0.., |c: char| {
         c.is_ascii_alphanumeric() || c == '_' || c == '$'
     })
     .parse_next(parser_input)?;
+
+    if name.is_empty() && !parser_input.state.loose {
+        return Err(winnow::error::ContextError::new());
+    }
+
+    // In loose mode with empty name, the expression content might be invalid
+    if name.is_empty() {
+        // Consume any remaining content until }
+        let expr_offset = parser_input.current_token_start() as u32;
+        let _remaining = read_until_close_brace(parser_input)?;
+        literal("}").parse_next(parser_input)?;
+        let end = parser_input.previous_token_end();
+
+        let expr_span = Span::new(expr_offset as usize, expr_offset as usize);
+        let expression = Box::new(swc::Expr::Ident(swc::Ident::new(
+            "".into(),
+            swc_common::Span::new(
+                swc_common::BytePos(expr_offset),
+                swc_common::BytePos(expr_offset),
+            ),
+            Default::default(),
+        )));
+
+        return Ok(AttributeNode::Attribute(Attribute {
+            span: Span::new(start, end),
+            name: String::new(),
+            name_loc: Some(Span::new(expr_offset as usize, expr_offset as usize)),
+            value: AttributeValue::Expression(ExpressionTag {
+                span: expr_span,
+                expression,
+            }),
+        }));
+    }
+
     literal("}").parse_next(parser_input)?;
     let end = parser_input.previous_token_end();
 
@@ -185,9 +219,15 @@ fn parse_bind_directive_value(
     let expr_text = read_until_close_brace(parser_input)?;
     literal("}").parse_next(parser_input)?;
 
-    let (expr, comments) =
-        parse_expression_with_comments(expr_text, parser_input.state.ts, expr_offset)?;
-    Ok((expr, comments))
+    let loose = parser_input.state.loose;
+    match parse_expression_with_comments(expr_text, parser_input.state.ts, expr_offset) {
+        Ok((expr, comments)) => Ok((expr, comments)),
+        Err(_) if loose => {
+            let expr = super::expression::make_empty_ident(expr_text, expr_offset);
+            Ok((expr, vec![]))
+        }
+        Err(e) => Err(e),
+    }
 }
 
 fn parse_on_directive(
@@ -397,7 +437,8 @@ fn parse_expression_value(parser_input: &mut ParserInput) -> ParseResult<Attribu
     let expr_text = read_until_close_brace(parser_input)?;
     literal("}").parse_next(parser_input)?;
     let end = parser_input.previous_token_end();
-    let expression = parse_expression(expr_text, parser_input.state.ts, expr_offset)?;
+    let loose = parser_input.state.loose;
+    let expression = super::expression::parse_expression_or_loose(expr_text, parser_input.state.ts, expr_offset, loose)?;
     Ok(AttributeValue::Expression(ExpressionTag {
         span: Span::new(start, end),
         expression,

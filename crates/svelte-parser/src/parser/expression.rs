@@ -12,6 +12,37 @@ pub fn read_expression(parser_input: &mut ParserInput) -> ParseResult<Box<swc::E
     let start = parser_input.current_token_start();
     let content = scan_expression_content(parser_input)?;
     let ts = parser_input.state.ts;
+    let loose = parser_input.state.loose;
     // offset is start + 1 (past the opening {)
-    parse_expression(content, ts, (start + 1) as u32)
+    let offset = (start + 1) as u32;
+    parse_expression_or_loose(content, ts, offset, loose)
+}
+
+/// Parse an expression with loose-mode fallback.
+/// In loose mode, if parsing fails, returns an empty-name Identifier
+/// spanning the content's trimmed range.
+pub fn parse_expression_or_loose(
+    content: &str,
+    ts: bool,
+    offset: u32,
+    loose: bool,
+) -> ParseResult<Box<swc::Expr>> {
+    match parse_expression(content, ts, offset) {
+        Ok(expr) => Ok(expr),
+        Err(e) if loose => Ok(make_empty_ident(content, offset)),
+        Err(e) => Err(e),
+    }
+}
+
+/// Create an empty-name Identifier covering the trimmed content span.
+pub fn make_empty_ident(content: &str, offset: u32) -> Box<swc::Expr> {
+    let leading_ws = content.len() - content.trim_start().len();
+    let trimmed = content.trim();
+    let start = offset + leading_ws as u32;
+    let end = start + trimmed.len() as u32;
+    Box::new(swc::Expr::Ident(swc::Ident::new(
+        "".into(),
+        swc_common::Span::new(swc_common::BytePos(start), swc_common::BytePos(end)),
+        Default::default(),
+    )))
 }

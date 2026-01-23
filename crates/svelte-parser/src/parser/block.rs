@@ -13,6 +13,7 @@ use super::ParserInput;
 use super::bracket::{
     read_until_chars_balanced, read_until_close_brace, read_until_keyword_balanced,
 };
+use super::expression::{make_empty_ident, parse_expression_or_loose};
 use super::fragment::fragment_node_parser;
 use super::swc_parse::{parse_expression, parse_param_list, parse_pattern};
 
@@ -44,7 +45,8 @@ fn if_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult<
     // read test expression up to }
     let offset = parser_input.current_token_start();
     let content = read_until_close_brace(parser_input)?;
-    let test = parse_expression(content, parser_input.state.ts, offset as u32)?;
+    let loose = parser_input.state.loose;
+    let test = parse_expression_or_loose(content, parser_input.state.ts, offset as u32, loose)?;
     literal("}").parse_next(parser_input)?;
 
     // parse consequent body until {:else}, {:else if}, or {/if}
@@ -95,7 +97,8 @@ fn parse_if_alternate(parser_input: &mut ParserInput) -> ParseResult<Option<Frag
 
         let offset = parser_input.current_token_start();
         let content = read_until_close_brace(parser_input)?;
-        let test = parse_expression(content, parser_input.state.ts, offset as u32)?;
+        let loose = parser_input.state.loose;
+        let test = parse_expression_or_loose(content, parser_input.state.ts, offset as u32, loose)?;
         literal("}").parse_next(parser_input)?;
 
         let (consequent_nodes, _): (Vec<FragmentNode>, _) = repeat_till(
@@ -144,48 +147,67 @@ fn parse_if_alternate(parser_input: &mut ParserInput) -> ParseResult<Option<Frag
 fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult<FragmentNode> {
     take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
+    let loose = parser_input.state.loose;
+
     // Read expression until " as " keyword
     let expr_offset = parser_input.current_token_start();
-    let expr_text = read_until_keyword_balanced(parser_input, " as ")?;
-    let expression = parse_expression(expr_text, parser_input.state.ts, expr_offset as u32)?;
-
-    literal(" as ").parse_next(parser_input)?;
-    take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
-
-    // Read context pattern until , or ( or } at depth 0
-    let ctx_offset = parser_input.current_token_start();
-    let context_text = read_until_chars_balanced(parser_input, &[',', '(', '}'])?;
-    let context = if context_text.trim().is_empty() {
-        None
-    } else {
-        Some(parse_pattern(
-            context_text,
-            parser_input.state.ts,
-            ctx_offset as u32,
-        )?)
+    let (expression, has_as) = match read_until_keyword_balanced(parser_input, " as ") {
+        Ok(expr_text) => {
+            let expr = parse_expression_or_loose(expr_text, parser_input.state.ts, expr_offset as u32, loose)?;
+            (expr, true)
+        }
+        Err(_) if loose => {
+            // No " as " found - read until } and use as expression
+            let content = read_until_close_brace(parser_input)?;
+            let expr = make_empty_ident(content, expr_offset as u32);
+            (expr, false)
+        }
+        Err(e) => return Err(e),
     };
 
-    // Optional index
-    let index = if opt(literal(",")).parse_next(parser_input)?.is_some() {
+    let (context, index, key) = if has_as {
+        literal(" as ").parse_next(parser_input)?;
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
-        let idx: &str = take_while(1.., |c: char| c.is_ascii_alphanumeric() || c == '_')
-            .parse_next(parser_input)?;
-        take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
-        Some(idx.to_string())
-    } else {
-        None
-    };
 
-    // Optional key
-    let key = if opt(literal("(")).parse_next(parser_input)?.is_some() {
-        let key_offset = parser_input.current_token_start();
-        let key_content = read_until_close_paren(parser_input)?;
-        let key_expr = parse_expression(key_content, parser_input.state.ts, key_offset as u32)?;
-        literal(")").parse_next(parser_input)?;
-        take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
-        Some(key_expr)
+        // Read context pattern until , or ( or } at depth 0
+        let ctx_offset = parser_input.current_token_start();
+        let context_text = read_until_chars_balanced(parser_input, &[',', '(', '}'])?;
+        let context = if context_text.trim().is_empty() {
+            None
+        } else {
+            Some(parse_pattern(
+                context_text,
+                parser_input.state.ts,
+                ctx_offset as u32,
+            )?)
+        };
+
+        // Optional index
+        let index = if opt(literal(",")).parse_next(parser_input)?.is_some() {
+            take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+            let idx: &str = take_while(1.., |c: char| c.is_ascii_alphanumeric() || c == '_')
+                .parse_next(parser_input)?;
+            take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+            Some(idx.to_string())
+        } else {
+            None
+        };
+
+        // Optional key
+        let key = if opt(literal("(")).parse_next(parser_input)?.is_some() {
+            let key_offset = parser_input.current_token_start();
+            let key_content = read_until_close_paren(parser_input)?;
+            let key_expr = parse_expression_or_loose(key_content, parser_input.state.ts, key_offset as u32, loose)?;
+            literal(")").parse_next(parser_input)?;
+            take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+            Some(key_expr)
+        } else {
+            None
+        };
+
+        (context, index, key)
     } else {
-        None
+        (None, None, None)
     };
 
     literal("}").parse_next(parser_input)?;
@@ -248,8 +270,9 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
     take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
     let offset = parser_input.current_token_start();
+    let loose = parser_input.state.loose;
     let content = read_until_close_brace(parser_input)?;
-    let expression = parse_expression(content, parser_input.state.ts, offset as u32)?;
+    let expression = parse_expression_or_loose(content, parser_input.state.ts, offset as u32, loose)?;
     literal("}").parse_next(parser_input)?;
 
     // Parse pending body
@@ -336,10 +359,17 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
 fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult<FragmentNode> {
     take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
+    let loose = parser_input.state.loose;
+
     // Read snippet name with actual positions
     let name_start = parser_input.current_token_start();
-    let name: &str = take_while(1.., |c: char| c.is_ascii_alphanumeric() || c == '_')
+    let name: &str = take_while(0.., |c: char| c.is_ascii_alphanumeric() || c == '_')
         .parse_next(parser_input)?;
+
+    if name.is_empty() && !loose {
+        return Err(winnow::error::ContextError::new());
+    }
+
     let name_end = parser_input.current_token_start();
     let ident = Box::new(swc::Ident::new(
         name.into(),
@@ -368,8 +398,6 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
                 None
             }
         } else {
-            // No generics, but we consumed whitespace - that's fine, we'll
-            // skip whitespace again before ( anyway
             None
         }
     } else {
@@ -378,15 +406,21 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
 
     take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
-    // Parse parameters with correct offset
-    let paren_offset = parser_input.current_token_start();
-    literal("(").parse_next(parser_input)?;
-    let params_content = read_until_close_paren(parser_input)?;
-    literal(")").parse_next(parser_input)?;
-    take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
-    literal("}").parse_next(parser_input)?;
+    // Parse parameters - in loose mode, ( might not be present
+    let parameters = if opt(peek(literal("("))).parse_next(parser_input)?.is_some() {
+        let paren_offset = parser_input.current_token_start();
+        literal("(").parse_next(parser_input)?;
+        let params_content = read_until_close_paren(parser_input)?;
+        literal(")").parse_next(parser_input)?;
+        take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+        parse_param_list(params_content, parser_input.state.ts, paren_offset as u32)?
+    } else if loose {
+        vec![]
+    } else {
+        return Err(winnow::error::ContextError::new());
+    };
 
-    let parameters = parse_param_list(params_content, parser_input.state.ts, paren_offset as u32)?;
+    literal("}").parse_next(parser_input)?;
 
     // Use peek terminator so trailing text before {/snippet} is captured in the body
     let (nodes, _): (Vec<FragmentNode>, _) =
@@ -394,7 +428,7 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
             .parse_next(parser_input)?;
 
     // Consume {/snippet}
-    literal("{/snippet}").parse_next(parser_input)?;
+    block_close("snippet").parse_next(parser_input)?;
 
     let end = parser_input.previous_token_end();
 
