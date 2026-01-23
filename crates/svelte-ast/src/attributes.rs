@@ -9,6 +9,7 @@ use crate::text::Text;
  * interface Attribute extends BaseNode {
  *   type: 'Attribute';
  *   name: string;
+ *   name_loc: SourceLocation | null;
  *   value: true | ExpressionTag | Array<Text | ExpressionTag>;
  * }
  */
@@ -16,6 +17,7 @@ use crate::text::Text;
 pub struct Attribute {
     pub span: Span,
     pub name: String,
+    pub name_loc: Option<Span>,
     pub value: AttributeValue,
 }
 
@@ -35,12 +37,14 @@ pub enum AttributeSequenceValue {
 /*
  * interface SpreadAttribute extends BaseNode {
  *   type: 'SpreadAttribute';
+ *   name_loc: SourceLocation | null;
  *   expression: Expression;
  * }
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SpreadAttribute {
     pub span: Span,
+    pub name_loc: Option<Span>,
     pub expression: Box<swc::Expr>,
 }
 
@@ -48,6 +52,7 @@ pub struct SpreadAttribute {
  * interface BindDirective extends BaseNode {
  *   type: 'BindDirective';
  *   name: string;
+ *   name_loc: SourceLocation | null;
  *   expression: Identifier | MemberExpression | SequenceExpression;
  * }
  */
@@ -55,6 +60,7 @@ pub struct SpreadAttribute {
 pub struct BindDirective {
     pub span: Span,
     pub name: String,
+    pub name_loc: Option<Span>,
     pub expression: Box<swc::Expr>,
 }
 
@@ -62,6 +68,7 @@ pub struct BindDirective {
  * interface ClassDirective extends BaseNode {
  *   type: 'ClassDirective';
  *   name: 'class';
+ *   name_loc: SourceLocation | null;
  *   expression: Expression;
  * }
  */
@@ -69,6 +76,7 @@ pub struct BindDirective {
 pub struct ClassDirective {
     pub span: Span,
     pub name: String,
+    pub name_loc: Option<Span>,
     pub expression: Box<swc::Expr>,
 }
 
@@ -76,6 +84,7 @@ pub struct ClassDirective {
  * interface StyleDirective extends BaseNode {
  *   type: 'StyleDirective';
  *   name: string;
+ *   name_loc: SourceLocation | null;
  *   value: true | ExpressionTag | Array<ExpressionTag | Text>;
  *   modifiers: Array<'important'>;
  * }
@@ -84,6 +93,7 @@ pub struct ClassDirective {
 pub struct StyleDirective {
     pub span: Span,
     pub name: String,
+    pub name_loc: Option<Span>,
     pub value: AttributeValue,
     pub modifiers: Vec<StyleModifier>,
 }
@@ -97,6 +107,7 @@ pub enum StyleModifier {
  * interface OnDirective extends BaseNode {
  *   type: 'OnDirective';
  *   name: string;
+ *   name_loc: SourceLocation | null;
  *   expression: null | Expression;
  *   modifiers: string[];
  * }
@@ -105,6 +116,7 @@ pub enum StyleModifier {
 pub struct OnDirective {
     pub span: Span,
     pub name: String,
+    pub name_loc: Option<Span>,
     pub expression: Option<Box<swc::Expr>>,
     pub modifiers: Vec<EventModifier>,
 }
@@ -126,6 +138,7 @@ pub enum EventModifier {
  * interface TransitionDirective extends BaseNode {
  *   type: 'TransitionDirective';
  *   name: string;
+ *   name_loc: SourceLocation | null;
  *   expression: null | Expression;
  *   modifiers: Array<'local' | 'global'>;
  *   intro: boolean;
@@ -136,6 +149,7 @@ pub enum EventModifier {
 pub struct TransitionDirective {
     pub span: Span,
     pub name: String,
+    pub name_loc: Option<Span>,
     pub expression: Option<Box<swc::Expr>>,
     pub modifiers: Vec<TransitionModifier>,
     pub intro: bool,
@@ -152,6 +166,7 @@ pub enum TransitionModifier {
  * interface AnimateDirective extends BaseNode {
  *   type: 'AnimateDirective';
  *   name: string;
+ *   name_loc: SourceLocation | null;
  *   expression: null | Expression;
  * }
  */
@@ -159,6 +174,7 @@ pub enum TransitionModifier {
 pub struct AnimateDirective {
     pub span: Span,
     pub name: String,
+    pub name_loc: Option<Span>,
     pub expression: Option<Box<swc::Expr>>,
 }
 
@@ -166,6 +182,7 @@ pub struct AnimateDirective {
  * interface UseDirective extends BaseNode {
  *   type: 'UseDirective';
  *   name: string;
+ *   name_loc: SourceLocation | null;
  *   expression: null | Expression;
  * }
  */
@@ -173,6 +190,7 @@ pub struct AnimateDirective {
 pub struct UseDirective {
     pub span: Span,
     pub name: String,
+    pub name_loc: Option<Span>,
     pub expression: Option<Box<swc::Expr>>,
 }
 
@@ -180,6 +198,7 @@ pub struct UseDirective {
  * interface LetDirective extends BaseNode {
  *   type: 'LetDirective';
  *   name: string;
+ *   name_loc: SourceLocation | null;
  *   expression: null | Identifier | ArrayExpression | ObjectExpression;
  * }
  */
@@ -187,5 +206,6 @@ pub struct UseDirective {
 pub struct LetDirective {
     pub span: Span,
     pub name: String,
+    pub name_loc: Option<Span>,
     pub expression: Option<Box<swc::Expr>>,
 }

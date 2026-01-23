@@ -79,6 +79,7 @@ pub struct Fragment {
  */
 #[derive(Debug, Clone, Serialize)]
 pub struct SvelteOptions {
+    pub span: Span,
     pub runes: Option<bool>,
     pub immutable: Option<bool>,
     pub accessors: Option<bool>,
