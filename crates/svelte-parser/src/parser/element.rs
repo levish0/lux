@@ -9,13 +9,13 @@ use winnow::combinator::{peek, repeat_till};
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::{any, literal, take_while};
-use winnow::Result;
+use winnow::Result as ParseResult;
 
 use super::ParserInput;
 use super::attribute::attribute_parser;
 use super::fragment::fragment_node_parser;
 
-pub fn element_parser(parser_input: &mut ParserInput) -> Result<FragmentNode> {
+pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNode> {
     let start = parser_input.input.current_token_start();
 
     // consume '<'
@@ -54,7 +54,7 @@ pub fn element_parser(parser_input: &mut ParserInput) -> Result<FragmentNode> {
     Ok(classify_element(&name, name_loc, attributes, fragment, span))
 }
 
-fn parse_attributes(parser_input: &mut ParserInput) -> Result<Vec<AttributeNode>> {
+fn parse_attributes(parser_input: &mut ParserInput) -> ParseResult<Vec<AttributeNode>> {
     let mut attributes = Vec::new();
     loop {
         // consume whitespace between attributes
@@ -69,7 +69,7 @@ fn parse_attributes(parser_input: &mut ParserInput) -> Result<Vec<AttributeNode>
     Ok(attributes)
 }
 
-fn tag_name_parser<'i>(parser_input: &mut ParserInput<'i>) -> Result<String> {
+fn tag_name_parser<'i>(parser_input: &mut ParserInput<'i>) -> ParseResult<String> {
     let name = take_while(1.., |c: char| {
         c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.' || c == ':'
     })
@@ -79,7 +79,7 @@ fn tag_name_parser<'i>(parser_input: &mut ParserInput<'i>) -> Result<String> {
 
 fn closing_tag_parser<'a, 'i>(
     name: &'a str,
-) -> impl FnMut(&mut ParserInput<'i>) -> Result<()> + 'a {
+) -> impl FnMut(&mut ParserInput<'i>) -> ParseResult<()> + 'a {
     move |input: &mut ParserInput| {
         literal("</").parse_next(input)?;
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(input)?;

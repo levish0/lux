@@ -3,12 +3,12 @@ use svelte_ast::span::Span;
 use svelte_ast::text::Text;
 use winnow::prelude::*;
 use winnow::stream::Location;
-use winnow::Result;
+use winnow::Result as ParseResult;
 use winnow::token::take_while;
 
 use super::ParserInput;
 
-pub fn text_parser(parser_input: &mut ParserInput) -> Result<FragmentNode> {
+pub fn text_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNode> {
     let start = parser_input.input.current_token_start();
 
     let data = take_while(1.., |c: char| !matches!(c, '<' | '{'))

@@ -5,20 +5,19 @@ use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
 use winnow::combinator::peek;
 use winnow::prelude::*;
 use winnow::token::any;
-use winnow::Result;
-
+use winnow::Result as ParseResult;
 use super::ParserInput;
 
 /// Read a JS/TS expression enclosed in `{ ... }`.
 /// Consumes from `{` to matching `}`, parses with SWC.
-pub fn read_expression(parser_input: &mut ParserInput) -> Result<Box<swc::Expr>> {
+pub fn read_expression(parser_input: &mut ParserInput) -> ParseResult<Box<swc::Expr>> {
     let expr_str = scan_expression_text(parser_input)?;
     let ts = parser_input.state.ts;
     swc_parse_expression(&expr_str, ts)
 }
 
 /// Consume `{` ... `}` with brace matching, return the inner text.
-pub fn scan_expression_text(parser_input: &mut ParserInput) -> Result<String> {
+pub fn scan_expression_text(parser_input: &mut ParserInput) -> ParseResult<String> {
     let c: char = any.parse_next(parser_input)?;
     debug_assert_eq!(c, '{');
 
@@ -47,7 +46,7 @@ pub fn scan_expression_text(parser_input: &mut ParserInput) -> Result<String> {
                 collect_template_literal(parser_input, &mut result)?;
             }
             '/' => {
-                let next: Result<char> = peek(any).parse_next(parser_input);
+                let next: ParseResult<char> = peek(any).parse_next(parser_input);
                 let next = next.ok();
                 match next {
                     Some('/') => {
@@ -68,7 +67,7 @@ pub fn scan_expression_text(parser_input: &mut ParserInput) -> Result<String> {
     Ok(result)
 }
 
-fn collect_string(parser_input: &mut ParserInput, quote: char, out: &mut String) -> Result<()> {
+fn collect_string(parser_input: &mut ParserInput, quote: char, out: &mut String) -> ParseResult<()> {
     loop {
         let c: char = any.parse_next(parser_input)?;
         out.push(c);
@@ -82,7 +81,7 @@ fn collect_string(parser_input: &mut ParserInput, quote: char, out: &mut String)
     }
 }
 
-fn collect_template_literal(parser_input: &mut ParserInput, out: &mut String) -> Result<()> {
+fn collect_template_literal(parser_input: &mut ParserInput, out: &mut String) -> ParseResult<()> {
     loop {
         let c: char = any.parse_next(parser_input)?;
         out.push(c);
@@ -93,7 +92,7 @@ fn collect_template_literal(parser_input: &mut ParserInput, out: &mut String) ->
                 out.push(escaped);
             }
             '$' => {
-                let next: Result<char> = peek(any).parse_next(parser_input);
+                let next: ParseResult<char> = peek(any).parse_next(parser_input);
                 let next = next.ok();
                 if next == Some('{') {
                     let brace: char = any.parse_next(parser_input)?;
@@ -106,7 +105,7 @@ fn collect_template_literal(parser_input: &mut ParserInput, out: &mut String) ->
     }
 }
 
-fn collect_template_expr(parser_input: &mut ParserInput, out: &mut String) -> Result<()> {
+fn collect_template_expr(parser_input: &mut ParserInput, out: &mut String) -> ParseResult<()> {
     let mut depth: u32 = 1;
     while depth > 0 {
         let c: char = any.parse_next(parser_input)?;
@@ -122,7 +121,7 @@ fn collect_template_expr(parser_input: &mut ParserInput, out: &mut String) -> Re
     Ok(())
 }
 
-fn collect_line_comment(parser_input: &mut ParserInput, out: &mut String) -> Result<()> {
+fn collect_line_comment(parser_input: &mut ParserInput, out: &mut String) -> ParseResult<()> {
     let slash: char = any.parse_next(parser_input)?;
     out.push(slash); // second /
     loop {
@@ -134,14 +133,14 @@ fn collect_line_comment(parser_input: &mut ParserInput, out: &mut String) -> Res
     }
 }
 
-fn collect_block_comment(parser_input: &mut ParserInput, out: &mut String) -> Result<()> {
+fn collect_block_comment(parser_input: &mut ParserInput, out: &mut String) -> ParseResult<()> {
     let star: char = any.parse_next(parser_input)?;
     out.push(star); // *
     loop {
         let c: char = any.parse_next(parser_input)?;
         out.push(c);
         if c == '*' {
-            let next: Result<char> = peek(any).parse_next(parser_input);
+            let next: ParseResult<char> = peek(any).parse_next(parser_input);
                 let next = next.ok();
             if next == Some('/') {
                 let slash: char = any.parse_next(parser_input)?;
@@ -152,7 +151,7 @@ fn collect_block_comment(parser_input: &mut ParserInput, out: &mut String) -> Re
     }
 }
 
-fn swc_parse_expression(source: &str, ts: bool) -> Result<Box<swc::Expr>> {
+fn swc_parse_expression(source: &str, ts: bool) -> ParseResult<Box<swc::Expr>> {
     let syntax = if ts {
         Syntax::Typescript(TsSyntax {
             tsx: true,

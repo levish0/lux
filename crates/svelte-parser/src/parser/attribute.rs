@@ -6,11 +6,11 @@ use winnow::combinator::opt;
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::{literal, take_while};
-use winnow::Result;
+use winnow::Result as ParseResult;
 
 use super::ParserInput;
 
-pub fn attribute_parser(parser_input: &mut ParserInput) -> Result<AttributeNode> {
+pub fn attribute_parser(parser_input: &mut ParserInput) -> ParseResult<AttributeNode> {
     let start = parser_input.input.current_token_start();
 
     let name_start = parser_input.input.current_token_start();
@@ -40,7 +40,7 @@ pub fn attribute_parser(parser_input: &mut ParserInput) -> Result<AttributeNode>
     }))
 }
 
-fn parse_attribute_value(parser_input: &mut ParserInput) -> Result<AttributeValue> {
+fn parse_attribute_value(parser_input: &mut ParserInput) -> ParseResult<AttributeValue> {
     let next = winnow::token::any.parse_next(parser_input)?;
     match next {
         '"' => {

@@ -1,4 +1,5 @@
 pub mod attribute;
+pub mod block;
 pub mod comment;
 pub mod element;
 pub mod expression;

@@ -5,11 +5,11 @@ use winnow::combinator::delimited;
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::take_until;
-use winnow::Result;
+use winnow::Result as ParseResult;
 
 use super::ParserInput;
 
-pub fn comment_parser(parser_input: &mut ParserInput) -> Result<FragmentNode> {
+pub fn comment_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNode> {
     let start = parser_input.current_token_start();
 
     let data: &str = delimited("<!--", take_until(0.., "-->"), "-->")
