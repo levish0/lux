@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 
+use svelte_ast::css::StyleSheet;
+use svelte_ast::root::Script;
 use svelte_ast::text::JsComment;
 
 use crate::error::ParseError;
@@ -13,6 +15,9 @@ pub struct ParseContext {
     pub meta_tags: HashSet<&'static str>,
     pub comments: Vec<JsComment>,
     pub errors: Vec<ParseError>,
+    pub instance: Option<Script>,
+    pub module: Option<Script>,
+    pub css: Option<StyleSheet>,
 }
 
 impl ParseContext {
@@ -25,6 +30,9 @@ impl ParseContext {
             meta_tags: HashSet::new(),
             comments: Vec::new(),
             errors: Vec::new(),
+            instance: None,
+            module: None,
+            css: None,
         }
     }
 

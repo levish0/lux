@@ -1,4 +1,5 @@
-use serde::Serialize;
+use serde::ser::SerializeMap;
+use serde::{Serialize, Serializer};
 
 use crate::span::Span;
 
@@ -36,15 +37,29 @@ pub struct Comment {
  *   value: string;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct JsComment {
-    #[serde(flatten)]
     pub span: Span,
     pub kind: JsCommentKind,
     pub value: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+impl Serialize for JsComment {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        let type_str = match self.kind {
+            JsCommentKind::Line => "Line",
+            JsCommentKind::Block => "Block",
+        };
+        map.serialize_entry("type", type_str)?;
+        map.serialize_entry("value", &self.value)?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.end()
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum JsCommentKind {
     Line,
     Block,

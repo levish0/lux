@@ -1,4 +1,5 @@
-use serde::Serialize;
+use serde::ser::SerializeMap;
+use serde::{Serialize, Serializer};
 
 use crate::attributes::Attribute;
 use crate::node::{CssBlockChild, SimpleSelector, StyleSheetChild};
@@ -13,13 +14,25 @@ use crate::text::Comment;
  *   content: { start: number; end: number; styles: string; comment: Comment | null; };
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct StyleSheet {
-    #[serde(flatten)]
     pub span: Span,
     pub attributes: Vec<Attribute>,
     pub children: Vec<StyleSheetChild>,
     pub content: CssContent,
+}
+
+impl Serialize for StyleSheet {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "StyleSheet")?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("attributes", &self.attributes)?;
+        map.serialize_entry("children", &self.children)?;
+        map.serialize_entry("content", &self.content)?;
+        map.end()
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -68,11 +81,21 @@ pub struct CssAtrule {
  *   children: Array<Declaration | Rule | Atrule>;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct CssBlock {
-    #[serde(flatten)]
     pub span: Span,
     pub children: Vec<CssBlockChild>,
+}
+
+impl Serialize for CssBlock {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "Block")?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("children", &self.children)?;
+        map.end()
+    }
 }
 
 /*
@@ -96,11 +119,21 @@ pub struct CssDeclaration {
  *   children: ComplexSelector[];
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct SelectorList {
-    #[serde(flatten)]
     pub span: Span,
     pub children: Vec<ComplexSelector>,
+}
+
+impl Serialize for SelectorList {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "SelectorList")?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("children", &self.children)?;
+        map.end()
+    }
 }
 
 /*
@@ -109,11 +142,21 @@ pub struct SelectorList {
  *   children: RelativeSelector[];
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct ComplexSelector {
-    #[serde(flatten)]
     pub span: Span,
     pub children: Vec<RelativeSelector>,
+}
+
+impl Serialize for ComplexSelector {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "ComplexSelector")?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("children", &self.children)?;
+        map.end()
+    }
 }
 
 /*
@@ -123,12 +166,23 @@ pub struct ComplexSelector {
  *   selectors: SimpleSelector[];
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct RelativeSelector {
-    #[serde(flatten)]
     pub span: Span,
     pub combinator: Option<CssCombinator>,
     pub selectors: Vec<SimpleSelector>,
+}
+
+impl Serialize for RelativeSelector {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "RelativeSelector")?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("combinator", &self.combinator)?;
+        map.serialize_entry("selectors", &self.selectors)?;
+        map.end()
+    }
 }
 
 /*
@@ -137,11 +191,21 @@ pub struct RelativeSelector {
  *   name: string;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct CssCombinator {
-    #[serde(flatten)]
     pub span: Span,
     pub name: String,
+}
+
+impl Serialize for CssCombinator {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "Combinator")?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("name", &self.name)?;
+        map.end()
+    }
 }
 
 /*

@@ -1,7 +1,9 @@
 {
+  "type": "Root",
   "start": 0,
   "end": 77,
   "fragment": {
+    "type": "Fragment",
     "nodes": [
       {
         "type": "Comment",
@@ -17,51 +19,6 @@
         "raw": "\n"
       },
       {
-        "type": "RegularElement",
-        "start": 28,
-        "end": 76,
-        "name": "script",
-        "name_loc": {
-          "start": 29,
-          "end": 35
-        },
-        "attributes": [
-          {
-            "type": "Attribute",
-            "start": 36,
-            "end": 45,
-            "name": "lang",
-            "name_loc": {
-              "start": 36,
-              "end": 40
-            },
-            "value": {
-              "Sequence": [
-                {
-                  "Text": {
-                    "start": 42,
-                    "end": 44,
-                    "data": "ts",
-                    "raw": "ts"
-                  }
-                }
-              ]
-            }
-          }
-        ],
-        "fragment": {
-          "nodes": [
-            {
-              "type": "Text",
-              "start": 46,
-              "end": 67,
-              "data": "\n\tlet count: number;\n",
-              "raw": "\n\tlet count: number;\n"
-            }
-          ]
-        }
-      },
-      {
         "type": "Text",
         "start": 76,
         "end": 77,
@@ -71,7 +28,75 @@
     ]
   },
   "css": null,
-  "instance": null,
+  "instance": {
+    "type": "Script",
+    "start": 28,
+    "end": 76,
+    "context": "Default",
+    "content": {
+      "body": [
+        {
+          "declarations": [
+            {
+              "end": 65,
+              "id": {
+                "end": 57,
+                "name": "count",
+                "start": 52,
+                "type": "Identifier",
+                "typeAnnotation": {
+                  "end": 65,
+                  "start": 57,
+                  "type": "TsTypeAnnotation",
+                  "typeAnnotation": {
+                    "end": 65,
+                    "kind": "number",
+                    "start": 59,
+                    "type": "TsKeywordType"
+                  }
+                }
+              },
+              "init": null,
+              "start": 52,
+              "type": "VariableDeclarator"
+            }
+          ],
+          "declare": false,
+          "end": 66,
+          "kind": "let",
+          "start": 48,
+          "type": "VariableDeclaration"
+        }
+      ],
+      "end": 66,
+      "sourceType": "module",
+      "start": 48,
+      "type": "Program"
+    },
+    "attributes": [
+      {
+        "start": 36,
+        "end": 45,
+        "name": "lang",
+        "name_loc": {
+          "start": 36,
+          "end": 40
+        },
+        "value": {
+          "Sequence": [
+            {
+              "Text": {
+                "start": 42,
+                "end": 44,
+                "data": "ts",
+                "raw": "ts"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
   "module": null,
   "options": null,
   "comments": [],

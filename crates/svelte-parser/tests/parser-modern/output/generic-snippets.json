@@ -1,53 +1,10 @@
 {
+  "type": "Root",
   "start": 0,
   "end": 192,
   "fragment": {
+    "type": "Fragment",
     "nodes": [
-      {
-        "type": "RegularElement",
-        "start": 0,
-        "end": 28,
-        "name": "script",
-        "name_loc": {
-          "start": 1,
-          "end": 7
-        },
-        "attributes": [
-          {
-            "type": "Attribute",
-            "start": 8,
-            "end": 17,
-            "name": "lang",
-            "name_loc": {
-              "start": 8,
-              "end": 12
-            },
-            "value": {
-              "Sequence": [
-                {
-                  "Text": {
-                    "start": 14,
-                    "end": 16,
-                    "data": "ts",
-                    "raw": "ts"
-                  }
-                }
-              ]
-            }
-          }
-        ],
-        "fragment": {
-          "nodes": [
-            {
-              "type": "Text",
-              "start": 18,
-              "end": 19,
-              "data": "\n",
-              "raw": "\n"
-            }
-          ]
-        }
-      },
       {
         "type": "Text",
         "start": 28,
@@ -58,7 +15,42 @@
     ]
   },
   "css": null,
-  "instance": null,
+  "instance": {
+    "type": "Script",
+    "start": 0,
+    "end": 28,
+    "context": "Default",
+    "content": {
+      "body": [],
+      "end": 18,
+      "sourceType": "module",
+      "start": 18,
+      "type": "Program"
+    },
+    "attributes": [
+      {
+        "start": 8,
+        "end": 17,
+        "name": "lang",
+        "name_loc": {
+          "start": 8,
+          "end": 12
+        },
+        "value": {
+          "Sequence": [
+            {
+              "Text": {
+                "start": 14,
+                "end": 16,
+                "data": "ts",
+                "raw": "ts"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
   "module": null,
   "options": null,
   "comments": [],

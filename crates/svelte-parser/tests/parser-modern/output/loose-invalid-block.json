@@ -1,7 +1,9 @@
 {
+  "type": "Root",
   "start": 0,
   "end": 103,
   "fragment": {
+    "type": "Fragment",
     "nodes": []
   },
   "css": null,

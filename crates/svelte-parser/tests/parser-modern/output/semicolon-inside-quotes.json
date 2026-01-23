@@ -1,7 +1,9 @@
 {
+  "type": "Root",
   "start": 0,
   "end": 206,
   "fragment": {
+    "type": "Fragment",
     "nodes": [
       {
         "type": "RegularElement",
@@ -14,6 +16,7 @@
         },
         "attributes": [],
         "fragment": {
+          "type": "Fragment",
           "nodes": [
             {
               "type": "Text",
@@ -33,68 +36,6 @@
         "raw": "\n"
       },
       {
-        "type": "RegularElement",
-        "start": 36,
-        "end": 205,
-        "name": "style",
-        "name_loc": {
-          "start": 37,
-          "end": 42
-        },
-        "attributes": [],
-        "fragment": {
-          "nodes": [
-            {
-              "type": "Text",
-              "start": 43,
-              "end": 140,
-              "data": "\n\t@import url(\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap\");\n\th1 ",
-              "raw": "\n\t@import url(\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap\");\n\th1 "
-            },
-            {
-              "type": "ExpressionTag",
-              "start": 140,
-              "end": 196,
-              "expression": {
-                "type": "BinaryExpression",
-                "span": {
-                  "start": 3,
-                  "end": 14
-                },
-                "operator": "-",
-                "left": {
-                  "type": "Identifier",
-                  "span": {
-                    "start": 3,
-                    "end": 7
-                  },
-                  "ctxt": 0,
-                  "value": "font",
-                  "optional": false
-                },
-                "right": {
-                  "type": "Identifier",
-                  "span": {
-                    "start": 8,
-                    "end": 14
-                  },
-                  "ctxt": 0,
-                  "value": "weight",
-                  "optional": false
-                }
-              }
-            },
-            {
-              "type": "Text",
-              "start": 196,
-              "end": 197,
-              "data": "\n",
-              "raw": "\n"
-            }
-          ]
-        }
-      },
-      {
         "type": "Text",
         "start": 205,
         "end": 206,
@@ -103,7 +44,82 @@
       }
     ]
   },
-  "css": null,
+  "css": {
+    "type": "StyleSheet",
+    "start": 36,
+    "end": 205,
+    "attributes": [],
+    "children": [
+      {
+        "type": "Atrule",
+        "start": 45,
+        "end": 135,
+        "name": "import",
+        "prelude": "url(\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap\")",
+        "block": null
+      },
+      {
+        "type": "Rule",
+        "start": 137,
+        "end": 196,
+        "prelude": {
+          "type": "SelectorList",
+          "start": 137,
+          "end": 139,
+          "children": [
+            {
+              "type": "ComplexSelector",
+              "start": 137,
+              "end": 139,
+              "children": [
+                {
+                  "type": "RelativeSelector",
+                  "start": 137,
+                  "end": 139,
+                  "combinator": null,
+                  "selectors": [
+                    {
+                      "type": "TypeSelector",
+                      "start": 137,
+                      "end": 139,
+                      "name": "h1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "block": {
+          "type": "Block",
+          "start": 140,
+          "end": 196,
+          "children": [
+            {
+              "type": "Declaration",
+              "start": 144,
+              "end": 162,
+              "property": "font-weight",
+              "value": "bold"
+            },
+            {
+              "type": "Declaration",
+              "start": 165,
+              "end": 193,
+              "property": "background",
+              "value": "url(\"whatever\")"
+            }
+          ]
+        }
+      }
+    ],
+    "content": {
+      "start": 43,
+      "end": 197,
+      "styles": "\n\t@import url(\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap\");\n\th1 {\n\t\tfont-weight: bold;\n\t\tbackground: url(\"whatever\");\n\t}\n",
+      "comment": null
+    }
+  },
   "instance": null,
   "module": null,
   "options": null,

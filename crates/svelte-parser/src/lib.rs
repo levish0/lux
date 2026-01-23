@@ -4,13 +4,12 @@ mod parser;
 
 use svelte_ast::root::{Fragment, Root};
 use svelte_ast::span::Span;
-use winnow::prelude::*;
 use winnow::stream::{LocatingSlice, Stateful};
 
 use crate::context::ParseContext;
 use crate::error::ParseError;
 use crate::parser::ParserInput;
-use crate::parser::fragment::fragment_parser;
+use crate::parser::fragment::document_parser;
 
 #[derive(Debug, Clone, Default)]
 pub struct ParseOptions {
@@ -27,8 +26,7 @@ pub fn parse(source: &str, options: ParseOptions) -> Result<Root, Vec<ParseError
         state: context,
     };
 
-    let nodes = fragment_parser
-        .parse_next(&mut parser_input)
+    let nodes = document_parser(&mut parser_input)
         .map_err(|_| vec![ParseError::new(
             error::ErrorKind::UnexpectedEof,
             Span::new(0, source.len()),
@@ -38,9 +36,9 @@ pub fn parse(source: &str, options: ParseOptions) -> Result<Root, Vec<ParseError
     let root = Root {
         span: Span::new(0, source.len()),
         fragment: Fragment { nodes },
-        css: None,
-        instance: None,
-        module: None,
+        css: parser_input.state.css,
+        instance: parser_input.state.instance,
+        module: parser_input.state.module,
         options: None,
         comments: parser_input.state.comments,
         ts,
@@ -727,5 +725,112 @@ mod tests {
             }
             _ => panic!("expected RegularElement"),
         }
+    }
+
+    // --- Phase 7: Script parsing ---
+
+    #[test]
+    fn parse_script_tag() {
+        let root = parse("<script>let x = 1;</script>", ParseOptions::default()).unwrap();
+        assert!(root.instance.is_some());
+        assert!(root.module.is_none());
+        let script = root.instance.unwrap();
+        assert_eq!(script.span.start, 0);
+        assert_eq!(script.span.end, 27);
+        assert!(script.attributes.is_empty());
+    }
+
+    #[test]
+    fn parse_script_module() {
+        let root = parse(r#"<script context="module">export const x = 1;</script>"#, ParseOptions::default()).unwrap();
+        assert!(root.instance.is_none());
+        assert!(root.module.is_some());
+    }
+
+    #[test]
+    fn parse_script_with_markup() {
+        let root = parse("<script>let count = 0;</script>\n<p>{count}</p>", ParseOptions::default()).unwrap();
+        assert!(root.instance.is_some());
+        // Fragment should contain the newline and <p> element, but not the script tag
+        assert!(!root.fragment.nodes.is_empty());
+        let has_script_element = root.fragment.nodes.iter().any(|n| {
+            matches!(n, FragmentNode::RegularElement(el) if el.name == "script")
+        });
+        assert!(!has_script_element, "script should not appear as a fragment element");
+    }
+
+    #[test]
+    fn parse_script_with_attributes() {
+        let root = parse(r#"<script lang="ts">let x: number = 1;</script>"#, ParseOptions { loose: false }).unwrap();
+        assert!(root.instance.is_some());
+        let script = root.instance.unwrap();
+        assert_eq!(script.attributes.len(), 1);
+        assert_eq!(script.attributes[0].name, "lang");
+    }
+
+    // --- Phase 7: CSS parsing ---
+
+    #[test]
+    fn parse_style_tag() {
+        let root = parse("<style>div { color: red; }</style>", ParseOptions::default()).unwrap();
+        assert!(root.css.is_some());
+        let css = root.css.unwrap();
+        assert_eq!(css.children.len(), 1);
+    }
+
+    #[test]
+    fn parse_style_not_in_fragment() {
+        let root = parse("<style>p { margin: 0; }</style><p>hi</p>", ParseOptions::default()).unwrap();
+        assert!(root.css.is_some());
+        // Fragment should only have the <p> element, not the style tag
+        let has_style = root.fragment.nodes.iter().any(|n| {
+            matches!(n, FragmentNode::RegularElement(el) if el.name == "style")
+        });
+        assert!(!has_style, "style should not appear as a fragment element");
+        assert!(root.fragment.nodes.iter().any(|n| {
+            matches!(n, FragmentNode::RegularElement(el) if el.name == "p")
+        }));
+    }
+
+    #[test]
+    fn parse_style_multiple_rules() {
+        let root = parse("<style>h1 { font-size: 2em; } p { margin: 0; }</style>", ParseOptions::default()).unwrap();
+        let css = root.css.unwrap();
+        assert_eq!(css.children.len(), 2);
+    }
+
+    #[test]
+    fn parse_style_nesting() {
+        let root = parse("<style>.parent { color: red; .child { color: blue; } }</style>", ParseOptions::default()).unwrap();
+        let css = root.css.unwrap();
+        assert_eq!(css.children.len(), 1); // .parent rule
+    }
+
+    #[test]
+    fn parse_style_nesting_ampersand() {
+        let root = parse("<style>.btn { color: red; &:hover { color: blue; } &::after { content: ''; } }</style>", ParseOptions::default()).unwrap();
+        let css = root.css.unwrap();
+        assert_eq!(css.children.len(), 1); // .btn rule
+    }
+
+    #[test]
+    fn parse_style_nesting_pseudo_class() {
+        let root = parse("<style>div { :global(.foo) { color: red; } }</style>", ParseOptions::default()).unwrap();
+        let css = root.css.unwrap();
+        assert_eq!(css.children.len(), 1);
+    }
+
+    #[test]
+    fn parse_script_and_style() {
+        let root = parse(
+            "<script>let x = 1;</script>\n<p>hi</p>\n<style>p { color: blue; }</style>",
+            ParseOptions::default(),
+        ).unwrap();
+        assert!(root.instance.is_some());
+        assert!(root.css.is_some());
+        // Fragment should only have newlines and <p>
+        assert!(root.fragment.nodes.iter().any(|n| {
+            matches!(n, FragmentNode::RegularElement(el) if el.name == "p")
+        }));
     }
 }

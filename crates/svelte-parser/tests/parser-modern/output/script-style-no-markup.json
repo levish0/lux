@@ -1,80 +1,16 @@
 {
+  "type": "Root",
   "start": 0,
   "end": 92,
   "fragment": {
+    "type": "Fragment",
     "nodes": [
-      {
-        "type": "RegularElement",
-        "start": 0,
-        "end": 53,
-        "name": "script",
-        "name_loc": {
-          "start": 1,
-          "end": 7
-        },
-        "attributes": [],
-        "fragment": {
-          "nodes": [
-            {
-              "type": "Text",
-              "start": 8,
-              "end": 44,
-              "data": "\n\t// script and style but no markup\n",
-              "raw": "\n\t// script and style but no markup\n"
-            }
-          ]
-        }
-      },
       {
         "type": "Text",
         "start": 53,
         "end": 54,
         "data": "\n",
         "raw": "\n"
-      },
-      {
-        "type": "RegularElement",
-        "start": 54,
-        "end": 91,
-        "name": "style",
-        "name_loc": {
-          "start": 55,
-          "end": 60
-        },
-        "attributes": [],
-        "fragment": {
-          "nodes": [
-            {
-              "type": "Text",
-              "start": 61,
-              "end": 67,
-              "data": "\n\tdiv ",
-              "raw": "\n\tdiv "
-            },
-            {
-              "type": "ExpressionTag",
-              "start": 67,
-              "end": 82,
-              "expression": {
-                "type": "Identifier",
-                "span": {
-                  "start": 1,
-                  "end": 6
-                },
-                "ctxt": 0,
-                "value": "color",
-                "optional": false
-              }
-            },
-            {
-              "type": "Text",
-              "start": 82,
-              "end": 83,
-              "data": "\n",
-              "raw": "\n"
-            }
-          ]
-        }
       },
       {
         "type": "Text",
@@ -85,8 +21,89 @@
       }
     ]
   },
-  "css": null,
-  "instance": null,
+  "css": {
+    "type": "StyleSheet",
+    "start": 54,
+    "end": 91,
+    "attributes": [],
+    "children": [
+      {
+        "type": "Rule",
+        "start": 63,
+        "end": 82,
+        "prelude": {
+          "type": "SelectorList",
+          "start": 63,
+          "end": 66,
+          "children": [
+            {
+              "type": "ComplexSelector",
+              "start": 63,
+              "end": 66,
+              "children": [
+                {
+                  "type": "RelativeSelector",
+                  "start": 63,
+                  "end": 66,
+                  "combinator": null,
+                  "selectors": [
+                    {
+                      "type": "TypeSelector",
+                      "start": 63,
+                      "end": 66,
+                      "name": "div"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "block": {
+          "type": "Block",
+          "start": 67,
+          "end": 82,
+          "children": [
+            {
+              "type": "Declaration",
+              "start": 69,
+              "end": 80,
+              "property": "color",
+              "value": "red"
+            }
+          ]
+        }
+      }
+    ],
+    "content": {
+      "start": 61,
+      "end": 83,
+      "styles": "\n\tdiv { color: red; }\n",
+      "comment": null
+    }
+  },
+  "instance": {
+    "type": "Script",
+    "start": 0,
+    "end": 53,
+    "context": "Default",
+    "content": {
+      "body": [],
+      "end": 8,
+      "sourceType": "module",
+      "start": 8,
+      "trailingComments": [
+        {
+          "end": 43,
+          "start": 10,
+          "type": "Line",
+          "value": " script and style but no markup"
+        }
+      ],
+      "type": "Program"
+    },
+    "attributes": []
+  },
   "module": null,
   "options": null,
   "comments": [],

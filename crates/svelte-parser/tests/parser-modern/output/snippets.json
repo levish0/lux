@@ -1,45 +1,10 @@
 {
+  "type": "Root",
   "start": 0,
   "end": 102,
   "fragment": {
+    "type": "Fragment",
     "nodes": [
-      {
-        "type": "RegularElement",
-        "start": 0,
-        "end": 27,
-        "name": "script",
-        "name_loc": {
-          "start": 1,
-          "end": 7
-        },
-        "attributes": [
-          {
-            "type": "Attribute",
-            "start": 8,
-            "end": 17,
-            "name": "lang",
-            "name_loc": {
-              "start": 8,
-              "end": 12
-            },
-            "value": {
-              "Sequence": [
-                {
-                  "Text": {
-                    "start": 14,
-                    "end": 16,
-                    "data": "ts",
-                    "raw": "ts"
-                  }
-                }
-              ]
-            }
-          }
-        ],
-        "fragment": {
-          "nodes": []
-        }
-      },
       {
         "type": "Text",
         "start": 27,
@@ -52,44 +17,33 @@
         "start": 29,
         "end": 81,
         "expression": {
-          "type": "Identifier",
-          "span": {
-            "start": 0,
-            "end": 0
-          },
-          "ctxt": 0,
-          "value": "foo",
-          "optional": false
+          "end": 0,
+          "name": "foo",
+          "start": 0,
+          "type": "Identifier"
         },
         "parameters": [
           {
+            "end": 12,
+            "name": "msg",
+            "start": 1,
             "type": "Identifier",
-            "span": {
-              "start": 1,
-              "end": 12
-            },
-            "ctxt": 0,
-            "value": "msg",
-            "optional": false,
             "typeAnnotation": {
+              "end": 12,
+              "start": 4,
               "type": "TsTypeAnnotation",
-              "span": {
-                "start": 4,
-                "end": 12
-              },
               "typeAnnotation": {
-                "type": "TsKeywordType",
-                "span": {
-                  "start": 6,
-                  "end": 12
-                },
-                "kind": "string"
+                "end": 12,
+                "kind": "string",
+                "start": 6,
+                "type": "TsKeywordType"
               }
             }
           }
         ],
         "type_params": null,
         "body": {
+          "type": "Fragment",
           "nodes": [
             {
               "type": "Text",
@@ -109,20 +63,17 @@
               },
               "attributes": [],
               "fragment": {
+                "type": "Fragment",
                 "nodes": [
                   {
                     "type": "ExpressionTag",
                     "start": 61,
                     "end": 66,
                     "expression": {
-                      "type": "Identifier",
-                      "span": {
-                        "start": 0,
-                        "end": 3
-                      },
-                      "ctxt": 0,
-                      "value": "msg",
-                      "optional": false
+                      "end": 65,
+                      "name": "msg",
+                      "start": 62,
+                      "type": "Identifier"
                     }
                   }
                 ]
@@ -143,37 +94,26 @@
         "start": 83,
         "end": 101,
         "expression": {
-          "type": "CallExpression",
-          "span": {
-            "start": 0,
-            "end": 8
-          },
-          "ctxt": 0,
-          "callee": {
-            "type": "Identifier",
-            "span": {
-              "start": 0,
-              "end": 3
-            },
-            "ctxt": 0,
-            "value": "foo",
-            "optional": false
-          },
           "arguments": [
             {
-              "spread": null,
               "expression": {
-                "type": "Identifier",
-                "span": {
-                  "start": 4,
-                  "end": 7
-                },
-                "ctxt": 0,
-                "value": "msg",
-                "optional": false
-              }
+                "end": 99,
+                "name": "msg",
+                "start": 96,
+                "type": "Identifier"
+              },
+              "spread": null
             }
           ],
+          "callee": {
+            "end": 95,
+            "name": "foo",
+            "start": 92,
+            "type": "Identifier"
+          },
+          "end": 100,
+          "start": 92,
+          "type": "CallExpression",
           "typeArguments": null
         }
       },
@@ -187,7 +127,42 @@
     ]
   },
   "css": null,
-  "instance": null,
+  "instance": {
+    "type": "Script",
+    "start": 0,
+    "end": 27,
+    "context": "Default",
+    "content": {
+      "body": [],
+      "end": 18,
+      "sourceType": "module",
+      "start": 18,
+      "type": "Program"
+    },
+    "attributes": [
+      {
+        "start": 8,
+        "end": 17,
+        "name": "lang",
+        "name_loc": {
+          "start": 8,
+          "end": 12
+        },
+        "value": {
+          "Sequence": [
+            {
+              "Text": {
+                "start": 14,
+                "end": 16,
+                "data": "ts",
+                "raw": "ts"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
   "module": null,
   "options": null,
   "comments": [],

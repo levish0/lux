@@ -87,6 +87,82 @@ pub fn serialize_program<S: Serializer>(
     transformed.serialize(s)
 }
 
+/// Wrapper for serializing a Program reference in ESTree format.
+/// Used in custom Serialize impls where `serialize_with` isn't applicable.
+pub struct ProgramRef<'a>(pub &'a swc::Program);
+
+impl<'a> Serialize for ProgramRef<'a> {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let value = serde_json::to_value(self.0).map_err(S::Error::custom)?;
+        let transformed = transform_value(value);
+        transformed.serialize(s)
+    }
+}
+
+/// Wrapper for serializing a Program with leadingComments/trailingComments attached.
+/// Comments are positioned relative to body statements:
+/// - Before first statement → leadingComments on Program
+/// - After last statement → trailingComments on Program
+pub struct ProgramWithComments<'a> {
+    pub program: &'a swc::Program,
+    pub comments: &'a [crate::text::JsComment],
+}
+
+impl<'a> Serialize for ProgramWithComments<'a> {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let value = serde_json::to_value(self.program).map_err(S::Error::custom)?;
+        let mut transformed = transform_value(value);
+
+        if !self.comments.is_empty() {
+            if let Value::Object(ref mut obj) = transformed {
+                let body_is_empty = obj
+                    .get("body")
+                    .and_then(|b| b.as_array())
+                    .map(|arr| arr.is_empty())
+                    .unwrap_or(true);
+
+                if body_is_empty {
+                    // No statements: all comments are trailingComments
+                    let comments_val: Vec<Value> = self.comments.iter()
+                        .map(|c| serde_json::to_value(c).map_err(S::Error::custom))
+                        .collect::<Result<_, _>>()?;
+                    obj.insert("trailingComments".to_string(), Value::Array(comments_val));
+                } else {
+                    // Use first statement start as boundary
+                    let body_start = obj
+                        .get("body")
+                        .and_then(|b| b.as_array())
+                        .and_then(|arr| arr.first())
+                        .and_then(|node| node.get("start"))
+                        .and_then(|s| s.as_u64())
+                        .unwrap_or(u64::MAX);
+
+                    let mut leading = Vec::new();
+                    let mut trailing = Vec::new();
+
+                    for comment in self.comments {
+                        let c_val = serde_json::to_value(comment).map_err(S::Error::custom)?;
+                        if (comment.span.start as u64) < body_start {
+                            leading.push(c_val);
+                        } else {
+                            trailing.push(c_val);
+                        }
+                    }
+
+                    if !leading.is_empty() {
+                        obj.insert("leadingComments".to_string(), Value::Array(leading));
+                    }
+                    if !trailing.is_empty() {
+                        obj.insert("trailingComments".to_string(), Value::Array(trailing));
+                    }
+                }
+            }
+        }
+
+        transformed.serialize(s)
+    }
+}
+
 /// Transform a serde_json::Value from SWC format to ESTree format.
 fn transform_value(value: Value) -> Value {
     match value {
@@ -171,6 +247,16 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                 if let Some(name) = obj.remove("name") {
                     obj.insert("id".to_string(), name);
                 }
+            }
+            "Module" => {
+                obj.insert("type".to_string(), Value::String("Program".to_string()));
+                obj.insert("sourceType".to_string(), Value::String("module".to_string()));
+                obj.remove("interpreter");
+            }
+            "Script" => {
+                obj.insert("type".to_string(), Value::String("Program".to_string()));
+                obj.insert("sourceType".to_string(), Value::String("script".to_string()));
+                obj.remove("interpreter");
             }
             _ => {}
         }

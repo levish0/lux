@@ -1,7 +1,9 @@
 {
+  "type": "Root",
   "start": 0,
   "end": 125,
   "fragment": {
+    "type": "Fragment",
     "nodes": [
       {
         "type": "RegularElement",
@@ -37,6 +39,7 @@
           }
         ],
         "fragment": {
+          "type": "Fragment",
           "nodes": [
             {
               "type": "Text",
@@ -56,6 +59,7 @@
               },
               "attributes": [],
               "fragment": {
+                "type": "Fragment",
                 "nodes": [
                   {
                     "type": "SlotElement",
@@ -68,6 +72,7 @@
                     },
                     "attributes": [],
                     "fragment": {
+                      "type": "Fragment",
                       "nodes": []
                     }
                   }
@@ -102,6 +107,7 @@
         },
         "attributes": [],
         "fragment": {
+          "type": "Fragment",
           "nodes": [
             {
               "type": "Text",
@@ -121,6 +127,7 @@
               },
               "attributes": [],
               "fragment": {
+                "type": "Fragment",
                 "nodes": [
                   {
                     "type": "SlotElement",
@@ -133,6 +140,7 @@
                     },
                     "attributes": [],
                     "fragment": {
+                      "type": "Fragment",
                       "nodes": []
                     }
                   }
@@ -167,6 +175,7 @@
         },
         "attributes": [],
         "fragment": {
+          "type": "Fragment",
           "nodes": []
         }
       }

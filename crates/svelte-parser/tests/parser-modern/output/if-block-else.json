@@ -1,7 +1,9 @@
 {
+  "type": "Root",
   "start": 0,
   "end": 52,
   "fragment": {
+    "type": "Fragment",
     "nodes": [
       {
         "type": "IfBlock",
@@ -9,16 +11,13 @@
         "end": 51,
         "elseif": false,
         "test": {
-          "type": "Identifier",
-          "span": {
-            "start": 0,
-            "end": 3
-          },
-          "ctxt": 0,
-          "value": "foo",
-          "optional": false
+          "end": 8,
+          "name": "foo",
+          "start": 5,
+          "type": "Identifier"
         },
         "consequent": {
+          "type": "Fragment",
           "nodes": [
             {
               "type": "Text",
@@ -38,6 +37,7 @@
               },
               "attributes": [],
               "fragment": {
+                "type": "Fragment",
                 "nodes": [
                   {
                     "type": "Text",
@@ -59,6 +59,7 @@
           ]
         },
         "alternate": {
+          "type": "Fragment",
           "nodes": [
             {
               "type": "Text",
@@ -78,6 +79,7 @@
               },
               "attributes": [],
               "fragment": {
+                "type": "Fragment",
                 "nodes": [
                   {
                     "type": "Text",

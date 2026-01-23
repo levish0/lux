@@ -1,7 +1,9 @@
 {
+  "type": "Root",
   "start": 0,
   "end": 18,
   "fragment": {
+    "type": "Fragment",
     "nodes": [
       {
         "type": "IfBlock",
@@ -9,16 +11,13 @@
         "end": 17,
         "elseif": false,
         "test": {
-          "type": "Identifier",
-          "span": {
-            "start": 0,
-            "end": 3
-          },
-          "ctxt": 0,
-          "value": "foo",
-          "optional": false
+          "end": 8,
+          "name": "foo",
+          "start": 5,
+          "type": "Identifier"
         },
         "consequent": {
+          "type": "Fragment",
           "nodes": [
             {
               "type": "Text",

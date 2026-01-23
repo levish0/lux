@@ -1,4 +1,5 @@
-use serde::Serialize;
+use serde::ser::SerializeMap;
+use serde::{Serialize, Serializer};
 use std::collections::HashMap;
 use swc_ecma_ast as swc;
 
@@ -20,17 +21,33 @@ use crate::text::JsComment;
  *   metadata: { ts: boolean };
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct Root {
-    #[serde(flatten)]
     pub span: Span,
+    pub options: Option<SvelteOptions>,
     pub fragment: Fragment,
     pub css: Option<StyleSheet>,
     pub instance: Option<Script>,
     pub module: Option<Script>,
-    pub options: Option<SvelteOptions>,
     pub comments: Vec<JsComment>,
     pub ts: bool,
+}
+
+impl Serialize for Root {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "Root")?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("fragment", &self.fragment)?;
+        map.serialize_entry("css", &self.css)?;
+        map.serialize_entry("instance", &self.instance)?;
+        map.serialize_entry("module", &self.module)?;
+        map.serialize_entry("options", &self.options)?;
+        map.serialize_entry("comments", &self.comments)?;
+        map.serialize_entry("ts", &self.ts)?;
+        map.end()
+    }
 }
 
 /*
@@ -41,14 +58,29 @@ pub struct Root {
  *   attributes: Attribute[];
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct Script {
-    #[serde(flatten)]
     pub span: Span,
     pub context: ScriptContext,
-    #[serde(serialize_with = "crate::utils::estree::serialize_program")]
     pub content: swc::Program,
+    pub content_comments: Vec<crate::text::JsComment>,
     pub attributes: Vec<Attribute>,
+}
+
+impl Serialize for Script {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "Script")?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("context", &self.context)?;
+        map.serialize_entry("content", &crate::utils::estree::ProgramWithComments {
+            program: &self.content,
+            comments: &self.content_comments,
+        })?;
+        map.serialize_entry("attributes", &self.attributes)?;
+        map.end()
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -63,9 +95,18 @@ pub enum ScriptContext {
  *   nodes: Array<Text | Tag | ElementLike | Block | Comment>;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct Fragment {
     pub nodes: Vec<FragmentNode>,
+}
+
+impl Serialize for Fragment {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "Fragment")?;
+        map.serialize_entry("nodes", &self.nodes)?;
+        map.end()
+    }
 }
 
 /*
