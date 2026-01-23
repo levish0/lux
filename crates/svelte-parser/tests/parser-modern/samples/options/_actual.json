@@ -37,7 +37,7 @@
               "expression": {
                 "end": 61,
                 "start": 57,
-                "type": "BooleanLiteral",
+                "type": "Literal",
                 "value": true
               },
               "start": 56

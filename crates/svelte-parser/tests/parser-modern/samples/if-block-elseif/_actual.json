@@ -66,8 +66,8 @@
                   "end": 57,
                   "raw": "5",
                   "start": 56,
-                  "type": "NumericLiteral",
-                  "value": 5.0
+                  "type": "Literal",
+                  "value": 5
                 },
                 "start": 52,
                 "type": "BinaryExpression"
@@ -135,8 +135,8 @@
             "end": 11,
             "raw": "10",
             "start": 9,
-            "type": "NumericLiteral",
-            "value": 10.0
+            "type": "Literal",
+            "value": 10
           },
           "start": 5,
           "type": "BinaryExpression"

@@ -66,12 +66,11 @@
             "typeAnnotation": {
               "end": 12,
               "start": 4,
-              "type": "TsTypeAnnotation",
+              "type": "TSTypeAnnotation",
               "typeAnnotation": {
                 "end": 12,
-                "kind": "string",
                 "start": 6,
-                "type": "TsKeywordType"
+                "type": "TSStringKeyword"
               }
             }
           }
@@ -109,8 +108,7 @@
           },
           "end": 100,
           "start": 92,
-          "type": "CallExpression",
-          "typeArguments": null
+          "type": "CallExpression"
         },
         "start": 83,
         "type": "RenderTag"

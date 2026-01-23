@@ -53,12 +53,11 @@
                 "typeAnnotation": {
                   "end": 65,
                   "start": 57,
-                  "type": "TsTypeAnnotation",
+                  "type": "TSTypeAnnotation",
                   "typeAnnotation": {
                     "end": 65,
-                    "kind": "number",
                     "start": 59,
-                    "type": "TsKeywordType"
+                    "type": "TSNumberKeyword"
                   }
                 }
               },
@@ -67,7 +66,6 @@
               "type": "VariableDeclarator"
             }
           ],
-          "declare": false,
           "end": 66,
           "kind": "let",
           "start": 48,

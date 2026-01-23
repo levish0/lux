@@ -17,9 +17,7 @@
             "expression": {
               "async": false,
               "body": {
-                "end": 146,
-                "start": 92,
-                "stmts": [
+                "body": [
                   {
                     "declarations": [
                       {
@@ -32,12 +30,11 @@
                           "typeAnnotation": {
                             "end": 114,
                             "start": 106,
-                            "type": "TsTypeAnnotation",
+                            "type": "TSTypeAnnotation",
                             "typeAnnotation": {
                               "end": 114,
-                              "kind": "number",
                               "start": 108,
-                              "type": "TsKeywordType"
+                              "type": "TSNumberKeyword"
                             }
                           }
                         },
@@ -54,8 +51,8 @@
                             "end": 126,
                             "raw": "1",
                             "start": 125,
-                            "type": "NumericLiteral",
-                            "value": 1.0
+                            "type": "Literal",
+                            "value": 1
                           },
                           "start": 117,
                           "type": "BinaryExpression"
@@ -64,7 +61,6 @@
                         "type": "VariableDeclarator"
                       }
                     ],
-                    "declare": false,
                     "end": 127,
                     "kind": "const",
                     "start": 96,
@@ -78,8 +74,7 @@
                         "end": 135,
                         "name": "count",
                         "start": 130,
-                        "type": "Identifier",
-                        "typeAnnotation": null
+                        "type": "Identifier"
                       },
                       "operator": "=",
                       "right": {
@@ -95,6 +90,8 @@
                     "type": "ExpressionStatement"
                   }
                 ],
+                "end": 146,
+                "start": 92,
                 "type": "BlockStatement"
               },
               "end": 146,
@@ -108,11 +105,11 @@
                   "typeAnnotation": {
                     "end": 87,
                     "start": 75,
-                    "type": "TsTypeAnnotation",
+                    "type": "TSTypeAnnotation",
                     "typeAnnotation": {
                       "end": 87,
                       "start": 77,
-                      "type": "TsTypeReference",
+                      "type": "TSTypeReference",
                       "typeName": {
                         "end": 87,
                         "name": "MouseEvent",
@@ -204,8 +201,7 @@
                 "end": 29,
                 "name": "count",
                 "start": 24,
-                "type": "Identifier",
-                "typeAnnotation": null
+                "type": "Identifier"
               },
               "init": {
                 "arguments": [
@@ -214,8 +210,8 @@
                       "end": 40,
                       "raw": "0",
                       "start": 39,
-                      "type": "NumericLiteral",
-                      "value": 0.0
+                      "type": "Literal",
+                      "value": 0
                     },
                     "spread": null
                   }
@@ -228,14 +224,12 @@
                 },
                 "end": 41,
                 "start": 32,
-                "type": "CallExpression",
-                "typeArguments": null
+                "type": "CallExpression"
               },
               "start": 24,
               "type": "VariableDeclarator"
             }
           ],
-          "declare": false,
           "end": 42,
           "kind": "let",
           "start": 20,

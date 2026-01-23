@@ -41,8 +41,7 @@
                       "end": 94,
                       "name": "value",
                       "start": 89,
-                      "type": "Identifier",
-                      "typeAnnotation": null
+                      "type": "Identifier"
                     },
                     "operator": "=",
                     "right": {
@@ -66,8 +65,7 @@
                       },
                       "end": 112,
                       "start": 97,
-                      "type": "CallExpression",
-                      "typeArguments": null
+                      "type": "CallExpression"
                     },
                     "start": 89,
                     "type": "AssignmentExpression"
@@ -79,8 +77,7 @@
                       "end": 84,
                       "name": "v",
                       "start": 83,
-                      "type": "Identifier",
-                      "typeAnnotation": null
+                      "type": "Identifier"
                     }
                   ],
                   "returnType": null,
@@ -129,21 +126,19 @@
                 "end": 19,
                 "name": "value",
                 "start": 14,
-                "type": "Identifier",
-                "typeAnnotation": null
+                "type": "Identifier"
               },
               "init": {
                 "end": 24,
                 "raw": "''",
                 "start": 22,
-                "type": "StringLiteral",
+                "type": "Literal",
                 "value": ""
               },
               "start": 14,
               "type": "VariableDeclarator"
             }
           ],
-          "declare": false,
           "end": 25,
           "kind": "let",
           "start": 10,

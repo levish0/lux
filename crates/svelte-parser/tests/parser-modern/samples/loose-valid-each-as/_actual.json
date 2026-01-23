@@ -43,8 +43,7 @@
                 "end": 27,
                 "name": "arr",
                 "start": 24,
-                "type": "Identifier",
-                "typeAnnotation": null
+                "type": "Identifier"
               },
               "init": {
                 "elements": [],
@@ -56,7 +55,6 @@
               "type": "VariableDeclarator"
             }
           ],
-          "declare": false,
           "end": 33,
           "kind": "let",
           "start": 20,
