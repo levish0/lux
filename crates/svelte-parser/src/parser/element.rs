@@ -1,5 +1,5 @@
 use svelte_ast::JsNode;
-use svelte_ast::attributes::AttributeValue;
+use svelte_ast::attributes::{AttributeSequenceValue, AttributeValue};
 use svelte_ast::elements::{
     Component, RegularElement, SlotElement, SvelteBody, SvelteBoundary, SvelteComponent,
     SvelteDocument, SvelteElement, SvelteFragment, SvelteHead, SvelteOptionsRaw, SvelteSelf,
@@ -460,15 +460,23 @@ fn extract_this_attribute(mut attributes: Vec<AttributeNode>) -> (Option<JsNode>
             match a.value {
                 AttributeValue::Expression(tag) => Some(tag.expression),
                 AttributeValue::Sequence(items) => {
-                    // Text value → create a Literal node
-                    if let Some(svelte_ast::attributes::AttributeSequenceValue::Text(text)) = items.first() {
-                        Some(JsNode(serde_json::json!({
-                            "type": "Literal",
-                            "start": text.span.start,
-                            "end": text.span.end,
-                            "value": text.data,
-                            "raw": format!("\"{}\"", text.data)
-                        })))
+                    if items.len() == 1 {
+                        match &items[0] {
+                            AttributeSequenceValue::Text(text) => {
+                                // Text value → create a Literal node
+                                Some(JsNode(serde_json::json!({
+                                    "type": "Literal",
+                                    "start": text.span.start,
+                                    "end": text.span.end,
+                                    "value": text.data,
+                                    "raw": format!("\"{}\"", text.data)
+                                })))
+                            }
+                            AttributeSequenceValue::ExpressionTag(tag) => {
+                                // Expression inside quotes → extract directly
+                                Some(tag.expression.clone())
+                            }
+                        }
                     } else {
                         None
                     }

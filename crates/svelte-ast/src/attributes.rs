@@ -25,6 +25,7 @@ pub struct Attribute {
 impl Serialize for Attribute {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "Attribute")?;
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("name", &self.name)?;
@@ -106,6 +107,7 @@ pub struct BindDirective {
 impl Serialize for BindDirective {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "BindDirective")?;
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
 

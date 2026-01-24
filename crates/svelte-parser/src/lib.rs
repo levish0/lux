@@ -2,9 +2,10 @@ mod context;
 pub mod error;
 mod parser;
 
+use svelte_ast::JsNode;
 use svelte_ast::attributes::{AttributeSequenceValue, AttributeValue};
 use svelte_ast::node::{AttributeNode, FragmentNode};
-use svelte_ast::root::{CustomElementOptions, Fragment, Root, Script, SvelteOptions};
+use svelte_ast::root::{CustomElementOptions, CustomElementProp, Fragment, PropType, Root, Script, ShadowMode, SvelteOptions};
 use svelte_ast::span::Span;
 use svelte_ast::text::{JsComment, JsCommentKind};
 use winnow::stream::{LocatingSlice, Stateful};
@@ -115,15 +116,43 @@ fn extract_svelte_options(nodes: &mut Vec<FragmentNode>) -> Option<SvelteOptions
                 "preserveWhitespace" => {
                     svelte_options.preserve_whitespace = get_boolean_attribute_value(&a.value);
                 }
+                "namespace" => {
+                    if let Some(val) = get_static_text_value(&a.value) {
+                        svelte_options.namespace = match val.as_str() {
+                            "svg" => Some(svelte_ast::root::Namespace::Svg),
+                            "mathml" => Some(svelte_ast::root::Namespace::Mathml),
+                            "html" => Some(svelte_ast::root::Namespace::Html),
+                            _ => None,
+                        };
+                    }
+                }
+                "css" => {
+                    if let Some(val) = get_static_text_value(&a.value) {
+                        if val == "injected" {
+                            svelte_options.css = Some(svelte_ast::root::CssMode::Injected);
+                        }
+                    }
+                }
                 "customElement" => {
-                    let tag = get_static_text_value(&a.value);
-                    if let Some(tag) = tag {
-                        svelte_options.custom_element = Some(CustomElementOptions {
-                            tag: Some(tag),
-                            shadow: None,
-                            props: None,
-                            extend: None,
-                        });
+                    match &a.value {
+                        AttributeValue::Sequence(_) => {
+                            // Simple string tag: customElement="my-tag"
+                            let tag = get_static_text_value(&a.value);
+                            if let Some(tag) = tag {
+                                svelte_options.custom_element = Some(CustomElementOptions {
+                                    tag: Some(tag),
+                                    shadow: None,
+                                    props: None,
+                                    extend: None,
+                                });
+                            }
+                        }
+                        AttributeValue::Expression(expr_tag) => {
+                            // Expression value: customElement={{tag: "...", ...}}
+                            svelte_options.custom_element =
+                                extract_custom_element_from_expr(&expr_tag.expression);
+                        }
+                        _ => {}
                     }
                 }
                 _ => {}
@@ -167,6 +196,147 @@ fn get_static_text_value(value: &AttributeValue) -> Option<String> {
     }
 }
 
+/// Extract customElement options from an ObjectExpression JsNode.
+fn extract_custom_element_from_expr(expr: &JsNode) -> Option<CustomElementOptions> {
+    use std::collections::HashMap;
+
+    let obj = expr.0.as_object()?;
+    if obj.get("type")?.as_str()? != "ObjectExpression" {
+        return None;
+    }
+
+    let properties = obj.get("properties")?.as_array()?;
+
+    let mut tag: Option<String> = None;
+    let mut shadow: Option<ShadowMode> = None;
+    let mut props: Option<HashMap<String, CustomElementProp>> = None;
+    let mut extend: Option<JsNode> = None;
+
+    for prop in properties {
+        let key_name = prop
+            .get("key")
+            .and_then(|k| k.get("name").or_else(|| k.get("value")))
+            .and_then(|v| v.as_str());
+
+        let value = prop.get("value");
+
+        match key_name {
+            Some("tag") => {
+                if let Some(v) = value {
+                    tag = v.get("value").and_then(|v| v.as_str()).map(|s| s.to_string());
+                }
+            }
+            Some("shadow") => {
+                if let Some(v) = value {
+                    let s = v.get("value").and_then(|v| v.as_str());
+                    shadow = match s {
+                        Some("open") => Some(ShadowMode::Open),
+                        Some("none") => Some(ShadowMode::None),
+                        _ => None,
+                    };
+                }
+            }
+            Some("props") => {
+                if let Some(v) = value {
+                    props = extract_custom_element_props(v);
+                }
+            }
+            Some("extend") => {
+                if let Some(v) = value {
+                    extend = Some(JsNode(v.clone()));
+                }
+            }
+            _ => {}
+        }
+    }
+
+    Some(CustomElementOptions {
+        tag,
+        shadow,
+        props,
+        extend,
+    })
+}
+
+/// Extract props from a customElement props ObjectExpression.
+fn extract_custom_element_props(
+    value: &serde_json::Value,
+) -> Option<std::collections::HashMap<String, CustomElementProp>> {
+    use std::collections::HashMap;
+
+    let obj = value.as_object()?;
+    if obj.get("type")?.as_str()? != "ObjectExpression" {
+        return None;
+    }
+
+    let properties = obj.get("properties")?.as_array()?;
+    let mut result = HashMap::new();
+
+    for prop in properties {
+        let key_name = prop
+            .get("key")
+            .and_then(|k| k.get("name").or_else(|| k.get("value")))
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string());
+
+        let Some(key) = key_name else { continue };
+        let Some(val) = prop.get("value") else { continue };
+
+        let mut attribute: Option<String> = None;
+        let mut reflect: Option<bool> = None;
+        let mut prop_type: Option<PropType> = None;
+
+        // val should be an ObjectExpression with {attribute, reflect, type}
+        if let Some(inner_props) = val.get("properties").and_then(|p| p.as_array()) {
+            for inner_prop in inner_props {
+                let inner_key = inner_prop
+                    .get("key")
+                    .and_then(|k| k.get("name").or_else(|| k.get("value")))
+                    .and_then(|v| v.as_str());
+
+                let inner_val = inner_prop.get("value");
+
+                match inner_key {
+                    Some("attribute") => {
+                        attribute = inner_val
+                            .and_then(|v| v.get("value"))
+                            .and_then(|v| v.as_str())
+                            .map(|s| s.to_string());
+                    }
+                    Some("reflect") => {
+                        reflect = inner_val.and_then(|v| v.get("value")).and_then(|v| v.as_bool());
+                    }
+                    Some("type") => {
+                        let type_str = inner_val
+                            .and_then(|v| v.get("value"))
+                            .and_then(|v| v.as_str());
+                        prop_type = match type_str {
+                            Some("Array") => Some(PropType::Array),
+                            Some("Boolean") => Some(PropType::Boolean),
+                            Some("Number") => Some(PropType::Number),
+                            Some("Object") => Some(PropType::Object),
+                            Some("String") => Some(PropType::String),
+                            _ => None,
+                        };
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        result.insert(
+            key,
+            CustomElementProp {
+                attribute,
+                reflect,
+                prop_type,
+            },
+        );
+    }
+
+    Some(result)
+}
+
 /// If an HTML comment immediately precedes a script tag (with only whitespace between),
 /// attach it as a leadingComment to the Script's Program node.
 fn attach_html_comment_to_script(nodes: &[FragmentNode], script: &mut Option<Script>) {
@@ -177,23 +347,33 @@ fn attach_html_comment_to_script(nodes: &[FragmentNode], script: &mut Option<Scr
 
     let script_start = script.span.start;
 
-    // Walk backwards through fragment nodes to find a Comment just before the script
-    // Allow only whitespace Text nodes between the comment and the script start
+    // Walk backwards through fragment nodes before the script to find a Comment.
+    // Allow only whitespace Text nodes between the comment and the script start.
     let mut comment_data = None;
 
-    for node in nodes.iter().rev() {
+    // Only consider nodes that end before the script start
+    let nodes_before: Vec<&FragmentNode> = nodes
+        .iter()
+        .filter(|n| {
+            let end = match n {
+                FragmentNode::Text(t) => t.span.end,
+                FragmentNode::Comment(c) => c.span.end,
+                _ => usize::MAX,
+            };
+            end <= script_start
+        })
+        .collect();
+
+    for node in nodes_before.iter().rev() {
         match node {
             FragmentNode::Text(t) => {
-                // Only whitespace text is allowed between comment and script
-                if t.span.end <= script_start && t.data.trim().is_empty() {
+                if t.data.trim().is_empty() {
                     continue;
                 }
                 break;
             }
             FragmentNode::Comment(c) => {
-                if c.span.end <= script_start {
-                    comment_data = Some(c.data.clone());
-                }
+                comment_data = Some(c.data.clone());
                 break;
             }
             _ => break,

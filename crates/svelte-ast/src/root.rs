@@ -96,52 +96,14 @@ impl Serialize for Script {
             self.span.end,
         );
 
-        // Attach comments
+        // Attach comments to individual statement nodes
         if !self.content_comments.is_empty() {
-            if let serde_json::Value::Object(ref mut obj) = program {
-                let body_is_empty = obj
-                    .get("body")
-                    .and_then(|b| b.as_array())
-                    .map(|arr| arr.is_empty())
-                    .unwrap_or(true);
-
-                if body_is_empty {
-                    let comments_val: Vec<serde_json::Value> = self
-                        .content_comments
-                        .iter()
-                        .map(|c| serde_json::to_value(c).map_err(serde::ser::Error::custom))
-                        .collect::<Result<_, _>>()?;
-                    obj.insert("trailingComments".to_string(), serde_json::Value::Array(comments_val));
-                } else {
-                    let body_start = obj
-                        .get("body")
-                        .and_then(|b| b.as_array())
-                        .and_then(|arr| arr.first())
-                        .and_then(|node| node.get("start"))
-                        .and_then(|s| s.as_u64())
-                        .unwrap_or(u64::MAX);
-
-                    let mut leading = Vec::new();
-                    let mut trailing = Vec::new();
-
-                    for comment in &self.content_comments {
-                        let c_val = serde_json::to_value(comment).map_err(serde::ser::Error::custom)?;
-                        let comment_start = comment.span.map_or(0, |s| s.start) as u64;
-                        if comment_start < body_start {
-                            leading.push(c_val);
-                        } else {
-                            trailing.push(c_val);
-                        }
-                    }
-
-                    if !leading.is_empty() {
-                        obj.insert("leadingComments".to_string(), serde_json::Value::Array(leading));
-                    }
-                    if !trailing.is_empty() {
-                        obj.insert("trailingComments".to_string(), serde_json::Value::Array(trailing));
-                    }
-                }
-            }
+            let source = crate::utils::estree::get_loc_source().unwrap_or_default();
+            crate::utils::estree::attach_comments(
+                &mut program,
+                &self.content_comments,
+                &source,
+            );
         }
 
         map.serialize_entry("content", &program)?;
@@ -211,6 +173,7 @@ pub struct SvelteOptions {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Namespace {
     Html,
     Svg,
@@ -218,6 +181,7 @@ pub enum Namespace {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum CssMode {
     Injected,
 }
@@ -235,6 +199,7 @@ pub struct CustomElementOptions {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum ShadowMode {
     Open,
     None,

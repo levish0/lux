@@ -5,6 +5,7 @@ use serde_json::Value;
 
 thread_local! {
     static LOC_LINE_STARTS: RefCell<Option<Vec<usize>>> = RefCell::new(None);
+    static LOC_SOURCE: RefCell<Option<String>> = RefCell::new(None);
     static LOC_PATTERN_COLUMN_ADJUST: RefCell<bool> = RefCell::new(false);
     static FORCE_CHAR_LOC: RefCell<bool> = RefCell::new(false);
 }
@@ -13,11 +14,18 @@ thread_local! {
 pub fn set_loc_source(source: &str) {
     let line_starts: Vec<usize> = source.line_spans().map(|s| s.range().start).collect();
     LOC_LINE_STARTS.with(|ls| *ls.borrow_mut() = Some(line_starts));
+    LOC_SOURCE.with(|s| *s.borrow_mut() = Some(source.to_string()));
 }
 
 /// Clear the loc source after serialization.
 pub fn clear_loc_source() {
     LOC_LINE_STARTS.with(|ls| *ls.borrow_mut() = None);
+    LOC_SOURCE.with(|s| *s.borrow_mut() = None);
+}
+
+/// Get the stored source text.
+pub fn get_loc_source() -> Option<String> {
+    LOC_SOURCE.with(|s| s.borrow().clone())
 }
 
 /// Enable pattern column adjustment (+1 for lines > 1).
@@ -42,71 +50,6 @@ fn offset_to_line_col(offset: usize, line_starts: &[usize]) -> (usize, usize) {
     (line, col + adjust)
 }
 
-/// Strip OXC-specific fields that acorn/Svelte don't produce.
-/// OXC always outputs structural TS fields even for JS code.
-pub fn strip_oxc_extras(value: &mut Value) {
-    match value {
-        Value::Object(obj) => {
-            let node_type = obj
-                .get("type")
-                .and_then(|t| t.as_str())
-                .unwrap_or("")
-                .to_string();
-
-            // Always remove TS-only structural fields
-            obj.remove("decorators");
-            obj.remove("definite");
-            obj.remove("declare");
-            obj.remove("accessibility");
-            obj.remove("override");
-
-            // typeAnnotation: keep on nodes that actually need it in TS mode,
-            // strip from nodes where acorn wouldn't have it
-            // For now, only keep typeAnnotation if it's not null
-            if obj.get("typeAnnotation") == Some(&Value::Null) {
-                obj.remove("typeAnnotation");
-            }
-
-            // Remove OXC-added fields not in acorn ESTree
-            obj.remove("hashbang"); // Program.hashbang
-            obj.remove("phase"); // ImportDeclaration.phase
-
-            // `optional` is valid on CallExpression and MemberExpression (for ?.)
-            // but OXC adds it to Identifier and other nodes where acorn doesn't
-            match node_type.as_str() {
-                "CallExpression" | "MemberExpression" => {
-                    // Keep optional on these - it's real ESTree
-                }
-                _ => {
-                    obj.remove("optional");
-                }
-            }
-
-            // Import/Export: Svelte reference keeps `attributes: []` and does NOT have
-            // importKind/exportKind. OXC may add these TS-ESTree extensions - remove them.
-            match node_type.as_str() {
-                "ImportDeclaration" | "ImportSpecifier" => {
-                    obj.remove("importKind");
-                }
-                "ExportNamedDeclaration" | "ExportAllDeclaration" => {
-                    obj.remove("exportKind");
-                }
-                _ => {}
-            }
-
-            // Recurse into remaining values
-            for (_, v) in obj.iter_mut() {
-                strip_oxc_extras(v);
-            }
-        }
-        Value::Array(arr) => {
-            for item in arr {
-                strip_oxc_extras(item);
-            }
-        }
-        _ => {}
-    }
-}
 
 /// Recursively add `offset` to all start/end fields in ESTree JSON.
 pub fn adjust_offsets(value: &mut Value, offset: u32) {
@@ -214,6 +157,181 @@ pub fn add_char_loc(value: &mut Value) {
             }
         }
     });
+}
+
+/// Attach comments to individual AST nodes following Svelte's reference algorithm.
+/// Comments are consumed in DFS order and attached as leadingComments/trailingComments.
+pub fn attach_comments(program: &mut Value, comments: &[crate::text::JsComment], source: &str) {
+    if comments.is_empty() {
+        return;
+    }
+
+    // Convert comments to JSON values (type, value, start, end - no loc)
+    let mut comment_vals: Vec<Value> = comments
+        .iter()
+        .map(|c| {
+            let type_str = match c.kind {
+                crate::text::JsCommentKind::Line => "Line",
+                crate::text::JsCommentKind::Block => "Block",
+            };
+            serde_json::json!({
+                "type": type_str,
+                "value": c.value,
+                "start": c.span.map_or(0, |s| s.start),
+                "end": c.span.map_or(0, |s| s.end),
+            })
+        })
+        .collect();
+
+    // Walk tree and attach
+    walk_attach(program, &mut comment_vals, source);
+
+    // Remaining comments become Program's trailingComments
+    if !comment_vals.is_empty() {
+        if let Value::Object(obj) = program {
+            let trailing = obj
+                .entry("trailingComments")
+                .or_insert(Value::Array(vec![]));
+            if let Value::Array(arr) = trailing {
+                arr.extend(comment_vals.drain(..));
+            }
+        }
+    }
+}
+
+fn get_start(v: &Value) -> u64 {
+    v.get("start").and_then(|s| s.as_u64()).unwrap_or(0)
+}
+
+fn get_end(v: &Value) -> u64 {
+    v.get("end").and_then(|s| s.as_u64()).unwrap_or(0)
+}
+
+fn walk_attach(node: &mut Value, comments: &mut Vec<Value>, source: &str) {
+    if comments.is_empty() {
+        return;
+    }
+
+    if let Value::Object(obj) = node {
+        let node_start = obj.get("start").and_then(|v| v.as_u64()).unwrap_or(0);
+        let node_end = obj.get("end").and_then(|v| v.as_u64()).unwrap_or(u64::MAX);
+        let node_type = obj
+            .get("type")
+            .and_then(|t| t.as_str())
+            .unwrap_or("")
+            .to_string();
+
+        // Consume comments before this node's start as its leadingComments
+        {
+            let mut leading = Vec::new();
+            while !comments.is_empty() && get_start(&comments[0]) < node_start {
+                leading.push(comments.remove(0));
+            }
+            if !leading.is_empty() {
+                obj.insert("leadingComments".to_string(), Value::Array(leading));
+            }
+        }
+
+        // Process body-like arrays (Program.body, BlockStatement.body, SwitchCase.consequent)
+        let body_keys: Vec<&str> = match node_type.as_str() {
+            "Program" | "BlockStatement" | "StaticBlock" | "ClassBody" => vec!["body"],
+            "SwitchCase" => vec!["consequent"],
+            _ => vec![],
+        };
+
+        for body_key in &body_keys {
+            if let Some(Value::Array(children)) = obj.get_mut(*body_key) {
+                let len = children.len();
+                for i in 0..len {
+                    if comments.is_empty() {
+                        break;
+                    }
+
+                    let child_start = get_start(&children[i]);
+
+                    // Leading: consume comments before child's start
+                    let mut leading = Vec::new();
+                    while !comments.is_empty() && get_start(&comments[0]) < child_start {
+                        leading.push(comments.remove(0));
+                    }
+                    if !leading.is_empty() {
+                        if let Value::Object(child_obj) = &mut children[i] {
+                            child_obj
+                                .insert("leadingComments".to_string(), Value::Array(leading));
+                        }
+                    }
+
+                    // Recurse into child
+                    walk_attach(&mut children[i], comments, source);
+
+                    // Trailing
+                    if !comments.is_empty() {
+                        let child_end = get_end(&children[i]);
+                        let is_last = i == len - 1;
+
+                        if is_last {
+                            // Last in body: consume all remaining within parent's scope
+                            let mut trailing = Vec::new();
+                            while !comments.is_empty() {
+                                if get_start(&comments[0]) >= node_end {
+                                    break;
+                                }
+                                trailing.push(comments.remove(0));
+                            }
+                            if !trailing.is_empty() {
+                                if let Value::Object(child_obj) = &mut children[i] {
+                                    child_obj.insert(
+                                        "trailingComments".to_string(),
+                                        Value::Array(trailing),
+                                    );
+                                }
+                            }
+                        } else {
+                            // Not last: single trailing if only whitespace/punctuation between
+                            let c_start = get_start(&comments[0]);
+                            if child_end <= c_start && (c_start as usize) <= source.len() {
+                                let end_idx = child_end as usize;
+                                let start_idx = c_start as usize;
+                                if end_idx <= source.len() && start_idx <= source.len() {
+                                    let slice = &source[end_idx..start_idx];
+                                    if slice.chars().all(|c| matches!(c, ',' | ')' | ' ' | '\t')) {
+                                        let comment = comments.remove(0);
+                                        if let Value::Object(child_obj) = &mut children[i] {
+                                            child_obj.insert(
+                                                "trailingComments".to_string(),
+                                                Value::Array(vec![comment]),
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Recurse into other fields that may contain nested bodies
+        let keys: Vec<String> = obj.keys().cloned().collect();
+        for key in keys {
+            if body_keys.contains(&key.as_str()) {
+                continue; // already handled
+            }
+            if let Some(v) = obj.get_mut(&key) {
+                match v {
+                    Value::Object(_) => walk_attach(v, comments, source),
+                    Value::Array(arr) => {
+                        for item in arr.iter_mut() {
+                            if item.is_object() {
+                                walk_attach(item, comments, source);
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
 }
 
 /// Add loc to a Program node using script tag boundaries for loc,

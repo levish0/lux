@@ -6,7 +6,7 @@ use winnow::Result as ParseResult;
 use winnow::combinator::peek;
 use winnow::prelude::*;
 use winnow::stream::Location;
-use winnow::token::{any, literal, take_while};
+use winnow::token::{any, literal, take_until, take_while};
 
 use super::ParserInput;
 use super::attribute::attribute_parser;
@@ -91,16 +91,7 @@ fn detect_script_context(attributes: &[AttributeNode]) -> ScriptContext {
     ScriptContext::Default
 }
 
-/// Read raw text content until `</script>` without consuming the closing tag.
-fn read_until_closing_script(parser_input: &mut ParserInput) -> ParseResult<String> {
-    let mut buf = String::new();
-    loop {
-        let check: ParseResult<&str> = peek(literal("</script>")).parse_next(parser_input);
-        if check.is_ok() {
-            break;
-        }
-        let c: char = any.parse_next(parser_input)?;
-        buf.push(c);
-    }
-    Ok(buf)
+/// Read raw text content until `</script` without consuming the closing tag.
+fn read_until_closing_script<'i>(parser_input: &mut ParserInput<'i>) -> ParseResult<&'i str> {
+    take_until(0.., "</script").parse_next(parser_input)
 }

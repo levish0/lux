@@ -30,7 +30,13 @@ pub fn document_parser(parser_input: &mut ParserInput) -> Result<Vec<FragmentNod
         // Parse a regular fragment node
         match fragment_node_parser(parser_input) {
             Ok(node) => nodes.push(node),
-            Err(_) => break,
+            Err(_) => {
+                // Error recovery: skip one character and try again
+                if parser_input.input.is_empty() {
+                    break;
+                }
+                any.parse_next(parser_input)?;
+            }
         }
     }
     Ok(nodes)

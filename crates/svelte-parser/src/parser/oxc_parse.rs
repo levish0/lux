@@ -1,6 +1,6 @@
 use oxc_allocator::Allocator;
 use oxc_ast::ast::CommentKind;
-use oxc_estree::{CompactJSSerializer, ESTree};
+use oxc_estree::{CompactTSSerializer, ESTree};
 use oxc_parser::{ParseOptions, Parser, ParserReturn};
 use oxc_span::SourceType;
 use serde_json::Value;
@@ -26,8 +26,9 @@ fn make_parse_options() -> ParseOptions {
 }
 
 /// Serialize an OXC AST node implementing ESTree to serde_json::Value.
+/// Uses CompactTSSerializer to include TypeScript-specific fields (importKind, typeAnnotation, etc.)
 fn estree_to_value<T: ESTree>(node: &T) -> Result<Value, winnow::error::ContextError> {
-    let mut serializer = CompactJSSerializer::new(false);
+    let mut serializer = CompactTSSerializer::new(false);
     node.serialize(&mut serializer);
     let json_str = serializer.into_string();
     let value: Value =

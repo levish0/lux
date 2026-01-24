@@ -241,6 +241,21 @@ fn parse_bind_directive_value(
         return Ok((expr, vec![]));
     }
 
+    let next: char = peek(any).parse_next(parser_input)?;
+    if next == '"' || next == '\'' {
+        // Quoted value: parse then extract single expression
+        let value = parse_quoted_value(parser_input, next)?;
+        let expr = extract_expression_from_attribute_value(value).unwrap_or_else(|| {
+            JsNode(serde_json::json!({
+                "type": "Identifier",
+                "name": name,
+                "start": 0,
+                "end": 0
+            }))
+        });
+        return Ok((expr, vec![]));
+    }
+
     literal("{").parse_next(parser_input)?;
     let expr_offset = parser_input.current_token_start() as u32;
     let expr_text = read_until_close_brace(parser_input)?;
@@ -450,7 +465,8 @@ fn parse_let_directive(
 
 // --- Value parsing helpers ---
 
-/// Parse optional `={expr}` value for directives.
+/// Parse optional directive value: `={expr}` or `="{expr}"` or `='...'`.
+/// Matches reference behavior: uses read_attribute_value then extracts single ExpressionTag.
 fn parse_optional_directive_value(
     parser_input: &mut ParserInput,
 ) -> ParseResult<Option<JsNode>> {
@@ -458,7 +474,14 @@ fn parse_optional_directive_value(
         return Ok(None);
     }
 
-    // Must be {expr}
+    let next: char = peek(any).parse_next(parser_input)?;
+    if next == '"' || next == '\'' {
+        // Quoted value: parse then extract single expression
+        let value = parse_quoted_value(parser_input, next)?;
+        return Ok(extract_expression_from_attribute_value(value));
+    }
+
+    // Bare expression: ={expr}
     literal("{").parse_next(parser_input)?;
     let expr_offset = parser_input.current_token_start() as u32;
     let expr_text = read_until_close_brace(parser_input)?;
@@ -466,6 +489,24 @@ fn parse_optional_directive_value(
 
     let expr = parse_expression(expr_text, parser_input.state.ts, expr_offset)?;
     Ok(Some(expr))
+}
+
+/// Extract a single expression from an AttributeValue (for directive quoted values).
+fn extract_expression_from_attribute_value(value: AttributeValue) -> Option<JsNode> {
+    match value {
+        AttributeValue::Expression(tag) => Some(tag.expression),
+        AttributeValue::Sequence(items) => {
+            if items.len() == 1 {
+                match items.into_iter().next() {
+                    Some(AttributeSequenceValue::ExpressionTag(tag)) => Some(tag.expression),
+                    _ => None,
+                }
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
 }
 
 fn parse_attribute_value(parser_input: &mut ParserInput) -> ParseResult<AttributeValue> {
@@ -567,6 +608,15 @@ fn parse_quoted_value(parser_input: &mut ParserInput, quote: char) -> ParseResul
             any.parse_next(parser_input)?;
             text_buf.push(c);
         }
+    }
+
+    // Empty quoted value ("") → single empty Text node (matches reference behavior)
+    if sequence.is_empty() {
+        sequence.push(AttributeSequenceValue::Text(Text {
+            span: Span::new(text_start, text_start),
+            data: String::new(),
+            raw: String::new(),
+        }));
     }
 
     Ok(AttributeValue::Sequence(sequence))
