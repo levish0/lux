@@ -119,7 +119,7 @@ fn next_if<'a>(parser: &mut Parser<'a>, start: usize) -> Result<(), ParseError> 
 }
 
 /// Handle {:else} for EachBlock
-fn next_each<'a>(parser: &mut Parser<'a>, start: usize) -> Result<(), ParseError> {
+fn next_each(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
     if !parser.eat("else") {
         if !parser.loose {
             return Err(parser.error(
@@ -148,7 +148,7 @@ fn next_each<'a>(parser: &mut Parser<'a>, start: usize) -> Result<(), ParseError
 }
 
 /// Handle {:then} and {:catch} for AwaitBlock
-fn next_await<'a>(parser: &mut Parser<'a>, start: usize) -> Result<(), ParseError> {
+fn next_await(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
     let loose = parser.loose;
 
     if parser.eat("then") {

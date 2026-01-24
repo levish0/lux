@@ -10,7 +10,7 @@ use crate::parser::{AwaitPhase, ParseError, Parser, StackFrame};
 use super::skip_to_closing_brace;
 
 /// `{/...}` — close block
-pub fn close<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
+pub fn close(parser: &mut Parser) -> Result<(), ParseError> {
     let current_type = match parser.current() {
         Some(StackFrame::IfBlock { .. }) => "if",
         Some(StackFrame::EachBlock { .. }) => "each",
@@ -42,7 +42,7 @@ pub fn close<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
     Ok(())
 }
 
-fn close_if<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
+fn close_if(parser: &mut Parser) -> Result<(), ParseError> {
     let matched = parser.eat_required_with_loose("if", false)?;
     if !matched {
         // Loose mode: mismatched close, pop and retry
@@ -149,7 +149,7 @@ fn close_if<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
     Ok(())
 }
 
-fn close_each<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
+fn close_each(parser: &mut Parser) -> Result<(), ParseError> {
     let matched = parser.eat_required_with_loose("each", false)?;
     if !matched {
         parser.fragments.pop();
@@ -202,7 +202,7 @@ fn close_each<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
     Ok(())
 }
 
-fn close_await<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
+fn close_await(parser: &mut Parser) -> Result<(), ParseError> {
     let matched = parser.eat_required_with_loose("await", false)?;
     if !matched {
         parser.fragments.pop();

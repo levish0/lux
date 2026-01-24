@@ -14,7 +14,7 @@ use crate::parser::{ParseError, Parser};
 use super::{binding_pattern_span, expression_end, skip_to_closing_brace};
 
 /// `{@...}` — special tags (html, debug, const, render)
-pub fn special<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
+pub fn special(parser: &mut Parser) -> Result<(), ParseError> {
     let mut start = parser.index;
     while start > 0 && parser.template.as_bytes()[start] != b'{' {
         start -= 1;
