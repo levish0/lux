@@ -16,6 +16,7 @@ use winnow::token::{any, literal, take_while};
 
 use super::ParserInput;
 use super::bracket::read_until_close_brace;
+use super::html_entities::decode_character_references;
 use super::swc_parse::{parse_expression, parse_expression_with_comments};
 
 /// Parse a single attribute, directive, or spread.
@@ -482,7 +483,7 @@ fn parse_unquoted_value(parser_input: &mut ParserInput) -> ParseResult<Attribute
     Ok(AttributeValue::Sequence(vec![
         AttributeSequenceValue::Text(Text {
             span: Span::new(val_start, val_end),
-            data: text.to_string(),
+            data: decode_character_references(text, true),
             raw: text.to_string(),
         }),
     ]))
@@ -504,7 +505,7 @@ fn parse_quoted_value(parser_input: &mut ParserInput, quote: char) -> ParseResul
                 let text_end = parser_input.current_token_start();
                 sequence.push(AttributeSequenceValue::Text(Text {
                     span: Span::new(text_start, text_end),
-                    data: text_buf.clone(),
+                    data: decode_character_references(&text_buf, true),
                     raw: text_buf.clone(),
                 }));
                 text_buf.clear();
@@ -517,7 +518,7 @@ fn parse_quoted_value(parser_input: &mut ParserInput, quote: char) -> ParseResul
                 let text_end = parser_input.current_token_start();
                 sequence.push(AttributeSequenceValue::Text(Text {
                     span: Span::new(text_start, text_end),
-                    data: text_buf.clone(),
+                    data: decode_character_references(&text_buf, true),
                     raw: text_buf.clone(),
                 }));
                 text_buf.clear();

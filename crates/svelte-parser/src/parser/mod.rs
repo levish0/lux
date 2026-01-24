@@ -6,6 +6,7 @@ pub mod css;
 pub mod element;
 pub mod expression;
 pub mod fragment;
+pub mod html_entities;
 pub mod script;
 pub mod swc_parse;
 pub mod tag;

@@ -15,6 +15,27 @@ use super::ParserInput;
 use super::attribute::attribute_parser;
 use super::fragment::fragment_node_parser;
 
+const ROOT_ONLY_META_TAGS: &[&str] = &[
+    "svelte:head",
+    "svelte:options",
+    "svelte:window",
+    "svelte:document",
+    "svelte:body",
+];
+
+const ALL_META_TAGS: &[&str] = &[
+    "svelte:head",
+    "svelte:options",
+    "svelte:window",
+    "svelte:document",
+    "svelte:body",
+    "svelte:element",
+    "svelte:component",
+    "svelte:self",
+    "svelte:fragment",
+    "svelte:boundary",
+];
+
 pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNode> {
     let start = parser_input.input.current_token_start();
     let loose = parser_input.state.loose;
@@ -30,6 +51,24 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
     };
     let name_end = parser_input.input.previous_token_end();
     let name_loc = parser_input.state.locator.locate_span(name_start, name_end);
+
+    // Validate svelte: meta tags (skip in loose mode)
+    if !loose && name.starts_with("svelte:") {
+        if !ALL_META_TAGS.contains(&name.as_str()) {
+            return Err(winnow::error::ContextError::new());
+        }
+        if ROOT_ONLY_META_TAGS.contains(&name.as_str()) {
+            // Must be at root level (no parent elements)
+            if !parser_input.state.element_stack.is_empty() {
+                return Err(winnow::error::ContextError::new());
+            }
+            // Must not be duplicated
+            if parser_input.state.seen_meta_tags.contains(&name) {
+                return Err(winnow::error::ContextError::new());
+            }
+            parser_input.state.seen_meta_tags.insert(name.clone());
+        }
+    }
 
     // parse attributes (in loose mode, might stop at EOF or unexpected tokens)
     let attributes = if loose {

@@ -19,6 +19,10 @@ pub enum ErrorKind {
     JsParseError,
     CssSelectorInvalid,
     SvelteMetaDuplicate,
+    RenderTagInvalidExpression,
+    ConstTagInvalidExpression,
+    SvelteMetaInvalidTag,
+    SvelteMetaInvalidPlacement,
 }
 
 impl ParseError {

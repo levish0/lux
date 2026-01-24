@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use line_span::LineSpanExt;
 use svelte_ast::css::StyleSheet;
 use svelte_ast::root::Script;
@@ -59,6 +61,8 @@ pub struct ParseContext {
     pub element_stack: Vec<ElementStackEntry>,
     /// When true, quoted attribute values are parsed as plain text (no expression interpolation)
     pub text_only_attributes: bool,
+    /// Tracks root-only meta tags that have been seen (for duplicate detection)
+    pub seen_meta_tags: HashSet<String>,
 }
 
 impl ParseContext {
@@ -74,6 +78,7 @@ impl ParseContext {
             css: None,
             element_stack: Vec::new(),
             text_only_attributes: false,
+            seen_meta_tags: HashSet::new(),
         }
     }
 

@@ -109,6 +109,11 @@ fn const_tag_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult
 
     let declaration = parse_var_decl(content, parser_input.state.ts)?;
 
+    // Validate: must have exactly one declarator (rejects `{@const a = 1, b = 2}`)
+    if declaration.decls.len() != 1 {
+        return Err(winnow::error::ContextError::new());
+    }
+
     Ok(FragmentNode::ConstTag(ConstTag {
         span: Span::new(start, end),
         declaration,
@@ -122,6 +127,17 @@ fn render_tag_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
     let offset = parser_input.current_token_start();
     let content = read_until_close_brace(parser_input)?;
     let expression = parse_expression(content, parser_input.state.ts, offset as u32)?;
+
+    // Validate: must be CallExpression or optional chain call
+    let is_valid = match expression.as_ref() {
+        swc::Expr::Call(_) => true,
+        swc::Expr::OptChain(opt) => matches!(opt.base.as_ref(), swc::OptChainBase::Call(_)),
+        _ => false,
+    };
+    if !is_valid {
+        return Err(winnow::error::ContextError::new());
+    }
+
     literal("}").parse_next(parser_input)?;
     let end = parser_input.previous_token_end();
 
