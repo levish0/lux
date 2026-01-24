@@ -5,7 +5,8 @@
       "Bash(cargo test:*)",
       "WebSearch",
       "Bash(dir:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(grep:*)"
     ]
   }
 }

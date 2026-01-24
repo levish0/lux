@@ -524,7 +524,11 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
             }
             "ArrayExpression" => {
                 if let Some(elems) = obj.remove("elems") {
-                    obj.insert("elements".to_string(), elems);
+                    let unwrapped = unwrap_expr_or_spread(elems);
+                    obj.insert("elements".to_string(), unwrapped);
+                } else if let Some(elems) = obj.remove("elements") {
+                    let unwrapped = unwrap_expr_or_spread(elems);
+                    obj.insert("elements".to_string(), unwrapped);
                 }
             }
             "MemberExpression" | "OptionalMemberExpression" => {
@@ -660,12 +664,15 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                 }
             }
             "FunctionDeclaration" | "FunctionExpression" => {
-                if let Some(ident) = obj.remove("ident") {
+                if let Some(ident) = obj.remove("ident").or_else(|| obj.remove("identifier")) {
                     obj.insert("id".to_string(), ident);
                 }
-                // Remove null id
-                if obj.get("id") == Some(&Value::Null) {
-                    // Keep null for FunctionExpression (valid), but some need it
+                if t == "FunctionDeclaration" {
+                    obj.entry("expression".to_string())
+                        .or_insert(Value::Bool(false));
+                }
+                if obj.get("decorators") == Some(&Value::Array(vec![])) {
+                    obj.remove("decorators");
                 }
                 obj.remove("declare");
             }
@@ -673,11 +680,14 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                 // SWC uses "params" with Pat wrappers, ESTree uses flat params
             }
             "ClassDeclaration" | "ClassExpression" => {
-                if let Some(ident) = obj.remove("ident") {
+                if let Some(ident) = obj.remove("ident").or_else(|| obj.remove("identifier")) {
                     obj.insert("id".to_string(), ident);
                 }
                 if let Some(sc) = obj.remove("superClass") {
                     obj.insert("superClass".to_string(), sc);
+                }
+                if obj.get("decorators") == Some(&Value::Array(vec![])) {
+                    obj.remove("decorators");
                 }
                 obj.remove("declare");
                 obj.remove("isAbstract");
@@ -815,14 +825,30 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
 
             // --- Imports/Exports ---
             "ImportDeclaration" => {
-                if let Some(specifiers) = obj.remove("specifiers") {
-                    obj.insert("specifiers".to_string(), specifiers);
+                obj.remove("phase");
+                obj.remove("with");
+                obj.entry("importKind".to_string())
+                    .or_insert(Value::String("value".to_string()));
+                obj.entry("attributes".to_string())
+                    .or_insert(Value::Array(vec![]));
+            }
+            "ImportSpecifier" => {
+                obj.remove("isTypeOnly");
+                obj.entry("importKind".to_string())
+                    .or_insert(Value::String("value".to_string()));
+                // If imported is null, clone local as imported
+                if obj.get("imported") == Some(&Value::Null) {
+                    if let Some(local) = obj.get("local").cloned() {
+                        obj.insert("imported".to_string(), local);
+                    }
                 }
             }
             "ExportDefaultDeclaration" => {
                 if let Some(decl) = obj.remove("decl") {
                     obj.insert("declaration".to_string(), decl);
                 }
+                obj.remove("phase");
+                obj.remove("with");
             }
             "ExportNamedDeclaration" | "ExportDeclaration" => {
                 obj.insert(
@@ -832,6 +858,16 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                 if let Some(decl) = obj.remove("decl") {
                     obj.insert("declaration".to_string(), decl);
                 }
+                obj.remove("phase");
+                obj.remove("with");
+                obj.entry("exportKind".to_string())
+                    .or_insert(Value::String("value".to_string()));
+                obj.entry("specifiers".to_string())
+                    .or_insert(Value::Array(vec![]));
+                obj.entry("source".to_string())
+                    .or_insert(Value::Null);
+                obj.entry("attributes".to_string())
+                    .or_insert(Value::Array(vec![]));
             }
 
             // --- TypeScript: Ts* → TS* ---
