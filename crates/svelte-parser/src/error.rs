@@ -17,7 +17,9 @@ pub enum ErrorKind {
     ExpectedBlockType,
     ExpectedTag,
     AttributeDuplicate,
+    AttributeEmptyShorthand,
     ExpectedExpression,
+    ExpectedAttributeValue,
     JsParseError,
     CssSelectorInvalid,
     SvelteMetaDuplicate,
@@ -25,6 +27,16 @@ pub enum ErrorKind {
     ConstTagInvalidExpression,
     SvelteMetaInvalidTag,
     SvelteMetaInvalidPlacement,
+    TagInvalidName,
+    VoidElementInvalidContent,
+    ElementInvalidClosingTag,
+    DirectiveMissingName,
+    DirectiveInvalidValue,
+    BlockInvalidPlacement,
+    TagInvalidPlacement,
+    ScriptDuplicate,
+    StyleDuplicate,
+    SvelteElementMissingThis,
 }
 
 impl ParseError {

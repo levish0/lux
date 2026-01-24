@@ -1,20 +1,8 @@
-use std::sync::LazyLock;
-
-use regex::Regex;
-
 use svelte_ast::css::{CssContent, StyleSheet};
 use svelte_ast::node::AttributeNode;
 use svelte_ast::span::Span;
 use crate::error::ErrorKind::ElementUnclosed;
 use crate::parser::{ParseError, Parser};
-
-/// Regex to find `</style` (optionally with whitespace) followed by `>`.
-static REGEX_CLOSING_STYLE_TAG: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"</style\s*>").unwrap());
-
-/// Regex to match `</style...>` at the start of remaining input.
-static REGEX_STARTS_WITH_CLOSING_STYLE_TAG: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^</style\s*>").unwrap());
 
 /// Read the content of a `<style>` tag and parse it as CSS.
 /// Port of reference `read/style.js`.
@@ -28,8 +16,8 @@ pub fn read_style<'a>(
 ) -> Result<StyleSheet<'a>, ParseError> {
     let content_start = parser.index;
 
-    // Read content until </style>
-    let styles = parser.read_until(&REGEX_CLOSING_STYLE_TAG);
+    // Read content until </style\s*>
+    let styles = parser.read_until_closing_tag("style");
     let content_end = parser.index;
 
     if parser.index >= parser.template.len() {
@@ -43,7 +31,7 @@ pub fn read_style<'a>(
     }
 
     // Consume the </style> tag
-    parser.read(&REGEX_STARTS_WITH_CLOSING_STYLE_TAG);
+    parser.eat_closing_tag("style");
 
     // Extract only Attribute variants (style tags only have static attributes)
     let style_attributes = attributes

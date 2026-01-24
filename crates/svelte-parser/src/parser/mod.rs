@@ -1,6 +1,5 @@
 pub mod bracket;
 pub mod html_entities;
-pub mod patterns;
 pub mod read;
 pub mod state;
 pub mod utils;
@@ -10,7 +9,6 @@ use std::sync::LazyLock;
 
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{BindingPattern, Expression};
-use regex::Regex;
 use svelte_ast::css::StyleSheet;
 use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::{Fragment, Root, Script, SvelteOptions};
@@ -18,7 +16,7 @@ use svelte_ast::span::{Position, SourceLocation, Span};
 use svelte_ast::text::JsComment;
 
 use line_span::LineSpans;
-
+use regex::Regex;
 use crate::error::ErrorKind;
 
 /// Stack frame representing a nested element or block being parsed.
@@ -421,17 +419,7 @@ impl<'a> Parser<'a> {
         if self.loose { Ok(false) } else { Err(err) }
     }
 
-    /// `parser.match_regex(pattern)` — match regex at current position.
-    /// Returns the matched string if it matches at position 0.
-    pub fn match_regex(&self, re: &Regex) -> Option<&'a str> {
-        let remaining = &self.template[self.index..];
-        if let Some(m) = re.find(remaining) {
-            if m.start() == 0 {
-                return Some(&self.template[self.index..self.index + m.end()]);
-            }
-        }
-        None
-    }
+
 
     /// `parser.allow_whitespace()` — skip whitespace.
     pub fn allow_whitespace(&mut self) {
@@ -462,16 +450,6 @@ impl<'a> Parser<'a> {
         }
         self.allow_whitespace();
         Ok(())
-    }
-
-    /// `parser.read(pattern)` — match regex and advance if matched.
-    pub fn read(&mut self, re: &Regex) -> Option<&'a str> {
-        if let Some(matched) = self.match_regex(re) {
-            self.index += matched.len();
-            Some(matched)
-        } else {
-            None
-        }
     }
 
     /// `parser.read_identifier()` — read a JS/TS identifier at current position.
@@ -522,27 +500,121 @@ impl<'a> Parser<'a> {
         (name, start, end)
     }
 
-    /// `parser.read_until(pattern)` — consume until regex matches.
-    pub fn read_until(&mut self, re: &Regex) -> &'a str {
-        if self.index >= self.template.len() {
-            if !self.loose {
-                self.error(
-                    ErrorKind::UnexpectedEof,
-                    self.template.len(),
-                    "Unexpected end of input".to_string(),
-                );
-            }
-            return "";
-        }
-
+    /// Fast `read_until` using a byte predicate instead of regex.
+    /// Scans from current index until `pred(byte)` returns true.
+    /// Returns the consumed slice (does NOT consume the matching byte).
+    #[inline]
+    pub fn read_until_char(&mut self, pred: impl Fn(u8) -> bool) -> &'a str {
         let start = self.index;
-        let remaining = &self.template[self.index..];
-        if let Some(m) = re.find(remaining) {
-            self.index += m.start();
+        let bytes = self.template.as_bytes();
+        while self.index < bytes.len() {
+            if pred(bytes[self.index]) {
+                break;
+            }
+            self.index += 1;
+        }
+        &self.template[start..self.index]
+    }
+
+    /// Fast `read_until` for a literal substring (e.g. `"-->"`, `"</script"`).
+    /// Returns the slice before the match. Does NOT consume the matched substring.
+    #[inline]
+    pub fn read_until_str(&mut self, needle: &str) -> &'a str {
+        let start = self.index;
+        if let Some(pos) = self.template[self.index..].find(needle) {
+            self.index += pos;
         } else {
             self.index = self.template.len();
         }
         &self.template[start..self.index]
+    }
+
+    /// Check if the current byte matches a predicate (without consuming).
+    #[inline]
+    pub fn match_ch(&self, pred: impl Fn(u8) -> bool) -> bool {
+        self.template
+            .as_bytes()
+            .get(self.index)
+            .copied()
+            .map_or(false, &pred)
+    }
+
+    /// Skip whitespace at current position, then check if byte `b` follows.
+    /// If yes, consume through the byte and return true. Otherwise restore position.
+    #[inline]
+    pub fn eat_whitespace_then(&mut self, b: u8) -> bool {
+        let saved = self.index;
+        self.allow_whitespace();
+        if self.template.as_bytes().get(self.index).copied() == Some(b) {
+            self.index += 1;
+            true
+        } else {
+            self.index = saved;
+            false
+        }
+    }
+
+    /// Check if remaining input matches `\s*<byte>` without consuming.
+    #[inline]
+    pub fn peek_whitespace_then(&self, b: u8) -> bool {
+        let bytes = self.template.as_bytes();
+        let mut i = self.index;
+        while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+            i += 1;
+        }
+        bytes.get(i).copied() == Some(b)
+    }
+
+    /// Read and consume a closing tag like `</script\s*>` or `</style\s*>` at current position.
+    /// Returns the consumed slice if matched, None otherwise.
+    pub fn eat_closing_tag(&mut self, tag_name: &str) -> Option<&'a str> {
+        let start = self.index;
+        // Check for `</`
+        if !self.match_str("</") {
+            return None;
+        }
+        self.index += 2;
+        // Check tag name (case-sensitive)
+        if !self.template[self.index..].starts_with(tag_name) {
+            self.index = start;
+            return None;
+        }
+        self.index += tag_name.len();
+        // Skip optional whitespace
+        self.allow_whitespace();
+        // Expect `>`
+        if self.template.as_bytes().get(self.index).copied() != Some(b'>') {
+            self.index = start;
+            return None;
+        }
+        self.index += 1;
+        Some(&self.template[start..self.index])
+    }
+
+    /// Find the position of a closing tag like `</script\s*>` from the current index.
+    /// Advances index to the start of the closing tag. Returns the content before it.
+    pub fn read_until_closing_tag(&mut self, tag_name: &str) -> &'a str {
+        let start = self.index;
+        let needle = format!("</{}", tag_name);
+        loop {
+            if let Some(pos) = self.template[self.index..].find(&needle) {
+                self.index += pos;
+                // Verify it's actually followed by optional whitespace then `>`
+                let saved = self.index;
+                self.index += needle.len();
+                self.allow_whitespace();
+                if self.template.as_bytes().get(self.index).copied() == Some(b'>') {
+                    // Found valid closing tag — restore to start of it
+                    self.index = saved;
+                    return &self.template[start..saved];
+                }
+                // Not a valid closing tag, keep scanning
+                self.index = saved + needle.len();
+            } else {
+                self.index = self.template.len();
+                return &self.template[start..self.index];
+            }
+        }
     }
 
     /// `parser.pop()` — pop both stack and fragments.

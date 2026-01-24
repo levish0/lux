@@ -1,41 +1,4 @@
 //! Utility functions.
-//! Port of reference `src/utils.js`.
-
-use regex::Regex;
-use std::sync::LazyLock;
-
-static REGEX_RETURN_CHARACTERS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\r").unwrap());
-
-/// Port of reference's `hash()`.
-/// Uses UTF-16 code units (matching JS `charCodeAt`) and base36 output (matching JS `toString(36)`).
-pub fn hash(input: &str) -> String {
-    let s = REGEX_RETURN_CHARACTERS.replace_all(input, "");
-    // Collect UTF-16 code units (matching JS's charCodeAt behavior)
-    let code_units: Vec<u16> = s.encode_utf16().collect();
-    let mut hash: u32 = 5381;
-    let mut i = code_units.len();
-    while i > 0 {
-        i -= 1;
-        hash = ((hash << 5).wrapping_sub(hash)) ^ (code_units[i] as u32);
-    }
-    to_base36(hash)
-}
-
-/// Convert u32 to base36 string (matching JS's `Number.prototype.toString(36)`).
-fn to_base36(mut n: u32) -> String {
-    if n == 0 {
-        return "0".to_string();
-    }
-    const CHARS: &[u8; 36] = b"0123456789abcdefghijklmnopqrstuvwxyz";
-    let mut result = Vec::new();
-    while n > 0 {
-        result.push(CHARS[(n % 36) as usize]);
-        n /= 36;
-    }
-    result.reverse();
-    String::from_utf8(result).unwrap()
-}
-
 const VOID_ELEMENT_NAMES: &[&str] = &[
     "area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link",
     "meta", "param", "source", "track", "wbr",
@@ -437,6 +400,162 @@ pub fn is_rune(name: &str) -> bool {
 /// Returns `true` if `name` is a state creation rune.
 pub fn is_state_creation_rune(name: &str) -> bool {
     STATE_CREATION_RUNES.contains(&name)
+}
+
+// ─── HTML Tree Validation ────────────────────────────────────────
+// Port of reference `src/html-tree-validation.js`
+
+/// Autoclosing rules: `direct` means only immediate children trigger auto-close,
+/// `descendant` means any descendant triggers auto-close.
+enum AutoCloseRule {
+    Direct(&'static [&'static str]),
+    Descendant(&'static [&'static str]),
+}
+
+fn autoclosing_rule(tag: &str) -> Option<AutoCloseRule> {
+    match tag {
+        "li" => Some(AutoCloseRule::Direct(&["li"])),
+        "dt" => Some(AutoCloseRule::Descendant(&["dt", "dd"])),
+        "dd" => Some(AutoCloseRule::Descendant(&["dt", "dd"])),
+        "p" => Some(AutoCloseRule::Descendant(&[
+            "address", "article", "aside", "blockquote", "div", "dl",
+            "fieldset", "footer", "form", "h1", "h2", "h3", "h4",
+            "h5", "h6", "header", "hgroup", "hr", "main", "menu",
+            "nav", "ol", "p", "pre", "section", "table", "ul",
+        ])),
+        "rt" => Some(AutoCloseRule::Descendant(&["rt", "rp"])),
+        "rp" => Some(AutoCloseRule::Descendant(&["rt", "rp"])),
+        "optgroup" => Some(AutoCloseRule::Descendant(&["optgroup"])),
+        "option" => Some(AutoCloseRule::Descendant(&["option", "optgroup"])),
+        "thead" => Some(AutoCloseRule::Direct(&["tbody", "tfoot"])),
+        "tbody" => Some(AutoCloseRule::Direct(&["tbody", "tfoot"])),
+        "tfoot" => Some(AutoCloseRule::Direct(&["tbody"])),
+        "tr" => Some(AutoCloseRule::Direct(&["tr", "tbody"])),
+        "td" => Some(AutoCloseRule::Direct(&["td", "th", "tr"])),
+        "th" => Some(AutoCloseRule::Direct(&["td", "th", "tr"])),
+        _ => None,
+    }
+}
+
+/// Returns true if the `current` tag should be auto-closed when `next` tag is encountered.
+/// Port of reference `closing_tag_omitted` from html-tree-validation.js.
+pub fn closing_tag_omitted(current: &str, next: &str) -> bool {
+    if let Some(rule) = autoclosing_rule(current) {
+        let list = match rule {
+            AutoCloseRule::Direct(tags) | AutoCloseRule::Descendant(tags) => tags,
+        };
+        return list.contains(&next);
+    }
+    false
+}
+
+/// Returns an error message if the tag is not allowed inside the parent tag.
+/// Port of reference `is_tag_valid_with_parent` from html-tree-validation.js.
+pub fn is_tag_valid_with_parent(child_tag: &str, parent_tag: &str) -> Option<String> {
+    if child_tag.contains('-') || parent_tag.contains('-') {
+        return None; // custom elements can be anything
+    }
+    if parent_tag == "template" {
+        return None;
+    }
+
+    // Check disallowed_children rules
+    if let Some(msg) = check_disallowed(child_tag, parent_tag) {
+        return Some(msg);
+    }
+
+    // Tags only valid with specific parents
+    match child_tag {
+        "body" | "caption" | "col" | "colgroup" | "frameset" | "frame" | "head" | "html" => {
+            Some(format!("`<{child_tag}>` cannot be a child of `<{parent_tag}>`"))
+        }
+        "thead" | "tbody" | "tfoot" => {
+            Some(format!("`<{child_tag}>` must be the child of a `<table>`, not a `<{parent_tag}>`"))
+        }
+        "td" | "th" => {
+            Some(format!("`<{child_tag}>` must be the child of a `<tr>`, not a `<{parent_tag}>`"))
+        }
+        "tr" => Some(format!(
+            "`<tr>` must be the child of a `<thead>`, `<tbody>`, or `<tfoot>`, not a `<{parent_tag}>`"
+        )),
+        _ => None,
+    }
+}
+
+/// Check disallowed_children rules (superset of autoclosing_children).
+fn check_disallowed(child_tag: &str, parent_tag: &str) -> Option<String> {
+    // 'only' rules — certain parents only allow specific children
+    let only_children: Option<&[&str]> = match parent_tag {
+        "tr" => Some(&["th", "td", "style", "script", "template"]),
+        "tbody" | "thead" | "tfoot" => Some(&["tr", "style", "script", "template"]),
+        "colgroup" => Some(&["col", "template"]),
+        "table" => Some(&["caption", "colgroup", "tbody", "thead", "tfoot", "style", "script", "template"]),
+        "head" => Some(&["base", "basefont", "bgsound", "link", "meta", "title", "noscript", "noframes", "style", "script", "template"]),
+        "html" => Some(&["head", "body", "frameset"]),
+        "frameset" => Some(&["frame"]),
+        _ => None,
+    };
+
+    if let Some(allowed) = only_children {
+        if allowed.contains(&child_tag) {
+            return None; // allowed
+        } else {
+            return Some(format!(
+                "`<{child_tag}>` cannot be a child of `<{parent_tag}>`"
+            ));
+        }
+    }
+
+    // 'direct' rules (from autoclosing + disallowed)
+    let direct_disallowed: Option<&[&str]> = match parent_tag {
+        "li" => Some(&["li"]),
+        "thead" => Some(&["tbody", "tfoot"]),
+        "tbody" => Some(&["tbody", "tfoot"]),
+        "tfoot" => Some(&["tbody"]),
+        "tr" => Some(&["tr", "tbody"]),
+        "td" => Some(&["td", "th", "tr"]),
+        "th" => Some(&["td", "th", "tr"]),
+        _ => None,
+    };
+
+    if let Some(list) = direct_disallowed {
+        if list.contains(&child_tag) {
+            return Some(format!(
+                "`<{child_tag}>` cannot be a direct child of `<{parent_tag}>`"
+            ));
+        }
+    }
+
+    // 'descendant' rules
+    let descendant_disallowed: Option<&[&str]> = match parent_tag {
+        "dt" | "dd" => Some(&["dt", "dd"]),
+        "p" => Some(&[
+            "address", "article", "aside", "blockquote", "div", "dl",
+            "fieldset", "footer", "form", "h1", "h2", "h3", "h4",
+            "h5", "h6", "header", "hgroup", "hr", "main", "menu",
+            "nav", "ol", "p", "pre", "section", "table", "ul",
+        ]),
+        "rt" | "rp" => Some(&["rt", "rp"]),
+        "optgroup" => Some(&["optgroup"]),
+        "option" => Some(&["option", "optgroup"]),
+        "form" => Some(&["form"]),
+        "a" => Some(&["a"]),
+        "button" => Some(&["button"]),
+        "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => {
+            Some(&["h1", "h2", "h3", "h4", "h5", "h6"])
+        }
+        _ => None,
+    };
+
+    if let Some(list) = descendant_disallowed {
+        if list.contains(&child_tag) {
+            return Some(format!(
+                "`<{child_tag}>` cannot be a child of `<{parent_tag}>`"
+            ));
+        }
+    }
+
+    None
 }
 
 const RAW_TEXT_ELEMENTS: &[&str] = &["textarea", "script", "style", "title"];

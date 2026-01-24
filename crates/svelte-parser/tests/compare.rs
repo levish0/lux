@@ -2,6 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use oxc_allocator::Allocator;
 use serde_json::Value;
 use svelte_ast::utils::estree::{clear_loc_source, set_loc_source};
 use svelte_parser::{ParseOptions, parse};
@@ -165,7 +166,8 @@ fn generate_and_compare() {
             continue;
         }
 
-        match parse(&source, options) {
+        let allocator = Allocator::default();
+        match parse(&source, &allocator, options) {
             Ok(root) => {
                 set_loc_source(&source);
                 let mut actual: Value = serde_json::to_value(&root).unwrap();

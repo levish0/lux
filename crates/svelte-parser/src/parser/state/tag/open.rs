@@ -4,7 +4,6 @@ use oxc_ast::ast::{BindingPattern, Expression};
 use oxc_span::SourceType;
 
 use crate::error::ErrorKind;
-use crate::parser::patterns::REGEX_WHITESPACE_WITH_CLOSING_CURLY_BRACE;
 use crate::parser::read::context::read_pattern;
 use crate::parser::read::expression::{extract_expression, loose_identifier, read_expression};
 use crate::parser::{AwaitPhase, ParseError, Parser, StackFrame};
@@ -112,10 +111,7 @@ pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
         let phase;
 
         if parser.eat("then") {
-            if parser
-                .match_regex(&REGEX_WHITESPACE_WITH_CLOSING_CURLY_BRACE)
-                .is_some()
-            {
+            if parser.peek_whitespace_then(b'}') {
                 parser.allow_whitespace();
             } else {
                 parser.require_whitespace()?;
@@ -124,10 +120,7 @@ pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
             }
             phase = AwaitPhase::Then;
         } else if parser.eat("catch") {
-            if parser
-                .match_regex(&REGEX_WHITESPACE_WITH_CLOSING_CURLY_BRACE)
-                .is_some()
-            {
+            if parser.peek_whitespace_then(b'}') {
                 parser.allow_whitespace();
             } else {
                 parser.require_whitespace()?;

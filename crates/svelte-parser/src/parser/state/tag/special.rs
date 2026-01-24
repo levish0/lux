@@ -6,7 +6,6 @@ use svelte_ast::span::Span;
 use svelte_ast::tags::{ConstTag, DebugTag, HtmlTag, RenderTag};
 
 use crate::error::ErrorKind;
-use crate::parser::patterns::REGEX_WHITESPACE_WITH_CLOSING_CURLY_BRACE;
 use crate::parser::read::context::read_pattern;
 use crate::parser::read::expression::read_expression;
 use crate::parser::{ParseError, Parser};
@@ -39,10 +38,7 @@ pub fn special(parser: &mut Parser) -> Result<(), ParseError> {
 
     if parser.eat("debug") {
         // {@debug} with no args means "debug all"
-        if parser
-            .read(&REGEX_WHITESPACE_WITH_CLOSING_CURLY_BRACE)
-            .is_some()
-        {
+        if parser.eat_whitespace_then(b'}') {
             parser.append(FragmentNode::DebugTag(DebugTag {
                 span: Span::new(start, parser.index),
                 identifiers: Vec::new(),

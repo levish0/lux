@@ -1,22 +1,11 @@
-use std::sync::LazyLock;
-
 use oxc_ast::ast::Program;
 use oxc_span::SourceType;
-use regex::Regex;
 
 use svelte_ast::node::AttributeNode;
 use svelte_ast::root::{Script, ScriptContext};
 use svelte_ast::span::Span;
 use crate::error::ErrorKind::{ElementUnclosed, JsParseError};
 use crate::parser::{ParseError, Parser};
-
-/// Regex to find `</script` (optionally with whitespace) followed by `>`.
-static REGEX_CLOSING_SCRIPT_TAG: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"</script\s*>").unwrap());
-
-/// Regex to match `</script...>` at the start of remaining input.
-static REGEX_STARTS_WITH_CLOSING_SCRIPT_TAG: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^</script\s*>").unwrap());
 
 /// Read the content of a `<script>` tag and parse it as a JS/TS program.
 /// Port of reference `read/script.js`.
@@ -31,8 +20,8 @@ pub fn read_script<'a>(
 ) -> Result<Script<'a>, ParseError> {
     let script_start = parser.index;
 
-    // Read content until </script>
-    let data = parser.read_until(&REGEX_CLOSING_SCRIPT_TAG);
+    // Read content until </script\s*>
+    let data = parser.read_until_closing_tag("script");
 
     if parser.index >= parser.template.len() {
         if !parser.loose {
@@ -45,7 +34,7 @@ pub fn read_script<'a>(
     }
 
     // Consume the </script> tag
-    parser.read(&REGEX_STARTS_WITH_CLOSING_SCRIPT_TAG);
+    parser.eat_closing_tag("script");
 
     // Build padded source: everything before script_start replaced with spaces
     // (preserving newlines for correct line numbers), then the script content.
