@@ -54,6 +54,7 @@ pub struct Component {
 pub struct SvelteElement {
     #[serde(flatten)]
     pub span: Span,
+    pub name: String,
     pub name_loc: SourceLocation,
     pub tag: JsNode,
     pub attributes: Vec<AttributeNode>,
@@ -73,6 +74,7 @@ pub struct SvelteElement {
 pub struct SvelteComponent {
     #[serde(flatten)]
     pub span: Span,
+    pub name: String,
     pub name_loc: SourceLocation,
     pub expression: JsNode,
     pub attributes: Vec<AttributeNode>,

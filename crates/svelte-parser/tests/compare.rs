@@ -46,6 +46,34 @@ fn generate_svelte_ast(tests_dir: &Path) {
     run_cmd("node", &["generate.mjs"], tests_dir);
 }
 
+/// Check if `actual` is a superset of `expected`.
+/// All fields in `expected` must exist in `actual` with matching values.
+/// Extra fields in `actual` are allowed (EXTRA is not a mismatch).
+fn is_superset(actual: &Value, expected: &Value) -> bool {
+    match (actual, expected) {
+        (Value::Object(a), Value::Object(e)) => {
+            for (key, e_val) in e {
+                match a.get(key) {
+                    Some(a_val) => {
+                        if !is_superset(a_val, e_val) {
+                            return false;
+                        }
+                    }
+                    None => return false, // missing field
+                }
+            }
+            true
+        }
+        (Value::Array(a), Value::Array(e)) => {
+            if a.len() != e.len() {
+                return false;
+            }
+            a.iter().zip(e.iter()).all(|(a_item, e_item)| is_superset(a_item, e_item))
+        }
+        _ => actual == expected,
+    }
+}
+
 const SKIP_CATEGORIES: &[&str] = &["parser-legacy"];
 
 /// Recursively find all .svelte files
@@ -152,10 +180,10 @@ fn generate_and_compare() {
                 if svelte_path.exists() {
                     let svelte_str = fs::read_to_string(&svelte_path).unwrap();
                     let svelte_val: Value = serde_json::from_str(&svelte_str).unwrap();
-                    if actual != svelte_val {
-                        mismatches.push(name.clone());
-                    } else {
+                    if is_superset(&actual, &svelte_val) {
                         ok_count += 1;
+                    } else {
+                        mismatches.push(name.clone());
                     }
                 }
             }

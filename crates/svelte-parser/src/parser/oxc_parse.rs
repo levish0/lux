@@ -6,7 +6,7 @@ use oxc_span::SourceType;
 use serde_json::Value;
 use svelte_ast::span::Span;
 use svelte_ast::text::{JsComment, JsCommentKind};
-use svelte_ast::utils::estree::{adjust_offsets, strip_oxc_extras};
+use svelte_ast::utils::estree::adjust_offsets;
 use svelte_ast::JsNode;
 use winnow::Result as ParseResult;
 
@@ -30,9 +30,8 @@ fn estree_to_value<T: ESTree>(node: &T) -> Result<Value, winnow::error::ContextE
     let mut serializer = CompactJSSerializer::new(false);
     node.serialize(&mut serializer);
     let json_str = serializer.into_string();
-    let mut value: Value =
+    let value: Value =
         serde_json::from_str(&json_str).map_err(|_| winnow::error::ContextError::new())?;
-    strip_oxc_extras(&mut value);
     Ok(value)
 }
 

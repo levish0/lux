@@ -1,6 +1,9 @@
+use svelte_ast::JsNode;
+use svelte_ast::attributes::AttributeValue;
 use svelte_ast::elements::{
-    Component, RegularElement, SlotElement, SvelteBody, SvelteBoundary, SvelteDocument,
-    SvelteFragment, SvelteHead, SvelteOptionsRaw, SvelteSelf, SvelteWindow, TitleElement,
+    Component, RegularElement, SlotElement, SvelteBody, SvelteBoundary, SvelteComponent,
+    SvelteDocument, SvelteElement, SvelteFragment, SvelteHead, SvelteOptionsRaw, SvelteSelf,
+    SvelteWindow, TitleElement,
 };
 use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::Fragment;
@@ -353,6 +356,40 @@ fn classify_element(
             attributes,
             fragment,
         }),
+        "svelte:element" => {
+            let (this_expr, remaining_attrs) = extract_this_attribute(attributes);
+            let tag = match this_expr {
+                Some(expr) => expr,
+                None => {
+                    JsNode(serde_json::json!({"type": "Identifier", "name": "", "start": span.start, "end": span.start}))
+                }
+            };
+            FragmentNode::SvelteElement(SvelteElement {
+                span,
+                name: name.to_string(),
+                name_loc,
+                tag,
+                attributes: remaining_attrs,
+                fragment,
+            })
+        }
+        "svelte:component" => {
+            let (this_expr, remaining_attrs) = extract_this_attribute(attributes);
+            let expression = match this_expr {
+                Some(expr) => expr,
+                None => {
+                    JsNode(serde_json::json!({"type": "Identifier", "name": "", "start": span.start, "end": span.start}))
+                }
+            };
+            FragmentNode::SvelteComponent(SvelteComponent {
+                span,
+                name: name.to_string(),
+                name_loc,
+                expression,
+                attributes: remaining_attrs,
+                fragment,
+            })
+        }
         "svelte:options" => FragmentNode::SvelteOptionsRaw(SvelteOptionsRaw {
             span,
             name_loc,
@@ -408,6 +445,44 @@ fn classify_element(
             }
         }
     }
+}
+
+/// Extract the `this` attribute from an attribute list.
+/// Returns (expression from `this`, remaining attributes without `this`).
+fn extract_this_attribute(mut attributes: Vec<AttributeNode>) -> (Option<JsNode>, Vec<AttributeNode>) {
+    let this_idx = attributes.iter().position(|attr| {
+        matches!(attr, AttributeNode::Attribute(a) if a.name == "this")
+    });
+
+    let expr = if let Some(idx) = this_idx {
+        let attr_node = attributes.remove(idx);
+        if let AttributeNode::Attribute(a) = attr_node {
+            match a.value {
+                AttributeValue::Expression(tag) => Some(tag.expression),
+                AttributeValue::Sequence(items) => {
+                    // Text value → create a Literal node
+                    if let Some(svelte_ast::attributes::AttributeSequenceValue::Text(text)) = items.first() {
+                        Some(JsNode(serde_json::json!({
+                            "type": "Literal",
+                            "start": text.span.start,
+                            "end": text.span.end,
+                            "value": text.data,
+                            "raw": format!("\"{}\"", text.data)
+                        })))
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            }
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    (expr, attributes)
 }
 
 fn is_void_element(name: &str) -> bool {
