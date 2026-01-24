@@ -6,6 +6,7 @@ use oxc_span::SourceType;
 use crate::error::ErrorKind;
 use crate::parser::Parser;
 use crate::parser::bracket::match_bracket;
+use crate::parser::span_offset::shift_binding_pattern_spans;
 
 /// Read a destructuring pattern at the current parser position.
 /// Port of reference `read/context.js`.
@@ -65,38 +66,10 @@ pub fn read_pattern<'a>(parser: &mut Parser<'a>) -> Option<BindingPattern<'a>> {
     parser.index = bracket_end;
     let pattern_string = &parser.template[start..bracket_end];
 
-    // 4. Parse with OXC using `let <pattern> = 1;`
-    // Preserve newlines for correct line numbers (matching reference's padding logic)
-    // The reference uses: `space_with_newline = template.slice(0, start).replace(/[^\n]/g, ' ')`
-    // and then `(pattern = 1)` — but for OXC, `let pattern = 1;` gives us BindingPattern directly.
-    //
-    // We need (start - 4) worth of prefix for `let ` to align correctly:
-    // "let " is 4 chars, so we need prefix of length (start - 4) to place the pattern at offset `start`.
-    // But if start < 4, just use spaces.
-    let let_keyword = "let ";
-    let prefix_len = if start >= let_keyword.len() {
-        start - let_keyword.len()
-    } else {
-        0
-    };
-    let prefix: String = parser.template[..prefix_len]
-        .chars()
-        .map(|c| if c == '\n' { '\n' } else { ' ' })
-        .collect();
-    // Add remaining spaces if start < 4
-    let extra_spaces = if start >= let_keyword.len() {
-        "".to_string()
-    } else {
-        " ".repeat(start)
-    };
-
-    let padded = if start >= let_keyword.len() {
-        format!("{}{}{} = 1;", prefix, let_keyword, pattern_string)
-    } else {
-        format!("{}let {} = 1;", extra_spaces, pattern_string)
-    };
-
-    let padded_str = parser.allocator.alloc_str(&padded);
+    // 4. Parse with OXC using `let <pattern> = 1;` (no padding needed).
+    let let_prefix_len = 4u32; // "let "
+    let snippet = format!("let {} = 1;", pattern_string);
+    let snippet_str = parser.allocator.alloc_str(&snippet);
 
     let source_type = if parser.ts {
         SourceType::ts()
@@ -104,7 +77,7 @@ pub fn read_pattern<'a>(parser: &mut Parser<'a>) -> Option<BindingPattern<'a>> {
         SourceType::mjs()
     };
 
-    let result = oxc_parser::Parser::new(parser.allocator, padded_str, source_type).parse();
+    let result = oxc_parser::Parser::new(parser.allocator, snippet_str, source_type).parse();
 
     if !result.errors.is_empty() {
         if !parser.loose {
@@ -118,13 +91,15 @@ pub fn read_pattern<'a>(parser: &mut Parser<'a>) -> Option<BindingPattern<'a>> {
         return None;
     }
 
-    // 5. Extract BindingPattern from the parsed `let <pattern> = 1;`
+    // 5. Extract BindingPattern and shift spans to match original positions.
     let program = result.program;
-    let pattern = extract_pattern(program);
+    let mut pattern = extract_pattern(program)?;
 
-    // TODO: read_type_annotation after pattern (for TS)
+    // Pattern starts at byte 4 ("let ") in the snippet, but at `start` in the original.
+    let offset = start as u32 - let_prefix_len;
+    shift_binding_pattern_spans(&mut pattern, offset);
 
-    pattern
+    Some(pattern)
 }
 
 /// Extract the BindingPattern from a parsed `let <pattern> = 1;`

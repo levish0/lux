@@ -9,6 +9,7 @@ rust-version.workspace = true
 description = "svelte-parser"
 
 [dependencies]
+phf = {workspace = true}
 svelte-ast = { workspace = true }
 serde_json = { workspace = true }
 serde = { workspace = true }
@@ -19,5 +20,6 @@ oxc_span = { workspace = true }
 oxc_syntax = { workspace = true }
 oxc_diagnostics = { workspace = true }
 oxc_estree = { workspace = true }
+oxc_ast_visit = { workspace = true }
 regex = {workspace = true}
-line-span = { workspace = true }
+line-span={workspace = true}

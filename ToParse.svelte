@@ -1,13 +1,13 @@
 <script lang="ts">
-    import { onMount, tick } from 'svelte';
-    import type { ComponentProps } from 'svelte';
+    import { onMount, tick } from "svelte";
+    import type { ComponentProps } from "svelte";
 
     interface User {
         id: number;
         name: string;
         email: string;
         avatar: string;
-        status: 'online' | 'offline' | 'away';
+        status: "online" | "offline" | "away";
         lastSeen: Date;
         roles: string[];
         metadata: Record<string, unknown>;
@@ -27,7 +27,7 @@
 
     interface Attachment {
         id: string;
-        type: 'image' | 'video' | 'file' | 'audio';
+        type: "image" | "video" | "file" | "audio";
         url: string;
         name: string;
         size: number;
@@ -44,7 +44,7 @@
         id: string;
         name: string;
         description: string;
-        type: 'text' | 'voice' | 'announcement';
+        type: "text" | "voice" | "announcement";
         members: User[];
         messages: Message[];
         settings: ChannelSettings;
@@ -68,18 +68,18 @@
         users = $bindable([]),
         channels = $bindable([]),
         currentUser,
-        theme = 'dark',
-        locale = 'en-US',
+        theme = "dark",
+        locale = "en-US",
         onMessageSend,
         onUserClick,
         onChannelSelect,
-        class: className = '',
+        class: className = "",
         ...restProps
     }: {
         users?: User[];
         channels?: Channel[];
         currentUser: User;
-        theme?: 'light' | 'dark' | 'system';
+        theme?: "light" | "dark" | "system";
         locale?: string;
         onMessageSend?: (message: Partial<Message>) => Promise<void>;
         onUserClick?: (user: User) => void;
@@ -91,14 +91,14 @@
         message: Message;
         reaction: { messageId: string; emoji: string };
         typing: { userId: number; channelId: string };
-        presence: { userId: number; status: User['status'] };
+        presence: { userId: number; status: User["status"] };
     }>();
 
     let selectedChannel = $state<Channel | null>(null);
-    let messageInput = $state('');
+    let messageInput = $state("");
     let isTyping = $state(false);
     let typingUsers = $state<User[]>([]);
-    let searchQuery = $state('');
+    let searchQuery = $state("");
     let showEmojiPicker = $state(false);
     let showUserList = $state(true);
     let unreadCounts = $state<Record<string, number>>({});
@@ -106,10 +106,11 @@
     let messageRefs = $state<Map<string, HTMLElement>>(new Map());
 
     const filteredUsers = $derived(
-        users.filter(u =>
-            u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            u.email.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+        users.filter(
+            (u) =>
+                u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                u.email.toLowerCase().includes(searchQuery.toLowerCase()),
+        ),
     );
 
     const sortedChannels = $derived(
@@ -118,16 +119,16 @@
             const bUnread = unreadCounts[b.id] || 0;
             if (aUnread !== bUnread) return bUnread - aUnread;
             return a.name.localeCompare(b.name);
-        })
+        }),
     );
 
-    const onlineUsers = $derived(users.filter(u => u.status === 'online'));
-    const offlineUsers = $derived(users.filter(u => u.status === 'offline'));
-    const awayUsers = $derived(users.filter(u => u.status === 'away'));
+    const onlineUsers = $derived(users.filter((u) => u.status === "online"));
+    const offlineUsers = $derived(users.filter((u) => u.status === "offline"));
+    const awayUsers = $derived(users.filter((u) => u.status === "away"));
 
     const currentMessages = $derived(selectedChannel?.messages ?? []);
-    const pinnedMessages = $derived(currentMessages.filter(m => m.pinned));
-    const hasUnread = $derived(Object.values(unreadCounts).some(c => c > 0));
+    const pinnedMessages = $derived(currentMessages.filter((m) => m.pinned));
+    const hasUnread = $derived(Object.values(unreadCounts).some((c) => c > 0));
 
     $effect(() => {
         if (selectedChannel) {
@@ -149,7 +150,7 @@
             tick().then(() => {
                 scrollContainer?.scrollTo({
                     top: scrollContainer.scrollHeight,
-                    behavior: 'smooth'
+                    behavior: "smooth",
                 });
             });
         }
@@ -157,19 +158,21 @@
 
     onMount(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
+            if (e.key === "Escape") {
                 showEmojiPicker = false;
             }
-            if (e.ctrlKey && e.key === 'k') {
+            if (e.ctrlKey && e.key === "k") {
                 e.preventDefault();
-                document.querySelector<HTMLInputElement>('#search-input')?.focus();
+                document
+                    .querySelector<HTMLInputElement>("#search-input")
+                    ?.focus();
             }
         };
 
-        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener("keydown", handleKeyDown);
 
         return () => {
-            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener("keydown", handleKeyDown);
         };
     });
 
@@ -183,21 +186,21 @@
             attachments: [],
             reactions: [],
             edited: false,
-            pinned: false
+            pinned: false,
         };
 
         try {
             await onMessageSend?.(newMessage);
-            dispatch('message', newMessage as Message);
-            messageInput = '';
+            dispatch("message", newMessage as Message);
+            messageInput = "";
             isTyping = false;
         } catch (error) {
-            console.error('Failed to send message:', error);
+            console.error("Failed to send message:", error);
         }
     }
 
     function handleReaction(messageId: string, emoji: string) {
-        dispatch('reaction', { messageId, emoji });
+        dispatch("reaction", { messageId, emoji });
     }
 
     function handleChannelClick(channel: Channel) {
@@ -205,15 +208,15 @@
         onChannelSelect?.(channel);
     }
 
-    function handleUserPresence(user: User, status: User['status']) {
-        dispatch('presence', { userId: user.id, status });
+    function handleUserPresence(user: User, status: User["status"]) {
+        dispatch("presence", { userId: user.id, status });
     }
 
     function formatTimestamp(date: Date): string {
         return new Intl.DateTimeFormat(locale, {
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: true
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true,
         }).format(date);
     }
 
@@ -222,27 +225,30 @@
         const diff = now.getTime() - date.getTime();
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-        if (days === 0) return 'Today';
-        if (days === 1) return 'Yesterday';
+        if (days === 0) return "Today";
+        if (days === 1) return "Yesterday";
         if (days < 7) return `${days} days ago`;
 
         return new Intl.DateTimeFormat(locale, {
-            month: 'short',
-            day: 'numeric',
-            year: days > 365 ? 'numeric' : undefined
+            month: "short",
+            day: "numeric",
+            year: days > 365 ? "numeric" : undefined,
         }).format(date);
     }
 
-    function getStatusColor(status: User['status']): string {
+    function getStatusColor(status: User["status"]): string {
         switch (status) {
-            case 'online': return 'bg-green-500';
-            case 'away': return 'bg-yellow-500';
-            case 'offline': return 'bg-gray-500';
+            case "online":
+                return "bg-green-500";
+            case "away":
+                return "bg-yellow-500";
+            case "offline":
+                return "bg-gray-500";
         }
     }
 
     function formatFileSize(bytes: number): string {
-        const units = ['B', 'KB', 'MB', 'GB'];
+        const units = ["B", "KB", "MB", "GB"];
         let size = bytes;
         let unitIndex = 0;
 
@@ -269,17 +275,21 @@
     const messageGroups = $derived(groupMessagesByDate(currentMessages));
 </script>
 
-<svelte:window on:resize={() => { /* handle resize */ }} />
+<svelte:window
+        on:resize={() => {
+        /* handle resize */
+    }}
+/>
 
 <svelte:head>
-    <title>{selectedChannel ? `#${selectedChannel.name}` : 'Chat'} | App</title>
+    <title>{selectedChannel ? `#${selectedChannel.name}` : "Chat"} | App</title>
     <meta name="description" content="Real-time chat application" />
 </svelte:head>
 
 <div
         class="chat-container {className}"
-        class:dark={theme === 'dark'}
-        class:light={theme === 'light'}
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
         data-testid="chat-container"
         {...restProps}
 >
@@ -289,8 +299,8 @@
             <h2>Channels</h2>
             <button
                     type="button"
-                    onclick={() => showUserList = !showUserList}
-                    aria-label={showUserList ? 'Hide sidebar' : 'Show sidebar'}
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
             >
                 {#if showUserList}
                     <span>←</span>
@@ -320,22 +330,25 @@
                         class:selected={isSelected}
                         class:has-unread={unread > 0}
                         onclick={() => handleChannelClick(channel)}
-                        aria-current={isSelected ? 'page' : undefined}
+                        aria-current={isSelected ? "page" : undefined}
                 >
-					<span class="channel-icon">
-						{#if channel.type === 'voice'}
-							🔊
-						{:else if channel.type === 'announcement'}
-							📢
-						{:else}
-							#
-						{/if}
-					</span>
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
                     <span class="channel-name">{channel.name}</span>
                     {#if unread > 0}
-						<span class="unread-badge" aria-label="{unread} unread messages">
-							{unread > 99 ? '99+' : unread}
-						</span>
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
                     {/if}
                 </button>
             {:else}
@@ -363,7 +376,11 @@
                                         loading="lazy"
                                 />
                                 <span class="user-name">{user.name}</span>
-                                <span class="status-indicator {getStatusColor(user.status)}" />
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
                             </button>
                         </li>
                     {/each}
@@ -381,9 +398,17 @@
                                         class="user-item"
                                         onclick={() => onUserClick?.(user)}
                                 >
-                                    <img src={user.avatar} alt="" class="avatar" />
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
                                     <span class="user-name">{user.name}</span>
-                                    <span class="status-indicator {getStatusColor(user.status)}" />
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
                                 </button>
                             </li>
                         {/each}
@@ -402,9 +427,17 @@
                                         class="user-item"
                                         onclick={() => onUserClick?.(user)}
                                 >
-                                    <img src={user.avatar} alt="" class="avatar" />
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
                                     <span class="user-name">{user.name}</span>
-                                    <span class="status-indicator {getStatusColor(user.status)}" />
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
                                 </button>
                             </li>
                         {/each}
@@ -421,7 +454,9 @@
                 <h1>#{selectedChannel.name}</h1>
                 <p class="channel-description">{selectedChannel.description}</p>
                 <div class="header-actions">
-                    <span class="member-count">{selectedChannel.members.length} members</span>
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
                     {#if pinnedMessages.length > 0}
                         <button type="button" class="pinned-btn">
                             📌 {pinnedMessages.length} pinned
@@ -443,14 +478,19 @@
 
                     {#each messages as message, index (message.id)}
                         {@const isOwn = message.author.id === currentUser.id}
-                        {@const showAvatar = index === 0 || messages[index - 1]?.author.id !== message.author.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
 
                         <article
                                 class="message"
                                 class:own={isOwn}
                                 class:pinned={message.pinned}
                                 class:edited={message.edited}
-                                bind:this={messageRefs.set(message.id, this) && undefined}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
                                 data-message-id={message.id}
                         >
                             {#if showAvatar}
@@ -468,12 +508,18 @@
                             <div class="message-content">
                                 {#if showAvatar}
                                     <header class="message-header">
-                                        <span class="author-name">{message.author.name}</span>
-                                        <time datetime={message.timestamp.toISOString()}>
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
                                             {formatTimestamp(message.timestamp)}
                                         </time>
                                         {#if message.edited}
-                                            <span class="edited-indicator">(edited)</span>
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
                                         {/if}
                                     </header>
                                 {/if}
@@ -483,14 +529,14 @@
                                 {#if message.attachments.length > 0}
                                     <div class="attachments">
                                         {#each message.attachments as attachment (attachment.id)}
-                                            {#if attachment.type === 'image'}
+                                            {#if attachment.type === "image"}
                                                 <img
                                                         src={attachment.url}
                                                         alt={attachment.name}
                                                         class="attachment-image"
                                                         loading="lazy"
                                                 />
-                                            {:else if attachment.type === 'video'}
+                                            {:else if attachment.type === "video"}
                                                 <video
                                                         src={attachment.url}
                                                         controls
@@ -499,8 +545,12 @@
                                                 >
                                                     <track kind="captions" />
                                                 </video>
-                                            {:else if attachment.type === 'audio'}
-                                                <audio src={attachment.url} controls class="attachment-audio">
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
                                                     <track kind="captions" />
                                                 </audio>
                                             {:else}
@@ -509,9 +559,17 @@
                                                         class="attachment-file"
                                                         download={attachment.name}
                                                 >
-                                                    <span class="file-icon">📎</span>
-                                                    <span class="file-name">{attachment.name}</span>
-                                                    <span class="file-size">{formatFileSize(attachment.size)}</span>
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
                                                 </a>
                                             {/if}
                                         {/each}
@@ -524,12 +582,25 @@
                                             <button
                                                     type="button"
                                                     class="reaction"
-                                                    class:reacted={reaction.users.some(u => u.id === currentUser.id)}
-                                                    onclick={() => handleReaction(message.id, reaction.emoji)}
-                                                    title={reaction.users.map(u => u.name).join(', ')}
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
                                             >
-                                                <span class="emoji">{reaction.emoji}</span>
-                                                <span class="count">{reaction.count}</span>
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
                                             </button>
                                         {/each}
                                     </div>
@@ -538,14 +609,27 @@
                                 {#if message.thread && message.thread.length > 0}
                                     <details class="thread">
                                         <summary>
-                                            {message.thread.length} {message.thread.length === 1 ? 'reply' : 'replies'}
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
                                         </summary>
                                         <div class="thread-messages">
                                             {#each message.thread as reply (reply.id)}
                                                 <div class="reply">
-                                                    <img src={reply.author.avatar} alt="" class="reply-avatar" />
-                                                    <span class="reply-author">{reply.author.name}</span>
-                                                    <span class="reply-content">{reply.content}</span>
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
                                                 </div>
                                             {/each}
                                         </div>
@@ -561,7 +645,10 @@
                         {#if typingUsers.length === 1}
                             <span>{typingUsers[0].name} is typing...</span>
                         {:else if typingUsers.length === 2}
-                            <span>{typingUsers[0].name} and {typingUsers[1].name} are typing...</span>
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
                         {:else}
                             <span>Several people are typing...</span>
                         {/if}
@@ -570,12 +657,17 @@
             </div>
 
             <footer class="message-input-container">
-                <form onsubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
                     <div class="input-wrapper">
                         <button
                                 type="button"
                                 class="emoji-btn"
-                                onclick={() => showEmojiPicker = !showEmojiPicker}
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
                                 aria-label="Open emoji picker"
                         >
                             😀
@@ -585,22 +677,39 @@
                                 type="text"
                                 placeholder="Message #{selectedChannel.name}"
                                 bind:value={messageInput}
-                                oninput={() => { isTyping = true; dispatch('typing', { userId: currentUser.id, channelId: selectedChannel!.id }); }}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
                                 aria-label="Message input"
                         />
 
-                        <button type="submit" disabled={!messageInput.trim()} aria-label="Send message">
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
                             Send
                         </button>
                     </div>
                 </form>
 
                 {#if showEmojiPicker}
-                    <div class="emoji-picker" role="dialog" aria-label="Emoji picker">
-                        {#each ['😀', '😂', '❤️', '👍', '👎', '🎉', '🔥', '💯', '🤔', '😢', '😡', '🙏'] as emoji}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
                             <button
                                     type="button"
-                                    onclick={() => { messageInput += emoji; showEmojiPicker = false; }}
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
                             >
                                 {emoji}
                             </button>
@@ -614,7 +723,9 @@
                 <p>Select a channel from the sidebar to start chatting.</p>
 
                 {#if hasUnread}
-                    <p class="unread-notice">You have unread messages in some channels.</p>
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
                 {/if}
             </div>
         {/if}
@@ -626,7 +737,10 @@
         display: grid;
         grid-template-columns: 280px 1fr;
         height: 100vh;
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family:
+                system-ui,
+                -apple-system,
+                sans-serif;
     }
 
     .chat-container.dark {
@@ -820,7 +934,7 @@
 
     .date-separator::before,
     .date-separator::after {
-        content: '';
+        content: "";
         flex: 1;
         height: 1px;
         background: var(--border-color);

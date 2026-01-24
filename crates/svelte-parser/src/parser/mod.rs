@@ -1,12 +1,11 @@
 pub mod bracket;
 pub mod html_entities;
 pub mod read;
+pub mod span_offset;
 pub mod state;
 pub mod utils;
 
 use std::collections::HashSet;
-use std::sync::LazyLock;
-
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{BindingPattern, Expression};
 use svelte_ast::css::StyleSheet;
@@ -14,9 +13,7 @@ use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::{Fragment, Root, Script, SvelteOptions};
 use svelte_ast::span::{Position, SourceLocation, Span};
 use svelte_ast::text::JsComment;
-
 use line_span::LineSpans;
-use regex::Regex;
 use crate::error::ErrorKind;
 
 /// Stack frame representing a nested element or block being parsed.
@@ -239,14 +236,6 @@ pub struct Parser<'a> {
     line_starts: Vec<usize>,
 }
 
-/// Matches HTML comments (to skip) or `<script` tags with a `lang` attribute.
-/// Port of reference's `regex_lang_attribute`.
-static REGEX_LANG_ATTRIBUTE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r#"(?s)<!--.*?-->|<script\s+(?:[^>]*?\s)?lang=(?:"([^"]*)"|'([^']*)'|([^\s>"']+))[^>]*>"#,
-    )
-    .unwrap()
-});
 
 impl<'a> Parser<'a> {
     /// Create a new parser and run the state machine.
@@ -657,20 +646,91 @@ impl<'a> Parser<'a> {
 
 /// Detect if template has `<script lang="ts">`.
 /// Port of reference's constructor logic using `regex_lang_attribute`.
+/// Scans for the first `<script` tag (skipping HTML comments) and checks its `lang` attribute.
 fn detect_lang_ts(template: &str) -> bool {
-    for caps in REGEX_LANG_ATTRIBUTE.captures_iter(template) {
-        let full = caps.get(0).unwrap().as_str();
-        // Skip HTML comment matches (reference: `match[0][1] !== 's'`)
-        if !full.starts_with("<s") {
-            continue;
+    let bytes = template.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        // Skip HTML comments
+        if i + 3 < bytes.len() && &bytes[i..i + 4] == b"<!--" {
+            if let Some(end) = template[i + 4..].find("-->") {
+                i += 4 + end + 3;
+                continue;
+            } else {
+                break; // unclosed comment
+            }
         }
-        // First <script> match with lang attr — check if lang value is "ts"
-        let lang = caps
-            .get(1)
-            .or_else(|| caps.get(2))
-            .or_else(|| caps.get(3))
-            .map(|m| m.as_str());
-        return lang == Some("ts");
+        // Check for `<script` followed by whitespace or `>`
+        if i + 7 <= bytes.len()
+            && bytes[i] == b'<'
+            && template[i + 1..].starts_with("script")
+            && (bytes.get(i + 7).map_or(true, |&b| b.is_ascii_whitespace() || b == b'>'))
+        {
+            // Found <script — scan attributes for `lang=`
+            let tag_start = i + 7;
+            return find_lang_value(template, tag_start) == Some("ts");
+        }
+        i += 1;
     }
     false
+}
+
+/// Within a `<script ...>` tag's attribute area (starting after `<script`),
+/// find the value of the `lang` attribute.
+fn find_lang_value(template: &str, start: usize) -> Option<&str> {
+    let bytes = template.as_bytes();
+    let mut i = start;
+    while i < bytes.len() && bytes[i] != b'>' {
+        // Skip whitespace
+        if bytes[i].is_ascii_whitespace() {
+            i += 1;
+            continue;
+        }
+        // Read attribute name
+        let name_start = i;
+        while i < bytes.len() && bytes[i] != b'=' && bytes[i] != b'>' && !bytes[i].is_ascii_whitespace() {
+            i += 1;
+        }
+        let name = &template[name_start..i];
+        // Skip whitespace around `=`
+        while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+            i += 1;
+        }
+        if i < bytes.len() && bytes[i] == b'=' {
+            i += 1;
+            while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+                i += 1;
+            }
+            // Read value
+            let value = if i < bytes.len() && (bytes[i] == b'"' || bytes[i] == b'\'') {
+                let quote = bytes[i];
+                i += 1;
+                let val_start = i;
+                while i < bytes.len() && bytes[i] != quote {
+                    i += 1;
+                }
+                let val = &template[val_start..i];
+                if i < bytes.len() {
+                    i += 1; // skip closing quote
+                }
+                val
+            } else {
+                // Unquoted value
+                let val_start = i;
+                while i < bytes.len() && !bytes[i].is_ascii_whitespace() && bytes[i] != b'>' {
+                    i += 1;
+                }
+                &template[val_start..i]
+            };
+            if name == "lang" {
+                return Some(value);
+            }
+        } else {
+            // Boolean attribute (no value)
+            if name == "lang" {
+                return Some("");
+            }
+        }
+    }
+    None
 }

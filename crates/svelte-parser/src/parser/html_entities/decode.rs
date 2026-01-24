@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use super::entities_data::ENTITIES;
 
 const WINDOWS_1252: [u32; 32] = [
@@ -49,11 +50,20 @@ fn validate_code(code: u32) -> u32 {
 /// Decode HTML character references in a string.
 /// `is_attribute_value` controls whether entities without semicolons are decoded
 /// when followed by alphanumeric, underscore, or equals characters.
-pub fn decode_character_references(html: &str, is_attribute_value: bool) -> String {
+/// 
+/// Returns `Cow::Borrowed` if no entities are found (zero-copy),
+/// or `Cow::Owned` if decoding was performed.
+pub fn decode_character_references(html: &'_ str, is_attribute_value: bool) -> Cow<'_, str> {
+    // Fast path: no ampersand means no entities
+    if !html.contains('&') {
+        return Cow::Borrowed(html);
+    }
+
     let bytes = html.as_bytes();
     let len = bytes.len();
     let mut result = String::with_capacity(len);
     let mut i = 0;
+    let mut modified = false;
 
     while i < len {
         if bytes[i] != b'&' {
@@ -99,6 +109,7 @@ pub fn decode_character_references(html: &str, is_attribute_value: bool) -> Stri
                     let validated = validate_code(code);
                     if let Some(c) = char::from_u32(validated) {
                         result.push(c);
+                        modified = true;
                     } else {
                         result.push_str(&html[amp_pos..i]);
                     }
@@ -123,6 +134,7 @@ pub fn decode_character_references(html: &str, is_attribute_value: bool) -> Stri
                     let validated = validate_code(code);
                     if let Some(c) = char::from_u32(validated) {
                         result.push(c);
+                        modified = true;
                     } else {
                         result.push_str(&html[amp_pos..i]);
                     }
@@ -168,6 +180,7 @@ pub fn decode_character_references(html: &str, is_attribute_value: bool) -> Stri
                 let validated = validate_code(matched_code);
                 if let Some(c) = char::from_u32(validated) {
                     result.push(c);
+                    modified = true;
                 } else {
                     result.push_str(&html[amp_pos..amp_pos + 1 + matched_len]);
                 }
@@ -183,7 +196,12 @@ pub fn decode_character_references(html: &str, is_attribute_value: bool) -> Stri
         }
     }
 
-    result
+    if modified {
+        Cow::Owned(result)
+    } else {
+        // No actual decoding happened, return borrowed original
+        Cow::Borrowed(html)
+    }
 }
 
 #[cfg(test)]

@@ -5,6 +5,7 @@ use svelte_ast::node::AttributeNode;
 use svelte_ast::root::{Script, ScriptContext};
 use svelte_ast::span::Span;
 use crate::error::ErrorKind::{ElementUnclosed, JsParseError};
+use crate::parser::span_offset::shift_program_spans;
 use crate::parser::{ParseError, Parser};
 
 /// Read the content of a `<script>` tag and parse it as a JS/TS program.
@@ -36,16 +37,9 @@ pub fn read_script<'a>(
     // Consume the </script> tag
     parser.eat_closing_tag("script");
 
-    // Build padded source: everything before script_start replaced with spaces
-    // (preserving newlines for correct line numbers), then the script content.
-    let prefix: String = parser.template[..script_start]
-        .chars()
-        .map(|c| if c == '\n' { '\n' } else { ' ' })
-        .collect();
-    let source = format!("{}{}", prefix, data);
-    let source_str = parser.allocator.alloc_str(&source);
+    // Parse script content with OXC (no padding needed), then shift spans.
+    let source_str = parser.allocator.alloc_str(data);
 
-    // Parse with OXC
     let source_type = if parser.ts {
         SourceType::ts().with_module(true)
     } else {
@@ -65,8 +59,8 @@ pub fn read_script<'a>(
 
     let mut program: Program<'a> = oxc_result.program;
 
-    // Fix up program span to match script content position
-    program.span = oxc_span::Span::new(script_start as u32, (script_start + data.len()) as u32);
+    // Shift all spans to match original template positions
+    shift_program_spans(&mut program, script_start as u32);
 
     // Determine context from attributes
     let context = determine_script_context(&attributes);

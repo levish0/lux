@@ -4,6 +4,7 @@ use oxc_ast::ast::Expression;
 use oxc_span::SourceType;
 
 use crate::error::ErrorKind;
+use crate::parser::span_offset::shift_expression_spans;
 use crate::parser::{ParseError, Parser};
 
 /// Read a JS/TS expression at the current parser position.
@@ -47,48 +48,32 @@ pub fn read_expression<'a>(parser: &mut Parser<'a>) -> Result<Expression<'a>, Pa
         ));
     }
 
-    // Parse with OXC.
-    let prefix: String = parser.template[..start]
-        .chars()
-        .map(|c| if c == '\n' { '\n' } else { ' ' })
-        .collect();
-    let padded = format!("{}{};", prefix, trimmed);
-    let padded_str = parser.allocator.alloc_str(&padded);
-
+    // Parse with OXC using parse_expression (no padding needed).
     let source_type = if parser.ts {
         SourceType::ts()
     } else {
         SourceType::mjs()
     };
 
-    let result = oxc_parser::Parser::new(parser.allocator, padded_str, source_type).parse();
+    let snippet = parser.allocator.alloc_str(trimmed);
+    let result =
+        oxc_parser::Parser::new(parser.allocator, snippet, source_type).parse_expression();
 
-    if !result.errors.is_empty() {
-        if parser.loose {
-            parser.index = end;
-            return Ok(loose_identifier(parser, start, end));
-        }
-        let first_err = &result.errors[0];
-        parser.index = end;
-        return Err(parser.error(
-            ErrorKind::JsParseError,
-            start,
-            format!("JS parse error: {}", first_err),
-        ));
-    }
-
-    // Extract expression from the parsed program.
-    let program = result.program;
-    let expr = extract_expression(program);
-
-    match expr {
-        Some(e) => {
+    match result {
+        Ok(mut e) => {
+            shift_expression_spans(&mut e, start as u32);
             parser.index = effective_end;
             Ok(e)
         }
-        None => {
-            parser.index = end;
-            Ok(loose_identifier(parser, start, end))
+        Err(_errors) => {
+            if parser.loose {
+                parser.index = end;
+                Ok(loose_identifier(parser, start, end))
+            } else {
+                let msg = format!("JS parse error: {}", _errors[0]);
+                parser.index = end;
+                Err(parser.error(ErrorKind::JsParseError, start, msg))
+            }
         }
     }
 }
@@ -194,26 +179,6 @@ fn skip_string_in_expr(bytes: &[u8], start: usize) -> usize {
         i += 1;
     }
     i
-}
-
-/// Extract the expression from a parsed OXC Program.
-pub fn extract_expression<'a>(program: oxc_ast::ast::Program<'a>) -> Option<Expression<'a>> {
-    let body = program.body;
-
-    if body.len() != 1 {
-        return None;
-    }
-
-    let mut iter = body.into_iter();
-    let stmt = iter.next()?;
-
-    match stmt {
-        oxc_ast::ast::Statement::ExpressionStatement(expr_stmt) => {
-            let inner = expr_stmt.unbox();
-            Some(inner.expression)
-        }
-        _ => None,
-    }
 }
 
 /// Create a dummy Identifier expression for loose/error recovery.

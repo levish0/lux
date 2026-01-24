@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use svelte_ast::node::FragmentNode;
 use svelte_ast::span::Span;
 use svelte_ast::text::Text;
@@ -12,13 +14,16 @@ use super::super::html_entities::decode_character_references;
 pub fn text(parser: &mut Parser) {
     let start = parser.index;
 
-    while parser.index < parser.template.len() && !parser.match_str("<") && !parser.match_str("{") {
-        parser.index += 1;
-    }
+    let raw = parser.read_until_char(|ch| ch == b'<' || ch == b'{');
 
-    let raw = &parser.template[start..parser.index];
+    if raw.is_empty() {
+        return;
+    }
     let decoded = decode_character_references(raw, false);
-    let data = parser.allocator.alloc_str(&decoded);
+    let data = match decoded {
+        Cow::Borrowed(s) => s,
+        Cow::Owned(s) => parser.allocator.alloc_str(&s),
+    };
 
     parser.append(FragmentNode::Text(Text {
         span: Span::new(start, parser.index),

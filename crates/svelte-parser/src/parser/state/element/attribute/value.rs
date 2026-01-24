@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use svelte_ast::attributes::{AttributeSequenceValue, AttributeValue};
 use svelte_ast::metadata::ExpressionNodeMetadata;
 use svelte_ast::span::Span;
@@ -131,7 +133,10 @@ pub fn read_sequence<'a>(
             if text_start < parser.index {
                 let raw = &parser.template[text_start..parser.index];
                 let decoded = decode_character_references(raw, true);
-                let data = parser.allocator.alloc_str(&decoded);
+                let data = match decoded {
+                    Cow::Borrowed(s) => s,
+                    Cow::Owned(s) => parser.allocator.alloc_str(&s),
+                };
                 chunks.push(AttributeSequenceValue::Text(Text {
                     span: Span::new(text_start, parser.index),
                     raw,
@@ -171,7 +176,10 @@ pub fn read_sequence<'a>(
             if text_start < parser.index - 1 {
                 let raw = &parser.template[text_start..parser.index - 1];
                 let decoded = decode_character_references(raw, true);
-                let data = parser.allocator.alloc_str(&decoded);
+                let data = match decoded {
+                    Cow::Borrowed(s) => s,
+                    Cow::Owned(s) => parser.allocator.alloc_str(&s),
+                };
                 chunks.push(AttributeSequenceValue::Text(Text {
                     span: Span::new(text_start, parser.index - 1),
                     raw,
@@ -214,7 +222,10 @@ pub fn read_sequence<'a>(
     if text_start < parser.index {
         let raw = &parser.template[text_start..parser.index];
         let decoded = decode_character_references(raw, true);
-        let data = parser.allocator.alloc_str(&decoded);
+        let data = match decoded {
+            Cow::Borrowed(s) => s,
+            Cow::Owned(s) => parser.allocator.alloc_str(&s),
+        };
         chunks.push(AttributeSequenceValue::Text(Text {
             span: Span::new(text_start, parser.index),
             raw,

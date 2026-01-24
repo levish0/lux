@@ -22,6 +22,8 @@ pub enum ErrorKind {
     ExpectedAttributeValue,
     JsParseError,
     CssSelectorInvalid,
+    CssExpectedIdentifier,
+    CssEmptyDeclaration,
     SvelteMetaDuplicate,
     RenderTagInvalidExpression,
     ConstTagInvalidExpression,

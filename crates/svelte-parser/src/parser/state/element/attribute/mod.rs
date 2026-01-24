@@ -2,6 +2,7 @@ pub mod directive;
 pub mod read;
 pub mod value;
 
+use std::borrow::Cow;
 use std::collections::HashSet;
 
 use crate::error::ErrorKind;
@@ -151,7 +152,10 @@ fn read_static_attribute<'a>(parser: &mut Parser<'a>) -> Option<AttributeNode<'a
         let val_start = parser.index - raw.len() - if quoted { 1 } else { 0 };
         let val_end = if quoted { parser.index - 1 } else { parser.index };
         let decoded = decode_character_references(raw, true);
-        let data = parser.allocator.alloc_str(&decoded);
+        let data = match decoded {
+            Cow::Borrowed(s) => s,
+            Cow::Owned(s) => parser.allocator.alloc_str(&s),
+        };
 
         AttributeValue::Sequence(vec![AttributeSequenceValue::Text(Text {
             span: Span::new(val_start, val_end),

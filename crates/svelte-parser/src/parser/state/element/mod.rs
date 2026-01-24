@@ -25,11 +25,45 @@ use crate::parser::{LastAutoClosedTag, ParseError, Parser, StackFrame};
 use attribute::{read_attributes, read_sequence, read_static_attributes};
 use crate::error::ErrorKind;
 
-/// Reference: regex_valid_element_name (keep as regex — complex alternation)
-static REGEX_VALID_ELEMENT_NAME: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^(?:![a-zA-Z]+|[a-zA-Z](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|[a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9])$")
-        .unwrap()
-});
+/// Check if a name is a valid HTML/SVG element name.
+/// Matches: `![A-Za-z]+`, `[A-Za-z]([A-Za-z0-9-]*[A-Za-z0-9])?`, or namespaced `tag:name`.
+#[inline]
+fn is_valid_element_name(name: &str) -> bool {
+    let bytes = name.as_bytes();
+    if bytes.is_empty() {
+        return false;
+    }
+    // Case 1: ![a-zA-Z]+  (e.g. !DOCTYPE)
+    if bytes[0] == b'!' {
+        return bytes.len() > 1 && bytes[1..].iter().all(|b| b.is_ascii_alphabetic());
+    }
+    // Must start with ASCII alpha
+    if !bytes[0].is_ascii_alphabetic() {
+        return false;
+    }
+    // Case 3: namespaced — [a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]
+    if let Some(colon) = name.find(':') {
+        let prefix = &bytes[..colon];
+        let local = &bytes[colon + 1..];
+        return prefix.len() >= 1
+            && prefix[0].is_ascii_alphabetic()
+            && prefix[1..].iter().all(|b| b.is_ascii_alphanumeric())
+            && local.len() >= 1
+            && local[0].is_ascii_alphabetic()
+            && local[local.len() - 1].is_ascii_alphanumeric()
+            && local[1..local.len().saturating_sub(1)].iter().all(|b| b.is_ascii_alphanumeric() || *b == b'-');
+    }
+    // Case 2: [a-zA-Z]([a-zA-Z0-9-]*[a-zA-Z0-9])?
+    if bytes.len() == 1 {
+        return true; // single alpha char
+    }
+    // Last char must be alphanumeric
+    if !bytes[bytes.len() - 1].is_ascii_alphanumeric() {
+        return false;
+    }
+    // Middle chars: alphanumeric or hyphen
+    bytes[1..bytes.len() - 1].iter().all(|b| b.is_ascii_alphanumeric() || *b == b'-')
+}
 
 /// Reference: regex_valid_component_name (keep as regex — Unicode properties)
 static REGEX_VALID_COMPONENT_NAME: LazyLock<Regex> = LazyLock::new(|| {
@@ -401,7 +435,7 @@ fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
     }
 
     // Reference: element.js:137-143 — invalid tag name
-    if !REGEX_VALID_ELEMENT_NAME.is_match(&name)
+    if !is_valid_element_name(&name)
         && !REGEX_VALID_COMPONENT_NAME.is_match(&name)
     {
         if !parser.loose || !name.ends_with('.') {

@@ -1,3 +1,6 @@
+use serde::ser::SerializeMap;
+use serde::Serialize;
+
 use crate::attributes::Attribute;
 use crate::span::Span;
 use crate::text::Comment;
@@ -18,11 +21,24 @@ pub struct StyleSheet<'a> {
     pub content: CssContent<'a>,
 }
 
-#[derive(Debug, Clone)]
+impl Serialize for StyleSheet<'_> {
+    fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let mut map = s.serialize_map(None)?;
+        map.serialize_entry("type", "StyleSheet")?;
+        map.serialize_entry("start", &self.span.start)?;
+        map.serialize_entry("end", &self.span.end)?;
+        map.serialize_entry("attributes", &self.attributes)?;
+        map.serialize_entry("children", &self.children)?;
+        map.serialize_entry("content", &self.content)?;
+        map.end()
+    }
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct CssContent<'a> {
     pub start: u32,
     pub end: u32,
-    pub styles: String,
+    pub styles: &'a str,
     pub comment: Option<Comment<'a>>,
 }
 
@@ -35,6 +51,15 @@ pub enum StyleSheetChild {
     Atrule(CssAtrule),
 }
 
+impl Serialize for StyleSheetChild {
+    fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        match self {
+            Self::Rule(n) => n.serialize(s),
+            Self::Atrule(n) => n.serialize(s),
+        }
+    }
+}
+
 /*
  * type CssBlockChild = Declaration | Rule | Atrule;
  */
@@ -43,6 +68,16 @@ pub enum CssBlockChild {
     Declaration(CssDeclaration),
     Rule(CssRule),
     Atrule(CssAtrule),
+}
+
+impl Serialize for CssBlockChild {
+    fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        match self {
+            Self::Declaration(n) => n.serialize(s),
+            Self::Rule(n) => n.serialize(s),
+            Self::Atrule(n) => n.serialize(s),
+        }
+    }
 }
 
 /*
@@ -63,14 +98,30 @@ pub enum SimpleSelector {
     Nth(Nth),
 }
 
-#[derive(Debug, Clone)]
+impl Serialize for SimpleSelector {
+    fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        match self {
+            Self::TypeSelector(n) => n.serialize(s),
+            Self::IdSelector(n) => n.serialize(s),
+            Self::ClassSelector(n) => n.serialize(s),
+            Self::AttributeSelector(n) => n.serialize(s),
+            Self::PseudoClassSelector(n) => n.serialize(s),
+            Self::PseudoElementSelector(n) => n.serialize(s),
+            Self::NestingSelector(n) => n.serialize(s),
+            Self::Percentage(n) => n.serialize(s),
+            Self::Nth(n) => n.serialize(s),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct CssRule {
     pub span: Span,
     pub prelude: SelectorList,
     pub block: CssBlock,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct CssAtrule {
     pub span: Span,
     pub name: String,
@@ -78,63 +129,63 @@ pub struct CssAtrule {
     pub block: Option<CssBlock>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct CssBlock {
     pub span: Span,
     pub children: Vec<CssBlockChild>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct CssDeclaration {
     pub span: Span,
     pub property: String,
     pub value: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct SelectorList {
     pub span: Span,
     pub children: Vec<ComplexSelector>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ComplexSelector {
     pub span: Span,
     pub children: Vec<RelativeSelector>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct RelativeSelector {
     pub span: Span,
     pub combinator: Option<CssCombinator>,
     pub selectors: Vec<SimpleSelector>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct CssCombinator {
     pub span: Span,
     pub name: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct TypeSelector {
     pub span: Span,
     pub name: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct IdSelector {
     pub span: Span,
     pub name: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ClassSelector {
     pub span: Span,
     pub name: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct AttributeSelector {
     pub span: Span,
     pub name: String,
@@ -143,32 +194,32 @@ pub struct AttributeSelector {
     pub flags: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct PseudoClassSelector {
     pub span: Span,
     pub name: String,
     pub args: Option<Box<SelectorList>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct PseudoElementSelector {
     pub span: Span,
     pub name: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct NestingSelector {
     pub span: Span,
     pub name: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Percentage {
     pub span: Span,
     pub value: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Nth {
     pub span: Span,
     pub value: String,

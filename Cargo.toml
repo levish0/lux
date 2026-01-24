@@ -28,6 +28,8 @@ oxc_span = { version = "0.110.0", features = ["serialize"] }
 oxc_syntax = "0.110.0"
 oxc_diagnostics = "0.110.0"
 oxc_estree = { version = "0.110.0", features = ["serialize"] }
+oxc_ast_visit = "0.110.0"
 rayon = "1.11.0"
-line-span = "0.1.5"
+phf = { version = "0.13.1", features = ["macros"] }
 regex = "1.12.2"
+line-span = "0.1.5"

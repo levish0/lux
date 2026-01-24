@@ -1,2233 +1,2230 @@
-use std::collections::HashMap;
-use std::sync::LazyLock;
+use phf::phf_map;
 
 #[rustfmt::skip]
-pub static ENTITIES: LazyLock<HashMap<&'static str, u32>> = LazyLock::new(|| {
-    let mut m = HashMap::with_capacity(2225);
-        m.insert("CounterClockwiseContourIntegral;", 8755);
-        m.insert("ClockwiseContourIntegral;", 8754);
-        m.insert("DoubleLongLeftRightArrow;", 10234);
-        m.insert("NotNestedGreaterGreater;", 10914);
-        m.insert("DiacriticalDoubleAcute;", 733);
-        m.insert("NotSquareSupersetEqual;", 8931);
-        m.insert("CloseCurlyDoubleQuote;", 8221);
-        m.insert("DoubleContourIntegral;", 8751);
-        m.insert("FilledVerySmallSquare;", 9642);
-        m.insert("NegativeVeryThinSpace;", 8203);
-        m.insert("NotPrecedesSlantEqual;", 8928);
-        m.insert("NotRightTriangleEqual;", 8941);
-        m.insert("NotSucceedsSlantEqual;", 8929);
-        m.insert("CapitalDifferentialD;", 8517);
-        m.insert("DoubleLeftRightArrow;", 8660);
-        m.insert("DoubleLongRightArrow;", 10233);
-        m.insert("EmptyVerySmallSquare;", 9643);
-        m.insert("NestedGreaterGreater;", 8811);
-        m.insert("NotDoubleVerticalBar;", 8742);
-        m.insert("NotGreaterSlantEqual;", 10878);
-        m.insert("NotLeftTriangleEqual;", 8940);
-        m.insert("NotSquareSubsetEqual;", 8930);
-        m.insert("OpenCurlyDoubleQuote;", 8220);
-        m.insert("ReverseUpEquilibrium;", 10607);
-        m.insert("DoubleLongLeftArrow;", 10232);
-        m.insert("DownLeftRightVector;", 10576);
-        m.insert("LeftArrowRightArrow;", 8646);
-        m.insert("NegativeMediumSpace;", 8203);
-        m.insert("NotGreaterFullEqual;", 8807);
-        m.insert("NotRightTriangleBar;", 10704);
-        m.insert("RightArrowLeftArrow;", 8644);
-        m.insert("SquareSupersetEqual;", 8850);
-        m.insert("leftrightsquigarrow;", 8621);
-        m.insert("DownRightTeeVector;", 10591);
-        m.insert("DownRightVectorBar;", 10583);
-        m.insert("LongLeftRightArrow;", 10231);
-        m.insert("Longleftrightarrow;", 10234);
-        m.insert("NegativeThickSpace;", 8203);
-        m.insert("NotLeftTriangleBar;", 10703);
-        m.insert("PrecedesSlantEqual;", 8828);
-        m.insert("ReverseEquilibrium;", 8651);
-        m.insert("RightDoubleBracket;", 10215);
-        m.insert("RightDownTeeVector;", 10589);
-        m.insert("RightDownVectorBar;", 10581);
-        m.insert("RightTriangleEqual;", 8885);
-        m.insert("SquareIntersection;", 8851);
-        m.insert("SucceedsSlantEqual;", 8829);
-        m.insert("blacktriangleright;", 9656);
-        m.insert("longleftrightarrow;", 10231);
-        m.insert("DoubleUpDownArrow;", 8661);
-        m.insert("DoubleVerticalBar;", 8741);
-        m.insert("DownLeftTeeVector;", 10590);
-        m.insert("DownLeftVectorBar;", 10582);
-        m.insert("FilledSmallSquare;", 9724);
-        m.insert("GreaterSlantEqual;", 10878);
-        m.insert("LeftDoubleBracket;", 10214);
-        m.insert("LeftDownTeeVector;", 10593);
-        m.insert("LeftDownVectorBar;", 10585);
-        m.insert("LeftTriangleEqual;", 8884);
-        m.insert("NegativeThinSpace;", 8203);
-        m.insert("NotGreaterGreater;", 8811);
-        m.insert("NotLessSlantEqual;", 10877);
-        m.insert("NotNestedLessLess;", 10913);
-        m.insert("NotReverseElement;", 8716);
-        m.insert("NotSquareSuperset;", 8848);
-        m.insert("NotTildeFullEqual;", 8775);
-        m.insert("RightAngleBracket;", 10217);
-        m.insert("RightUpDownVector;", 10575);
-        m.insert("SquareSubsetEqual;", 8849);
-        m.insert("VerticalSeparator;", 10072);
-        m.insert("blacktriangledown;", 9662);
-        m.insert("blacktriangleleft;", 9666);
-        m.insert("leftrightharpoons;", 8651);
-        m.insert("rightleftharpoons;", 8652);
-        m.insert("twoheadrightarrow;", 8608);
-        m.insert("DiacriticalAcute;", 180);
-        m.insert("DiacriticalGrave;", 96);
-        m.insert("DiacriticalTilde;", 732);
-        m.insert("DoubleRightArrow;", 8658);
-        m.insert("DownArrowUpArrow;", 8693);
-        m.insert("EmptySmallSquare;", 9723);
-        m.insert("GreaterEqualLess;", 8923);
-        m.insert("GreaterFullEqual;", 8807);
-        m.insert("LeftAngleBracket;", 10216);
-        m.insert("LeftUpDownVector;", 10577);
-        m.insert("LessEqualGreater;", 8922);
-        m.insert("NonBreakingSpace;", 160);
-        m.insert("NotPrecedesEqual;", 10927);
-        m.insert("NotRightTriangle;", 8939);
-        m.insert("NotSucceedsEqual;", 10928);
-        m.insert("NotSucceedsTilde;", 8831);
-        m.insert("NotSupersetEqual;", 8841);
-        m.insert("RightTriangleBar;", 10704);
-        m.insert("RightUpTeeVector;", 10588);
-        m.insert("RightUpVectorBar;", 10580);
-        m.insert("UnderParenthesis;", 9181);
-        m.insert("UpArrowDownArrow;", 8645);
-        m.insert("circlearrowright;", 8635);
-        m.insert("downharpoonright;", 8642);
-        m.insert("ntrianglerighteq;", 8941);
-        m.insert("rightharpoondown;", 8641);
-        m.insert("rightrightarrows;", 8649);
-        m.insert("twoheadleftarrow;", 8606);
-        m.insert("vartriangleright;", 8883);
-        m.insert("CloseCurlyQuote;", 8217);
-        m.insert("ContourIntegral;", 8750);
-        m.insert("DoubleDownArrow;", 8659);
-        m.insert("DoubleLeftArrow;", 8656);
-        m.insert("DownRightVector;", 8641);
-        m.insert("LeftRightVector;", 10574);
-        m.insert("LeftTriangleBar;", 10703);
-        m.insert("LeftUpTeeVector;", 10592);
-        m.insert("LeftUpVectorBar;", 10584);
-        m.insert("LowerRightArrow;", 8600);
-        m.insert("NotGreaterEqual;", 8817);
-        m.insert("NotGreaterTilde;", 8821);
-        m.insert("NotHumpDownHump;", 8782);
-        m.insert("NotLeftTriangle;", 8938);
-        m.insert("NotSquareSubset;", 8847);
-        m.insert("OverParenthesis;", 9180);
-        m.insert("RightDownVector;", 8642);
-        m.insert("ShortRightArrow;", 8594);
-        m.insert("UpperRightArrow;", 8599);
-        m.insert("bigtriangledown;", 9661);
-        m.insert("circlearrowleft;", 8634);
-        m.insert("curvearrowright;", 8631);
-        m.insert("downharpoonleft;", 8643);
-        m.insert("leftharpoondown;", 8637);
-        m.insert("leftrightarrows;", 8646);
-        m.insert("nLeftrightarrow;", 8654);
-        m.insert("nleftrightarrow;", 8622);
-        m.insert("ntrianglelefteq;", 8940);
-        m.insert("rightleftarrows;", 8644);
-        m.insert("rightsquigarrow;", 8605);
-        m.insert("rightthreetimes;", 8908);
-        m.insert("straightepsilon;", 1013);
-        m.insert("trianglerighteq;", 8885);
-        m.insert("vartriangleleft;", 8882);
-        m.insert("DiacriticalDot;", 729);
-        m.insert("DoubleRightTee;", 8872);
-        m.insert("DownLeftVector;", 8637);
-        m.insert("GreaterGreater;", 10914);
-        m.insert("HorizontalLine;", 9472);
-        m.insert("InvisibleComma;", 8291);
-        m.insert("InvisibleTimes;", 8290);
-        m.insert("LeftDownVector;", 8643);
-        m.insert("LeftRightArrow;", 8596);
-        m.insert("Leftrightarrow;", 8660);
-        m.insert("LessSlantEqual;", 10877);
-        m.insert("LongRightArrow;", 10230);
-        m.insert("Longrightarrow;", 10233);
-        m.insert("LowerLeftArrow;", 8601);
-        m.insert("NestedLessLess;", 8810);
-        m.insert("NotGreaterLess;", 8825);
-        m.insert("NotLessGreater;", 8824);
-        m.insert("NotSubsetEqual;", 8840);
-        m.insert("NotVerticalBar;", 8740);
-        m.insert("OpenCurlyQuote;", 8216);
-        m.insert("ReverseElement;", 8715);
-        m.insert("RightTeeVector;", 10587);
-        m.insert("RightVectorBar;", 10579);
-        m.insert("ShortDownArrow;", 8595);
-        m.insert("ShortLeftArrow;", 8592);
-        m.insert("SquareSuperset;", 8848);
-        m.insert("TildeFullEqual;", 8773);
-        m.insert("UpperLeftArrow;", 8598);
-        m.insert("ZeroWidthSpace;", 8203);
-        m.insert("curvearrowleft;", 8630);
-        m.insert("doublebarwedge;", 8966);
-        m.insert("downdownarrows;", 8650);
-        m.insert("hookrightarrow;", 8618);
-        m.insert("leftleftarrows;", 8647);
-        m.insert("leftrightarrow;", 8596);
-        m.insert("leftthreetimes;", 8907);
-        m.insert("longrightarrow;", 10230);
-        m.insert("looparrowright;", 8620);
-        m.insert("nshortparallel;", 8742);
-        m.insert("ntriangleright;", 8939);
-        m.insert("rightarrowtail;", 8611);
-        m.insert("rightharpoonup;", 8640);
-        m.insert("trianglelefteq;", 8884);
-        m.insert("upharpoonright;", 8638);
-        m.insert("ApplyFunction;", 8289);
-        m.insert("DifferentialD;", 8518);
-        m.insert("DoubleLeftTee;", 10980);
-        m.insert("DoubleUpArrow;", 8657);
-        m.insert("LeftTeeVector;", 10586);
-        m.insert("LeftVectorBar;", 10578);
-        m.insert("LessFullEqual;", 8806);
-        m.insert("LongLeftArrow;", 10229);
-        m.insert("Longleftarrow;", 10232);
-        m.insert("NotEqualTilde;", 8770);
-        m.insert("NotTildeEqual;", 8772);
-        m.insert("NotTildeTilde;", 8777);
-        m.insert("Poincareplane;", 8460);
-        m.insert("PrecedesEqual;", 10927);
-        m.insert("PrecedesTilde;", 8830);
-        m.insert("RightArrowBar;", 8677);
-        m.insert("RightTeeArrow;", 8614);
-        m.insert("RightTriangle;", 8883);
-        m.insert("RightUpVector;", 8638);
-        m.insert("SucceedsEqual;", 10928);
-        m.insert("SucceedsTilde;", 8831);
-        m.insert("SupersetEqual;", 8839);
-        m.insert("UpEquilibrium;", 10606);
-        m.insert("VerticalTilde;", 8768);
-        m.insert("VeryThinSpace;", 8202);
-        m.insert("bigtriangleup;", 9651);
-        m.insert("blacktriangle;", 9652);
-        m.insert("divideontimes;", 8903);
-        m.insert("fallingdotseq;", 8786);
-        m.insert("hookleftarrow;", 8617);
-        m.insert("leftarrowtail;", 8610);
-        m.insert("leftharpoonup;", 8636);
-        m.insert("longleftarrow;", 10229);
-        m.insert("looparrowleft;", 8619);
-        m.insert("measuredangle;", 8737);
-        m.insert("ntriangleleft;", 8938);
-        m.insert("shortparallel;", 8741);
-        m.insert("smallsetminus;", 8726);
-        m.insert("triangleright;", 9657);
-        m.insert("upharpoonleft;", 8639);
-        m.insert("varsubsetneqq;", 10955);
-        m.insert("varsupsetneqq;", 10956);
-        m.insert("DownArrowBar;", 10515);
-        m.insert("DownTeeArrow;", 8615);
-        m.insert("ExponentialE;", 8519);
-        m.insert("GreaterEqual;", 8805);
-        m.insert("GreaterTilde;", 8819);
-        m.insert("HilbertSpace;", 8459);
-        m.insert("HumpDownHump;", 8782);
-        m.insert("Intersection;", 8898);
-        m.insert("LeftArrowBar;", 8676);
-        m.insert("LeftTeeArrow;", 8612);
-        m.insert("LeftTriangle;", 8882);
-        m.insert("LeftUpVector;", 8639);
-        m.insert("NotCongruent;", 8802);
-        m.insert("NotHumpEqual;", 8783);
-        m.insert("NotLessEqual;", 8816);
-        m.insert("NotLessTilde;", 8820);
-        m.insert("Proportional;", 8733);
-        m.insert("RightCeiling;", 8969);
-        m.insert("RoundImplies;", 10608);
-        m.insert("ShortUpArrow;", 8593);
-        m.insert("SquareSubset;", 8847);
-        m.insert("UnderBracket;", 9141);
-        m.insert("VerticalLine;", 124);
-        m.insert("blacklozenge;", 10731);
-        m.insert("exponentiale;", 8519);
-        m.insert("risingdotseq;", 8787);
-        m.insert("triangledown;", 9663);
-        m.insert("triangleleft;", 9667);
-        m.insert("varsubsetneq;", 8842);
-        m.insert("varsupsetneq;", 8843);
-        m.insert("CircleMinus;", 8854);
-        m.insert("CircleTimes;", 8855);
-        m.insert("Equilibrium;", 8652);
-        m.insert("GreaterLess;", 8823);
-        m.insert("LeftCeiling;", 8968);
-        m.insert("LessGreater;", 8822);
-        m.insert("MediumSpace;", 8287);
-        m.insert("NotLessLess;", 8810);
-        m.insert("NotPrecedes;", 8832);
-        m.insert("NotSucceeds;", 8833);
-        m.insert("NotSuperset;", 8835);
-        m.insert("OverBracket;", 9140);
-        m.insert("RightVector;", 8640);
-        m.insert("Rrightarrow;", 8667);
-        m.insert("RuleDelayed;", 10740);
-        m.insert("SmallCircle;", 8728);
-        m.insert("SquareUnion;", 8852);
-        m.insert("SubsetEqual;", 8838);
-        m.insert("UpDownArrow;", 8597);
-        m.insert("Updownarrow;", 8661);
-        m.insert("VerticalBar;", 8739);
-        m.insert("backepsilon;", 1014);
-        m.insert("blacksquare;", 9642);
-        m.insert("circledcirc;", 8858);
-        m.insert("circleddash;", 8861);
-        m.insert("curlyeqprec;", 8926);
-        m.insert("curlyeqsucc;", 8927);
-        m.insert("diamondsuit;", 9830);
-        m.insert("eqslantless;", 10901);
-        m.insert("expectation;", 8496);
-        m.insert("nRightarrow;", 8655);
-        m.insert("nrightarrow;", 8603);
-        m.insert("preccurlyeq;", 8828);
-        m.insert("precnapprox;", 10937);
-        m.insert("quaternions;", 8461);
-        m.insert("straightphi;", 981);
-        m.insert("succcurlyeq;", 8829);
-        m.insert("succnapprox;", 10938);
-        m.insert("thickapprox;", 8776);
-        m.insert("updownarrow;", 8597);
-        m.insert("Bernoullis;", 8492);
-        m.insert("CirclePlus;", 8853);
-        m.insert("EqualTilde;", 8770);
-        m.insert("Fouriertrf;", 8497);
-        m.insert("ImaginaryI;", 8520);
-        m.insert("Laplacetrf;", 8466);
-        m.insert("LeftVector;", 8636);
-        m.insert("Lleftarrow;", 8666);
-        m.insert("NotElement;", 8713);
-        m.insert("NotGreater;", 8815);
-        m.insert("Proportion;", 8759);
-        m.insert("RightArrow;", 8594);
-        m.insert("RightFloor;", 8971);
-        m.insert("Rightarrow;", 8658);
-        m.insert("ThickSpace;", 8287);
-        m.insert("TildeEqual;", 8771);
-        m.insert("TildeTilde;", 8776);
-        m.insert("UnderBrace;", 9183);
-        m.insert("UpArrowBar;", 10514);
-        m.insert("UpTeeArrow;", 8613);
-        m.insert("circledast;", 8859);
-        m.insert("complement;", 8705);
-        m.insert("curlywedge;", 8911);
-        m.insert("eqslantgtr;", 10902);
-        m.insert("gtreqqless;", 10892);
-        m.insert("lessapprox;", 10885);
-        m.insert("lesseqqgtr;", 10891);
-        m.insert("lmoustache;", 9136);
-        m.insert("longmapsto;", 10236);
-        m.insert("mapstodown;", 8615);
-        m.insert("mapstoleft;", 8612);
-        m.insert("nLeftarrow;", 8653);
-        m.insert("nleftarrow;", 8602);
-        m.insert("nsubseteqq;", 10949);
-        m.insert("nsupseteqq;", 10950);
-        m.insert("precapprox;", 10935);
-        m.insert("rightarrow;", 8594);
-        m.insert("rmoustache;", 9137);
-        m.insert("sqsubseteq;", 8849);
-        m.insert("sqsupseteq;", 8850);
-        m.insert("subsetneqq;", 10955);
-        m.insert("succapprox;", 10936);
-        m.insert("supsetneqq;", 10956);
-        m.insert("upuparrows;", 8648);
-        m.insert("varepsilon;", 1013);
-        m.insert("varnothing;", 8709);
-        m.insert("Backslash;", 8726);
-        m.insert("CenterDot;", 183);
-        m.insert("CircleDot;", 8857);
-        m.insert("Congruent;", 8801);
-        m.insert("Coproduct;", 8720);
-        m.insert("DoubleDot;", 168);
-        m.insert("DownArrow;", 8595);
-        m.insert("DownBreve;", 785);
-        m.insert("Downarrow;", 8659);
-        m.insert("HumpEqual;", 8783);
-        m.insert("LeftArrow;", 8592);
-        m.insert("LeftFloor;", 8970);
-        m.insert("Leftarrow;", 8656);
-        m.insert("LessTilde;", 8818);
-        m.insert("Mellintrf;", 8499);
-        m.insert("MinusPlus;", 8723);
-        m.insert("NotCupCap;", 8813);
-        m.insert("NotExists;", 8708);
-        m.insert("NotSubset;", 8834);
-        m.insert("OverBrace;", 9182);
-        m.insert("PlusMinus;", 177);
-        m.insert("Therefore;", 8756);
-        m.insert("ThinSpace;", 8201);
-        m.insert("TripleDot;", 8411);
-        m.insert("UnionPlus;", 8846);
-        m.insert("backprime;", 8245);
-        m.insert("backsimeq;", 8909);
-        m.insert("bigotimes;", 10754);
-        m.insert("centerdot;", 183);
-        m.insert("checkmark;", 10003);
-        m.insert("complexes;", 8450);
-        m.insert("dotsquare;", 8865);
-        m.insert("downarrow;", 8595);
-        m.insert("gtrapprox;", 10886);
-        m.insert("gtreqless;", 8923);
-        m.insert("gvertneqq;", 8809);
-        m.insert("heartsuit;", 9829);
-        m.insert("leftarrow;", 8592);
-        m.insert("lesseqgtr;", 8922);
-        m.insert("lvertneqq;", 8808);
-        m.insert("ngeqslant;", 10878);
-        m.insert("nleqslant;", 10877);
-        m.insert("nparallel;", 8742);
-        m.insert("nshortmid;", 8740);
-        m.insert("nsubseteq;", 8840);
-        m.insert("nsupseteq;", 8841);
-        m.insert("pitchfork;", 8916);
-        m.insert("rationals;", 8474);
-        m.insert("spadesuit;", 9824);
-        m.insert("subseteqq;", 10949);
-        m.insert("subsetneq;", 8842);
-        m.insert("supseteqq;", 10950);
-        m.insert("supsetneq;", 8843);
-        m.insert("therefore;", 8756);
-        m.insert("triangleq;", 8796);
-        m.insert("varpropto;", 8733);
-        m.insert("DDotrahd;", 10513);
-        m.insert("DotEqual;", 8784);
-        m.insert("Integral;", 8747);
-        m.insert("LessLess;", 10913);
-        m.insert("NotEqual;", 8800);
-        m.insert("NotTilde;", 8769);
-        m.insert("PartialD;", 8706);
-        m.insert("Precedes;", 8826);
-        m.insert("RightTee;", 8866);
-        m.insert("Succeeds;", 8827);
-        m.insert("SuchThat;", 8715);
-        m.insert("Superset;", 8835);
-        m.insert("Uarrocir;", 10569);
-        m.insert("UnderBar;", 95);
-        m.insert("andslope;", 10840);
-        m.insert("angmsdaa;", 10664);
-        m.insert("angmsdab;", 10665);
-        m.insert("angmsdac;", 10666);
-        m.insert("angmsdad;", 10667);
-        m.insert("angmsdae;", 10668);
-        m.insert("angmsdaf;", 10669);
-        m.insert("angmsdag;", 10670);
-        m.insert("angmsdah;", 10671);
-        m.insert("angrtvbd;", 10653);
-        m.insert("approxeq;", 8778);
-        m.insert("awconint;", 8755);
-        m.insert("backcong;", 8780);
-        m.insert("barwedge;", 8965);
-        m.insert("bbrktbrk;", 9142);
-        m.insert("bigoplus;", 10753);
-        m.insert("bigsqcup;", 10758);
-        m.insert("biguplus;", 10756);
-        m.insert("bigwedge;", 8896);
-        m.insert("boxminus;", 8863);
-        m.insert("boxtimes;", 8864);
-        m.insert("bsolhsub;", 10184);
-        m.insert("capbrcup;", 10825);
-        m.insert("circledR;", 174);
-        m.insert("circledS;", 9416);
-        m.insert("cirfnint;", 10768);
-        m.insert("clubsuit;", 9827);
-        m.insert("cupbrcap;", 10824);
-        m.insert("curlyvee;", 8910);
-        m.insert("cwconint;", 8754);
-        m.insert("doteqdot;", 8785);
-        m.insert("dotminus;", 8760);
-        m.insert("drbkarow;", 10512);
-        m.insert("dzigrarr;", 10239);
-        m.insert("elinters;", 9191);
-        m.insert("emptyset;", 8709);
-        m.insert("eqvparsl;", 10725);
-        m.insert("fpartint;", 10765);
-        m.insert("geqslant;", 10878);
-        m.insert("gesdotol;", 10884);
-        m.insert("gnapprox;", 10890);
-        m.insert("hksearow;", 10533);
-        m.insert("hkswarow;", 10534);
-        m.insert("imagline;", 8464);
-        m.insert("imagpart;", 8465);
-        m.insert("infintie;", 10717);
-        m.insert("integers;", 8484);
-        m.insert("intercal;", 8890);
-        m.insert("intlarhk;", 10775);
-        m.insert("laemptyv;", 10676);
-        m.insert("ldrushar;", 10571);
-        m.insert("leqslant;", 10877);
-        m.insert("lesdotor;", 10883);
-        m.insert("llcorner;", 8990);
-        m.insert("lnapprox;", 10889);
-        m.insert("lrcorner;", 8991);
-        m.insert("lurdshar;", 10570);
-        m.insert("mapstoup;", 8613);
-        m.insert("multimap;", 8888);
-        m.insert("naturals;", 8469);
-        m.insert("ncongdot;", 10861);
-        m.insert("notindot;", 8949);
-        m.insert("otimesas;", 10806);
-        m.insert("parallel;", 8741);
-        m.insert("plusacir;", 10787);
-        m.insert("pointint;", 10773);
-        m.insert("precneqq;", 10933);
-        m.insert("precnsim;", 8936);
-        m.insert("profalar;", 9006);
-        m.insert("profline;", 8978);
-        m.insert("profsurf;", 8979);
-        m.insert("raemptyv;", 10675);
-        m.insert("realpart;", 8476);
-        m.insert("rppolint;", 10770);
-        m.insert("rtriltri;", 10702);
-        m.insert("scpolint;", 10771);
-        m.insert("setminus;", 8726);
-        m.insert("shortmid;", 8739);
-        m.insert("smeparsl;", 10724);
-        m.insert("sqsubset;", 8847);
-        m.insert("sqsupset;", 8848);
-        m.insert("subseteq;", 8838);
-        m.insert("succneqq;", 10934);
-        m.insert("succnsim;", 8937);
-        m.insert("supseteq;", 8839);
-        m.insert("thetasym;", 977);
-        m.insert("thicksim;", 8764);
-        m.insert("timesbar;", 10801);
-        m.insert("triangle;", 9653);
-        m.insert("triminus;", 10810);
-        m.insert("trpezium;", 9186);
-        m.insert("ulcorner;", 8988);
-        m.insert("urcorner;", 8989);
-        m.insert("varkappa;", 1008);
-        m.insert("varsigma;", 962);
-        m.insert("vartheta;", 977);
-        m.insert("Because;", 8757);
-        m.insert("Cayleys;", 8493);
-        m.insert("Cconint;", 8752);
-        m.insert("Cedilla;", 184);
-        m.insert("Diamond;", 8900);
-        m.insert("DownTee;", 8868);
-        m.insert("Element;", 8712);
-        m.insert("Epsilon;", 917);
-        m.insert("Implies;", 8658);
-        m.insert("LeftTee;", 8867);
-        m.insert("NewLine;", 10);
-        m.insert("NoBreak;", 8288);
-        m.insert("NotLess;", 8814);
-        m.insert("Omicron;", 927);
-        m.insert("OverBar;", 8254);
-        m.insert("Product;", 8719);
-        m.insert("UpArrow;", 8593);
-        m.insert("Uparrow;", 8657);
-        m.insert("Upsilon;", 933);
-        m.insert("alefsym;", 8501);
-        m.insert("angrtvb;", 8894);
-        m.insert("angzarr;", 9084);
-        m.insert("asympeq;", 8781);
-        m.insert("backsim;", 8765);
-        m.insert("because;", 8757);
-        m.insert("bemptyv;", 10672);
-        m.insert("between;", 8812);
-        m.insert("bigcirc;", 9711);
-        m.insert("bigodot;", 10752);
-        m.insert("bigstar;", 9733);
-        m.insert("bnequiv;", 8801);
-        m.insert("boxplus;", 8862);
-        m.insert("ccupssm;", 10832);
-        m.insert("cemptyv;", 10674);
-        m.insert("cirscir;", 10690);
-        m.insert("coloneq;", 8788);
-        m.insert("congdot;", 10861);
-        m.insert("cudarrl;", 10552);
-        m.insert("cudarrr;", 10549);
-        m.insert("cularrp;", 10557);
-        m.insert("curarrm;", 10556);
-        m.insert("dbkarow;", 10511);
-        m.insert("ddagger;", 8225);
-        m.insert("ddotseq;", 10871);
-        m.insert("demptyv;", 10673);
-        m.insert("diamond;", 8900);
-        m.insert("digamma;", 989);
-        m.insert("dotplus;", 8724);
-        m.insert("dwangle;", 10662);
-        m.insert("epsilon;", 949);
-        m.insert("eqcolon;", 8789);
-        m.insert("equivDD;", 10872);
-        m.insert("gesdoto;", 10882);
-        m.insert("gtquest;", 10876);
-        m.insert("gtrless;", 8823);
-        m.insert("harrcir;", 10568);
-        m.insert("intprod;", 10812);
-        m.insert("isindot;", 8949);
-        m.insert("larrbfs;", 10527);
-        m.insert("larrsim;", 10611);
-        m.insert("lbrksld;", 10639);
-        m.insert("lbrkslu;", 10637);
-        m.insert("ldrdhar;", 10599);
-        m.insert("lesdoto;", 10881);
-        m.insert("lessdot;", 8918);
-        m.insert("lessgtr;", 8822);
-        m.insert("lesssim;", 8818);
-        m.insert("lotimes;", 10804);
-        m.insert("lozenge;", 9674);
-        m.insert("ltquest;", 10875);
-        m.insert("luruhar;", 10598);
-        m.insert("maltese;", 10016);
-        m.insert("minusdu;", 10794);
-        m.insert("napprox;", 8777);
-        m.insert("natural;", 9838);
-        m.insert("nearrow;", 8599);
-        m.insert("nexists;", 8708);
-        m.insert("notinva;", 8713);
-        m.insert("notinvb;", 8951);
-        m.insert("notinvc;", 8950);
-        m.insert("notniva;", 8716);
-        m.insert("notnivb;", 8958);
-        m.insert("notnivc;", 8957);
-        m.insert("npolint;", 10772);
-        m.insert("npreceq;", 10927);
-        m.insert("nsqsube;", 8930);
-        m.insert("nsqsupe;", 8931);
-        m.insert("nsubset;", 8834);
-        m.insert("nsucceq;", 10928);
-        m.insert("nsupset;", 8835);
-        m.insert("nvinfin;", 10718);
-        m.insert("nvltrie;", 8884);
-        m.insert("nvrtrie;", 8885);
-        m.insert("nwarrow;", 8598);
-        m.insert("olcross;", 10683);
-        m.insert("omicron;", 959);
-        m.insert("orderof;", 8500);
-        m.insert("orslope;", 10839);
-        m.insert("pertenk;", 8241);
-        m.insert("planckh;", 8462);
-        m.insert("pluscir;", 10786);
-        m.insert("plussim;", 10790);
-        m.insert("plustwo;", 10791);
-        m.insert("precsim;", 8830);
-        m.insert("quatint;", 10774);
-        m.insert("questeq;", 8799);
-        m.insert("rarrbfs;", 10528);
-        m.insert("rarrsim;", 10612);
-        m.insert("rbrksld;", 10638);
-        m.insert("rbrkslu;", 10640);
-        m.insert("rdldhar;", 10601);
-        m.insert("realine;", 8475);
-        m.insert("rotimes;", 10805);
-        m.insert("ruluhar;", 10600);
-        m.insert("searrow;", 8600);
-        m.insert("simplus;", 10788);
-        m.insert("simrarr;", 10610);
-        m.insert("subedot;", 10947);
-        m.insert("submult;", 10945);
-        m.insert("subplus;", 10943);
-        m.insert("subrarr;", 10617);
-        m.insert("succsim;", 8831);
-        m.insert("supdsub;", 10968);
-        m.insert("supedot;", 10948);
-        m.insert("suphsol;", 10185);
-        m.insert("suphsub;", 10967);
-        m.insert("suplarr;", 10619);
-        m.insert("supmult;", 10946);
-        m.insert("supplus;", 10944);
-        m.insert("swarrow;", 8601);
-        m.insert("topfork;", 10970);
-        m.insert("triplus;", 10809);
-        m.insert("tritime;", 10811);
-        m.insert("uparrow;", 8593);
-        m.insert("upsilon;", 965);
-        m.insert("uwangle;", 10663);
-        m.insert("vzigzag;", 10650);
-        m.insert("zigrarr;", 8669);
-        m.insert("Aacute;", 193);
-        m.insert("Abreve;", 258);
-        m.insert("Agrave;", 192);
-        m.insert("Assign;", 8788);
-        m.insert("Atilde;", 195);
-        m.insert("Barwed;", 8966);
-        m.insert("Bumpeq;", 8782);
-        m.insert("Cacute;", 262);
-        m.insert("Ccaron;", 268);
-        m.insert("Ccedil;", 199);
-        m.insert("Colone;", 10868);
-        m.insert("Conint;", 8751);
-        m.insert("CupCap;", 8781);
-        m.insert("Dagger;", 8225);
-        m.insert("Dcaron;", 270);
-        m.insert("DotDot;", 8412);
-        m.insert("Dstrok;", 272);
-        m.insert("Eacute;", 201);
-        m.insert("Ecaron;", 282);
-        m.insert("Egrave;", 200);
-        m.insert("Exists;", 8707);
-        m.insert("ForAll;", 8704);
-        m.insert("Gammad;", 988);
-        m.insert("Gbreve;", 286);
-        m.insert("Gcedil;", 290);
-        m.insert("HARDcy;", 1066);
-        m.insert("Hstrok;", 294);
-        m.insert("Iacute;", 205);
-        m.insert("Igrave;", 204);
-        m.insert("Itilde;", 296);
-        m.insert("Jsercy;", 1032);
-        m.insert("Kcedil;", 310);
-        m.insert("Lacute;", 313);
-        m.insert("Lambda;", 923);
-        m.insert("Lcaron;", 317);
-        m.insert("Lcedil;", 315);
-        m.insert("Lmidot;", 319);
-        m.insert("Lstrok;", 321);
-        m.insert("Nacute;", 323);
-        m.insert("Ncaron;", 327);
-        m.insert("Ncedil;", 325);
-        m.insert("Ntilde;", 209);
-        m.insert("Oacute;", 211);
-        m.insert("Odblac;", 336);
-        m.insert("Ograve;", 210);
-        m.insert("Oslash;", 216);
-        m.insert("Otilde;", 213);
-        m.insert("Otimes;", 10807);
-        m.insert("Racute;", 340);
-        m.insert("Rarrtl;", 10518);
-        m.insert("Rcaron;", 344);
-        m.insert("Rcedil;", 342);
-        m.insert("SHCHcy;", 1065);
-        m.insert("SOFTcy;", 1068);
-        m.insert("Sacute;", 346);
-        m.insert("Scaron;", 352);
-        m.insert("Scedil;", 350);
-        m.insert("Square;", 9633);
-        m.insert("Subset;", 8912);
-        m.insert("Supset;", 8913);
-        m.insert("Tcaron;", 356);
-        m.insert("Tcedil;", 354);
-        m.insert("Tstrok;", 358);
-        m.insert("Uacute;", 218);
-        m.insert("Ubreve;", 364);
-        m.insert("Udblac;", 368);
-        m.insert("Ugrave;", 217);
-        m.insert("Utilde;", 360);
-        m.insert("Vdashl;", 10982);
-        m.insert("Verbar;", 8214);
-        m.insert("Vvdash;", 8874);
-        m.insert("Yacute;", 221);
-        m.insert("Zacute;", 377);
-        m.insert("Zcaron;", 381);
-        m.insert("aacute;", 225);
-        m.insert("abreve;", 259);
-        m.insert("agrave;", 224);
-        m.insert("andand;", 10837);
-        m.insert("angmsd;", 8737);
-        m.insert("angsph;", 8738);
-        m.insert("apacir;", 10863);
-        m.insert("approx;", 8776);
-        m.insert("atilde;", 227);
-        m.insert("barvee;", 8893);
-        m.insert("barwed;", 8965);
-        m.insert("becaus;", 8757);
-        m.insert("bernou;", 8492);
-        m.insert("bigcap;", 8898);
-        m.insert("bigcup;", 8899);
-        m.insert("bigvee;", 8897);
-        m.insert("bkarow;", 10509);
-        m.insert("bottom;", 8869);
-        m.insert("bowtie;", 8904);
-        m.insert("boxbox;", 10697);
-        m.insert("bprime;", 8245);
-        m.insert("brvbar;", 166);
-        m.insert("bullet;", 8226);
-        m.insert("bumpeq;", 8783);
-        m.insert("cacute;", 263);
-        m.insert("capand;", 10820);
-        m.insert("capcap;", 10827);
-        m.insert("capcup;", 10823);
-        m.insert("capdot;", 10816);
-        m.insert("ccaron;", 269);
-        m.insert("ccedil;", 231);
-        m.insert("circeq;", 8791);
-        m.insert("cirmid;", 10991);
-        m.insert("colone;", 8788);
-        m.insert("commat;", 64);
-        m.insert("compfn;", 8728);
-        m.insert("conint;", 8750);
-        m.insert("coprod;", 8720);
-        m.insert("copysr;", 8471);
-        m.insert("cularr;", 8630);
-        m.insert("cupcap;", 10822);
-        m.insert("cupcup;", 10826);
-        m.insert("cupdot;", 8845);
-        m.insert("curarr;", 8631);
-        m.insert("curren;", 164);
-        m.insert("cylcty;", 9005);
-        m.insert("dagger;", 8224);
-        m.insert("daleth;", 8504);
-        m.insert("dcaron;", 271);
-        m.insert("dfisht;", 10623);
-        m.insert("divide;", 247);
-        m.insert("divonx;", 8903);
-        m.insert("dlcorn;", 8990);
-        m.insert("dlcrop;", 8973);
-        m.insert("dollar;", 36);
-        m.insert("drcorn;", 8991);
-        m.insert("drcrop;", 8972);
-        m.insert("dstrok;", 273);
-        m.insert("eacute;", 233);
-        m.insert("easter;", 10862);
-        m.insert("ecaron;", 283);
-        m.insert("ecolon;", 8789);
-        m.insert("egrave;", 232);
-        m.insert("egsdot;", 10904);
-        m.insert("elsdot;", 10903);
-        m.insert("emptyv;", 8709);
-        m.insert("emsp13;", 8196);
-        m.insert("emsp14;", 8197);
-        m.insert("eparsl;", 10723);
-        m.insert("eqcirc;", 8790);
-        m.insert("equals;", 61);
-        m.insert("equest;", 8799);
-        m.insert("female;", 9792);
-        m.insert("ffilig;", 64259);
-        m.insert("ffllig;", 64260);
-        m.insert("forall;", 8704);
-        m.insert("frac12;", 189);
-        m.insert("frac13;", 8531);
-        m.insert("frac14;", 188);
-        m.insert("frac15;", 8533);
-        m.insert("frac16;", 8537);
-        m.insert("frac18;", 8539);
-        m.insert("frac23;", 8532);
-        m.insert("frac25;", 8534);
-        m.insert("frac34;", 190);
-        m.insert("frac35;", 8535);
-        m.insert("frac38;", 8540);
-        m.insert("frac45;", 8536);
-        m.insert("frac56;", 8538);
-        m.insert("frac58;", 8541);
-        m.insert("frac78;", 8542);
-        m.insert("gacute;", 501);
-        m.insert("gammad;", 989);
-        m.insert("gbreve;", 287);
-        m.insert("gesdot;", 10880);
-        m.insert("gesles;", 10900);
-        m.insert("gtlPar;", 10645);
-        m.insert("gtrarr;", 10616);
-        m.insert("gtrdot;", 8919);
-        m.insert("gtrsim;", 8819);
-        m.insert("hairsp;", 8202);
-        m.insert("hamilt;", 8459);
-        m.insert("hardcy;", 1098);
-        m.insert("hearts;", 9829);
-        m.insert("hellip;", 8230);
-        m.insert("hercon;", 8889);
-        m.insert("homtht;", 8763);
-        m.insert("horbar;", 8213);
-        m.insert("hslash;", 8463);
-        m.insert("hstrok;", 295);
-        m.insert("hybull;", 8259);
-        m.insert("hyphen;", 8208);
-        m.insert("iacute;", 237);
-        m.insert("igrave;", 236);
-        m.insert("iiiint;", 10764);
-        m.insert("iinfin;", 10716);
-        m.insert("incare;", 8453);
-        m.insert("inodot;", 305);
-        m.insert("intcal;", 8890);
-        m.insert("iquest;", 191);
-        m.insert("isinsv;", 8947);
-        m.insert("itilde;", 297);
-        m.insert("jsercy;", 1112);
-        m.insert("kappav;", 1008);
-        m.insert("kcedil;", 311);
-        m.insert("kgreen;", 312);
-        m.insert("lAtail;", 10523);
-        m.insert("lacute;", 314);
-        m.insert("lagran;", 8466);
-        m.insert("lambda;", 955);
-        m.insert("langle;", 10216);
-        m.insert("larrfs;", 10525);
-        m.insert("larrhk;", 8617);
-        m.insert("larrlp;", 8619);
-        m.insert("larrpl;", 10553);
-        m.insert("larrtl;", 8610);
-        m.insert("latail;", 10521);
-        m.insert("lbrace;", 123);
-        m.insert("lbrack;", 91);
-        m.insert("lcaron;", 318);
-        m.insert("lcedil;", 316);
-        m.insert("ldquor;", 8222);
-        m.insert("lesdot;", 10879);
-        m.insert("lesges;", 10899);
-        m.insert("lfisht;", 10620);
-        m.insert("lfloor;", 8970);
-        m.insert("lharul;", 10602);
-        m.insert("llhard;", 10603);
-        m.insert("lmidot;", 320);
-        m.insert("lmoust;", 9136);
-        m.insert("loplus;", 10797);
-        m.insert("lowast;", 8727);
-        m.insert("lowbar;", 95);
-        m.insert("lparlt;", 10643);
-        m.insert("lrhard;", 10605);
-        m.insert("lsaquo;", 8249);
-        m.insert("lsquor;", 8218);
-        m.insert("lstrok;", 322);
-        m.insert("lthree;", 8907);
-        m.insert("ltimes;", 8905);
-        m.insert("ltlarr;", 10614);
-        m.insert("ltrPar;", 10646);
-        m.insert("mapsto;", 8614);
-        m.insert("marker;", 9646);
-        m.insert("mcomma;", 10793);
-        m.insert("midast;", 42);
-        m.insert("midcir;", 10992);
-        m.insert("middot;", 183);
-        m.insert("minusb;", 8863);
-        m.insert("minusd;", 8760);
-        m.insert("mnplus;", 8723);
-        m.insert("models;", 8871);
-        m.insert("mstpos;", 8766);
-        m.insert("nVDash;", 8879);
-        m.insert("nVdash;", 8878);
-        m.insert("nacute;", 324);
-        m.insert("nbumpe;", 8783);
-        m.insert("ncaron;", 328);
-        m.insert("ncedil;", 326);
-        m.insert("nearhk;", 10532);
-        m.insert("nequiv;", 8802);
-        m.insert("nesear;", 10536);
-        m.insert("nexist;", 8708);
-        m.insert("nltrie;", 8940);
-        m.insert("notinE;", 8953);
-        m.insert("nparsl;", 11005);
-        m.insert("nprcue;", 8928);
-        m.insert("nrarrc;", 10547);
-        m.insert("nrarrw;", 8605);
-        m.insert("nrtrie;", 8941);
-        m.insert("nsccue;", 8929);
-        m.insert("nsimeq;", 8772);
-        m.insert("ntilde;", 241);
-        m.insert("numero;", 8470);
-        m.insert("nvDash;", 8877);
-        m.insert("nvHarr;", 10500);
-        m.insert("nvdash;", 8876);
-        m.insert("nvlArr;", 10498);
-        m.insert("nvrArr;", 10499);
-        m.insert("nwarhk;", 10531);
-        m.insert("nwnear;", 10535);
-        m.insert("oacute;", 243);
-        m.insert("odblac;", 337);
-        m.insert("odsold;", 10684);
-        m.insert("ograve;", 242);
-        m.insert("ominus;", 8854);
-        m.insert("origof;", 8886);
-        m.insert("oslash;", 248);
-        m.insert("otilde;", 245);
-        m.insert("otimes;", 8855);
-        m.insert("parsim;", 10995);
-        m.insert("percnt;", 37);
-        m.insert("period;", 46);
-        m.insert("permil;", 8240);
-        m.insert("phmmat;", 8499);
-        m.insert("planck;", 8463);
-        m.insert("plankv;", 8463);
-        m.insert("plusdo;", 8724);
-        m.insert("plusdu;", 10789);
-        m.insert("plusmn;", 177);
-        m.insert("preceq;", 10927);
-        m.insert("primes;", 8473);
-        m.insert("prnsim;", 8936);
-        m.insert("propto;", 8733);
-        m.insert("prurel;", 8880);
-        m.insert("puncsp;", 8200);
-        m.insert("qprime;", 8279);
-        m.insert("rAtail;", 10524);
-        m.insert("racute;", 341);
-        m.insert("rangle;", 10217);
-        m.insert("rarrap;", 10613);
-        m.insert("rarrfs;", 10526);
-        m.insert("rarrhk;", 8618);
-        m.insert("rarrlp;", 8620);
-        m.insert("rarrpl;", 10565);
-        m.insert("rarrtl;", 8611);
-        m.insert("ratail;", 10522);
-        m.insert("rbrace;", 125);
-        m.insert("rbrack;", 93);
-        m.insert("rcaron;", 345);
-        m.insert("rcedil;", 343);
-        m.insert("rdquor;", 8221);
-        m.insert("rfisht;", 10621);
-        m.insert("rfloor;", 8971);
-        m.insert("rharul;", 10604);
-        m.insert("rmoust;", 9137);
-        m.insert("roplus;", 10798);
-        m.insert("rpargt;", 10644);
-        m.insert("rsaquo;", 8250);
-        m.insert("rsquor;", 8217);
-        m.insert("rthree;", 8908);
-        m.insert("rtimes;", 8906);
-        m.insert("sacute;", 347);
-        m.insert("scaron;", 353);
-        m.insert("scedil;", 351);
-        m.insert("scnsim;", 8937);
-        m.insert("searhk;", 10533);
-        m.insert("seswar;", 10537);
-        m.insert("sfrown;", 8994);
-        m.insert("shchcy;", 1097);
-        m.insert("sigmaf;", 962);
-        m.insert("sigmav;", 962);
-        m.insert("simdot;", 10858);
-        m.insert("smashp;", 10803);
-        m.insert("softcy;", 1100);
-        m.insert("solbar;", 9023);
-        m.insert("spades;", 9824);
-        m.insert("sqcaps;", 8851);
-        m.insert("sqcups;", 8852);
-        m.insert("sqsube;", 8849);
-        m.insert("sqsupe;", 8850);
-        m.insert("square;", 9633);
-        m.insert("squarf;", 9642);
-        m.insert("ssetmn;", 8726);
-        m.insert("ssmile;", 8995);
-        m.insert("sstarf;", 8902);
-        m.insert("subdot;", 10941);
-        m.insert("subset;", 8834);
-        m.insert("subsim;", 10951);
-        m.insert("subsub;", 10965);
-        m.insert("subsup;", 10963);
-        m.insert("succeq;", 10928);
-        m.insert("supdot;", 10942);
-        m.insert("supset;", 8835);
-        m.insert("supsim;", 10952);
-        m.insert("supsub;", 10964);
-        m.insert("supsup;", 10966);
-        m.insert("swarhk;", 10534);
-        m.insert("swnwar;", 10538);
-        m.insert("target;", 8982);
-        m.insert("tcaron;", 357);
-        m.insert("tcedil;", 355);
-        m.insert("telrec;", 8981);
-        m.insert("there4;", 8756);
-        m.insert("thetav;", 977);
-        m.insert("thinsp;", 8201);
-        m.insert("thksim;", 8764);
-        m.insert("timesb;", 8864);
-        m.insert("timesd;", 10800);
-        m.insert("topbot;", 9014);
-        m.insert("topcir;", 10993);
-        m.insert("tprime;", 8244);
-        m.insert("tridot;", 9708);
-        m.insert("tstrok;", 359);
-        m.insert("uacute;", 250);
-        m.insert("ubreve;", 365);
-        m.insert("udblac;", 369);
-        m.insert("ufisht;", 10622);
-        m.insert("ugrave;", 249);
-        m.insert("ulcorn;", 8988);
-        m.insert("ulcrop;", 8975);
-        m.insert("urcorn;", 8989);
-        m.insert("urcrop;", 8974);
-        m.insert("utilde;", 361);
-        m.insert("vangrt;", 10652);
-        m.insert("varphi;", 981);
-        m.insert("varrho;", 1009);
-        m.insert("veebar;", 8891);
-        m.insert("vellip;", 8942);
-        m.insert("verbar;", 124);
-        m.insert("vsubnE;", 10955);
-        m.insert("vsubne;", 8842);
-        m.insert("vsupnE;", 10956);
-        m.insert("vsupne;", 8843);
-        m.insert("wedbar;", 10847);
-        m.insert("wedgeq;", 8793);
-        m.insert("weierp;", 8472);
-        m.insert("wreath;", 8768);
-        m.insert("xoplus;", 10753);
-        m.insert("xotime;", 10754);
-        m.insert("xsqcup;", 10758);
-        m.insert("xuplus;", 10756);
-        m.insert("xwedge;", 8896);
-        m.insert("yacute;", 253);
-        m.insert("zacute;", 378);
-        m.insert("zcaron;", 382);
-        m.insert("zeetrf;", 8488);
-        m.insert("AElig;", 198);
-        m.insert("Aacute", 193);
-        m.insert("Acirc;", 194);
-        m.insert("Agrave", 192);
-        m.insert("Alpha;", 913);
-        m.insert("Amacr;", 256);
-        m.insert("Aogon;", 260);
-        m.insert("Aring;", 197);
-        m.insert("Atilde", 195);
-        m.insert("Breve;", 728);
-        m.insert("Ccedil", 199);
-        m.insert("Ccirc;", 264);
-        m.insert("Colon;", 8759);
-        m.insert("Cross;", 10799);
-        m.insert("Dashv;", 10980);
-        m.insert("Delta;", 916);
-        m.insert("Eacute", 201);
-        m.insert("Ecirc;", 202);
-        m.insert("Egrave", 200);
-        m.insert("Emacr;", 274);
-        m.insert("Eogon;", 280);
-        m.insert("Equal;", 10869);
-        m.insert("Gamma;", 915);
-        m.insert("Gcirc;", 284);
-        m.insert("Hacek;", 711);
-        m.insert("Hcirc;", 292);
-        m.insert("IJlig;", 306);
-        m.insert("Iacute", 205);
-        m.insert("Icirc;", 206);
-        m.insert("Igrave", 204);
-        m.insert("Imacr;", 298);
-        m.insert("Iogon;", 302);
-        m.insert("Iukcy;", 1030);
-        m.insert("Jcirc;", 308);
-        m.insert("Jukcy;", 1028);
-        m.insert("Kappa;", 922);
-        m.insert("Ntilde", 209);
-        m.insert("OElig;", 338);
-        m.insert("Oacute", 211);
-        m.insert("Ocirc;", 212);
-        m.insert("Ograve", 210);
-        m.insert("Omacr;", 332);
-        m.insert("Omega;", 937);
-        m.insert("Oslash", 216);
-        m.insert("Otilde", 213);
-        m.insert("Prime;", 8243);
-        m.insert("RBarr;", 10512);
-        m.insert("Scirc;", 348);
-        m.insert("Sigma;", 931);
-        m.insert("THORN;", 222);
-        m.insert("TRADE;", 8482);
-        m.insert("TSHcy;", 1035);
-        m.insert("Theta;", 920);
-        m.insert("Tilde;", 8764);
-        m.insert("Uacute", 218);
-        m.insert("Ubrcy;", 1038);
-        m.insert("Ucirc;", 219);
-        m.insert("Ugrave", 217);
-        m.insert("Umacr;", 362);
-        m.insert("Union;", 8899);
-        m.insert("Uogon;", 370);
-        m.insert("UpTee;", 8869);
-        m.insert("Uring;", 366);
-        m.insert("VDash;", 8875);
-        m.insert("Vdash;", 8873);
-        m.insert("Wcirc;", 372);
-        m.insert("Wedge;", 8896);
-        m.insert("Yacute", 221);
-        m.insert("Ycirc;", 374);
-        m.insert("aacute", 225);
-        m.insert("acirc;", 226);
-        m.insert("acute;", 180);
-        m.insert("aelig;", 230);
-        m.insert("agrave", 224);
-        m.insert("aleph;", 8501);
-        m.insert("alpha;", 945);
-        m.insert("amacr;", 257);
-        m.insert("amalg;", 10815);
-        m.insert("angle;", 8736);
-        m.insert("angrt;", 8735);
-        m.insert("angst;", 197);
-        m.insert("aogon;", 261);
-        m.insert("aring;", 229);
-        m.insert("asymp;", 8776);
-        m.insert("atilde", 227);
-        m.insert("awint;", 10769);
-        m.insert("bcong;", 8780);
-        m.insert("bdquo;", 8222);
-        m.insert("bepsi;", 1014);
-        m.insert("blank;", 9251);
-        m.insert("blk12;", 9618);
-        m.insert("blk14;", 9617);
-        m.insert("blk34;", 9619);
-        m.insert("block;", 9608);
-        m.insert("boxDL;", 9559);
-        m.insert("boxDR;", 9556);
-        m.insert("boxDl;", 9558);
-        m.insert("boxDr;", 9555);
-        m.insert("boxHD;", 9574);
-        m.insert("boxHU;", 9577);
-        m.insert("boxHd;", 9572);
-        m.insert("boxHu;", 9575);
-        m.insert("boxUL;", 9565);
-        m.insert("boxUR;", 9562);
-        m.insert("boxUl;", 9564);
-        m.insert("boxUr;", 9561);
-        m.insert("boxVH;", 9580);
-        m.insert("boxVL;", 9571);
-        m.insert("boxVR;", 9568);
-        m.insert("boxVh;", 9579);
-        m.insert("boxVl;", 9570);
-        m.insert("boxVr;", 9567);
-        m.insert("boxdL;", 9557);
-        m.insert("boxdR;", 9554);
-        m.insert("boxdl;", 9488);
-        m.insert("boxdr;", 9484);
-        m.insert("boxhD;", 9573);
-        m.insert("boxhU;", 9576);
-        m.insert("boxhd;", 9516);
-        m.insert("boxhu;", 9524);
-        m.insert("boxuL;", 9563);
-        m.insert("boxuR;", 9560);
-        m.insert("boxul;", 9496);
-        m.insert("boxur;", 9492);
-        m.insert("boxvH;", 9578);
-        m.insert("boxvL;", 9569);
-        m.insert("boxvR;", 9566);
-        m.insert("boxvh;", 9532);
-        m.insert("boxvl;", 9508);
-        m.insert("boxvr;", 9500);
-        m.insert("breve;", 728);
-        m.insert("brvbar", 166);
-        m.insert("bsemi;", 8271);
-        m.insert("bsime;", 8909);
-        m.insert("bsolb;", 10693);
-        m.insert("bumpE;", 10926);
-        m.insert("bumpe;", 8783);
-        m.insert("caret;", 8257);
-        m.insert("caron;", 711);
-        m.insert("ccaps;", 10829);
-        m.insert("ccedil", 231);
-        m.insert("ccirc;", 265);
-        m.insert("ccups;", 10828);
-        m.insert("cedil;", 184);
-        m.insert("check;", 10003);
-        m.insert("clubs;", 9827);
-        m.insert("colon;", 58);
-        m.insert("comma;", 44);
-        m.insert("crarr;", 8629);
-        m.insert("cross;", 10007);
-        m.insert("csube;", 10961);
-        m.insert("csupe;", 10962);
-        m.insert("ctdot;", 8943);
-        m.insert("cuepr;", 8926);
-        m.insert("cuesc;", 8927);
-        m.insert("cupor;", 10821);
-        m.insert("curren", 164);
-        m.insert("cuvee;", 8910);
-        m.insert("cuwed;", 8911);
-        m.insert("cwint;", 8753);
-        m.insert("dashv;", 8867);
-        m.insert("dblac;", 733);
-        m.insert("ddarr;", 8650);
-        m.insert("delta;", 948);
-        m.insert("dharl;", 8643);
-        m.insert("dharr;", 8642);
-        m.insert("diams;", 9830);
-        m.insert("disin;", 8946);
-        m.insert("divide", 247);
-        m.insert("doteq;", 8784);
-        m.insert("dtdot;", 8945);
-        m.insert("dtrif;", 9662);
-        m.insert("duarr;", 8693);
-        m.insert("duhar;", 10607);
-        m.insert("eDDot;", 10871);
-        m.insert("eacute", 233);
-        m.insert("ecirc;", 234);
-        m.insert("efDot;", 8786);
-        m.insert("egrave", 232);
-        m.insert("emacr;", 275);
-        m.insert("empty;", 8709);
-        m.insert("eogon;", 281);
-        m.insert("eplus;", 10865);
-        m.insert("epsiv;", 1013);
-        m.insert("eqsim;", 8770);
-        m.insert("equiv;", 8801);
-        m.insert("erDot;", 8787);
-        m.insert("erarr;", 10609);
-        m.insert("esdot;", 8784);
-        m.insert("exist;", 8707);
-        m.insert("fflig;", 64256);
-        m.insert("filig;", 64257);
-        m.insert("fjlig;", 102);
-        m.insert("fllig;", 64258);
-        m.insert("fltns;", 9649);
-        m.insert("forkv;", 10969);
-        m.insert("frasl;", 8260);
-        m.insert("frown;", 8994);
-        m.insert("gamma;", 947);
-        m.insert("gcirc;", 285);
-        m.insert("gescc;", 10921);
-        m.insert("gimel;", 8503);
-        m.insert("gneqq;", 8809);
-        m.insert("gnsim;", 8935);
-        m.insert("grave;", 96);
-        m.insert("gsime;", 10894);
-        m.insert("gsiml;", 10896);
-        m.insert("gtcir;", 10874);
-        m.insert("gtdot;", 8919);
-        m.insert("harrw;", 8621);
-        m.insert("hcirc;", 293);
-        m.insert("hoarr;", 8703);
-        m.insert("iacute", 237);
-        m.insert("icirc;", 238);
-        m.insert("iexcl;", 161);
-        m.insert("igrave", 236);
-        m.insert("iiint;", 8749);
-        m.insert("iiota;", 8489);
-        m.insert("ijlig;", 307);
-        m.insert("imacr;", 299);
-        m.insert("image;", 8465);
-        m.insert("imath;", 305);
-        m.insert("imped;", 437);
-        m.insert("infin;", 8734);
-        m.insert("iogon;", 303);
-        m.insert("iprod;", 10812);
-        m.insert("iquest", 191);
-        m.insert("isinE;", 8953);
-        m.insert("isins;", 8948);
-        m.insert("isinv;", 8712);
-        m.insert("iukcy;", 1110);
-        m.insert("jcirc;", 309);
-        m.insert("jmath;", 567);
-        m.insert("jukcy;", 1108);
-        m.insert("kappa;", 954);
-        m.insert("lAarr;", 8666);
-        m.insert("lBarr;", 10510);
-        m.insert("langd;", 10641);
-        m.insert("laquo;", 171);
-        m.insert("larrb;", 8676);
-        m.insert("lates;", 10925);
-        m.insert("lbarr;", 10508);
-        m.insert("lbbrk;", 10098);
-        m.insert("lbrke;", 10635);
-        m.insert("lceil;", 8968);
-        m.insert("ldquo;", 8220);
-        m.insert("lescc;", 10920);
-        m.insert("lhard;", 8637);
-        m.insert("lharu;", 8636);
-        m.insert("lhblk;", 9604);
-        m.insert("llarr;", 8647);
-        m.insert("lltri;", 9722);
-        m.insert("lneqq;", 8808);
-        m.insert("lnsim;", 8934);
-        m.insert("loang;", 10220);
-        m.insert("loarr;", 8701);
-        m.insert("lobrk;", 10214);
-        m.insert("lopar;", 10629);
-        m.insert("lrarr;", 8646);
-        m.insert("lrhar;", 8651);
-        m.insert("lrtri;", 8895);
-        m.insert("lsime;", 10893);
-        m.insert("lsimg;", 10895);
-        m.insert("lsquo;", 8216);
-        m.insert("ltcir;", 10873);
-        m.insert("ltdot;", 8918);
-        m.insert("ltrie;", 8884);
-        m.insert("ltrif;", 9666);
-        m.insert("mDDot;", 8762);
-        m.insert("mdash;", 8212);
-        m.insert("micro;", 181);
-        m.insert("middot", 183);
-        m.insert("minus;", 8722);
-        m.insert("mumap;", 8888);
-        m.insert("nabla;", 8711);
-        m.insert("napid;", 8779);
-        m.insert("napos;", 329);
-        m.insert("natur;", 9838);
-        m.insert("nbump;", 8782);
-        m.insert("ncong;", 8775);
-        m.insert("ndash;", 8211);
-        m.insert("neArr;", 8663);
-        m.insert("nearr;", 8599);
-        m.insert("nedot;", 8784);
-        m.insert("nesim;", 8770);
-        m.insert("ngeqq;", 8807);
-        m.insert("ngsim;", 8821);
-        m.insert("nhArr;", 8654);
-        m.insert("nharr;", 8622);
-        m.insert("nhpar;", 10994);
-        m.insert("nlArr;", 8653);
-        m.insert("nlarr;", 8602);
-        m.insert("nleqq;", 8806);
-        m.insert("nless;", 8814);
-        m.insert("nlsim;", 8820);
-        m.insert("nltri;", 8938);
-        m.insert("notin;", 8713);
-        m.insert("notni;", 8716);
-        m.insert("npart;", 8706);
-        m.insert("nprec;", 8832);
-        m.insert("nrArr;", 8655);
-        m.insert("nrarr;", 8603);
-        m.insert("nrtri;", 8939);
-        m.insert("nsime;", 8772);
-        m.insert("nsmid;", 8740);
-        m.insert("nspar;", 8742);
-        m.insert("nsubE;", 10949);
-        m.insert("nsube;", 8840);
-        m.insert("nsucc;", 8833);
-        m.insert("nsupE;", 10950);
-        m.insert("nsupe;", 8841);
-        m.insert("ntilde", 241);
-        m.insert("numsp;", 8199);
-        m.insert("nvsim;", 8764);
-        m.insert("nwArr;", 8662);
-        m.insert("nwarr;", 8598);
-        m.insert("oacute", 243);
-        m.insert("ocirc;", 244);
-        m.insert("odash;", 8861);
-        m.insert("oelig;", 339);
-        m.insert("ofcir;", 10687);
-        m.insert("ograve", 242);
-        m.insert("ohbar;", 10677);
-        m.insert("olarr;", 8634);
-        m.insert("olcir;", 10686);
-        m.insert("oline;", 8254);
-        m.insert("omacr;", 333);
-        m.insert("omega;", 969);
-        m.insert("operp;", 10681);
-        m.insert("oplus;", 8853);
-        m.insert("orarr;", 8635);
-        m.insert("order;", 8500);
-        m.insert("oslash", 248);
-        m.insert("otilde", 245);
-        m.insert("ovbar;", 9021);
-        m.insert("parsl;", 11005);
-        m.insert("phone;", 9742);
-        m.insert("plusb;", 8862);
-        m.insert("pluse;", 10866);
-        m.insert("plusmn", 177);
-        m.insert("pound;", 163);
-        m.insert("prcue;", 8828);
-        m.insert("prime;", 8242);
-        m.insert("prnap;", 10937);
-        m.insert("prsim;", 8830);
-        m.insert("quest;", 63);
-        m.insert("rAarr;", 8667);
-        m.insert("rBarr;", 10511);
-        m.insert("radic;", 8730);
-        m.insert("rangd;", 10642);
-        m.insert("range;", 10661);
-        m.insert("raquo;", 187);
-        m.insert("rarrb;", 8677);
-        m.insert("rarrc;", 10547);
-        m.insert("rarrw;", 8605);
-        m.insert("ratio;", 8758);
-        m.insert("rbarr;", 10509);
-        m.insert("rbbrk;", 10099);
-        m.insert("rbrke;", 10636);
-        m.insert("rceil;", 8969);
-        m.insert("rdquo;", 8221);
-        m.insert("reals;", 8477);
-        m.insert("rhard;", 8641);
-        m.insert("rharu;", 8640);
-        m.insert("rlarr;", 8644);
-        m.insert("rlhar;", 8652);
-        m.insert("rnmid;", 10990);
-        m.insert("roang;", 10221);
-        m.insert("roarr;", 8702);
-        m.insert("robrk;", 10215);
-        m.insert("ropar;", 10630);
-        m.insert("rrarr;", 8649);
-        m.insert("rsquo;", 8217);
-        m.insert("rtrie;", 8885);
-        m.insert("rtrif;", 9656);
-        m.insert("sbquo;", 8218);
-        m.insert("sccue;", 8829);
-        m.insert("scirc;", 349);
-        m.insert("scnap;", 10938);
-        m.insert("scsim;", 8831);
-        m.insert("sdotb;", 8865);
-        m.insert("sdote;", 10854);
-        m.insert("seArr;", 8664);
-        m.insert("searr;", 8600);
-        m.insert("setmn;", 8726);
-        m.insert("sharp;", 9839);
-        m.insert("sigma;", 963);
-        m.insert("simeq;", 8771);
-        m.insert("simgE;", 10912);
-        m.insert("simlE;", 10911);
-        m.insert("simne;", 8774);
-        m.insert("slarr;", 8592);
-        m.insert("smile;", 8995);
-        m.insert("smtes;", 10924);
-        m.insert("sqcap;", 8851);
-        m.insert("sqcup;", 8852);
-        m.insert("sqsub;", 8847);
-        m.insert("sqsup;", 8848);
-        m.insert("srarr;", 8594);
-        m.insert("starf;", 9733);
-        m.insert("strns;", 175);
-        m.insert("subnE;", 10955);
-        m.insert("subne;", 8842);
-        m.insert("supnE;", 10956);
-        m.insert("supne;", 8843);
-        m.insert("swArr;", 8665);
-        m.insert("swarr;", 8601);
-        m.insert("szlig;", 223);
-        m.insert("theta;", 952);
-        m.insert("thkap;", 8776);
-        m.insert("thorn;", 254);
-        m.insert("tilde;", 732);
-        m.insert("times;", 215);
-        m.insert("trade;", 8482);
-        m.insert("trisb;", 10701);
-        m.insert("tshcy;", 1115);
-        m.insert("twixt;", 8812);
-        m.insert("uacute", 250);
-        m.insert("ubrcy;", 1118);
-        m.insert("ucirc;", 251);
-        m.insert("udarr;", 8645);
-        m.insert("udhar;", 10606);
-        m.insert("ugrave", 249);
-        m.insert("uharl;", 8639);
-        m.insert("uharr;", 8638);
-        m.insert("uhblk;", 9600);
-        m.insert("ultri;", 9720);
-        m.insert("umacr;", 363);
-        m.insert("uogon;", 371);
-        m.insert("uplus;", 8846);
-        m.insert("upsih;", 978);
-        m.insert("uring;", 367);
-        m.insert("urtri;", 9721);
-        m.insert("utdot;", 8944);
-        m.insert("utrif;", 9652);
-        m.insert("uuarr;", 8648);
-        m.insert("vBarv;", 10985);
-        m.insert("vDash;", 8872);
-        m.insert("varpi;", 982);
-        m.insert("vdash;", 8866);
-        m.insert("veeeq;", 8794);
-        m.insert("vltri;", 8882);
-        m.insert("vnsub;", 8834);
-        m.insert("vnsup;", 8835);
-        m.insert("vprop;", 8733);
-        m.insert("vrtri;", 8883);
-        m.insert("wcirc;", 373);
-        m.insert("wedge;", 8743);
-        m.insert("xcirc;", 9711);
-        m.insert("xdtri;", 9661);
-        m.insert("xhArr;", 10234);
-        m.insert("xharr;", 10231);
-        m.insert("xlArr;", 10232);
-        m.insert("xlarr;", 10229);
-        m.insert("xodot;", 10752);
-        m.insert("xrArr;", 10233);
-        m.insert("xrarr;", 10230);
-        m.insert("xutri;", 9651);
-        m.insert("yacute", 253);
-        m.insert("ycirc;", 375);
-        m.insert("AElig", 198);
-        m.insert("Acirc", 194);
-        m.insert("Aopf;", 120120);
-        m.insert("Aring", 197);
-        m.insert("Ascr;", 119964);
-        m.insert("Auml;", 196);
-        m.insert("Barv;", 10983);
-        m.insert("Beta;", 914);
-        m.insert("Bopf;", 120121);
-        m.insert("Bscr;", 8492);
-        m.insert("CHcy;", 1063);
-        m.insert("COPY;", 169);
-        m.insert("Cdot;", 266);
-        m.insert("Copf;", 8450);
-        m.insert("Cscr;", 119966);
-        m.insert("DJcy;", 1026);
-        m.insert("DScy;", 1029);
-        m.insert("DZcy;", 1039);
-        m.insert("Darr;", 8609);
-        m.insert("Dopf;", 120123);
-        m.insert("Dscr;", 119967);
-        m.insert("Ecirc", 202);
-        m.insert("Edot;", 278);
-        m.insert("Eopf;", 120124);
-        m.insert("Escr;", 8496);
-        m.insert("Esim;", 10867);
-        m.insert("Euml;", 203);
-        m.insert("Fopf;", 120125);
-        m.insert("Fscr;", 8497);
-        m.insert("GJcy;", 1027);
-        m.insert("Gdot;", 288);
-        m.insert("Gopf;", 120126);
-        m.insert("Gscr;", 119970);
-        m.insert("Hopf;", 8461);
-        m.insert("Hscr;", 8459);
-        m.insert("IEcy;", 1045);
-        m.insert("IOcy;", 1025);
-        m.insert("Icirc", 206);
-        m.insert("Idot;", 304);
-        m.insert("Iopf;", 120128);
-        m.insert("Iota;", 921);
-        m.insert("Iscr;", 8464);
-        m.insert("Iuml;", 207);
-        m.insert("Jopf;", 120129);
-        m.insert("Jscr;", 119973);
-        m.insert("KHcy;", 1061);
-        m.insert("KJcy;", 1036);
-        m.insert("Kopf;", 120130);
-        m.insert("Kscr;", 119974);
-        m.insert("LJcy;", 1033);
-        m.insert("Lang;", 10218);
-        m.insert("Larr;", 8606);
-        m.insert("Lopf;", 120131);
-        m.insert("Lscr;", 8466);
-        m.insert("Mopf;", 120132);
-        m.insert("Mscr;", 8499);
-        m.insert("NJcy;", 1034);
-        m.insert("Nopf;", 8469);
-        m.insert("Nscr;", 119977);
-        m.insert("Ocirc", 212);
-        m.insert("Oopf;", 120134);
-        m.insert("Oscr;", 119978);
-        m.insert("Ouml;", 214);
-        m.insert("Popf;", 8473);
-        m.insert("Pscr;", 119979);
-        m.insert("QUOT;", 34);
-        m.insert("Qopf;", 8474);
-        m.insert("Qscr;", 119980);
-        m.insert("Rang;", 10219);
-        m.insert("Rarr;", 8608);
-        m.insert("Ropf;", 8477);
-        m.insert("Rscr;", 8475);
-        m.insert("SHcy;", 1064);
-        m.insert("Sopf;", 120138);
-        m.insert("Sqrt;", 8730);
-        m.insert("Sscr;", 119982);
-        m.insert("Star;", 8902);
-        m.insert("THORN", 222);
-        m.insert("TScy;", 1062);
-        m.insert("Topf;", 120139);
-        m.insert("Tscr;", 119983);
-        m.insert("Uarr;", 8607);
-        m.insert("Ucirc", 219);
-        m.insert("Uopf;", 120140);
-        m.insert("Upsi;", 978);
-        m.insert("Uscr;", 119984);
-        m.insert("Uuml;", 220);
-        m.insert("Vbar;", 10987);
-        m.insert("Vert;", 8214);
-        m.insert("Vopf;", 120141);
-        m.insert("Vscr;", 119985);
-        m.insert("Wopf;", 120142);
-        m.insert("Wscr;", 119986);
-        m.insert("Xopf;", 120143);
-        m.insert("Xscr;", 119987);
-        m.insert("YAcy;", 1071);
-        m.insert("YIcy;", 1031);
-        m.insert("YUcy;", 1070);
-        m.insert("Yopf;", 120144);
-        m.insert("Yscr;", 119988);
-        m.insert("Yuml;", 376);
-        m.insert("ZHcy;", 1046);
-        m.insert("Zdot;", 379);
-        m.insert("Zeta;", 918);
-        m.insert("Zopf;", 8484);
-        m.insert("Zscr;", 119989);
-        m.insert("acirc", 226);
-        m.insert("acute", 180);
-        m.insert("aelig", 230);
-        m.insert("andd;", 10844);
-        m.insert("andv;", 10842);
-        m.insert("ange;", 10660);
-        m.insert("aopf;", 120146);
-        m.insert("apid;", 8779);
-        m.insert("apos;", 39);
-        m.insert("aring", 229);
-        m.insert("ascr;", 119990);
-        m.insert("auml;", 228);
-        m.insert("bNot;", 10989);
-        m.insert("bbrk;", 9141);
-        m.insert("beta;", 946);
-        m.insert("beth;", 8502);
-        m.insert("bnot;", 8976);
-        m.insert("bopf;", 120147);
-        m.insert("boxH;", 9552);
-        m.insert("boxV;", 9553);
-        m.insert("boxh;", 9472);
-        m.insert("boxv;", 9474);
-        m.insert("bscr;", 119991);
-        m.insert("bsim;", 8765);
-        m.insert("bsol;", 92);
-        m.insert("bull;", 8226);
-        m.insert("bump;", 8782);
-        m.insert("caps;", 8745);
-        m.insert("cdot;", 267);
-        m.insert("cedil", 184);
-        m.insert("cent;", 162);
-        m.insert("chcy;", 1095);
-        m.insert("cirE;", 10691);
-        m.insert("circ;", 710);
-        m.insert("cire;", 8791);
-        m.insert("comp;", 8705);
-        m.insert("cong;", 8773);
-        m.insert("copf;", 120148);
-        m.insert("copy;", 169);
-        m.insert("cscr;", 119992);
-        m.insert("csub;", 10959);
-        m.insert("csup;", 10960);
-        m.insert("cups;", 8746);
-        m.insert("dArr;", 8659);
-        m.insert("dHar;", 10597);
-        m.insert("darr;", 8595);
-        m.insert("dash;", 8208);
-        m.insert("diam;", 8900);
-        m.insert("djcy;", 1106);
-        m.insert("dopf;", 120149);
-        m.insert("dscr;", 119993);
-        m.insert("dscy;", 1109);
-        m.insert("dsol;", 10742);
-        m.insert("dtri;", 9663);
-        m.insert("dzcy;", 1119);
-        m.insert("eDot;", 8785);
-        m.insert("ecir;", 8790);
-        m.insert("ecirc", 234);
-        m.insert("edot;", 279);
-        m.insert("emsp;", 8195);
-        m.insert("ensp;", 8194);
-        m.insert("eopf;", 120150);
-        m.insert("epar;", 8917);
-        m.insert("epsi;", 949);
-        m.insert("escr;", 8495);
-        m.insert("esim;", 8770);
-        m.insert("euml;", 235);
-        m.insert("euro;", 8364);
-        m.insert("excl;", 33);
-        m.insert("flat;", 9837);
-        m.insert("fnof;", 402);
-        m.insert("fopf;", 120151);
-        m.insert("fork;", 8916);
-        m.insert("fscr;", 119995);
-        m.insert("gdot;", 289);
-        m.insert("geqq;", 8807);
-        m.insert("gesl;", 8923);
-        m.insert("gjcy;", 1107);
-        m.insert("gnap;", 10890);
-        m.insert("gneq;", 10888);
-        m.insert("gopf;", 120152);
-        m.insert("gscr;", 8458);
-        m.insert("gsim;", 8819);
-        m.insert("gtcc;", 10919);
-        m.insert("gvnE;", 8809);
-        m.insert("hArr;", 8660);
-        m.insert("half;", 189);
-        m.insert("harr;", 8596);
-        m.insert("hbar;", 8463);
-        m.insert("hopf;", 120153);
-        m.insert("hscr;", 119997);
-        m.insert("icirc", 238);
-        m.insert("iecy;", 1077);
-        m.insert("iexcl", 161);
-        m.insert("imof;", 8887);
-        m.insert("iocy;", 1105);
-        m.insert("iopf;", 120154);
-        m.insert("iota;", 953);
-        m.insert("iscr;", 119998);
-        m.insert("isin;", 8712);
-        m.insert("iuml;", 239);
-        m.insert("jopf;", 120155);
-        m.insert("jscr;", 119999);
-        m.insert("khcy;", 1093);
-        m.insert("kjcy;", 1116);
-        m.insert("kopf;", 120156);
-        m.insert("kscr;", 120000);
-        m.insert("lArr;", 8656);
-        m.insert("lHar;", 10594);
-        m.insert("lang;", 10216);
-        m.insert("laquo", 171);
-        m.insert("larr;", 8592);
-        m.insert("late;", 10925);
-        m.insert("lcub;", 123);
-        m.insert("ldca;", 10550);
-        m.insert("ldsh;", 8626);
-        m.insert("leqq;", 8806);
-        m.insert("lesg;", 8922);
-        m.insert("ljcy;", 1113);
-        m.insert("lnap;", 10889);
-        m.insert("lneq;", 10887);
-        m.insert("lopf;", 120157);
-        m.insert("lozf;", 10731);
-        m.insert("lpar;", 40);
-        m.insert("lscr;", 120001);
-        m.insert("lsim;", 8818);
-        m.insert("lsqb;", 91);
-        m.insert("ltcc;", 10918);
-        m.insert("ltri;", 9667);
-        m.insert("lvnE;", 8808);
-        m.insert("macr;", 175);
-        m.insert("male;", 9794);
-        m.insert("malt;", 10016);
-        m.insert("micro", 181);
-        m.insert("mlcp;", 10971);
-        m.insert("mldr;", 8230);
-        m.insert("mopf;", 120158);
-        m.insert("mscr;", 120002);
-        m.insert("nGtv;", 8811);
-        m.insert("nLtv;", 8810);
-        m.insert("nang;", 8736);
-        m.insert("napE;", 10864);
-        m.insert("nbsp;", 160);
-        m.insert("ncap;", 10819);
-        m.insert("ncup;", 10818);
-        m.insert("ngeq;", 8817);
-        m.insert("nges;", 10878);
-        m.insert("ngtr;", 8815);
-        m.insert("nisd;", 8954);
-        m.insert("njcy;", 1114);
-        m.insert("nldr;", 8229);
-        m.insert("nleq;", 8816);
-        m.insert("nles;", 10877);
-        m.insert("nmid;", 8740);
-        m.insert("nopf;", 120159);
-        m.insert("npar;", 8742);
-        m.insert("npre;", 10927);
-        m.insert("nsce;", 10928);
-        m.insert("nscr;", 120003);
-        m.insert("nsim;", 8769);
-        m.insert("nsub;", 8836);
-        m.insert("nsup;", 8837);
-        m.insert("ntgl;", 8825);
-        m.insert("ntlg;", 8824);
-        m.insert("nvap;", 8781);
-        m.insert("nvge;", 8805);
-        m.insert("nvgt;", 62);
-        m.insert("nvle;", 8804);
-        m.insert("nvlt;", 60);
-        m.insert("oast;", 8859);
-        m.insert("ocir;", 8858);
-        m.insert("ocirc", 244);
-        m.insert("odiv;", 10808);
-        m.insert("odot;", 8857);
-        m.insert("ogon;", 731);
-        m.insert("oint;", 8750);
-        m.insert("omid;", 10678);
-        m.insert("oopf;", 120160);
-        m.insert("opar;", 10679);
-        m.insert("ordf;", 170);
-        m.insert("ordm;", 186);
-        m.insert("oror;", 10838);
-        m.insert("oscr;", 8500);
-        m.insert("osol;", 8856);
-        m.insert("ouml;", 246);
-        m.insert("para;", 182);
-        m.insert("part;", 8706);
-        m.insert("perp;", 8869);
-        m.insert("phiv;", 981);
-        m.insert("plus;", 43);
-        m.insert("popf;", 120161);
-        m.insert("pound", 163);
-        m.insert("prap;", 10935);
-        m.insert("prec;", 8826);
-        m.insert("prnE;", 10933);
-        m.insert("prod;", 8719);
-        m.insert("prop;", 8733);
-        m.insert("pscr;", 120005);
-        m.insert("qint;", 10764);
-        m.insert("qopf;", 120162);
-        m.insert("qscr;", 120006);
-        m.insert("quot;", 34);
-        m.insert("rArr;", 8658);
-        m.insert("rHar;", 10596);
-        m.insert("race;", 8765);
-        m.insert("rang;", 10217);
-        m.insert("raquo", 187);
-        m.insert("rarr;", 8594);
-        m.insert("rcub;", 125);
-        m.insert("rdca;", 10551);
-        m.insert("rdsh;", 8627);
-        m.insert("real;", 8476);
-        m.insert("rect;", 9645);
-        m.insert("rhov;", 1009);
-        m.insert("ring;", 730);
-        m.insert("ropf;", 120163);
-        m.insert("rpar;", 41);
-        m.insert("rscr;", 120007);
-        m.insert("rsqb;", 93);
-        m.insert("rtri;", 9657);
-        m.insert("scap;", 10936);
-        m.insert("scnE;", 10934);
-        m.insert("sdot;", 8901);
-        m.insert("sect;", 167);
-        m.insert("semi;", 59);
-        m.insert("sext;", 10038);
-        m.insert("shcy;", 1096);
-        m.insert("sime;", 8771);
-        m.insert("simg;", 10910);
-        m.insert("siml;", 10909);
-        m.insert("smid;", 8739);
-        m.insert("smte;", 10924);
-        m.insert("solb;", 10692);
-        m.insert("sopf;", 120164);
-        m.insert("spar;", 8741);
-        m.insert("squf;", 9642);
-        m.insert("sscr;", 120008);
-        m.insert("star;", 9734);
-        m.insert("subE;", 10949);
-        m.insert("sube;", 8838);
-        m.insert("succ;", 8827);
-        m.insert("sung;", 9834);
-        m.insert("sup1;", 185);
-        m.insert("sup2;", 178);
-        m.insert("sup3;", 179);
-        m.insert("supE;", 10950);
-        m.insert("supe;", 8839);
-        m.insert("szlig", 223);
-        m.insert("tbrk;", 9140);
-        m.insert("tdot;", 8411);
-        m.insert("thorn", 254);
-        m.insert("times", 215);
-        m.insert("tint;", 8749);
-        m.insert("toea;", 10536);
-        m.insert("topf;", 120165);
-        m.insert("tosa;", 10537);
-        m.insert("trie;", 8796);
-        m.insert("tscr;", 120009);
-        m.insert("tscy;", 1094);
-        m.insert("uArr;", 8657);
-        m.insert("uHar;", 10595);
-        m.insert("uarr;", 8593);
-        m.insert("ucirc", 251);
-        m.insert("uopf;", 120166);
-        m.insert("upsi;", 965);
-        m.insert("uscr;", 120010);
-        m.insert("utri;", 9653);
-        m.insert("uuml;", 252);
-        m.insert("vArr;", 8661);
-        m.insert("vBar;", 10984);
-        m.insert("varr;", 8597);
-        m.insert("vert;", 124);
-        m.insert("vopf;", 120167);
-        m.insert("vscr;", 120011);
-        m.insert("wopf;", 120168);
-        m.insert("wscr;", 120012);
-        m.insert("xcap;", 8898);
-        m.insert("xcup;", 8899);
-        m.insert("xmap;", 10236);
-        m.insert("xnis;", 8955);
-        m.insert("xopf;", 120169);
-        m.insert("xscr;", 120013);
-        m.insert("xvee;", 8897);
-        m.insert("yacy;", 1103);
-        m.insert("yicy;", 1111);
-        m.insert("yopf;", 120170);
-        m.insert("yscr;", 120014);
-        m.insert("yucy;", 1102);
-        m.insert("yuml;", 255);
-        m.insert("zdot;", 380);
-        m.insert("zeta;", 950);
-        m.insert("zhcy;", 1078);
-        m.insert("zopf;", 120171);
-        m.insert("zscr;", 120015);
-        m.insert("zwnj;", 8204);
-        m.insert("AMP;", 38);
-        m.insert("Acy;", 1040);
-        m.insert("Afr;", 120068);
-        m.insert("And;", 10835);
-        m.insert("Auml", 196);
-        m.insert("Bcy;", 1041);
-        m.insert("Bfr;", 120069);
-        m.insert("COPY", 169);
-        m.insert("Cap;", 8914);
-        m.insert("Cfr;", 8493);
-        m.insert("Chi;", 935);
-        m.insert("Cup;", 8915);
-        m.insert("Dcy;", 1044);
-        m.insert("Del;", 8711);
-        m.insert("Dfr;", 120071);
-        m.insert("Dot;", 168);
-        m.insert("ENG;", 330);
-        m.insert("ETH;", 208);
-        m.insert("Ecy;", 1069);
-        m.insert("Efr;", 120072);
-        m.insert("Eta;", 919);
-        m.insert("Euml", 203);
-        m.insert("Fcy;", 1060);
-        m.insert("Ffr;", 120073);
-        m.insert("Gcy;", 1043);
-        m.insert("Gfr;", 120074);
-        m.insert("Hat;", 94);
-        m.insert("Hfr;", 8460);
-        m.insert("Icy;", 1048);
-        m.insert("Ifr;", 8465);
-        m.insert("Int;", 8748);
-        m.insert("Iuml", 207);
-        m.insert("Jcy;", 1049);
-        m.insert("Jfr;", 120077);
-        m.insert("Kcy;", 1050);
-        m.insert("Kfr;", 120078);
-        m.insert("Lcy;", 1051);
-        m.insert("Lfr;", 120079);
-        m.insert("Lsh;", 8624);
-        m.insert("Map;", 10501);
-        m.insert("Mcy;", 1052);
-        m.insert("Mfr;", 120080);
-        m.insert("Ncy;", 1053);
-        m.insert("Nfr;", 120081);
-        m.insert("Not;", 10988);
-        m.insert("Ocy;", 1054);
-        m.insert("Ofr;", 120082);
-        m.insert("Ouml", 214);
-        m.insert("Pcy;", 1055);
-        m.insert("Pfr;", 120083);
-        m.insert("Phi;", 934);
-        m.insert("Psi;", 936);
-        m.insert("QUOT", 34);
-        m.insert("Qfr;", 120084);
-        m.insert("REG;", 174);
-        m.insert("Rcy;", 1056);
-        m.insert("Rfr;", 8476);
-        m.insert("Rho;", 929);
-        m.insert("Rsh;", 8625);
-        m.insert("Scy;", 1057);
-        m.insert("Sfr;", 120086);
-        m.insert("Sub;", 8912);
-        m.insert("Sum;", 8721);
-        m.insert("Sup;", 8913);
-        m.insert("Tab;", 9);
-        m.insert("Tau;", 932);
-        m.insert("Tcy;", 1058);
-        m.insert("Tfr;", 120087);
-        m.insert("Ucy;", 1059);
-        m.insert("Ufr;", 120088);
-        m.insert("Uuml", 220);
-        m.insert("Vcy;", 1042);
-        m.insert("Vee;", 8897);
-        m.insert("Vfr;", 120089);
-        m.insert("Wfr;", 120090);
-        m.insert("Xfr;", 120091);
-        m.insert("Ycy;", 1067);
-        m.insert("Yfr;", 120092);
-        m.insert("Zcy;", 1047);
-        m.insert("Zfr;", 8488);
-        m.insert("acE;", 8766);
-        m.insert("acd;", 8767);
-        m.insert("acy;", 1072);
-        m.insert("afr;", 120094);
-        m.insert("amp;", 38);
-        m.insert("and;", 8743);
-        m.insert("ang;", 8736);
-        m.insert("apE;", 10864);
-        m.insert("ape;", 8778);
-        m.insert("ast;", 42);
-        m.insert("auml", 228);
-        m.insert("bcy;", 1073);
-        m.insert("bfr;", 120095);
-        m.insert("bne;", 61);
-        m.insert("bot;", 8869);
-        m.insert("cap;", 8745);
-        m.insert("cent", 162);
-        m.insert("cfr;", 120096);
-        m.insert("chi;", 967);
-        m.insert("cir;", 9675);
-        m.insert("copy", 169);
-        m.insert("cup;", 8746);
-        m.insert("dcy;", 1076);
-        m.insert("deg;", 176);
-        m.insert("dfr;", 120097);
-        m.insert("die;", 168);
-        m.insert("div;", 247);
-        m.insert("dot;", 729);
-        m.insert("ecy;", 1101);
-        m.insert("efr;", 120098);
-        m.insert("egs;", 10902);
-        m.insert("ell;", 8467);
-        m.insert("els;", 10901);
-        m.insert("eng;", 331);
-        m.insert("eta;", 951);
-        m.insert("eth;", 240);
-        m.insert("euml", 235);
-        m.insert("fcy;", 1092);
-        m.insert("ffr;", 120099);
-        m.insert("gEl;", 10892);
-        m.insert("gap;", 10886);
-        m.insert("gcy;", 1075);
-        m.insert("gel;", 8923);
-        m.insert("geq;", 8805);
-        m.insert("ges;", 10878);
-        m.insert("gfr;", 120100);
-        m.insert("ggg;", 8921);
-        m.insert("glE;", 10898);
-        m.insert("gla;", 10917);
-        m.insert("glj;", 10916);
-        m.insert("gnE;", 8809);
-        m.insert("gne;", 10888);
-        m.insert("hfr;", 120101);
-        m.insert("icy;", 1080);
-        m.insert("iff;", 8660);
-        m.insert("ifr;", 120102);
-        m.insert("int;", 8747);
-        m.insert("iuml", 239);
-        m.insert("jcy;", 1081);
-        m.insert("jfr;", 120103);
-        m.insert("kcy;", 1082);
-        m.insert("kfr;", 120104);
-        m.insert("lEg;", 10891);
-        m.insert("lap;", 10885);
-        m.insert("lat;", 10923);
-        m.insert("lcy;", 1083);
-        m.insert("leg;", 8922);
-        m.insert("leq;", 8804);
-        m.insert("les;", 10877);
-        m.insert("lfr;", 120105);
-        m.insert("lgE;", 10897);
-        m.insert("lnE;", 8808);
-        m.insert("lne;", 10887);
-        m.insert("loz;", 9674);
-        m.insert("lrm;", 8206);
-        m.insert("lsh;", 8624);
-        m.insert("macr", 175);
-        m.insert("map;", 8614);
-        m.insert("mcy;", 1084);
-        m.insert("mfr;", 120106);
-        m.insert("mho;", 8487);
-        m.insert("mid;", 8739);
-        m.insert("nGg;", 8921);
-        m.insert("nGt;", 8811);
-        m.insert("nLl;", 8920);
-        m.insert("nLt;", 8810);
-        m.insert("nap;", 8777);
-        m.insert("nbsp", 160);
-        m.insert("ncy;", 1085);
-        m.insert("nfr;", 120107);
-        m.insert("ngE;", 8807);
-        m.insert("nge;", 8817);
-        m.insert("ngt;", 8815);
-        m.insert("nis;", 8956);
-        m.insert("niv;", 8715);
-        m.insert("nlE;", 8806);
-        m.insert("nle;", 8816);
-        m.insert("nlt;", 8814);
-        m.insert("not;", 172);
-        m.insert("npr;", 8832);
-        m.insert("nsc;", 8833);
-        m.insert("num;", 35);
-        m.insert("ocy;", 1086);
-        m.insert("ofr;", 120108);
-        m.insert("ogt;", 10689);
-        m.insert("ohm;", 937);
-        m.insert("olt;", 10688);
-        m.insert("ord;", 10845);
-        m.insert("ordf", 170);
-        m.insert("ordm", 186);
-        m.insert("orv;", 10843);
-        m.insert("ouml", 246);
-        m.insert("par;", 8741);
-        m.insert("para", 182);
-        m.insert("pcy;", 1087);
-        m.insert("pfr;", 120109);
-        m.insert("phi;", 966);
-        m.insert("piv;", 982);
-        m.insert("prE;", 10931);
-        m.insert("pre;", 10927);
-        m.insert("psi;", 968);
-        m.insert("qfr;", 120110);
-        m.insert("quot", 34);
-        m.insert("rcy;", 1088);
-        m.insert("reg;", 174);
-        m.insert("rfr;", 120111);
-        m.insert("rho;", 961);
-        m.insert("rlm;", 8207);
-        m.insert("rsh;", 8625);
-        m.insert("scE;", 10932);
-        m.insert("sce;", 10928);
-        m.insert("scy;", 1089);
-        m.insert("sect", 167);
-        m.insert("sfr;", 120112);
-        m.insert("shy;", 173);
-        m.insert("sim;", 8764);
-        m.insert("smt;", 10922);
-        m.insert("sol;", 47);
-        m.insert("squ;", 9633);
-        m.insert("sub;", 8834);
-        m.insert("sum;", 8721);
-        m.insert("sup;", 8835);
-        m.insert("tau;", 964);
-        m.insert("tcy;", 1090);
-        m.insert("tfr;", 120113);
-        m.insert("top;", 8868);
-        m.insert("ucy;", 1091);
-        m.insert("ufr;", 120114);
-        m.insert("uml;", 168);
-        m.insert("uuml", 252);
-        m.insert("vcy;", 1074);
-        m.insert("vee;", 8744);
-        m.insert("vfr;", 120115);
-        m.insert("wfr;", 120116);
-        m.insert("xfr;", 120117);
-        m.insert("ycy;", 1099);
-        m.insert("yen;", 165);
-        m.insert("yfr;", 120118);
-        m.insert("yuml", 255);
-        m.insert("zcy;", 1079);
-        m.insert("zfr;", 120119);
-        m.insert("zwj;", 8205);
-        m.insert("AMP", 38);
-        m.insert("DD;", 8517);
-        m.insert("ETH", 208);
-        m.insert("GT;", 62);
-        m.insert("Gg;", 8921);
-        m.insert("Gt;", 8811);
-        m.insert("Im;", 8465);
-        m.insert("LT;", 60);
-        m.insert("Ll;", 8920);
-        m.insert("Lt;", 8810);
-        m.insert("Mu;", 924);
-        m.insert("Nu;", 925);
-        m.insert("Or;", 10836);
-        m.insert("Pi;", 928);
-        m.insert("Pr;", 10939);
-        m.insert("REG", 174);
-        m.insert("Re;", 8476);
-        m.insert("Sc;", 10940);
-        m.insert("Xi;", 926);
-        m.insert("ac;", 8766);
-        m.insert("af;", 8289);
-        m.insert("amp", 38);
-        m.insert("ap;", 8776);
-        m.insert("dd;", 8518);
-        m.insert("deg", 176);
-        m.insert("ee;", 8519);
-        m.insert("eg;", 10906);
-        m.insert("el;", 10905);
-        m.insert("eth", 240);
-        m.insert("gE;", 8807);
-        m.insert("ge;", 8805);
-        m.insert("gg;", 8811);
-        m.insert("gl;", 8823);
-        m.insert("gt;", 62);
-        m.insert("ic;", 8291);
-        m.insert("ii;", 8520);
-        m.insert("in;", 8712);
-        m.insert("it;", 8290);
-        m.insert("lE;", 8806);
-        m.insert("le;", 8804);
-        m.insert("lg;", 8822);
-        m.insert("ll;", 8810);
-        m.insert("lt;", 60);
-        m.insert("mp;", 8723);
-        m.insert("mu;", 956);
-        m.insert("ne;", 8800);
-        m.insert("ni;", 8715);
-        m.insert("not", 172);
-        m.insert("nu;", 957);
-        m.insert("oS;", 9416);
-        m.insert("or;", 8744);
-        m.insert("pi;", 960);
-        m.insert("pm;", 177);
-        m.insert("pr;", 8826);
-        m.insert("reg", 174);
-        m.insert("rx;", 8478);
-        m.insert("sc;", 8827);
-        m.insert("shy", 173);
-        m.insert("uml", 168);
-        m.insert("wp;", 8472);
-        m.insert("wr;", 8768);
-        m.insert("xi;", 958);
-        m.insert("yen", 165);
-        m.insert("GT", 62);
-        m.insert("LT", 60);
-        m.insert("gt", 62);
-        m.insert("lt", 60);
-    m
-});
+pub static ENTITIES: phf::Map<&'static str, u32> = phf_map! {
+    "CounterClockwiseContourIntegral;" => 8755,
+    "ClockwiseContourIntegral;" => 8754,
+    "DoubleLongLeftRightArrow;" => 10234,
+    "NotNestedGreaterGreater;" => 10914,
+    "DiacriticalDoubleAcute;" => 733,
+    "NotSquareSupersetEqual;" => 8931,
+    "CloseCurlyDoubleQuote;" => 8221,
+    "DoubleContourIntegral;" => 8751,
+    "FilledVerySmallSquare;" => 9642,
+    "NegativeVeryThinSpace;" => 8203,
+    "NotPrecedesSlantEqual;" => 8928,
+    "NotRightTriangleEqual;" => 8941,
+    "NotSucceedsSlantEqual;" => 8929,
+    "CapitalDifferentialD;" => 8517,
+    "DoubleLeftRightArrow;" => 8660,
+    "DoubleLongRightArrow;" => 10233,
+    "EmptyVerySmallSquare;" => 9643,
+    "NestedGreaterGreater;" => 8811,
+    "NotDoubleVerticalBar;" => 8742,
+    "NotGreaterSlantEqual;" => 10878,
+    "NotLeftTriangleEqual;" => 8940,
+    "NotSquareSubsetEqual;" => 8930,
+    "OpenCurlyDoubleQuote;" => 8220,
+    "ReverseUpEquilibrium;" => 10607,
+    "DoubleLongLeftArrow;" => 10232,
+    "DownLeftRightVector;" => 10576,
+    "LeftArrowRightArrow;" => 8646,
+    "NegativeMediumSpace;" => 8203,
+    "NotGreaterFullEqual;" => 8807,
+    "NotRightTriangleBar;" => 10704,
+    "RightArrowLeftArrow;" => 8644,
+    "SquareSupersetEqual;" => 8850,
+    "leftrightsquigarrow;" => 8621,
+    "DownRightTeeVector;" => 10591,
+    "DownRightVectorBar;" => 10583,
+    "LongLeftRightArrow;" => 10231,
+    "Longleftrightarrow;" => 10234,
+    "NegativeThickSpace;" => 8203,
+    "NotLeftTriangleBar;" => 10703,
+    "PrecedesSlantEqual;" => 8828,
+    "ReverseEquilibrium;" => 8651,
+    "RightDoubleBracket;" => 10215,
+    "RightDownTeeVector;" => 10589,
+    "RightDownVectorBar;" => 10581,
+    "RightTriangleEqual;" => 8885,
+    "SquareIntersection;" => 8851,
+    "SucceedsSlantEqual;" => 8829,
+    "blacktriangleright;" => 9656,
+    "longleftrightarrow;" => 10231,
+    "DoubleUpDownArrow;" => 8661,
+    "DoubleVerticalBar;" => 8741,
+    "DownLeftTeeVector;" => 10590,
+    "DownLeftVectorBar;" => 10582,
+    "FilledSmallSquare;" => 9724,
+    "GreaterSlantEqual;" => 10878,
+    "LeftDoubleBracket;" => 10214,
+    "LeftDownTeeVector;" => 10593,
+    "LeftDownVectorBar;" => 10585,
+    "LeftTriangleEqual;" => 8884,
+    "NegativeThinSpace;" => 8203,
+    "NotGreaterGreater;" => 8811,
+    "NotLessSlantEqual;" => 10877,
+    "NotNestedLessLess;" => 10913,
+    "NotReverseElement;" => 8716,
+    "NotSquareSuperset;" => 8848,
+    "NotTildeFullEqual;" => 8775,
+    "RightAngleBracket;" => 10217,
+    "RightUpDownVector;" => 10575,
+    "SquareSubsetEqual;" => 8849,
+    "VerticalSeparator;" => 10072,
+    "blacktriangledown;" => 9662,
+    "blacktriangleleft;" => 9666,
+    "leftrightharpoons;" => 8651,
+    "rightleftharpoons;" => 8652,
+    "twoheadrightarrow;" => 8608,
+    "DiacriticalAcute;" => 180,
+    "DiacriticalGrave;" => 96,
+    "DiacriticalTilde;" => 732,
+    "DoubleRightArrow;" => 8658,
+    "DownArrowUpArrow;" => 8693,
+    "EmptySmallSquare;" => 9723,
+    "GreaterEqualLess;" => 8923,
+    "GreaterFullEqual;" => 8807,
+    "LeftAngleBracket;" => 10216,
+    "LeftUpDownVector;" => 10577,
+    "LessEqualGreater;" => 8922,
+    "NonBreakingSpace;" => 160,
+    "NotPrecedesEqual;" => 10927,
+    "NotRightTriangle;" => 8939,
+    "NotSucceedsEqual;" => 10928,
+    "NotSucceedsTilde;" => 8831,
+    "NotSupersetEqual;" => 8841,
+    "RightTriangleBar;" => 10704,
+    "RightUpTeeVector;" => 10588,
+    "RightUpVectorBar;" => 10580,
+    "UnderParenthesis;" => 9181,
+    "UpArrowDownArrow;" => 8645,
+    "circlearrowright;" => 8635,
+    "downharpoonright;" => 8642,
+    "ntrianglerighteq;" => 8941,
+    "rightharpoondown;" => 8641,
+    "rightrightarrows;" => 8649,
+    "twoheadleftarrow;" => 8606,
+    "vartriangleright;" => 8883,
+    "CloseCurlyQuote;" => 8217,
+    "ContourIntegral;" => 8750,
+    "DoubleDownArrow;" => 8659,
+    "DoubleLeftArrow;" => 8656,
+    "DownRightVector;" => 8641,
+    "LeftRightVector;" => 10574,
+    "LeftTriangleBar;" => 10703,
+    "LeftUpTeeVector;" => 10592,
+    "LeftUpVectorBar;" => 10584,
+    "LowerRightArrow;" => 8600,
+    "NotGreaterEqual;" => 8817,
+    "NotGreaterTilde;" => 8821,
+    "NotHumpDownHump;" => 8782,
+    "NotLeftTriangle;" => 8938,
+    "NotSquareSubset;" => 8847,
+    "OverParenthesis;" => 9180,
+    "RightDownVector;" => 8642,
+    "ShortRightArrow;" => 8594,
+    "UpperRightArrow;" => 8599,
+    "bigtriangledown;" => 9661,
+    "circlearrowleft;" => 8634,
+    "curvearrowright;" => 8631,
+    "downharpoonleft;" => 8643,
+    "leftharpoondown;" => 8637,
+    "leftrightarrows;" => 8646,
+    "nLeftrightarrow;" => 8654,
+    "nleftrightarrow;" => 8622,
+    "ntrianglelefteq;" => 8940,
+    "rightleftarrows;" => 8644,
+    "rightsquigarrow;" => 8605,
+    "rightthreetimes;" => 8908,
+    "straightepsilon;" => 1013,
+    "trianglerighteq;" => 8885,
+    "vartriangleleft;" => 8882,
+    "DiacriticalDot;" => 729,
+    "DoubleRightTee;" => 8872,
+    "DownLeftVector;" => 8637,
+    "GreaterGreater;" => 10914,
+    "HorizontalLine;" => 9472,
+    "InvisibleComma;" => 8291,
+    "InvisibleTimes;" => 8290,
+    "LeftDownVector;" => 8643,
+    "LeftRightArrow;" => 8596,
+    "Leftrightarrow;" => 8660,
+    "LessSlantEqual;" => 10877,
+    "LongRightArrow;" => 10230,
+    "Longrightarrow;" => 10233,
+    "LowerLeftArrow;" => 8601,
+    "NestedLessLess;" => 8810,
+    "NotGreaterLess;" => 8825,
+    "NotLessGreater;" => 8824,
+    "NotSubsetEqual;" => 8840,
+    "NotVerticalBar;" => 8740,
+    "OpenCurlyQuote;" => 8216,
+    "ReverseElement;" => 8715,
+    "RightTeeVector;" => 10587,
+    "RightVectorBar;" => 10579,
+    "ShortDownArrow;" => 8595,
+    "ShortLeftArrow;" => 8592,
+    "SquareSuperset;" => 8848,
+    "TildeFullEqual;" => 8773,
+    "UpperLeftArrow;" => 8598,
+    "ZeroWidthSpace;" => 8203,
+    "curvearrowleft;" => 8630,
+    "doublebarwedge;" => 8966,
+    "downdownarrows;" => 8650,
+    "hookrightarrow;" => 8618,
+    "leftleftarrows;" => 8647,
+    "leftrightarrow;" => 8596,
+    "leftthreetimes;" => 8907,
+    "longrightarrow;" => 10230,
+    "looparrowright;" => 8620,
+    "nshortparallel;" => 8742,
+    "ntriangleright;" => 8939,
+    "rightarrowtail;" => 8611,
+    "rightharpoonup;" => 8640,
+    "trianglelefteq;" => 8884,
+    "upharpoonright;" => 8638,
+    "ApplyFunction;" => 8289,
+    "DifferentialD;" => 8518,
+    "DoubleLeftTee;" => 10980,
+    "DoubleUpArrow;" => 8657,
+    "LeftTeeVector;" => 10586,
+    "LeftVectorBar;" => 10578,
+    "LessFullEqual;" => 8806,
+    "LongLeftArrow;" => 10229,
+    "Longleftarrow;" => 10232,
+    "NotEqualTilde;" => 8770,
+    "NotTildeEqual;" => 8772,
+    "NotTildeTilde;" => 8777,
+    "Poincareplane;" => 8460,
+    "PrecedesEqual;" => 10927,
+    "PrecedesTilde;" => 8830,
+    "RightArrowBar;" => 8677,
+    "RightTeeArrow;" => 8614,
+    "RightTriangle;" => 8883,
+    "RightUpVector;" => 8638,
+    "SucceedsEqual;" => 10928,
+    "SucceedsTilde;" => 8831,
+    "SupersetEqual;" => 8839,
+    "UpEquilibrium;" => 10606,
+    "VerticalTilde;" => 8768,
+    "VeryThinSpace;" => 8202,
+    "bigtriangleup;" => 9651,
+    "blacktriangle;" => 9652,
+    "divideontimes;" => 8903,
+    "fallingdotseq;" => 8786,
+    "hookleftarrow;" => 8617,
+    "leftarrowtail;" => 8610,
+    "leftharpoonup;" => 8636,
+    "longleftarrow;" => 10229,
+    "looparrowleft;" => 8619,
+    "measuredangle;" => 8737,
+    "ntriangleleft;" => 8938,
+    "shortparallel;" => 8741,
+    "smallsetminus;" => 8726,
+    "triangleright;" => 9657,
+    "upharpoonleft;" => 8639,
+    "varsubsetneqq;" => 10955,
+    "varsupsetneqq;" => 10956,
+    "DownArrowBar;" => 10515,
+    "DownTeeArrow;" => 8615,
+    "ExponentialE;" => 8519,
+    "GreaterEqual;" => 8805,
+    "GreaterTilde;" => 8819,
+    "HilbertSpace;" => 8459,
+    "HumpDownHump;" => 8782,
+    "Intersection;" => 8898,
+    "LeftArrowBar;" => 8676,
+    "LeftTeeArrow;" => 8612,
+    "LeftTriangle;" => 8882,
+    "LeftUpVector;" => 8639,
+    "NotCongruent;" => 8802,
+    "NotHumpEqual;" => 8783,
+    "NotLessEqual;" => 8816,
+    "NotLessTilde;" => 8820,
+    "Proportional;" => 8733,
+    "RightCeiling;" => 8969,
+    "RoundImplies;" => 10608,
+    "ShortUpArrow;" => 8593,
+    "SquareSubset;" => 8847,
+    "UnderBracket;" => 9141,
+    "VerticalLine;" => 124,
+    "blacklozenge;" => 10731,
+    "exponentiale;" => 8519,
+    "risingdotseq;" => 8787,
+    "triangledown;" => 9663,
+    "triangleleft;" => 9667,
+    "varsubsetneq;" => 8842,
+    "varsupsetneq;" => 8843,
+    "CircleMinus;" => 8854,
+    "CircleTimes;" => 8855,
+    "Equilibrium;" => 8652,
+    "GreaterLess;" => 8823,
+    "LeftCeiling;" => 8968,
+    "LessGreater;" => 8822,
+    "MediumSpace;" => 8287,
+    "NotLessLess;" => 8810,
+    "NotPrecedes;" => 8832,
+    "NotSucceeds;" => 8833,
+    "NotSuperset;" => 8835,
+    "OverBracket;" => 9140,
+    "RightVector;" => 8640,
+    "Rrightarrow;" => 8667,
+    "RuleDelayed;" => 10740,
+    "SmallCircle;" => 8728,
+    "SquareUnion;" => 8852,
+    "SubsetEqual;" => 8838,
+    "UpDownArrow;" => 8597,
+    "Updownarrow;" => 8661,
+    "VerticalBar;" => 8739,
+    "backepsilon;" => 1014,
+    "blacksquare;" => 9642,
+    "circledcirc;" => 8858,
+    "circleddash;" => 8861,
+    "curlyeqprec;" => 8926,
+    "curlyeqsucc;" => 8927,
+    "diamondsuit;" => 9830,
+    "eqslantless;" => 10901,
+    "expectation;" => 8496,
+    "nRightarrow;" => 8655,
+    "nrightarrow;" => 8603,
+    "preccurlyeq;" => 8828,
+    "precnapprox;" => 10937,
+    "quaternions;" => 8461,
+    "straightphi;" => 981,
+    "succcurlyeq;" => 8829,
+    "succnapprox;" => 10938,
+    "thickapprox;" => 8776,
+    "updownarrow;" => 8597,
+    "Bernoullis;" => 8492,
+    "CirclePlus;" => 8853,
+    "EqualTilde;" => 8770,
+    "Fouriertrf;" => 8497,
+    "ImaginaryI;" => 8520,
+    "Laplacetrf;" => 8466,
+    "LeftVector;" => 8636,
+    "Lleftarrow;" => 8666,
+    "NotElement;" => 8713,
+    "NotGreater;" => 8815,
+    "Proportion;" => 8759,
+    "RightArrow;" => 8594,
+    "RightFloor;" => 8971,
+    "Rightarrow;" => 8658,
+    "ThickSpace;" => 8287,
+    "TildeEqual;" => 8771,
+    "TildeTilde;" => 8776,
+    "UnderBrace;" => 9183,
+    "UpArrowBar;" => 10514,
+    "UpTeeArrow;" => 8613,
+    "circledast;" => 8859,
+    "complement;" => 8705,
+    "curlywedge;" => 8911,
+    "eqslantgtr;" => 10902,
+    "gtreqqless;" => 10892,
+    "lessapprox;" => 10885,
+    "lesseqqgtr;" => 10891,
+    "lmoustache;" => 9136,
+    "longmapsto;" => 10236,
+    "mapstodown;" => 8615,
+    "mapstoleft;" => 8612,
+    "nLeftarrow;" => 8653,
+    "nleftarrow;" => 8602,
+    "nsubseteqq;" => 10949,
+    "nsupseteqq;" => 10950,
+    "precapprox;" => 10935,
+    "rightarrow;" => 8594,
+    "rmoustache;" => 9137,
+    "sqsubseteq;" => 8849,
+    "sqsupseteq;" => 8850,
+    "subsetneqq;" => 10955,
+    "succapprox;" => 10936,
+    "supsetneqq;" => 10956,
+    "upuparrows;" => 8648,
+    "varepsilon;" => 1013,
+    "varnothing;" => 8709,
+    "Backslash;" => 8726,
+    "CenterDot;" => 183,
+    "CircleDot;" => 8857,
+    "Congruent;" => 8801,
+    "Coproduct;" => 8720,
+    "DoubleDot;" => 168,
+    "DownArrow;" => 8595,
+    "DownBreve;" => 785,
+    "Downarrow;" => 8659,
+    "HumpEqual;" => 8783,
+    "LeftArrow;" => 8592,
+    "LeftFloor;" => 8970,
+    "Leftarrow;" => 8656,
+    "LessTilde;" => 8818,
+    "Mellintrf;" => 8499,
+    "MinusPlus;" => 8723,
+    "NotCupCap;" => 8813,
+    "NotExists;" => 8708,
+    "NotSubset;" => 8834,
+    "OverBrace;" => 9182,
+    "PlusMinus;" => 177,
+    "Therefore;" => 8756,
+    "ThinSpace;" => 8201,
+    "TripleDot;" => 8411,
+    "UnionPlus;" => 8846,
+    "backprime;" => 8245,
+    "backsimeq;" => 8909,
+    "bigotimes;" => 10754,
+    "centerdot;" => 183,
+    "checkmark;" => 10003,
+    "complexes;" => 8450,
+    "dotsquare;" => 8865,
+    "downarrow;" => 8595,
+    "gtrapprox;" => 10886,
+    "gtreqless;" => 8923,
+    "gvertneqq;" => 8809,
+    "heartsuit;" => 9829,
+    "leftarrow;" => 8592,
+    "lesseqgtr;" => 8922,
+    "lvertneqq;" => 8808,
+    "ngeqslant;" => 10878,
+    "nleqslant;" => 10877,
+    "nparallel;" => 8742,
+    "nshortmid;" => 8740,
+    "nsubseteq;" => 8840,
+    "nsupseteq;" => 8841,
+    "pitchfork;" => 8916,
+    "rationals;" => 8474,
+    "spadesuit;" => 9824,
+    "subseteqq;" => 10949,
+    "subsetneq;" => 8842,
+    "supseteqq;" => 10950,
+    "supsetneq;" => 8843,
+    "therefore;" => 8756,
+    "triangleq;" => 8796,
+    "varpropto;" => 8733,
+    "DDotrahd;" => 10513,
+    "DotEqual;" => 8784,
+    "Integral;" => 8747,
+    "LessLess;" => 10913,
+    "NotEqual;" => 8800,
+    "NotTilde;" => 8769,
+    "PartialD;" => 8706,
+    "Precedes;" => 8826,
+    "RightTee;" => 8866,
+    "Succeeds;" => 8827,
+    "SuchThat;" => 8715,
+    "Superset;" => 8835,
+    "Uarrocir;" => 10569,
+    "UnderBar;" => 95,
+    "andslope;" => 10840,
+    "angmsdaa;" => 10664,
+    "angmsdab;" => 10665,
+    "angmsdac;" => 10666,
+    "angmsdad;" => 10667,
+    "angmsdae;" => 10668,
+    "angmsdaf;" => 10669,
+    "angmsdag;" => 10670,
+    "angmsdah;" => 10671,
+    "angrtvbd;" => 10653,
+    "approxeq;" => 8778,
+    "awconint;" => 8755,
+    "backcong;" => 8780,
+    "barwedge;" => 8965,
+    "bbrktbrk;" => 9142,
+    "bigoplus;" => 10753,
+    "bigsqcup;" => 10758,
+    "biguplus;" => 10756,
+    "bigwedge;" => 8896,
+    "boxminus;" => 8863,
+    "boxtimes;" => 8864,
+    "bsolhsub;" => 10184,
+    "capbrcup;" => 10825,
+    "circledR;" => 174,
+    "circledS;" => 9416,
+    "cirfnint;" => 10768,
+    "clubsuit;" => 9827,
+    "cupbrcap;" => 10824,
+    "curlyvee;" => 8910,
+    "cwconint;" => 8754,
+    "doteqdot;" => 8785,
+    "dotminus;" => 8760,
+    "drbkarow;" => 10512,
+    "dzigrarr;" => 10239,
+    "elinters;" => 9191,
+    "emptyset;" => 8709,
+    "eqvparsl;" => 10725,
+    "fpartint;" => 10765,
+    "geqslant;" => 10878,
+    "gesdotol;" => 10884,
+    "gnapprox;" => 10890,
+    "hksearow;" => 10533,
+    "hkswarow;" => 10534,
+    "imagline;" => 8464,
+    "imagpart;" => 8465,
+    "infintie;" => 10717,
+    "integers;" => 8484,
+    "intercal;" => 8890,
+    "intlarhk;" => 10775,
+    "laemptyv;" => 10676,
+    "ldrushar;" => 10571,
+    "leqslant;" => 10877,
+    "lesdotor;" => 10883,
+    "llcorner;" => 8990,
+    "lnapprox;" => 10889,
+    "lrcorner;" => 8991,
+    "lurdshar;" => 10570,
+    "mapstoup;" => 8613,
+    "multimap;" => 8888,
+    "naturals;" => 8469,
+    "ncongdot;" => 10861,
+    "notindot;" => 8949,
+    "otimesas;" => 10806,
+    "parallel;" => 8741,
+    "plusacir;" => 10787,
+    "pointint;" => 10773,
+    "precneqq;" => 10933,
+    "precnsim;" => 8936,
+    "profalar;" => 9006,
+    "profline;" => 8978,
+    "profsurf;" => 8979,
+    "raemptyv;" => 10675,
+    "realpart;" => 8476,
+    "rppolint;" => 10770,
+    "rtriltri;" => 10702,
+    "scpolint;" => 10771,
+    "setminus;" => 8726,
+    "shortmid;" => 8739,
+    "smeparsl;" => 10724,
+    "sqsubset;" => 8847,
+    "sqsupset;" => 8848,
+    "subseteq;" => 8838,
+    "succneqq;" => 10934,
+    "succnsim;" => 8937,
+    "supseteq;" => 8839,
+    "thetasym;" => 977,
+    "thicksim;" => 8764,
+    "timesbar;" => 10801,
+    "triangle;" => 9653,
+    "triminus;" => 10810,
+    "trpezium;" => 9186,
+    "ulcorner;" => 8988,
+    "urcorner;" => 8989,
+    "varkappa;" => 1008,
+    "varsigma;" => 962,
+    "vartheta;" => 977,
+    "Because;" => 8757,
+    "Cayleys;" => 8493,
+    "Cconint;" => 8752,
+    "Cedilla;" => 184,
+    "Diamond;" => 8900,
+    "DownTee;" => 8868,
+    "Element;" => 8712,
+    "Epsilon;" => 917,
+    "Implies;" => 8658,
+    "LeftTee;" => 8867,
+    "NewLine;" => 10,
+    "NoBreak;" => 8288,
+    "NotLess;" => 8814,
+    "Omicron;" => 927,
+    "OverBar;" => 8254,
+    "Product;" => 8719,
+    "UpArrow;" => 8593,
+    "Uparrow;" => 8657,
+    "Upsilon;" => 933,
+    "alefsym;" => 8501,
+    "angrtvb;" => 8894,
+    "angzarr;" => 9084,
+    "asympeq;" => 8781,
+    "backsim;" => 8765,
+    "because;" => 8757,
+    "bemptyv;" => 10672,
+    "between;" => 8812,
+    "bigcirc;" => 9711,
+    "bigodot;" => 10752,
+    "bigstar;" => 9733,
+    "bnequiv;" => 8801,
+    "boxplus;" => 8862,
+    "ccupssm;" => 10832,
+    "cemptyv;" => 10674,
+    "cirscir;" => 10690,
+    "coloneq;" => 8788,
+    "congdot;" => 10861,
+    "cudarrl;" => 10552,
+    "cudarrr;" => 10549,
+    "cularrp;" => 10557,
+    "curarrm;" => 10556,
+    "dbkarow;" => 10511,
+    "ddagger;" => 8225,
+    "ddotseq;" => 10871,
+    "demptyv;" => 10673,
+    "diamond;" => 8900,
+    "digamma;" => 989,
+    "dotplus;" => 8724,
+    "dwangle;" => 10662,
+    "epsilon;" => 949,
+    "eqcolon;" => 8789,
+    "equivDD;" => 10872,
+    "gesdoto;" => 10882,
+    "gtquest;" => 10876,
+    "gtrless;" => 8823,
+    "harrcir;" => 10568,
+    "intprod;" => 10812,
+    "isindot;" => 8949,
+    "larrbfs;" => 10527,
+    "larrsim;" => 10611,
+    "lbrksld;" => 10639,
+    "lbrkslu;" => 10637,
+    "ldrdhar;" => 10599,
+    "lesdoto;" => 10881,
+    "lessdot;" => 8918,
+    "lessgtr;" => 8822,
+    "lesssim;" => 8818,
+    "lotimes;" => 10804,
+    "lozenge;" => 9674,
+    "ltquest;" => 10875,
+    "luruhar;" => 10598,
+    "maltese;" => 10016,
+    "minusdu;" => 10794,
+    "napprox;" => 8777,
+    "natural;" => 9838,
+    "nearrow;" => 8599,
+    "nexists;" => 8708,
+    "notinva;" => 8713,
+    "notinvb;" => 8951,
+    "notinvc;" => 8950,
+    "notniva;" => 8716,
+    "notnivb;" => 8958,
+    "notnivc;" => 8957,
+    "npolint;" => 10772,
+    "npreceq;" => 10927,
+    "nsqsube;" => 8930,
+    "nsqsupe;" => 8931,
+    "nsubset;" => 8834,
+    "nsucceq;" => 10928,
+    "nsupset;" => 8835,
+    "nvinfin;" => 10718,
+    "nvltrie;" => 8884,
+    "nvrtrie;" => 8885,
+    "nwarrow;" => 8598,
+    "olcross;" => 10683,
+    "omicron;" => 959,
+    "orderof;" => 8500,
+    "orslope;" => 10839,
+    "pertenk;" => 8241,
+    "planckh;" => 8462,
+    "pluscir;" => 10786,
+    "plussim;" => 10790,
+    "plustwo;" => 10791,
+    "precsim;" => 8830,
+    "quatint;" => 10774,
+    "questeq;" => 8799,
+    "rarrbfs;" => 10528,
+    "rarrsim;" => 10612,
+    "rbrksld;" => 10638,
+    "rbrkslu;" => 10640,
+    "rdldhar;" => 10601,
+    "realine;" => 8475,
+    "rotimes;" => 10805,
+    "ruluhar;" => 10600,
+    "searrow;" => 8600,
+    "simplus;" => 10788,
+    "simrarr;" => 10610,
+    "subedot;" => 10947,
+    "submult;" => 10945,
+    "subplus;" => 10943,
+    "subrarr;" => 10617,
+    "succsim;" => 8831,
+    "supdsub;" => 10968,
+    "supedot;" => 10948,
+    "suphsol;" => 10185,
+    "suphsub;" => 10967,
+    "suplarr;" => 10619,
+    "supmult;" => 10946,
+    "supplus;" => 10944,
+    "swarrow;" => 8601,
+    "topfork;" => 10970,
+    "triplus;" => 10809,
+    "tritime;" => 10811,
+    "uparrow;" => 8593,
+    "upsilon;" => 965,
+    "uwangle;" => 10663,
+    "vzigzag;" => 10650,
+    "zigrarr;" => 8669,
+    "Aacute;" => 193,
+    "Abreve;" => 258,
+    "Agrave;" => 192,
+    "Assign;" => 8788,
+    "Atilde;" => 195,
+    "Barwed;" => 8966,
+    "Bumpeq;" => 8782,
+    "Cacute;" => 262,
+    "Ccaron;" => 268,
+    "Ccedil;" => 199,
+    "Colone;" => 10868,
+    "Conint;" => 8751,
+    "CupCap;" => 8781,
+    "Dagger;" => 8225,
+    "Dcaron;" => 270,
+    "DotDot;" => 8412,
+    "Dstrok;" => 272,
+    "Eacute;" => 201,
+    "Ecaron;" => 282,
+    "Egrave;" => 200,
+    "Exists;" => 8707,
+    "ForAll;" => 8704,
+    "Gammad;" => 988,
+    "Gbreve;" => 286,
+    "Gcedil;" => 290,
+    "HARDcy;" => 1066,
+    "Hstrok;" => 294,
+    "Iacute;" => 205,
+    "Igrave;" => 204,
+    "Itilde;" => 296,
+    "Jsercy;" => 1032,
+    "Kcedil;" => 310,
+    "Lacute;" => 313,
+    "Lambda;" => 923,
+    "Lcaron;" => 317,
+    "Lcedil;" => 315,
+    "Lmidot;" => 319,
+    "Lstrok;" => 321,
+    "Nacute;" => 323,
+    "Ncaron;" => 327,
+    "Ncedil;" => 325,
+    "Ntilde;" => 209,
+    "Oacute;" => 211,
+    "Odblac;" => 336,
+    "Ograve;" => 210,
+    "Oslash;" => 216,
+    "Otilde;" => 213,
+    "Otimes;" => 10807,
+    "Racute;" => 340,
+    "Rarrtl;" => 10518,
+    "Rcaron;" => 344,
+    "Rcedil;" => 342,
+    "SHCHcy;" => 1065,
+    "SOFTcy;" => 1068,
+    "Sacute;" => 346,
+    "Scaron;" => 352,
+    "Scedil;" => 350,
+    "Square;" => 9633,
+    "Subset;" => 8912,
+    "Supset;" => 8913,
+    "Tcaron;" => 356,
+    "Tcedil;" => 354,
+    "Tstrok;" => 358,
+    "Uacute;" => 218,
+    "Ubreve;" => 364,
+    "Udblac;" => 368,
+    "Ugrave;" => 217,
+    "Utilde;" => 360,
+    "Vdashl;" => 10982,
+    "Verbar;" => 8214,
+    "Vvdash;" => 8874,
+    "Yacute;" => 221,
+    "Zacute;" => 377,
+    "Zcaron;" => 381,
+    "aacute;" => 225,
+    "abreve;" => 259,
+    "agrave;" => 224,
+    "andand;" => 10837,
+    "angmsd;" => 8737,
+    "angsph;" => 8738,
+    "apacir;" => 10863,
+    "approx;" => 8776,
+    "atilde;" => 227,
+    "barvee;" => 8893,
+    "barwed;" => 8965,
+    "becaus;" => 8757,
+    "bernou;" => 8492,
+    "bigcap;" => 8898,
+    "bigcup;" => 8899,
+    "bigvee;" => 8897,
+    "bkarow;" => 10509,
+    "bottom;" => 8869,
+    "bowtie;" => 8904,
+    "boxbox;" => 10697,
+    "bprime;" => 8245,
+    "brvbar;" => 166,
+    "bullet;" => 8226,
+    "bumpeq;" => 8783,
+    "cacute;" => 263,
+    "capand;" => 10820,
+    "capcap;" => 10827,
+    "capcup;" => 10823,
+    "capdot;" => 10816,
+    "ccaron;" => 269,
+    "ccedil;" => 231,
+    "circeq;" => 8791,
+    "cirmid;" => 10991,
+    "colone;" => 8788,
+    "commat;" => 64,
+    "compfn;" => 8728,
+    "conint;" => 8750,
+    "coprod;" => 8720,
+    "copysr;" => 8471,
+    "cularr;" => 8630,
+    "cupcap;" => 10822,
+    "cupcup;" => 10826,
+    "cupdot;" => 8845,
+    "curarr;" => 8631,
+    "curren;" => 164,
+    "cylcty;" => 9005,
+    "dagger;" => 8224,
+    "daleth;" => 8504,
+    "dcaron;" => 271,
+    "dfisht;" => 10623,
+    "divide;" => 247,
+    "divonx;" => 8903,
+    "dlcorn;" => 8990,
+    "dlcrop;" => 8973,
+    "dollar;" => 36,
+    "drcorn;" => 8991,
+    "drcrop;" => 8972,
+    "dstrok;" => 273,
+    "eacute;" => 233,
+    "easter;" => 10862,
+    "ecaron;" => 283,
+    "ecolon;" => 8789,
+    "egrave;" => 232,
+    "egsdot;" => 10904,
+    "elsdot;" => 10903,
+    "emptyv;" => 8709,
+    "emsp13;" => 8196,
+    "emsp14;" => 8197,
+    "eparsl;" => 10723,
+    "eqcirc;" => 8790,
+    "equals;" => 61,
+    "equest;" => 8799,
+    "female;" => 9792,
+    "ffilig;" => 64259,
+    "ffllig;" => 64260,
+    "forall;" => 8704,
+    "frac12;" => 189,
+    "frac13;" => 8531,
+    "frac14;" => 188,
+    "frac15;" => 8533,
+    "frac16;" => 8537,
+    "frac18;" => 8539,
+    "frac23;" => 8532,
+    "frac25;" => 8534,
+    "frac34;" => 190,
+    "frac35;" => 8535,
+    "frac38;" => 8540,
+    "frac45;" => 8536,
+    "frac56;" => 8538,
+    "frac58;" => 8541,
+    "frac78;" => 8542,
+    "gacute;" => 501,
+    "gammad;" => 989,
+    "gbreve;" => 287,
+    "gesdot;" => 10880,
+    "gesles;" => 10900,
+    "gtlPar;" => 10645,
+    "gtrarr;" => 10616,
+    "gtrdot;" => 8919,
+    "gtrsim;" => 8819,
+    "hairsp;" => 8202,
+    "hamilt;" => 8459,
+    "hardcy;" => 1098,
+    "hearts;" => 9829,
+    "hellip;" => 8230,
+    "hercon;" => 8889,
+    "homtht;" => 8763,
+    "horbar;" => 8213,
+    "hslash;" => 8463,
+    "hstrok;" => 295,
+    "hybull;" => 8259,
+    "hyphen;" => 8208,
+    "iacute;" => 237,
+    "igrave;" => 236,
+    "iiiint;" => 10764,
+    "iinfin;" => 10716,
+    "incare;" => 8453,
+    "inodot;" => 305,
+    "intcal;" => 8890,
+    "iquest;" => 191,
+    "isinsv;" => 8947,
+    "itilde;" => 297,
+    "jsercy;" => 1112,
+    "kappav;" => 1008,
+    "kcedil;" => 311,
+    "kgreen;" => 312,
+    "lAtail;" => 10523,
+    "lacute;" => 314,
+    "lagran;" => 8466,
+    "lambda;" => 955,
+    "langle;" => 10216,
+    "larrfs;" => 10525,
+    "larrhk;" => 8617,
+    "larrlp;" => 8619,
+    "larrpl;" => 10553,
+    "larrtl;" => 8610,
+    "latail;" => 10521,
+    "lbrace;" => 123,
+    "lbrack;" => 91,
+    "lcaron;" => 318,
+    "lcedil;" => 316,
+    "ldquor;" => 8222,
+    "lesdot;" => 10879,
+    "lesges;" => 10899,
+    "lfisht;" => 10620,
+    "lfloor;" => 8970,
+    "lharul;" => 10602,
+    "llhard;" => 10603,
+    "lmidot;" => 320,
+    "lmoust;" => 9136,
+    "loplus;" => 10797,
+    "lowast;" => 8727,
+    "lowbar;" => 95,
+    "lparlt;" => 10643,
+    "lrhard;" => 10605,
+    "lsaquo;" => 8249,
+    "lsquor;" => 8218,
+    "lstrok;" => 322,
+    "lthree;" => 8907,
+    "ltimes;" => 8905,
+    "ltlarr;" => 10614,
+    "ltrPar;" => 10646,
+    "mapsto;" => 8614,
+    "marker;" => 9646,
+    "mcomma;" => 10793,
+    "midast;" => 42,
+    "midcir;" => 10992,
+    "middot;" => 183,
+    "minusb;" => 8863,
+    "minusd;" => 8760,
+    "mnplus;" => 8723,
+    "models;" => 8871,
+    "mstpos;" => 8766,
+    "nVDash;" => 8879,
+    "nVdash;" => 8878,
+    "nacute;" => 324,
+    "nbumpe;" => 8783,
+    "ncaron;" => 328,
+    "ncedil;" => 326,
+    "nearhk;" => 10532,
+    "nequiv;" => 8802,
+    "nesear;" => 10536,
+    "nexist;" => 8708,
+    "nltrie;" => 8940,
+    "notinE;" => 8953,
+    "nparsl;" => 11005,
+    "nprcue;" => 8928,
+    "nrarrc;" => 10547,
+    "nrarrw;" => 8605,
+    "nrtrie;" => 8941,
+    "nsccue;" => 8929,
+    "nsimeq;" => 8772,
+    "ntilde;" => 241,
+    "numero;" => 8470,
+    "nvDash;" => 8877,
+    "nvHarr;" => 10500,
+    "nvdash;" => 8876,
+    "nvlArr;" => 10498,
+    "nvrArr;" => 10499,
+    "nwarhk;" => 10531,
+    "nwnear;" => 10535,
+    "oacute;" => 243,
+    "odblac;" => 337,
+    "odsold;" => 10684,
+    "ograve;" => 242,
+    "ominus;" => 8854,
+    "origof;" => 8886,
+    "oslash;" => 248,
+    "otilde;" => 245,
+    "otimes;" => 8855,
+    "parsim;" => 10995,
+    "percnt;" => 37,
+    "period;" => 46,
+    "permil;" => 8240,
+    "phmmat;" => 8499,
+    "planck;" => 8463,
+    "plankv;" => 8463,
+    "plusdo;" => 8724,
+    "plusdu;" => 10789,
+    "plusmn;" => 177,
+    "preceq;" => 10927,
+    "primes;" => 8473,
+    "prnsim;" => 8936,
+    "propto;" => 8733,
+    "prurel;" => 8880,
+    "puncsp;" => 8200,
+    "qprime;" => 8279,
+    "rAtail;" => 10524,
+    "racute;" => 341,
+    "rangle;" => 10217,
+    "rarrap;" => 10613,
+    "rarrfs;" => 10526,
+    "rarrhk;" => 8618,
+    "rarrlp;" => 8620,
+    "rarrpl;" => 10565,
+    "rarrtl;" => 8611,
+    "ratail;" => 10522,
+    "rbrace;" => 125,
+    "rbrack;" => 93,
+    "rcaron;" => 345,
+    "rcedil;" => 343,
+    "rdquor;" => 8221,
+    "rfisht;" => 10621,
+    "rfloor;" => 8971,
+    "rharul;" => 10604,
+    "rmoust;" => 9137,
+    "roplus;" => 10798,
+    "rpargt;" => 10644,
+    "rsaquo;" => 8250,
+    "rsquor;" => 8217,
+    "rthree;" => 8908,
+    "rtimes;" => 8906,
+    "sacute;" => 347,
+    "scaron;" => 353,
+    "scedil;" => 351,
+    "scnsim;" => 8937,
+    "searhk;" => 10533,
+    "seswar;" => 10537,
+    "sfrown;" => 8994,
+    "shchcy;" => 1097,
+    "sigmaf;" => 962,
+    "sigmav;" => 962,
+    "simdot;" => 10858,
+    "smashp;" => 10803,
+    "softcy;" => 1100,
+    "solbar;" => 9023,
+    "spades;" => 9824,
+    "sqcaps;" => 8851,
+    "sqcups;" => 8852,
+    "sqsube;" => 8849,
+    "sqsupe;" => 8850,
+    "square;" => 9633,
+    "squarf;" => 9642,
+    "ssetmn;" => 8726,
+    "ssmile;" => 8995,
+    "sstarf;" => 8902,
+    "subdot;" => 10941,
+    "subset;" => 8834,
+    "subsim;" => 10951,
+    "subsub;" => 10965,
+    "subsup;" => 10963,
+    "succeq;" => 10928,
+    "supdot;" => 10942,
+    "supset;" => 8835,
+    "supsim;" => 10952,
+    "supsub;" => 10964,
+    "supsup;" => 10966,
+    "swarhk;" => 10534,
+    "swnwar;" => 10538,
+    "target;" => 8982,
+    "tcaron;" => 357,
+    "tcedil;" => 355,
+    "telrec;" => 8981,
+    "there4;" => 8756,
+    "thetav;" => 977,
+    "thinsp;" => 8201,
+    "thksim;" => 8764,
+    "timesb;" => 8864,
+    "timesd;" => 10800,
+    "topbot;" => 9014,
+    "topcir;" => 10993,
+    "tprime;" => 8244,
+    "tridot;" => 9708,
+    "tstrok;" => 359,
+    "uacute;" => 250,
+    "ubreve;" => 365,
+    "udblac;" => 369,
+    "ufisht;" => 10622,
+    "ugrave;" => 249,
+    "ulcorn;" => 8988,
+    "ulcrop;" => 8975,
+    "urcorn;" => 8989,
+    "urcrop;" => 8974,
+    "utilde;" => 361,
+    "vangrt;" => 10652,
+    "varphi;" => 981,
+    "varrho;" => 1009,
+    "veebar;" => 8891,
+    "vellip;" => 8942,
+    "verbar;" => 124,
+    "vsubnE;" => 10955,
+    "vsubne;" => 8842,
+    "vsupnE;" => 10956,
+    "vsupne;" => 8843,
+    "wedbar;" => 10847,
+    "wedgeq;" => 8793,
+    "weierp;" => 8472,
+    "wreath;" => 8768,
+    "xoplus;" => 10753,
+    "xotime;" => 10754,
+    "xsqcup;" => 10758,
+    "xuplus;" => 10756,
+    "xwedge;" => 8896,
+    "yacute;" => 253,
+    "zacute;" => 378,
+    "zcaron;" => 382,
+    "zeetrf;" => 8488,
+    "AElig;" => 198,
+    "Aacute" => 193,
+    "Acirc;" => 194,
+    "Agrave" => 192,
+    "Alpha;" => 913,
+    "Amacr;" => 256,
+    "Aogon;" => 260,
+    "Aring;" => 197,
+    "Atilde" => 195,
+    "Breve;" => 728,
+    "Ccedil" => 199,
+    "Ccirc;" => 264,
+    "Colon;" => 8759,
+    "Cross;" => 10799,
+    "Dashv;" => 10980,
+    "Delta;" => 916,
+    "Eacute" => 201,
+    "Ecirc;" => 202,
+    "Egrave" => 200,
+    "Emacr;" => 274,
+    "Eogon;" => 280,
+    "Equal;" => 10869,
+    "Gamma;" => 915,
+    "Gcirc;" => 284,
+    "Hacek;" => 711,
+    "Hcirc;" => 292,
+    "IJlig;" => 306,
+    "Iacute" => 205,
+    "Icirc;" => 206,
+    "Igrave" => 204,
+    "Imacr;" => 298,
+    "Iogon;" => 302,
+    "Iukcy;" => 1030,
+    "Jcirc;" => 308,
+    "Jukcy;" => 1028,
+    "Kappa;" => 922,
+    "Ntilde" => 209,
+    "OElig;" => 338,
+    "Oacute" => 211,
+    "Ocirc;" => 212,
+    "Ograve" => 210,
+    "Omacr;" => 332,
+    "Omega;" => 937,
+    "Oslash" => 216,
+    "Otilde" => 213,
+    "Prime;" => 8243,
+    "RBarr;" => 10512,
+    "Scirc;" => 348,
+    "Sigma;" => 931,
+    "THORN;" => 222,
+    "TRADE;" => 8482,
+    "TSHcy;" => 1035,
+    "Theta;" => 920,
+    "Tilde;" => 8764,
+    "Uacute" => 218,
+    "Ubrcy;" => 1038,
+    "Ucirc;" => 219,
+    "Ugrave" => 217,
+    "Umacr;" => 362,
+    "Union;" => 8899,
+    "Uogon;" => 370,
+    "UpTee;" => 8869,
+    "Uring;" => 366,
+    "VDash;" => 8875,
+    "Vdash;" => 8873,
+    "Wcirc;" => 372,
+    "Wedge;" => 8896,
+    "Yacute" => 221,
+    "Ycirc;" => 374,
+    "aacute" => 225,
+    "acirc;" => 226,
+    "acute;" => 180,
+    "aelig;" => 230,
+    "agrave" => 224,
+    "aleph;" => 8501,
+    "alpha;" => 945,
+    "amacr;" => 257,
+    "amalg;" => 10815,
+    "angle;" => 8736,
+    "angrt;" => 8735,
+    "angst;" => 197,
+    "aogon;" => 261,
+    "aring;" => 229,
+    "asymp;" => 8776,
+    "atilde" => 227,
+    "awint;" => 10769,
+    "bcong;" => 8780,
+    "bdquo;" => 8222,
+    "bepsi;" => 1014,
+    "blank;" => 9251,
+    "blk12;" => 9618,
+    "blk14;" => 9617,
+    "blk34;" => 9619,
+    "block;" => 9608,
+    "boxDL;" => 9559,
+    "boxDR;" => 9556,
+    "boxDl;" => 9558,
+    "boxDr;" => 9555,
+    "boxHD;" => 9574,
+    "boxHU;" => 9577,
+    "boxHd;" => 9572,
+    "boxHu;" => 9575,
+    "boxUL;" => 9565,
+    "boxUR;" => 9562,
+    "boxUl;" => 9564,
+    "boxUr;" => 9561,
+    "boxVH;" => 9580,
+    "boxVL;" => 9571,
+    "boxVR;" => 9568,
+    "boxVh;" => 9579,
+    "boxVl;" => 9570,
+    "boxVr;" => 9567,
+    "boxdL;" => 9557,
+    "boxdR;" => 9554,
+    "boxdl;" => 9488,
+    "boxdr;" => 9484,
+    "boxhD;" => 9573,
+    "boxhU;" => 9576,
+    "boxhd;" => 9516,
+    "boxhu;" => 9524,
+    "boxuL;" => 9563,
+    "boxuR;" => 9560,
+    "boxul;" => 9496,
+    "boxur;" => 9492,
+    "boxvH;" => 9578,
+    "boxvL;" => 9569,
+    "boxvR;" => 9566,
+    "boxvh;" => 9532,
+    "boxvl;" => 9508,
+    "boxvr;" => 9500,
+    "breve;" => 728,
+    "brvbar" => 166,
+    "bsemi;" => 8271,
+    "bsime;" => 8909,
+    "bsolb;" => 10693,
+    "bumpE;" => 10926,
+    "bumpe;" => 8783,
+    "caret;" => 8257,
+    "caron;" => 711,
+    "ccaps;" => 10829,
+    "ccedil" => 231,
+    "ccirc;" => 265,
+    "ccups;" => 10828,
+    "cedil;" => 184,
+    "check;" => 10003,
+    "clubs;" => 9827,
+    "colon;" => 58,
+    "comma;" => 44,
+    "crarr;" => 8629,
+    "cross;" => 10007,
+    "csube;" => 10961,
+    "csupe;" => 10962,
+    "ctdot;" => 8943,
+    "cuepr;" => 8926,
+    "cuesc;" => 8927,
+    "cupor;" => 10821,
+    "curren" => 164,
+    "cuvee;" => 8910,
+    "cuwed;" => 8911,
+    "cwint;" => 8753,
+    "dashv;" => 8867,
+    "dblac;" => 733,
+    "ddarr;" => 8650,
+    "delta;" => 948,
+    "dharl;" => 8643,
+    "dharr;" => 8642,
+    "diams;" => 9830,
+    "disin;" => 8946,
+    "divide" => 247,
+    "doteq;" => 8784,
+    "dtdot;" => 8945,
+    "dtrif;" => 9662,
+    "duarr;" => 8693,
+    "duhar;" => 10607,
+    "eDDot;" => 10871,
+    "eacute" => 233,
+    "ecirc;" => 234,
+    "efDot;" => 8786,
+    "egrave" => 232,
+    "emacr;" => 275,
+    "empty;" => 8709,
+    "eogon;" => 281,
+    "eplus;" => 10865,
+    "epsiv;" => 1013,
+    "eqsim;" => 8770,
+    "equiv;" => 8801,
+    "erDot;" => 8787,
+    "erarr;" => 10609,
+    "esdot;" => 8784,
+    "exist;" => 8707,
+    "fflig;" => 64256,
+    "filig;" => 64257,
+    "fjlig;" => 102,
+    "fllig;" => 64258,
+    "fltns;" => 9649,
+    "forkv;" => 10969,
+    "frasl;" => 8260,
+    "frown;" => 8994,
+    "gamma;" => 947,
+    "gcirc;" => 285,
+    "gescc;" => 10921,
+    "gimel;" => 8503,
+    "gneqq;" => 8809,
+    "gnsim;" => 8935,
+    "grave;" => 96,
+    "gsime;" => 10894,
+    "gsiml;" => 10896,
+    "gtcir;" => 10874,
+    "gtdot;" => 8919,
+    "harrw;" => 8621,
+    "hcirc;" => 293,
+    "hoarr;" => 8703,
+    "iacute" => 237,
+    "icirc;" => 238,
+    "iexcl;" => 161,
+    "igrave" => 236,
+    "iiint;" => 8749,
+    "iiota;" => 8489,
+    "ijlig;" => 307,
+    "imacr;" => 299,
+    "image;" => 8465,
+    "imath;" => 305,
+    "imped;" => 437,
+    "infin;" => 8734,
+    "iogon;" => 303,
+    "iprod;" => 10812,
+    "iquest" => 191,
+    "isinE;" => 8953,
+    "isins;" => 8948,
+    "isinv;" => 8712,
+    "iukcy;" => 1110,
+    "jcirc;" => 309,
+    "jmath;" => 567,
+    "jukcy;" => 1108,
+    "kappa;" => 954,
+    "lAarr;" => 8666,
+    "lBarr;" => 10510,
+    "langd;" => 10641,
+    "laquo;" => 171,
+    "larrb;" => 8676,
+    "lates;" => 10925,
+    "lbarr;" => 10508,
+    "lbbrk;" => 10098,
+    "lbrke;" => 10635,
+    "lceil;" => 8968,
+    "ldquo;" => 8220,
+    "lescc;" => 10920,
+    "lhard;" => 8637,
+    "lharu;" => 8636,
+    "lhblk;" => 9604,
+    "llarr;" => 8647,
+    "lltri;" => 9722,
+    "lneqq;" => 8808,
+    "lnsim;" => 8934,
+    "loang;" => 10220,
+    "loarr;" => 8701,
+    "lobrk;" => 10214,
+    "lopar;" => 10629,
+    "lrarr;" => 8646,
+    "lrhar;" => 8651,
+    "lrtri;" => 8895,
+    "lsime;" => 10893,
+    "lsimg;" => 10895,
+    "lsquo;" => 8216,
+    "ltcir;" => 10873,
+    "ltdot;" => 8918,
+    "ltrie;" => 8884,
+    "ltrif;" => 9666,
+    "mDDot;" => 8762,
+    "mdash;" => 8212,
+    "micro;" => 181,
+    "middot" => 183,
+    "minus;" => 8722,
+    "mumap;" => 8888,
+    "nabla;" => 8711,
+    "napid;" => 8779,
+    "napos;" => 329,
+    "natur;" => 9838,
+    "nbump;" => 8782,
+    "ncong;" => 8775,
+    "ndash;" => 8211,
+    "neArr;" => 8663,
+    "nearr;" => 8599,
+    "nedot;" => 8784,
+    "nesim;" => 8770,
+    "ngeqq;" => 8807,
+    "ngsim;" => 8821,
+    "nhArr;" => 8654,
+    "nharr;" => 8622,
+    "nhpar;" => 10994,
+    "nlArr;" => 8653,
+    "nlarr;" => 8602,
+    "nleqq;" => 8806,
+    "nless;" => 8814,
+    "nlsim;" => 8820,
+    "nltri;" => 8938,
+    "notin;" => 8713,
+    "notni;" => 8716,
+    "npart;" => 8706,
+    "nprec;" => 8832,
+    "nrArr;" => 8655,
+    "nrarr;" => 8603,
+    "nrtri;" => 8939,
+    "nsime;" => 8772,
+    "nsmid;" => 8740,
+    "nspar;" => 8742,
+    "nsubE;" => 10949,
+    "nsube;" => 8840,
+    "nsucc;" => 8833,
+    "nsupE;" => 10950,
+    "nsupe;" => 8841,
+    "ntilde" => 241,
+    "numsp;" => 8199,
+    "nvsim;" => 8764,
+    "nwArr;" => 8662,
+    "nwarr;" => 8598,
+    "oacute" => 243,
+    "ocirc;" => 244,
+    "odash;" => 8861,
+    "oelig;" => 339,
+    "ofcir;" => 10687,
+    "ograve" => 242,
+    "ohbar;" => 10677,
+    "olarr;" => 8634,
+    "olcir;" => 10686,
+    "oline;" => 8254,
+    "omacr;" => 333,
+    "omega;" => 969,
+    "operp;" => 10681,
+    "oplus;" => 8853,
+    "orarr;" => 8635,
+    "order;" => 8500,
+    "oslash" => 248,
+    "otilde" => 245,
+    "ovbar;" => 9021,
+    "parsl;" => 11005,
+    "phone;" => 9742,
+    "plusb;" => 8862,
+    "pluse;" => 10866,
+    "plusmn" => 177,
+    "pound;" => 163,
+    "prcue;" => 8828,
+    "prime;" => 8242,
+    "prnap;" => 10937,
+    "prsim;" => 8830,
+    "quest;" => 63,
+    "rAarr;" => 8667,
+    "rBarr;" => 10511,
+    "radic;" => 8730,
+    "rangd;" => 10642,
+    "range;" => 10661,
+    "raquo;" => 187,
+    "rarrb;" => 8677,
+    "rarrc;" => 10547,
+    "rarrw;" => 8605,
+    "ratio;" => 8758,
+    "rbarr;" => 10509,
+    "rbbrk;" => 10099,
+    "rbrke;" => 10636,
+    "rceil;" => 8969,
+    "rdquo;" => 8221,
+    "reals;" => 8477,
+    "rhard;" => 8641,
+    "rharu;" => 8640,
+    "rlarr;" => 8644,
+    "rlhar;" => 8652,
+    "rnmid;" => 10990,
+    "roang;" => 10221,
+    "roarr;" => 8702,
+    "robrk;" => 10215,
+    "ropar;" => 10630,
+    "rrarr;" => 8649,
+    "rsquo;" => 8217,
+    "rtrie;" => 8885,
+    "rtrif;" => 9656,
+    "sbquo;" => 8218,
+    "sccue;" => 8829,
+    "scirc;" => 349,
+    "scnap;" => 10938,
+    "scsim;" => 8831,
+    "sdotb;" => 8865,
+    "sdote;" => 10854,
+    "seArr;" => 8664,
+    "searr;" => 8600,
+    "setmn;" => 8726,
+    "sharp;" => 9839,
+    "sigma;" => 963,
+    "simeq;" => 8771,
+    "simgE;" => 10912,
+    "simlE;" => 10911,
+    "simne;" => 8774,
+    "slarr;" => 8592,
+    "smile;" => 8995,
+    "smtes;" => 10924,
+    "sqcap;" => 8851,
+    "sqcup;" => 8852,
+    "sqsub;" => 8847,
+    "sqsup;" => 8848,
+    "srarr;" => 8594,
+    "starf;" => 9733,
+    "strns;" => 175,
+    "subnE;" => 10955,
+    "subne;" => 8842,
+    "supnE;" => 10956,
+    "supne;" => 8843,
+    "swArr;" => 8665,
+    "swarr;" => 8601,
+    "szlig;" => 223,
+    "theta;" => 952,
+    "thkap;" => 8776,
+    "thorn;" => 254,
+    "tilde;" => 732,
+    "times;" => 215,
+    "trade;" => 8482,
+    "trisb;" => 10701,
+    "tshcy;" => 1115,
+    "twixt;" => 8812,
+    "uacute" => 250,
+    "ubrcy;" => 1118,
+    "ucirc;" => 251,
+    "udarr;" => 8645,
+    "udhar;" => 10606,
+    "ugrave" => 249,
+    "uharl;" => 8639,
+    "uharr;" => 8638,
+    "uhblk;" => 9600,
+    "ultri;" => 9720,
+    "umacr;" => 363,
+    "uogon;" => 371,
+    "uplus;" => 8846,
+    "upsih;" => 978,
+    "uring;" => 367,
+    "urtri;" => 9721,
+    "utdot;" => 8944,
+    "utrif;" => 9652,
+    "uuarr;" => 8648,
+    "vBarv;" => 10985,
+    "vDash;" => 8872,
+    "varpi;" => 982,
+    "vdash;" => 8866,
+    "veeeq;" => 8794,
+    "vltri;" => 8882,
+    "vnsub;" => 8834,
+    "vnsup;" => 8835,
+    "vprop;" => 8733,
+    "vrtri;" => 8883,
+    "wcirc;" => 373,
+    "wedge;" => 8743,
+    "xcirc;" => 9711,
+    "xdtri;" => 9661,
+    "xhArr;" => 10234,
+    "xharr;" => 10231,
+    "xlArr;" => 10232,
+    "xlarr;" => 10229,
+    "xodot;" => 10752,
+    "xrArr;" => 10233,
+    "xrarr;" => 10230,
+    "xutri;" => 9651,
+    "yacute" => 253,
+    "ycirc;" => 375,
+    "AElig" => 198,
+    "Acirc" => 194,
+    "Aopf;" => 120120,
+    "Aring" => 197,
+    "Ascr;" => 119964,
+    "Auml;" => 196,
+    "Barv;" => 10983,
+    "Beta;" => 914,
+    "Bopf;" => 120121,
+    "Bscr;" => 8492,
+    "CHcy;" => 1063,
+    "COPY;" => 169,
+    "Cdot;" => 266,
+    "Copf;" => 8450,
+    "Cscr;" => 119966,
+    "DJcy;" => 1026,
+    "DScy;" => 1029,
+    "DZcy;" => 1039,
+    "Darr;" => 8609,
+    "Dopf;" => 120123,
+    "Dscr;" => 119967,
+    "Ecirc" => 202,
+    "Edot;" => 278,
+    "Eopf;" => 120124,
+    "Escr;" => 8496,
+    "Esim;" => 10867,
+    "Euml;" => 203,
+    "Fopf;" => 120125,
+    "Fscr;" => 8497,
+    "GJcy;" => 1027,
+    "Gdot;" => 288,
+    "Gopf;" => 120126,
+    "Gscr;" => 119970,
+    "Hopf;" => 8461,
+    "Hscr;" => 8459,
+    "IEcy;" => 1045,
+    "IOcy;" => 1025,
+    "Icirc" => 206,
+    "Idot;" => 304,
+    "Iopf;" => 120128,
+    "Iota;" => 921,
+    "Iscr;" => 8464,
+    "Iuml;" => 207,
+    "Jopf;" => 120129,
+    "Jscr;" => 119973,
+    "KHcy;" => 1061,
+    "KJcy;" => 1036,
+    "Kopf;" => 120130,
+    "Kscr;" => 119974,
+    "LJcy;" => 1033,
+    "Lang;" => 10218,
+    "Larr;" => 8606,
+    "Lopf;" => 120131,
+    "Lscr;" => 8466,
+    "Mopf;" => 120132,
+    "Mscr;" => 8499,
+    "NJcy;" => 1034,
+    "Nopf;" => 8469,
+    "Nscr;" => 119977,
+    "Ocirc" => 212,
+    "Oopf;" => 120134,
+    "Oscr;" => 119978,
+    "Ouml;" => 214,
+    "Popf;" => 8473,
+    "Pscr;" => 119979,
+    "QUOT;" => 34,
+    "Qopf;" => 8474,
+    "Qscr;" => 119980,
+    "Rang;" => 10219,
+    "Rarr;" => 8608,
+    "Ropf;" => 8477,
+    "Rscr;" => 8475,
+    "SHcy;" => 1064,
+    "Sopf;" => 120138,
+    "Sqrt;" => 8730,
+    "Sscr;" => 119982,
+    "Star;" => 8902,
+    "THORN" => 222,
+    "TScy;" => 1062,
+    "Topf;" => 120139,
+    "Tscr;" => 119983,
+    "Uarr;" => 8607,
+    "Ucirc" => 219,
+    "Uopf;" => 120140,
+    "Upsi;" => 978,
+    "Uscr;" => 119984,
+    "Uuml;" => 220,
+    "Vbar;" => 10987,
+    "Vert;" => 8214,
+    "Vopf;" => 120141,
+    "Vscr;" => 119985,
+    "Wopf;" => 120142,
+    "Wscr;" => 119986,
+    "Xopf;" => 120143,
+    "Xscr;" => 119987,
+    "YAcy;" => 1071,
+    "YIcy;" => 1031,
+    "YUcy;" => 1070,
+    "Yopf;" => 120144,
+    "Yscr;" => 119988,
+    "Yuml;" => 376,
+    "ZHcy;" => 1046,
+    "Zdot;" => 379,
+    "Zeta;" => 918,
+    "Zopf;" => 8484,
+    "Zscr;" => 119989,
+    "acirc" => 226,
+    "acute" => 180,
+    "aelig" => 230,
+    "andd;" => 10844,
+    "andv;" => 10842,
+    "ange;" => 10660,
+    "aopf;" => 120146,
+    "apid;" => 8779,
+    "apos;" => 39,
+    "aring" => 229,
+    "ascr;" => 119990,
+    "auml;" => 228,
+    "bNot;" => 10989,
+    "bbrk;" => 9141,
+    "beta;" => 946,
+    "beth;" => 8502,
+    "bnot;" => 8976,
+    "bopf;" => 120147,
+    "boxH;" => 9552,
+    "boxV;" => 9553,
+    "boxh;" => 9472,
+    "boxv;" => 9474,
+    "bscr;" => 119991,
+    "bsim;" => 8765,
+    "bsol;" => 92,
+    "bull;" => 8226,
+    "bump;" => 8782,
+    "caps;" => 8745,
+    "cdot;" => 267,
+    "cedil" => 184,
+    "cent;" => 162,
+    "chcy;" => 1095,
+    "cirE;" => 10691,
+    "circ;" => 710,
+    "cire;" => 8791,
+    "comp;" => 8705,
+    "cong;" => 8773,
+    "copf;" => 120148,
+    "copy;" => 169,
+    "cscr;" => 119992,
+    "csub;" => 10959,
+    "csup;" => 10960,
+    "cups;" => 8746,
+    "dArr;" => 8659,
+    "dHar;" => 10597,
+    "darr;" => 8595,
+    "dash;" => 8208,
+    "diam;" => 8900,
+    "djcy;" => 1106,
+    "dopf;" => 120149,
+    "dscr;" => 119993,
+    "dscy;" => 1109,
+    "dsol;" => 10742,
+    "dtri;" => 9663,
+    "dzcy;" => 1119,
+    "eDot;" => 8785,
+    "ecir;" => 8790,
+    "ecirc" => 234,
+    "edot;" => 279,
+    "emsp;" => 8195,
+    "ensp;" => 8194,
+    "eopf;" => 120150,
+    "epar;" => 8917,
+    "epsi;" => 949,
+    "escr;" => 8495,
+    "esim;" => 8770,
+    "euml;" => 235,
+    "euro;" => 8364,
+    "excl;" => 33,
+    "flat;" => 9837,
+    "fnof;" => 402,
+    "fopf;" => 120151,
+    "fork;" => 8916,
+    "fscr;" => 119995,
+    "gdot;" => 289,
+    "geqq;" => 8807,
+    "gesl;" => 8923,
+    "gjcy;" => 1107,
+    "gnap;" => 10890,
+    "gneq;" => 10888,
+    "gopf;" => 120152,
+    "gscr;" => 8458,
+    "gsim;" => 8819,
+    "gtcc;" => 10919,
+    "gvnE;" => 8809,
+    "hArr;" => 8660,
+    "half;" => 189,
+    "harr;" => 8596,
+    "hbar;" => 8463,
+    "hopf;" => 120153,
+    "hscr;" => 119997,
+    "icirc" => 238,
+    "iecy;" => 1077,
+    "iexcl" => 161,
+    "imof;" => 8887,
+    "iocy;" => 1105,
+    "iopf;" => 120154,
+    "iota;" => 953,
+    "iscr;" => 119998,
+    "isin;" => 8712,
+    "iuml;" => 239,
+    "jopf;" => 120155,
+    "jscr;" => 119999,
+    "khcy;" => 1093,
+    "kjcy;" => 1116,
+    "kopf;" => 120156,
+    "kscr;" => 120000,
+    "lArr;" => 8656,
+    "lHar;" => 10594,
+    "lang;" => 10216,
+    "laquo" => 171,
+    "larr;" => 8592,
+    "late;" => 10925,
+    "lcub;" => 123,
+    "ldca;" => 10550,
+    "ldsh;" => 8626,
+    "leqq;" => 8806,
+    "lesg;" => 8922,
+    "ljcy;" => 1113,
+    "lnap;" => 10889,
+    "lneq;" => 10887,
+    "lopf;" => 120157,
+    "lozf;" => 10731,
+    "lpar;" => 40,
+    "lscr;" => 120001,
+    "lsim;" => 8818,
+    "lsqb;" => 91,
+    "ltcc;" => 10918,
+    "ltri;" => 9667,
+    "lvnE;" => 8808,
+    "macr;" => 175,
+    "male;" => 9794,
+    "malt;" => 10016,
+    "micro" => 181,
+    "mlcp;" => 10971,
+    "mldr;" => 8230,
+    "mopf;" => 120158,
+    "mscr;" => 120002,
+    "nGtv;" => 8811,
+    "nLtv;" => 8810,
+    "nang;" => 8736,
+    "napE;" => 10864,
+    "nbsp;" => 160,
+    "ncap;" => 10819,
+    "ncup;" => 10818,
+    "ngeq;" => 8817,
+    "nges;" => 10878,
+    "ngtr;" => 8815,
+    "nisd;" => 8954,
+    "njcy;" => 1114,
+    "nldr;" => 8229,
+    "nleq;" => 8816,
+    "nles;" => 10877,
+    "nmid;" => 8740,
+    "nopf;" => 120159,
+    "npar;" => 8742,
+    "npre;" => 10927,
+    "nsce;" => 10928,
+    "nscr;" => 120003,
+    "nsim;" => 8769,
+    "nsub;" => 8836,
+    "nsup;" => 8837,
+    "ntgl;" => 8825,
+    "ntlg;" => 8824,
+    "nvap;" => 8781,
+    "nvge;" => 8805,
+    "nvgt;" => 62,
+    "nvle;" => 8804,
+    "nvlt;" => 60,
+    "oast;" => 8859,
+    "ocir;" => 8858,
+    "ocirc" => 244,
+    "odiv;" => 10808,
+    "odot;" => 8857,
+    "ogon;" => 731,
+    "oint;" => 8750,
+    "omid;" => 10678,
+    "oopf;" => 120160,
+    "opar;" => 10679,
+    "ordf;" => 170,
+    "ordm;" => 186,
+    "oror;" => 10838,
+    "oscr;" => 8500,
+    "osol;" => 8856,
+    "ouml;" => 246,
+    "para;" => 182,
+    "part;" => 8706,
+    "perp;" => 8869,
+    "phiv;" => 981,
+    "plus;" => 43,
+    "popf;" => 120161,
+    "pound" => 163,
+    "prap;" => 10935,
+    "prec;" => 8826,
+    "prnE;" => 10933,
+    "prod;" => 8719,
+    "prop;" => 8733,
+    "pscr;" => 120005,
+    "qint;" => 10764,
+    "qopf;" => 120162,
+    "qscr;" => 120006,
+    "quot;" => 34,
+    "rArr;" => 8658,
+    "rHar;" => 10596,
+    "race;" => 8765,
+    "rang;" => 10217,
+    "raquo" => 187,
+    "rarr;" => 8594,
+    "rcub;" => 125,
+    "rdca;" => 10551,
+    "rdsh;" => 8627,
+    "real;" => 8476,
+    "rect;" => 9645,
+    "rhov;" => 1009,
+    "ring;" => 730,
+    "ropf;" => 120163,
+    "rpar;" => 41,
+    "rscr;" => 120007,
+    "rsqb;" => 93,
+    "rtri;" => 9657,
+    "scap;" => 10936,
+    "scnE;" => 10934,
+    "sdot;" => 8901,
+    "sect;" => 167,
+    "semi;" => 59,
+    "sext;" => 10038,
+    "shcy;" => 1096,
+    "sime;" => 8771,
+    "simg;" => 10910,
+    "siml;" => 10909,
+    "smid;" => 8739,
+    "smte;" => 10924,
+    "solb;" => 10692,
+    "sopf;" => 120164,
+    "spar;" => 8741,
+    "squf;" => 9642,
+    "sscr;" => 120008,
+    "star;" => 9734,
+    "subE;" => 10949,
+    "sube;" => 8838,
+    "succ;" => 8827,
+    "sung;" => 9834,
+    "sup1;" => 185,
+    "sup2;" => 178,
+    "sup3;" => 179,
+    "supE;" => 10950,
+    "supe;" => 8839,
+    "szlig" => 223,
+    "tbrk;" => 9140,
+    "tdot;" => 8411,
+    "thorn" => 254,
+    "times" => 215,
+    "tint;" => 8749,
+    "toea;" => 10536,
+    "topf;" => 120165,
+    "tosa;" => 10537,
+    "trie;" => 8796,
+    "tscr;" => 120009,
+    "tscy;" => 1094,
+    "uArr;" => 8657,
+    "uHar;" => 10595,
+    "uarr;" => 8593,
+    "ucirc" => 251,
+    "uopf;" => 120166,
+    "upsi;" => 965,
+    "uscr;" => 120010,
+    "utri;" => 9653,
+    "uuml;" => 252,
+    "vArr;" => 8661,
+    "vBar;" => 10984,
+    "varr;" => 8597,
+    "vert;" => 124,
+    "vopf;" => 120167,
+    "vscr;" => 120011,
+    "wopf;" => 120168,
+    "wscr;" => 120012,
+    "xcap;" => 8898,
+    "xcup;" => 8899,
+    "xmap;" => 10236,
+    "xnis;" => 8955,
+    "xopf;" => 120169,
+    "xscr;" => 120013,
+    "xvee;" => 8897,
+    "yacy;" => 1103,
+    "yicy;" => 1111,
+    "yopf;" => 120170,
+    "yscr;" => 120014,
+    "yucy;" => 1102,
+    "yuml;" => 255,
+    "zdot;" => 380,
+    "zeta;" => 950,
+    "zhcy;" => 1078,
+    "zopf;" => 120171,
+    "zscr;" => 120015,
+    "zwnj;" => 8204,
+    "AMP;" => 38,
+    "Acy;" => 1040,
+    "Afr;" => 120068,
+    "And;" => 10835,
+    "Auml" => 196,
+    "Bcy;" => 1041,
+    "Bfr;" => 120069,
+    "COPY" => 169,
+    "Cap;" => 8914,
+    "Cfr;" => 8493,
+    "Chi;" => 935,
+    "Cup;" => 8915,
+    "Dcy;" => 1044,
+    "Del;" => 8711,
+    "Dfr;" => 120071,
+    "Dot;" => 168,
+    "ENG;" => 330,
+    "ETH;" => 208,
+    "Ecy;" => 1069,
+    "Efr;" => 120072,
+    "Eta;" => 919,
+    "Euml" => 203,
+    "Fcy;" => 1060,
+    "Ffr;" => 120073,
+    "Gcy;" => 1043,
+    "Gfr;" => 120074,
+    "Hat;" => 94,
+    "Hfr;" => 8460,
+    "Icy;" => 1048,
+    "Ifr;" => 8465,
+    "Int;" => 8748,
+    "Iuml" => 207,
+    "Jcy;" => 1049,
+    "Jfr;" => 120077,
+    "Kcy;" => 1050,
+    "Kfr;" => 120078,
+    "Lcy;" => 1051,
+    "Lfr;" => 120079,
+    "Lsh;" => 8624,
+    "Map;" => 10501,
+    "Mcy;" => 1052,
+    "Mfr;" => 120080,
+    "Ncy;" => 1053,
+    "Nfr;" => 120081,
+    "Not;" => 10988,
+    "Ocy;" => 1054,
+    "Ofr;" => 120082,
+    "Ouml" => 214,
+    "Pcy;" => 1055,
+    "Pfr;" => 120083,
+    "Phi;" => 934,
+    "Psi;" => 936,
+    "QUOT" => 34,
+    "Qfr;" => 120084,
+    "REG;" => 174,
+    "Rcy;" => 1056,
+    "Rfr;" => 8476,
+    "Rho;" => 929,
+    "Rsh;" => 8625,
+    "Scy;" => 1057,
+    "Sfr;" => 120086,
+    "Sub;" => 8912,
+    "Sum;" => 8721,
+    "Sup;" => 8913,
+    "Tab;" => 9,
+    "Tau;" => 932,
+    "Tcy;" => 1058,
+    "Tfr;" => 120087,
+    "Ucy;" => 1059,
+    "Ufr;" => 120088,
+    "Uuml" => 220,
+    "Vcy;" => 1042,
+    "Vee;" => 8897,
+    "Vfr;" => 120089,
+    "Wfr;" => 120090,
+    "Xfr;" => 120091,
+    "Ycy;" => 1067,
+    "Yfr;" => 120092,
+    "Zcy;" => 1047,
+    "Zfr;" => 8488,
+    "acE;" => 8766,
+    "acd;" => 8767,
+    "acy;" => 1072,
+    "afr;" => 120094,
+    "amp;" => 38,
+    "and;" => 8743,
+    "ang;" => 8736,
+    "apE;" => 10864,
+    "ape;" => 8778,
+    "ast;" => 42,
+    "auml" => 228,
+    "bcy;" => 1073,
+    "bfr;" => 120095,
+    "bne;" => 61,
+    "bot;" => 8869,
+    "cap;" => 8745,
+    "cent" => 162,
+    "cfr;" => 120096,
+    "chi;" => 967,
+    "cir;" => 9675,
+    "copy" => 169,
+    "cup;" => 8746,
+    "dcy;" => 1076,
+    "deg;" => 176,
+    "dfr;" => 120097,
+    "die;" => 168,
+    "div;" => 247,
+    "dot;" => 729,
+    "ecy;" => 1101,
+    "efr;" => 120098,
+    "egs;" => 10902,
+    "ell;" => 8467,
+    "els;" => 10901,
+    "eng;" => 331,
+    "eta;" => 951,
+    "eth;" => 240,
+    "euml" => 235,
+    "fcy;" => 1092,
+    "ffr;" => 120099,
+    "gEl;" => 10892,
+    "gap;" => 10886,
+    "gcy;" => 1075,
+    "gel;" => 8923,
+    "geq;" => 8805,
+    "ges;" => 10878,
+    "gfr;" => 120100,
+    "ggg;" => 8921,
+    "glE;" => 10898,
+    "gla;" => 10917,
+    "glj;" => 10916,
+    "gnE;" => 8809,
+    "gne;" => 10888,
+    "hfr;" => 120101,
+    "icy;" => 1080,
+    "iff;" => 8660,
+    "ifr;" => 120102,
+    "int;" => 8747,
+    "iuml" => 239,
+    "jcy;" => 1081,
+    "jfr;" => 120103,
+    "kcy;" => 1082,
+    "kfr;" => 120104,
+    "lEg;" => 10891,
+    "lap;" => 10885,
+    "lat;" => 10923,
+    "lcy;" => 1083,
+    "leg;" => 8922,
+    "leq;" => 8804,
+    "les;" => 10877,
+    "lfr;" => 120105,
+    "lgE;" => 10897,
+    "lnE;" => 8808,
+    "lne;" => 10887,
+    "loz;" => 9674,
+    "lrm;" => 8206,
+    "lsh;" => 8624,
+    "macr" => 175,
+    "map;" => 8614,
+    "mcy;" => 1084,
+    "mfr;" => 120106,
+    "mho;" => 8487,
+    "mid;" => 8739,
+    "nGg;" => 8921,
+    "nGt;" => 8811,
+    "nLl;" => 8920,
+    "nLt;" => 8810,
+    "nap;" => 8777,
+    "nbsp" => 160,
+    "ncy;" => 1085,
+    "nfr;" => 120107,
+    "ngE;" => 8807,
+    "nge;" => 8817,
+    "ngt;" => 8815,
+    "nis;" => 8956,
+    "niv;" => 8715,
+    "nlE;" => 8806,
+    "nle;" => 8816,
+    "nlt;" => 8814,
+    "not;" => 172,
+    "npr;" => 8832,
+    "nsc;" => 8833,
+    "num;" => 35,
+    "ocy;" => 1086,
+    "ofr;" => 120108,
+    "ogt;" => 10689,
+    "ohm;" => 937,
+    "olt;" => 10688,
+    "ord;" => 10845,
+    "ordf" => 170,
+    "ordm" => 186,
+    "orv;" => 10843,
+    "ouml" => 246,
+    "par;" => 8741,
+    "para" => 182,
+    "pcy;" => 1087,
+    "pfr;" => 120109,
+    "phi;" => 966,
+    "piv;" => 982,
+    "prE;" => 10931,
+    "pre;" => 10927,
+    "psi;" => 968,
+    "qfr;" => 120110,
+    "quot" => 34,
+    "rcy;" => 1088,
+    "reg;" => 174,
+    "rfr;" => 120111,
+    "rho;" => 961,
+    "rlm;" => 8207,
+    "rsh;" => 8625,
+    "scE;" => 10932,
+    "sce;" => 10928,
+    "scy;" => 1089,
+    "sect" => 167,
+    "sfr;" => 120112,
+    "shy;" => 173,
+    "sim;" => 8764,
+    "smt;" => 10922,
+    "sol;" => 47,
+    "squ;" => 9633,
+    "sub;" => 8834,
+    "sum;" => 8721,
+    "sup;" => 8835,
+    "tau;" => 964,
+    "tcy;" => 1090,
+    "tfr;" => 120113,
+    "top;" => 8868,
+    "ucy;" => 1091,
+    "ufr;" => 120114,
+    "uml;" => 168,
+    "uuml" => 252,
+    "vcy;" => 1074,
+    "vee;" => 8744,
+    "vfr;" => 120115,
+    "wfr;" => 120116,
+    "xfr;" => 120117,
+    "ycy;" => 1099,
+    "yen;" => 165,
+    "yfr;" => 120118,
+    "yuml" => 255,
+    "zcy;" => 1079,
+    "zfr;" => 120119,
+    "zwj;" => 8205,
+    "AMP" => 38,
+    "DD;" => 8517,
+    "ETH" => 208,
+    "GT;" => 62,
+    "Gg;" => 8921,
+    "Gt;" => 8811,
+    "Im;" => 8465,
+    "LT;" => 60,
+    "Ll;" => 8920,
+    "Lt;" => 8810,
+    "Mu;" => 924,
+    "Nu;" => 925,
+    "Or;" => 10836,
+    "Pi;" => 928,
+    "Pr;" => 10939,
+    "REG" => 174,
+    "Re;" => 8476,
+    "Sc;" => 10940,
+    "Xi;" => 926,
+    "ac;" => 8766,
+    "af;" => 8289,
+    "amp" => 38,
+    "ap;" => 8776,
+    "dd;" => 8518,
+    "deg" => 176,
+    "ee;" => 8519,
+    "eg;" => 10906,
+    "el;" => 10905,
+    "eth" => 240,
+    "gE;" => 8807,
+    "ge;" => 8805,
+    "gg;" => 8811,
+    "gl;" => 8823,
+    "gt;" => 62,
+    "ic;" => 8291,
+    "ii;" => 8520,
+    "in;" => 8712,
+    "it;" => 8290,
+    "lE;" => 8806,
+    "le;" => 8804,
+    "lg;" => 8822,
+    "ll;" => 8810,
+    "lt;" => 60,
+    "mp;" => 8723,
+    "mu;" => 956,
+    "ne;" => 8800,
+    "ni;" => 8715,
+    "not" => 172,
+    "nu;" => 957,
+    "oS;" => 9416,
+    "or;" => 8744,
+    "pi;" => 960,
+    "pm;" => 177,
+    "pr;" => 8826,
+    "reg" => 174,
+    "rx;" => 8478,
+    "sc;" => 8827,
+    "shy" => 173,
+    "uml" => 168,
+    "wp;" => 8472,
+    "wr;" => 8768,
+    "xi;" => 958,
+    "yen" => 165,
+    "GT" => 62,
+    "LT" => 60,
+    "gt" => 62,
+    "lt" => 60,
+};

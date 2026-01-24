@@ -28,18 +28,15 @@ def main():
 
     print(f"Parsed {len(entries)} entities from {ENTITIES_JS}")
 
-    lines = [f'        m.insert("{name}", {code});' for name, code in entries]
-    inserts = "\n".join(lines)
+    lines = [f'    "{name}" => {code},' for name, code in entries]
+    entries_str = "\n".join(lines)
 
-    output = f"""use std::collections::HashMap;
-use std::sync::LazyLock;
+    output = f"""use phf::phf_map;
 
 #[rustfmt::skip]
-pub static ENTITIES: LazyLock<HashMap<&'static str, u32>> = LazyLock::new(|| {{
-    let mut m = HashMap::with_capacity({len(entries)});
-{inserts}
-    m
-}});
+pub static ENTITIES: phf::Map<&'static str, u32> = phf_map! {{
+{entries_str}
+}};
 """
 
     with open(OUTPUT_FILE, "w") as f:

@@ -5,7 +5,8 @@ use oxc_span::SourceType;
 
 use crate::error::ErrorKind;
 use crate::parser::read::context::read_pattern;
-use crate::parser::read::expression::{extract_expression, loose_identifier, read_expression};
+use crate::parser::read::expression::{loose_identifier, read_expression};
+use crate::parser::span_offset::{shift_binding_pattern_spans, shift_expression_spans};
 use crate::parser::{AwaitPhase, ParseError, Parser, StackFrame};
 
 use super::{is_identifier_byte, is_whitespace_byte, skip_string_bytes, skip_to_closing_brace};
@@ -294,46 +295,31 @@ fn read_each_expression<'a>(parser: &mut Parser<'a>) -> Result<Expression<'a>, P
         return Ok(loose_identifier(parser, start, expr_end));
     }
 
-    // Parse with OXC
-    let prefix: String = parser.template[..start]
-        .chars()
-        .map(|c| if c == '\n' { '\n' } else { ' ' })
-        .collect();
-    let padded = format!("{}{};", prefix, trimmed);
-    let padded_str = parser.allocator.alloc_str(&padded);
-
+    // Parse with OXC using parse_expression (no padding needed).
     let source_type = if parser.ts {
         SourceType::ts()
     } else {
         SourceType::mjs()
     };
 
-    let result = oxc_parser::Parser::new(parser.allocator, padded_str, source_type).parse();
+    let snippet = parser.allocator.alloc_str(trimmed);
+    let result =
+        oxc_parser::Parser::new(parser.allocator, snippet, source_type).parse_expression();
 
-    if !result.errors.is_empty() {
-        if parser.loose {
-            parser.index = effective_end;
-            return Ok(loose_identifier(parser, start, effective_end));
-        }
-        let first_err = &result.errors[0];
-        return Err(parser.error(
-            ErrorKind::JsParseError,
-            start,
-            format!("JS parse error: {}", first_err),
-        ));
-    }
-
-    let program = result.program;
-    let expr = extract_expression(program);
-
-    match expr {
-        Some(e) => {
+    match result {
+        Ok(mut e) => {
+            shift_expression_spans(&mut e, start as u32);
             parser.index = effective_end;
             Ok(e)
         }
-        None => {
-            parser.index = effective_end;
-            Ok(loose_identifier(parser, start, effective_end))
+        Err(errors) => {
+            if parser.loose {
+                parser.index = effective_end;
+                Ok(loose_identifier(parser, start, effective_end))
+            } else {
+                let msg = format!("JS parse error: {}", errors[0]);
+                Err(parser.error(ErrorKind::JsParseError, start, msg))
+            }
         }
     }
 }
@@ -418,12 +404,9 @@ fn parse_snippet_params<'a>(
     params_start: usize,
     params_source: &str,
 ) -> Vec<BindingPattern<'a>> {
-    let prefix: String = parser.template[..params_start]
-        .chars()
-        .map(|c| if c == '\n' { '\n' } else { ' ' })
-        .collect();
-    let padded = format!("{}{} => {{}}", prefix, params_source);
-    let padded_str = parser.allocator.alloc_str(&padded);
+    // Parse `<params> => {}` without padding, then shift spans.
+    let snippet = format!("{} => {{}}", params_source);
+    let snippet_str = parser.allocator.alloc_str(&snippet);
 
     let source_type = if parser.ts {
         SourceType::ts()
@@ -431,7 +414,7 @@ fn parse_snippet_params<'a>(
         SourceType::mjs()
     };
 
-    let result = oxc_parser::Parser::new(parser.allocator, padded_str, source_type).parse();
+    let result = oxc_parser::Parser::new(parser.allocator, snippet_str, source_type).parse();
 
     if !result.errors.is_empty() {
         if !parser.loose {
@@ -458,12 +441,17 @@ fn parse_snippet_params<'a>(
             match inner.expression {
                 Expression::ArrowFunctionExpression(arrow) => {
                     let arrow = arrow.unbox();
+                    let offset = params_start as u32;
                     arrow
                         .params
                         .unbox()
                         .items
                         .into_iter()
-                        .map(|param| param.pattern)
+                        .map(|param| {
+                            let mut pattern = param.pattern;
+                            shift_binding_pattern_spans(&mut pattern, offset);
+                            pattern
+                        })
                         .collect()
                 }
                 _ => Vec::new(),

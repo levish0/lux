@@ -15,7 +15,10 @@
       "Bash(xargs cat:*)",
       "Bash(find:*)",
       "Bash(tree:*)",
-      "Bash(cargo doc:*)"
+      "Bash(cargo doc:*)",
+      "Bash(cargo search:*)",
+      "Bash(cargo info:*)",
+      "Bash(cargo fetch:*)"
     ]
   }
 }
