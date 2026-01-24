@@ -1,7 +1,7 @@
 use std::cell::Cell;
 
 use oxc_ast::ast::{BindingPattern, Expression};
-use oxc_span::SourceType;
+use oxc_span::{GetSpan, SourceType};
 
 use crate::error::ErrorKind;
 use crate::parser::read::context::read_pattern;
@@ -40,7 +40,7 @@ pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
     if parser.eat("each") {
         parser.require_whitespace()?;
 
-        let expression = read_each_expression(parser)?;
+        let mut expression = read_each_expression(parser)?;
 
         parser.allow_whitespace();
 
@@ -49,6 +49,17 @@ pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
             parser.require_whitespace()?;
             read_pattern(parser)
         } else {
+            // If no "as" and expression is SequenceExpression (e.g. `[10, 20], i`),
+            // take only the first expression and reset index (matching reference behavior)
+            if let Expression::SequenceExpression(seq) = &expression {
+                let first_end = seq.expressions[0].span().end as usize;
+                // Reconstruct: take the first expression
+                if let Expression::SequenceExpression(seq) = expression {
+                    let seq = seq.unbox();
+                    expression = seq.expressions.into_iter().next().unwrap();
+                }
+                parser.index = first_end;
+            }
             None
         };
 
