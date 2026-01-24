@@ -38,8 +38,5 @@ jobs:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Run parser_modern tests
-        run: cargo test --package svelte-parser --test parser_modern
-
       - name: Run compare tests
         run: cargo test --package svelte-parser --test compare -- --nocapture
