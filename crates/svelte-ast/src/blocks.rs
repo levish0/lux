@@ -1,4 +1,4 @@
-use oxc_ast::ast::{BindingPattern, Expression};
+use oxc_ast::ast::{BindingPattern, Expression, FormalParameter};
 use serde::Serialize;
 use serde::ser::SerializeMap;
 
@@ -157,7 +157,7 @@ impl Serialize for KeyBlock<'_> {
 pub struct SnippetBlock<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
-    pub parameters: Vec<BindingPattern<'a>>,
+    pub parameters: Vec<FormalParameter<'a>>,
     pub type_params: Option<&'a str>,
     pub body: Fragment<'a>,
     pub metadata: SnippetBlockMetadata,

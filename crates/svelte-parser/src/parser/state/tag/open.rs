@@ -1,12 +1,12 @@
 use std::cell::Cell;
 
-use oxc_ast::ast::{BindingPattern, Expression};
+use oxc_ast::ast::{BindingPattern, Expression, FormalParameter};
 use oxc_span::{GetSpan, SourceType};
 
 use crate::error::ErrorKind;
 use crate::parser::read::context::read_pattern;
 use crate::parser::read::expression::{loose_identifier, read_expression};
-use crate::parser::span_offset::{shift_binding_pattern_spans, shift_expression_spans};
+use crate::parser::span_offset::{shift_expression_spans, shift_formal_parameter_spans};
 use crate::parser::{AwaitPhase, ParseError, Parser, StackFrame};
 
 use super::{is_identifier_byte, is_whitespace_byte, skip_string_bytes, skip_to_closing_brace};

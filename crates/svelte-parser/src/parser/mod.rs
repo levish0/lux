@@ -8,7 +8,7 @@ pub mod utils;
 use crate::error::ErrorKind;
 use line_span::LineSpans;
 use oxc_allocator::Allocator;
-use oxc_ast::ast::{BindingPattern, Expression};
+use oxc_ast::ast::{BindingPattern, Expression, FormalParameter};
 use std::collections::HashSet;
 use svelte_ast::css::StyleSheet;
 use svelte_ast::node::{AttributeNode, FragmentNode};
@@ -139,7 +139,7 @@ pub enum StackFrame<'a> {
     SnippetBlock {
         start: usize,
         expression: Expression<'a>,
-        parameters: Vec<BindingPattern<'a>>,
+        parameters: Vec<FormalParameter<'a>>,
         type_params: Option<&'a str>,
     },
 }
