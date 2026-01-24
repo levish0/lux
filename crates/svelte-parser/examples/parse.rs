@@ -41,4 +41,9 @@ fn main() {
         "Performance: {:.2} KB/s",
         document_len as f64 / 1024.0 / duration.as_secs_f64()
     );
+
+    // Write JSON output
+    let json = serde_json::to_string_pretty(&root).expect("Failed to serialize");
+    fs::write("ToParse.json", &json).expect("Failed to write ToParse.json");
+    println!("Written ToParse.json ({} bytes)", json.len());
 }
