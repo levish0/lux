@@ -827,19 +827,28 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
             "ImportDeclaration" => {
                 obj.remove("phase");
                 obj.remove("with");
-                obj.entry("importKind".to_string())
-                    .or_insert(Value::String("value".to_string()));
                 obj.entry("attributes".to_string())
                     .or_insert(Value::Array(vec![]));
             }
             "ImportSpecifier" => {
                 obj.remove("isTypeOnly");
-                obj.entry("importKind".to_string())
-                    .or_insert(Value::String("value".to_string()));
                 // If imported is null, clone local as imported
                 if obj.get("imported") == Some(&Value::Null) {
                     if let Some(local) = obj.get("local").cloned() {
                         obj.insert("imported".to_string(), local);
+                    }
+                }
+            }
+            "ExportSpecifier" => {
+                obj.remove("isTypeOnly");
+                // SWC uses "orig", ESTree uses "local"
+                if let Some(orig) = obj.remove("orig") {
+                    obj.insert("local".to_string(), orig);
+                }
+                // If exported is null, clone local as exported
+                if obj.get("exported") == Some(&Value::Null) {
+                    if let Some(local) = obj.get("local").cloned() {
+                        obj.insert("exported".to_string(), local);
                     }
                 }
             }
@@ -860,8 +869,8 @@ fn transform_node(mut obj: Map<String, Value>) -> Value {
                 }
                 obj.remove("phase");
                 obj.remove("with");
-                obj.entry("exportKind".to_string())
-                    .or_insert(Value::String("value".to_string()));
+                obj.entry("declaration".to_string())
+                    .or_insert(Value::Null);
                 obj.entry("specifiers".to_string())
                     .or_insert(Value::Array(vec![]));
                 obj.entry("source".to_string())

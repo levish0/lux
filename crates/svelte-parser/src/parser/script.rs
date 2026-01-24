@@ -12,7 +12,7 @@ use winnow::combinator::peek;
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::{any, literal, take_while};
-
+use svelte_ast::attributes::{AttributeSequenceValue, AttributeValue};
 use super::ParserInput;
 use super::attribute::attribute_parser;
 
@@ -83,9 +83,9 @@ fn detect_script_context(attributes: &[AttributeNode]) -> ScriptContext {
                 return ScriptContext::Module;
             }
             if a.name == "context" {
-                if let svelte_ast::attributes::AttributeValue::Sequence(seq) = &a.value {
+                if let AttributeValue::Sequence(seq) = &a.value {
                     for item in seq {
-                        if let svelte_ast::attributes::AttributeSequenceValue::Text(t) = item {
+                        if let AttributeSequenceValue::Text(t) = item {
                             if t.data == "module" {
                                 return ScriptContext::Module;
                             }
