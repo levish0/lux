@@ -158,9 +158,9 @@ fn performance_comparison() {
         
         let speedup = node_single.as_secs_f64() / rust_single.as_secs_f64();
         if speedup > 1.0 {
-            println!("  → Rust is {:.1}x faster\n", speedup);
+            println!("  → Rust is {:.3}x faster\n", speedup);
         } else {
-            println!("  → Node.js is {:.1}x faster\n", 1.0 / speedup);
+            println!("  → Node.js is {:.3}x faster\n", 1.0 / speedup);
         }
     } else {
         println!("  Node.js: (skipped - not available)\n");
@@ -172,17 +172,17 @@ fn performance_comparison() {
     
     let rust_bulk = run_rust_parser(&source, iterations);
     let rust_per_parse = rust_bulk.as_secs_f64() * 1000.0 / iterations as f64;
-    println!("  Rust:    {} total ({:.3}ms per parse)", format_duration(rust_bulk), rust_per_parse);
+    println!("  Rust:    {} total ({:.6}ms per parse)", format_duration(rust_bulk), rust_per_parse);
     
     if let Some(node_bulk) = run_node_parser(&fixture, iterations) {
         let node_per_parse = node_bulk.as_secs_f64() * 1000.0 / iterations as f64;
-        println!("  Node.js: {} total ({:.3}ms per parse)", format_duration(node_bulk), node_per_parse);
+        println!("  Node.js: {} total ({:.6}ms per parse)", format_duration(node_bulk), node_per_parse);
         
         let speedup = node_bulk.as_secs_f64() / rust_bulk.as_secs_f64();
         if speedup > 1.0 {
-            println!("  → Rust is {:.1}x faster\n", speedup);
+            println!("  → Rust is {:.3}x faster\n", speedup);
         } else {
-            println!("  → Node.js is {:.1}x faster\n", 1.0 / speedup);
+            println!("  → Node.js is {:.3}x faster\n", 1.0 / speedup);
         }
     } else {
         println!("  Node.js: (skipped - not available)\n");

@@ -45,12 +45,7 @@ impl Serialize for AttributeValue<'_> {
     fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         match self {
             Self::True => s.serialize_bool(true),
-            Self::ExpressionTag(tag) => {
-                use serde::ser::SerializeSeq;
-                let mut seq = s.serialize_seq(Some(1))?;
-                seq.serialize_element(tag)?;
-                seq.end()
-            }
+            Self::ExpressionTag(tag) => tag.serialize(s),
             Self::Sequence(items) => items.serialize(s),
         }
     }

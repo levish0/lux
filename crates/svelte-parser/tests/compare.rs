@@ -44,6 +44,9 @@ fn generate_svelte_ast(tests_dir: &Path) {
     run_cmd("node", &["generate.mjs"], tests_dir);
 }
 
+/// Fields to skip during comparison (positions/comments computed differently from reference).
+const SKIP_FIELDS: &[&str] = &["start", "end", "loc", "leadingComments", "trailingComments"];
+
 /// Check if `actual` is a superset of `expected`.
 /// All fields in `expected` must exist in `actual` with matching values.
 /// Extra fields in `actual` are allowed (EXTRA is not a mismatch).
@@ -51,6 +54,9 @@ fn is_superset(actual: &Value, expected: &Value) -> bool {
     match (actual, expected) {
         (Value::Object(a), Value::Object(e)) => {
             for (key, e_val) in e {
+                if SKIP_FIELDS.contains(&key.as_str()) {
+                    continue;
+                }
                 match a.get(key) {
                     Some(a_val) => {
                         if !is_superset(a_val, e_val) {

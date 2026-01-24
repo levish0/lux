@@ -104,7 +104,7 @@ pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
 
     if parser.eat("await") {
         parser.require_whitespace()?;
-        let expression = read_expression(parser)?;
+        let expression = read_await_expression(parser)?;
         parser.allow_whitespace();
 
         let mut value = None;
@@ -394,6 +394,133 @@ fn find_closing_brace_pos(template: &str, start: usize) -> usize {
         i += 1;
     }
     template.len()
+}
+
+// ─── Await Expression Helpers ───────────────────────────────────────
+
+/// Read the expression for an await block.
+/// Scans for "then" or "catch" keywords at bracket depth 0 to find the expression boundary.
+fn read_await_expression<'a>(parser: &mut Parser<'a>) -> Result<Expression<'a>, ParseError> {
+    let start = parser.index;
+
+    let keyword_pos = find_then_catch_keyword(parser.template, start);
+
+    let expr_end = match keyword_pos {
+        Some(pos) => {
+            let slice = &parser.template[start..pos];
+            start + slice.trim_end().len()
+        }
+        None => find_closing_brace_pos(parser.template, start),
+    };
+
+    if expr_end <= start {
+        if parser.loose {
+            parser.index = expr_end;
+            return Ok(loose_identifier(parser, start, start));
+        }
+        return Err(parser.error(
+            ErrorKind::ExpectedExpression,
+            start,
+            "Expected expression".to_string(),
+        ));
+    }
+
+    let expr_source = &parser.template[start..expr_end];
+    let trimmed = expr_source.trim_end();
+    let effective_end = start + trimmed.len();
+
+    if trimmed.is_empty() {
+        parser.index = expr_end;
+        return Ok(loose_identifier(parser, start, expr_end));
+    }
+
+    let source_type = if parser.ts {
+        SourceType::ts()
+    } else {
+        SourceType::mjs()
+    };
+
+    let snippet = parser.allocator.alloc_str(trimmed);
+    let result =
+        oxc_parser::Parser::new(parser.allocator, snippet, source_type).parse_expression();
+
+    match result {
+        Ok(mut e) => {
+            shift_expression_spans(&mut e, start as u32);
+            parser.index = effective_end;
+            Ok(e)
+        }
+        Err(errors) => {
+            if parser.loose {
+                parser.index = effective_end;
+                Ok(loose_identifier(parser, start, effective_end))
+            } else {
+                let msg = format!("JS parse error: {}", errors[0]);
+                Err(parser.error(ErrorKind::JsParseError, start, msg))
+            }
+        }
+    }
+}
+
+/// Find "then" or "catch" keyword at bracket depth 0.
+fn find_then_catch_keyword(template: &str, start: usize) -> Option<usize> {
+    let bytes = template.as_bytes();
+    let mut i = start;
+    let mut brace_depth: i32 = 0;
+    let mut paren_depth: i32 = 0;
+    let mut bracket_depth: i32 = 0;
+
+    while i < bytes.len() {
+        let ch = bytes[i];
+        match ch {
+            b'{' => brace_depth += 1,
+            b'}' => {
+                if brace_depth == 0 {
+                    return None;
+                }
+                brace_depth -= 1;
+            }
+            b'(' => paren_depth += 1,
+            b')' => paren_depth -= 1,
+            b'[' => bracket_depth += 1,
+            b']' => bracket_depth -= 1,
+            b'\'' | b'"' | b'`' => {
+                i = skip_string_bytes(bytes, i);
+                continue;
+            }
+            _ => {
+                if brace_depth == 0 && paren_depth == 0 && bracket_depth == 0 {
+                    // Check for "then" keyword
+                    if ch == b't'
+                        && i + 3 < bytes.len()
+                        && bytes[i + 1] == b'h'
+                        && bytes[i + 2] == b'e'
+                        && bytes[i + 3] == b'n'
+                        && i > start
+                        && is_whitespace_byte(bytes[i - 1])
+                        && (i + 4 >= bytes.len() || !is_identifier_byte(bytes[i + 4]))
+                    {
+                        return Some(i);
+                    }
+                    // Check for "catch" keyword
+                    if ch == b'c'
+                        && i + 4 < bytes.len()
+                        && bytes[i + 1] == b'a'
+                        && bytes[i + 2] == b't'
+                        && bytes[i + 3] == b'c'
+                        && bytes[i + 4] == b'h'
+                        && i > start
+                        && is_whitespace_byte(bytes[i - 1])
+                        && (i + 5 >= bytes.len() || !is_identifier_byte(bytes[i + 5]))
+                    {
+                        return Some(i);
+                    }
+                }
+            }
+        }
+        i += 1;
+    }
+    None
 }
 
 // ─── Snippet Parameter Parsing ──────────────────────────────────────

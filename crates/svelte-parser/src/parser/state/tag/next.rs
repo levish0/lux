@@ -47,7 +47,7 @@ pub fn next<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
 }
 
 /// Handle {:else} and {:else if} for IfBlock
-fn next_if<'a>(parser: &mut Parser<'a>, start: usize) -> Result<(), ParseError> {
+fn next_if(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
     if !parser.eat("else") {
         if !parser.loose {
             return Err(parser.error(
