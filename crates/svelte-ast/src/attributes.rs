@@ -1,77 +1,34 @@
-use serde::ser::SerializeMap;
-use serde::{Serialize, Serializer};
+use oxc_ast::ast::Expression;
 
-use crate::JsNode;
 use crate::span::{SourceLocation, Span};
 use crate::tags::ExpressionTag;
 use crate::text::Text;
 
 /*
- * interface Attribute extends BaseNode {
+ * interface Attribute extends BaseAttribute {
  *   type: 'Attribute';
- *   name: string;
- *   name_loc: SourceLocation | null;
  *   value: true | ExpressionTag | Array<Text | ExpressionTag>;
  * }
  */
-#[derive(Debug, Clone)]
-pub struct Attribute {
+#[derive(Debug)]
+pub struct Attribute<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    pub value: AttributeValue,
+    pub value: AttributeValue<'a>,
 }
 
-impl Serialize for Attribute {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        let mut map = s.serialize_map(None)?;
-        map.serialize_entry("type", "Attribute")?;
-        map.serialize_entry("start", &self.span.start)?;
-        map.serialize_entry("end", &self.span.end)?;
-        map.serialize_entry("name", &self.name)?;
-        map.serialize_entry("name_loc", &self.name_loc)?;
-        map.serialize_entry("value", &self.value)?;
-        map.end()
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum AttributeValue {
+#[derive(Debug)]
+pub enum AttributeValue<'a> {
     True,
-    Expression(ExpressionTag),
-    Sequence(Vec<AttributeSequenceValue>),
+    ExpressionTag(ExpressionTag<'a>),
+    Sequence(Vec<AttributeSequenceValue<'a>>),
 }
 
-impl Serialize for AttributeValue {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        match self {
-            AttributeValue::True => s.serialize_bool(true),
-            AttributeValue::Expression(e) => {
-                let mut map = s.serialize_map(None)?;
-                map.serialize_entry("type", "ExpressionTag")?;
-                map.serialize_entry("start", &e.span.start)?;
-                map.serialize_entry("end", &e.span.end)?;
-                if e.force_expression_loc {
-                    crate::utils::estree::set_force_char_loc(true);
-                }
-                let mut expr_val = e.expression.0.clone();
-                crate::utils::estree::add_loc(&mut expr_val);
-                if e.force_expression_loc {
-                    crate::utils::estree::set_force_char_loc(false);
-                }
-                map.serialize_entry("expression", &expr_val)?;
-                map.end()
-            }
-            AttributeValue::Sequence(items) => items.serialize(s),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(tag = "type")]
-pub enum AttributeSequenceValue {
+#[derive(Debug)]
+pub enum AttributeSequenceValue<'a> {
     Text(Text),
-    ExpressionTag(ExpressionTag),
+    ExpressionTag(ExpressionTag<'a>),
 }
 
 /*
@@ -80,219 +37,143 @@ pub enum AttributeSequenceValue {
  *   expression: Expression;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct SpreadAttribute {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct SpreadAttribute<'a> {
     pub span: Span,
-    pub expression: JsNode,
+    pub expression: Expression<'a>,
 }
 
 /*
- * interface BindDirective extends BaseNode {
+ * interface BindDirective extends BaseAttribute {
  *   type: 'BindDirective';
  *   name: string;
- *   name_loc: SourceLocation | null;
  *   expression: Identifier | MemberExpression | SequenceExpression;
  * }
  */
-#[derive(Debug, Clone)]
-pub struct BindDirective {
+#[derive(Debug)]
+pub struct BindDirective<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    pub expression: JsNode,
-    pub leading_comments: Vec<crate::text::JsComment>,
-}
-
-impl Serialize for BindDirective {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        let mut map = s.serialize_map(None)?;
-        map.serialize_entry("type", "BindDirective")?;
-        map.serialize_entry("start", &self.span.start)?;
-        map.serialize_entry("end", &self.span.end)?;
-
-        // Serialize expression with loc and optional leadingComments
-        let mut expr_val = self.expression.0.clone();
-        crate::utils::estree::add_loc(&mut expr_val);
-        if !self.leading_comments.is_empty() {
-            if let serde_json::Value::Object(ref mut obj) = expr_val {
-                let comments_val: Vec<serde_json::Value> = self
-                    .leading_comments
-                    .iter()
-                    .map(|c| serde_json::to_value(c).unwrap())
-                    .collect();
-                obj.insert(
-                    "leadingComments".to_string(),
-                    serde_json::Value::Array(comments_val),
-                );
-            }
-        }
-        map.serialize_entry("expression", &expr_val)?;
-
-        map.serialize_entry("modifiers", &Vec::<String>::new())?;
-        map.serialize_entry("name", &self.name)?;
-        map.serialize_entry("name_loc", &self.name_loc)?;
-        map.end()
-    }
-}
-
-/*
- * interface ClassDirective extends BaseNode {
- *   type: 'ClassDirective';
- *   name: 'class';
- *   name_loc: SourceLocation | null;
- *   expression: Expression;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct ClassDirective {
-    #[serde(flatten)]
-    pub span: Span,
-    pub name: String,
-    pub name_loc: Option<SourceLocation>,
-    pub expression: JsNode,
+    pub expression: Expression<'a>,
     pub modifiers: Vec<String>,
 }
 
 /*
- * interface StyleDirective extends BaseNode {
+ * interface ClassDirective extends BaseAttribute {
+ *   type: 'ClassDirective';
+ *   name: 'class';
+ *   expression: Expression;
+ * }
+ */
+#[derive(Debug)]
+pub struct ClassDirective<'a> {
+    pub span: Span,
+    pub name: String,
+    pub name_loc: Option<SourceLocation>,
+    pub expression: Expression<'a>,
+    pub modifiers: Vec<String>,
+}
+
+/*
+ * interface StyleDirective extends BaseAttribute {
  *   type: 'StyleDirective';
  *   name: string;
- *   name_loc: SourceLocation | null;
  *   value: true | ExpressionTag | Array<ExpressionTag | Text>;
  *   modifiers: Array<'important'>;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct StyleDirective {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct StyleDirective<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    pub value: AttributeValue,
-    pub modifiers: Vec<StyleModifier>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "lowercase")]
-pub enum StyleModifier {
-    Important,
+    pub value: AttributeValue<'a>,
+    pub modifiers: Vec<String>,
 }
 
 /*
- * interface OnDirective extends BaseNode {
+ * interface OnDirective extends BaseAttribute {
  *   type: 'OnDirective';
  *   name: string;
- *   name_loc: SourceLocation | null;
  *   expression: null | Expression;
  *   modifiers: string[];
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct OnDirective {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct OnDirective<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    pub expression: Option<JsNode>,
-    pub modifiers: Vec<EventModifier>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub enum EventModifier {
-    Capture,
-    Nonpassive,
-    Once,
-    Passive,
-    PreventDefault,
-    #[serde(rename = "self")]
-    Self_,
-    StopImmediatePropagation,
-    StopPropagation,
-    Trusted,
+    pub expression: Option<Expression<'a>>,
+    pub modifiers: Vec<String>,
 }
 
 /*
- * interface TransitionDirective extends BaseNode {
+ * interface TransitionDirective extends BaseAttribute {
  *   type: 'TransitionDirective';
  *   name: string;
- *   name_loc: SourceLocation | null;
  *   expression: null | Expression;
  *   modifiers: Array<'local' | 'global'>;
  *   intro: boolean;
  *   outro: boolean;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct TransitionDirective {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct TransitionDirective<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    pub expression: Option<JsNode>,
-    pub modifiers: Vec<TransitionModifier>,
+    pub expression: Option<Expression<'a>>,
+    pub modifiers: Vec<String>,
     pub intro: bool,
     pub outro: bool,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "lowercase")]
-pub enum TransitionModifier {
-    Local,
-    Global,
-}
-
 /*
- * interface AnimateDirective extends BaseNode {
+ * interface AnimateDirective extends BaseAttribute {
  *   type: 'AnimateDirective';
  *   name: string;
- *   name_loc: SourceLocation | null;
  *   expression: null | Expression;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct AnimateDirective {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct AnimateDirective<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    pub expression: Option<JsNode>,
+    pub expression: Option<Expression<'a>>,
     pub modifiers: Vec<String>,
 }
 
 /*
- * interface UseDirective extends BaseNode {
+ * interface UseDirective extends BaseAttribute {
  *   type: 'UseDirective';
  *   name: string;
- *   name_loc: SourceLocation | null;
  *   expression: null | Expression;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct UseDirective {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct UseDirective<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    pub expression: Option<JsNode>,
+    pub expression: Option<Expression<'a>>,
     pub modifiers: Vec<String>,
 }
 
 /*
- * interface LetDirective extends BaseNode {
+ * interface LetDirective extends BaseAttribute {
  *   type: 'LetDirective';
  *   name: string;
- *   name_loc: SourceLocation | null;
  *   expression: null | Identifier | ArrayExpression | ObjectExpression;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct LetDirective {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct LetDirective<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    pub expression: Option<JsNode>,
+    pub expression: Option<Expression<'a>>,
     pub modifiers: Vec<String>,
 }

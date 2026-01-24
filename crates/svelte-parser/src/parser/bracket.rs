@@ -1,401 +1,206 @@
-use winnow::Result as ParseResult;
-use winnow::prelude::*;
-use winnow::token::take;
+/// Bracket matching utilities.
+/// Direct port of reference utils/bracket.js.
 
-use super::ParserInput;
-
-/// Find the byte offset of the matching closing bracket in `s`.
-///
-/// `s` should start AFTER the opening bracket.
-/// Returns the byte offset of the matching closing bracket (relative to start of `s`),
-/// or `None` if not found.
-///
-/// Handles: nested brackets, string literals ('/"/ `), template literals with ${},
-/// line comments (//), block comments (/* */).
-pub fn find_matching_bracket(s: &str, open: char) -> Option<usize> {
+/// Find the corresponding closing bracket, ignoring brackets inside strings, comments, or regex.
+/// `index` is the position AFTER the opening bracket.
+/// Returns the position of the closing bracket, or None if not found.
+pub fn find_matching_bracket(template: &str, index: usize, open: char) -> Option<usize> {
     let close = match open {
         '{' => '}',
         '(' => ')',
         '[' => ']',
+        '<' => '>',
         _ => return None,
     };
 
-    let bytes = s.as_bytes();
-    let mut depth: u32 = 1;
-    let mut i = 0;
+    let bytes = template.as_bytes();
+    let mut brackets = 1u32;
+    let mut i = index;
 
-    while i < bytes.len() && depth > 0 {
+    while brackets > 0 && i < bytes.len() {
         let ch = bytes[i];
         match ch {
             b'\'' | b'"' | b'`' => {
-                i = skip_string(s, i + 1, ch as char)?;
+                let end = find_string_end(template, i + 1, ch as char);
+                if end >= bytes.len() {
+                    return None;
+                }
+                i = end + 1;
             }
             b'/' => {
-                let next = bytes.get(i + 1).copied();
-                match next {
-                    Some(b'/') => {
-                        // line comment - skip until newline
-                        i = s[i..]
-                            .find('\n')
-                            .map(|pos| i + pos + 1)
-                            .unwrap_or(bytes.len());
+                if i + 1 >= bytes.len() {
+                    i += 1;
+                    continue;
+                }
+                let next_ch = bytes[i + 1];
+                if next_ch == b'/' {
+                    // Line comment
+                    if let Some(nl) = template[i..].find('\n') {
+                        i += nl + 1;
+                    } else {
+                        i = bytes.len();
                     }
-                    Some(b'*') => {
-                        // block comment - skip until */
-                        i = s[i + 2..]
-                            .find("*/")
-                            .map(|pos| i + 2 + pos + 2)
-                            .unwrap_or(bytes.len());
+                } else if next_ch == b'*' {
+                    // Block comment
+                    if let Some(end) = template[i + 2..].find("*/") {
+                        i = i + 2 + end + 2;
+                    } else {
+                        i = bytes.len();
                     }
-                    _ => {
+                } else {
+                    // Regex: find unescaped /
+                    let end = find_regex_end(template, i + 1);
+                    if end >= bytes.len() {
                         i += 1;
+                    } else {
+                        i = end + 1;
                     }
                 }
             }
-            c if c == open as u8 => {
-                depth += 1;
-                i += 1;
-            }
-            c if c == close as u8 => {
-                depth -= 1;
-                if depth == 0 {
+            _ => {
+                if ch == open as u8 {
+                    brackets += 1;
+                } else if ch == close as u8 {
+                    brackets -= 1;
+                }
+                if brackets == 0 {
                     return Some(i);
                 }
                 i += 1;
             }
-            _ => {
-                i += 1;
-            }
         }
     }
 
     None
 }
 
-/// Find the LAST occurrence of the keyword `kw` at bracket depth 0.
-///
-/// Same as `find_keyword_at_depth_zero` but returns the last match instead of the first.
-/// Used in TS mode for `{#each}` blocks where TypeScript `as` assertions
-/// may precede the Svelte `as` keyword.
-pub fn find_last_keyword_at_depth_zero(s: &str, kw: &str) -> Option<usize> {
-    let bytes = s.as_bytes();
-    let mut depth: u32 = 0;
-    let mut i = 0;
-    let mut last_match: Option<usize> = None;
-
-    while i < bytes.len() {
-        if depth == 0 && bytes[i..].starts_with(kw.as_bytes()) {
-            last_match = Some(i);
-            i += kw.len();
-            continue;
-        }
-
-        let ch = bytes[i];
-        match ch {
-            b'\'' | b'"' | b'`' => {
-                i = skip_string(s, i + 1, ch as char).unwrap_or(bytes.len());
-            }
-            b'{' | b'(' | b'[' => {
-                depth += 1;
-                i += 1;
-            }
-            b'}' | b')' | b']' => {
-                depth = depth.saturating_sub(1);
-                i += 1;
-            }
-            b'/' => {
-                let next = bytes.get(i + 1).copied();
-                match next {
-                    Some(b'/') => {
-                        i = s[i..]
-                            .find('\n')
-                            .map(|pos| i + pos + 1)
-                            .unwrap_or(bytes.len());
-                    }
-                    Some(b'*') => {
-                        i = s[i + 2..]
-                            .find("*/")
-                            .map(|pos| i + 2 + pos + 2)
-                            .unwrap_or(bytes.len());
-                    }
-                    _ => {
-                        i += 1;
-                    }
-                }
-            }
-            _ => {
-                i += 1;
-            }
-        }
-    }
-
-    last_match
-}
-
-/// Find the end position of the keyword `kw` at bracket depth 0.
-///
-/// `s` starts after the opening bracket/whitespace.
-/// Returns the byte offset where the keyword starts, or `None` if not found.
-///
-/// Handles nested brackets {}/()/[] and string/template literals.
-pub fn find_keyword_at_depth_zero(s: &str, kw: &str) -> Option<usize> {
-    let bytes = s.as_bytes();
-    let mut depth: u32 = 0;
-    let mut i = 0;
-
-    while i < bytes.len() {
-        if depth == 0 && bytes[i..].starts_with(kw.as_bytes()) {
-            return Some(i);
-        }
-
-        let ch = bytes[i];
-        match ch {
-            b'\'' | b'"' | b'`' => {
-                i = skip_string(s, i + 1, ch as char).unwrap_or(bytes.len());
-            }
-            b'{' | b'(' | b'[' => {
-                depth += 1;
-                i += 1;
-            }
-            b'}' | b')' | b']' => {
-                depth = depth.saturating_sub(1);
-                i += 1;
-            }
-            b'/' => {
-                let next = bytes.get(i + 1).copied();
-                match next {
-                    Some(b'/') => {
-                        i = s[i..]
-                            .find('\n')
-                            .map(|pos| i + pos + 1)
-                            .unwrap_or(bytes.len());
-                    }
-                    Some(b'*') => {
-                        i = s[i + 2..]
-                            .find("*/")
-                            .map(|pos| i + 2 + pos + 2)
-                            .unwrap_or(bytes.len());
-                    }
-                    _ => {
-                        i += 1;
-                    }
-                }
-            }
-            _ => {
-                i += 1;
-            }
-        }
-    }
-
-    None
-}
-
-/// Find the byte offset of the first character in `chars` at bracket depth 0.
-///
-/// Handles nested brackets {}/()/[] and string/template literals.
-pub fn find_char_at_depth_zero(s: &str, chars: &[char]) -> Option<usize> {
-    let bytes = s.as_bytes();
-    let mut depth: u32 = 0;
-    let mut i = 0;
-
-    while i < bytes.len() {
-        let ch = bytes[i];
-
-        if depth == 0 {
-            // Check if current char is a terminator (for ASCII chars only)
-            let c = ch as char;
-            if chars.contains(&c) && ch < 128 {
-                return Some(i);
-            }
-        }
-
-        match ch {
-            b'\'' | b'"' | b'`' => {
-                i = skip_string(s, i + 1, ch as char).unwrap_or(bytes.len());
-            }
-            b'{' | b'(' | b'[' => {
-                depth += 1;
-                i += 1;
-            }
-            b'}' | b')' | b']' => {
-                depth = depth.saturating_sub(1);
-                i += 1;
-            }
-            b'/' => {
-                let next = bytes.get(i + 1).copied();
-                match next {
-                    Some(b'/') => {
-                        i = s[i..]
-                            .find('\n')
-                            .map(|pos| i + pos + 1)
-                            .unwrap_or(bytes.len());
-                    }
-                    Some(b'*') => {
-                        i = s[i + 2..]
-                            .find("*/")
-                            .map(|pos| i + 2 + pos + 2)
-                            .unwrap_or(bytes.len());
-                    }
-                    _ => {
-                        i += 1;
-                    }
-                }
-            }
-            _ => {
-                i += 1;
-            }
-        }
-    }
-
-    None
-}
-
-/// Skip past a string literal (starting after the opening quote).
-/// Returns the byte offset just past the closing quote.
-fn skip_string(s: &str, start: usize, quote: char) -> Option<usize> {
-    let bytes = s.as_bytes();
+/// Match brackets with full stack-based tracking (for `match_bracket` in reference).
+/// Starts at `start` (the position of the opening bracket).
+/// Returns position AFTER the final closing bracket.
+pub fn match_bracket(template: &str, start: usize, brackets: &[(char, char)]) -> Option<usize> {
+    let close_chars: Vec<char> = brackets.iter().map(|(_, c)| *c).collect();
+    let mut bracket_stack: Vec<char> = Vec::new();
+    let bytes = template.as_bytes();
     let mut i = start;
 
     while i < bytes.len() {
-        let ch = bytes[i];
-        if ch == b'\\' {
-            i += 2; // skip escape
-            continue;
-        }
-        if ch == quote as u8 {
-            return Some(i + 1); // past closing quote
-        }
-        // Template literal: handle ${ }
-        if quote == '`' && ch == b'$' && bytes.get(i + 1) == Some(&b'{') {
-            i += 2; // skip ${
-            // Find matching }
-            if let Some(end) = find_matching_bracket(&s[i..], '{') {
-                i += end + 1; // past the }
-            } else {
-                return None;
-            }
-            continue;
-        }
-        // Non-template strings can't span lines
-        if quote != '`' && ch == b'\n' {
-            return Some(i); // treat newline as end for non-template strings
-        }
+        let ch = bytes[i] as char;
         i += 1;
+
+        if ch == '\'' || ch == '"' || ch == '`' {
+            i = match_quote(template, i, ch)?;
+            continue;
+        }
+
+        if brackets.iter().any(|(o, _)| *o == ch) {
+            bracket_stack.push(ch);
+        } else if close_chars.contains(&ch) {
+            let popped = bracket_stack.pop();
+            if let Some(open) = popped {
+                let expected = brackets.iter().find(|(o, _)| *o == open).map(|(_, c)| *c);
+                if expected != Some(ch) {
+                    return None; // mismatched bracket
+                }
+            }
+            if bracket_stack.is_empty() {
+                return Some(i);
+            }
+        }
     }
 
     None
 }
 
-// --- Winnow parser wrappers ---
-
-/// Consume `{` ... `}` and return the inner content as `&str` (zero-allocation).
-pub fn scan_expression_content<'i>(input: &mut ParserInput<'i>) -> ParseResult<&'i str> {
-    // Consume opening {
-    let _: &str = take(1usize).parse_next(input)?;
-
-    let remaining: &str = &input.input;
-    let end = find_matching_bracket(remaining, '{').ok_or(winnow::error::ContextError::new())?;
-
-    // Take the content (everything before the closing })
-    let content: &str = take(end).parse_next(input)?;
-
-    // Consume closing }
-    let _: &str = take(1usize).parse_next(input)?;
-
-    Ok(content)
-}
-
-/// Read content until `}` at bracket depth 0, without consuming the `}`.
-/// Returns the content as `&str` (zero-allocation).
-pub fn read_until_close_brace<'i>(input: &mut ParserInput<'i>) -> ParseResult<&'i str> {
-    let remaining: &str = &input.input;
-    let end = find_matching_bracket_for_close_char(remaining, '}')
-        .ok_or(winnow::error::ContextError::new())?;
-
-    take(end).parse_next(input)
-}
-
-/// Read content until a keyword at bracket depth 0, without consuming the keyword.
-/// Returns the content as `&str` (zero-allocation).
-pub fn read_until_keyword_balanced<'a, 'i>(
-    input: &mut ParserInput<'i>,
-    keyword: &'a str,
-) -> ParseResult<&'i str> {
-    let remaining: &str = &input.input;
-    let end =
-        find_keyword_at_depth_zero(remaining, keyword).ok_or(winnow::error::ContextError::new())?;
-
-    take(end).parse_next(input)
-}
-
-/// Read content until one of the given chars at bracket depth 0, without consuming.
-/// Returns the content as `&str` (zero-allocation).
-pub fn read_until_chars_balanced<'i>(
-    input: &mut ParserInput<'i>,
-    chars: &[char],
-) -> ParseResult<&'i str> {
-    let remaining: &str = &input.input;
-    let end = find_char_at_depth_zero(remaining, chars).ok_or(winnow::error::ContextError::new())?;
-
-    take(end).parse_next(input)
-}
-
-/// Find position of `close` at depth 0, without requiring a matching open bracket.
-/// Used when we're already inside the brackets and just need to find the close.
-pub fn find_matching_bracket_for_close_char(s: &str, close: char) -> Option<usize> {
-    let open = match close {
-        '}' => '{',
-        ')' => '(',
-        ']' => '[',
-        _ => return None,
-    };
-
-    let bytes = s.as_bytes();
-    let mut depth: u32 = 0;
-    let mut i = 0;
+/// Match a quote (string literal), handling escape sequences and template literal interpolation.
+/// `start` is position AFTER the opening quote.
+/// Returns position AFTER the closing quote.
+fn match_quote(template: &str, start: usize, quote: char) -> Option<usize> {
+    let bytes = template.as_bytes();
+    let mut is_escaped = false;
+    let mut i = start;
 
     while i < bytes.len() {
-        let ch = bytes[i];
-        match ch {
-            b'\'' | b'"' | b'`' => {
-                i = skip_string(s, i + 1, ch as char).unwrap_or(bytes.len());
-            }
-            b'/' => {
-                let next = bytes.get(i + 1).copied();
-                match next {
-                    Some(b'/') => {
-                        i = s[i..]
-                            .find('\n')
-                            .map(|pos| i + pos + 1)
-                            .unwrap_or(bytes.len());
-                    }
-                    Some(b'*') => {
-                        i = s[i + 2..]
-                            .find("*/")
-                            .map(|pos| i + 2 + pos + 2)
-                            .unwrap_or(bytes.len());
-                    }
-                    _ => {
-                        i += 1;
-                    }
-                }
-            }
-            c if c == open as u8 => {
-                depth += 1;
-                i += 1;
-            }
-            c if c == close as u8 => {
-                if depth == 0 {
-                    return Some(i);
-                }
-                depth -= 1;
-                i += 1;
-            }
-            _ => {
-                i += 1;
-            }
+        let ch = bytes[i] as char;
+        i += 1;
+
+        if is_escaped {
+            is_escaped = false;
+            continue;
+        }
+
+        if ch == quote {
+            return Some(i);
+        }
+
+        if ch == '\\' {
+            is_escaped = true;
+        }
+
+        if quote == '`' && ch == '$' && i < bytes.len() && bytes[i] == b'{' {
+            // Template literal interpolation: ${...}
+            i += 1; // skip {
+            let default_brackets = [( '{', '}'), ('(', ')'), ('[', ']')];
+            // Find matching } using match_bracket logic
+            let end = match_bracket(template, i - 1, &default_brackets)?;
+            i = end;
         }
     }
 
-    None
+    None // unterminated string
+}
+
+/// Find the end of a string literal.
+/// `start` is position AFTER the opening quote.
+/// Returns position of the closing quote character (NOT after it).
+fn find_string_end(string: &str, search_start: usize, quote: char) -> usize {
+    let search_str = if quote == '`' {
+        string
+    } else {
+        // Non-template strings: only search until newline
+        let nl_pos = string[search_start..].find('\n')
+            .map(|p| search_start + p)
+            .unwrap_or(string.len());
+        &string[..nl_pos]
+    };
+    find_unescaped_char(search_str, search_start, quote as u8)
+}
+
+/// Find the end of a regex literal (unescaped /).
+fn find_regex_end(string: &str, search_start: usize) -> usize {
+    find_unescaped_char(string, search_start, b'/')
+}
+
+/// Find the first unescaped instance of `ch`.
+fn find_unescaped_char(string: &str, search_start: usize, ch: u8) -> usize {
+    let bytes = string.as_bytes();
+    let mut i = search_start;
+    loop {
+        if i >= bytes.len() {
+            return usize::MAX;
+        }
+        if let Some(pos) = bytes[i..].iter().position(|&b| b == ch) {
+            let found = i + pos;
+            if count_leading_backslashes(bytes, found) % 2 == 0 {
+                return found;
+            }
+            i = found + 1;
+        } else {
+            return usize::MAX;
+        }
+    }
+}
+
+/// Count consecutive backslashes before a position.
+fn count_leading_backslashes(bytes: &[u8], before: usize) -> usize {
+    let mut count = 0;
+    let mut i = before;
+    while i > 0 {
+        i -= 1;
+        if bytes[i] == b'\\' {
+            count += 1;
+        } else {
+            break;
+        }
+    }
+    count
 }

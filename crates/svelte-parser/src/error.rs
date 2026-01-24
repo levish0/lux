@@ -17,6 +17,7 @@ pub enum ErrorKind {
     ExpectedBlockType,
     ExpectedTag,
     AttributeDuplicate,
+    ExpectedExpression,
     JsParseError,
     CssSelectorInvalid,
     SvelteMetaDuplicate,

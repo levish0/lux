@@ -19,14 +19,15 @@ svelte-analyzer = {path = "crates/svelte-analyzer"}
 svelte-transformer = { path = "crates/svelte-transformer" }
 
 # External dependencies
-winnow = { version = "0.7.14", features = ["simd"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 oxc_parser = "0.110.0"
 oxc_allocator = "0.110.0"
 oxc_ast = { version = "0.110.0", features = ["serialize"] }
 oxc_span = { version = "0.110.0", features = ["serialize"] }
+oxc_syntax = "0.110.0"
 oxc_diagnostics = "0.110.0"
 oxc_estree = { version = "0.110.0", features = ["serialize"] }
 rayon = "1.11.0"
 line-span = "0.1.5"
+regex = "1.12.2"

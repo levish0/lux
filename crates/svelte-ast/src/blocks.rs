@@ -1,7 +1,5 @@
-use serde::ser::SerializeMap;
-use serde::{Serialize, Serializer};
+use oxc_ast::ast::{BindingPattern, Expression};
 
-use crate::JsNode;
 use crate::root::Fragment;
 use crate::span::Span;
 
@@ -14,14 +12,13 @@ use crate::span::Span;
  *   alternate: Fragment | null;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct IfBlock {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct IfBlock<'a> {
     pub span: Span,
     pub elseif: bool,
-    pub test: JsNode,
-    pub consequent: Fragment,
-    pub alternate: Option<Fragment>,
+    pub test: Expression<'a>,
+    pub consequent: Fragment<'a>,
+    pub alternate: Option<Fragment<'a>>,
 }
 
 /*
@@ -35,19 +32,15 @@ pub struct IfBlock {
  *   key?: Expression;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct EachBlock {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct EachBlock<'a> {
     pub span: Span,
-    pub expression: JsNode,
-    pub context: Option<JsNode>,
-    pub body: Fragment,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub fallback: Option<Fragment>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    pub expression: Expression<'a>,
+    pub context: Option<BindingPattern<'a>>,
+    pub body: Fragment<'a>,
+    pub fallback: Option<Fragment<'a>>,
     pub index: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub key: Option<JsNode>,
+    pub key: Option<Expression<'a>>,
 }
 
 /*
@@ -61,16 +54,15 @@ pub struct EachBlock {
  *   catch: Fragment | null;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct AwaitBlock {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct AwaitBlock<'a> {
     pub span: Span,
-    pub expression: JsNode,
-    pub value: Option<JsNode>,
-    pub error: Option<JsNode>,
-    pub pending: Option<Fragment>,
-    pub then: Option<Fragment>,
-    pub catch: Option<Fragment>,
+    pub expression: Expression<'a>,
+    pub value: Option<BindingPattern<'a>>,
+    pub error: Option<BindingPattern<'a>>,
+    pub pending: Option<Fragment<'a>>,
+    pub then: Option<Fragment<'a>>,
+    pub catch: Option<Fragment<'a>>,
 }
 
 /*
@@ -80,12 +72,11 @@ pub struct AwaitBlock {
  *   fragment: Fragment;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct KeyBlock {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct KeyBlock<'a> {
     pub span: Span,
-    pub expression: JsNode,
-    pub fragment: Fragment,
+    pub expression: Expression<'a>,
+    pub fragment: Fragment<'a>,
 }
 
 /*
@@ -97,29 +88,11 @@ pub struct KeyBlock {
  *   body: Fragment;
  * }
  */
-#[derive(Debug, Clone)]
-pub struct SnippetBlock {
+#[derive(Debug)]
+pub struct SnippetBlock<'a> {
     pub span: Span,
-    pub expression: JsNode,
+    pub expression: Expression<'a>,
+    pub parameters: Vec<BindingPattern<'a>>,
     pub type_params: Option<String>,
-    pub parameters: JsNode,
-    pub body: Fragment,
-}
-
-impl Serialize for SnippetBlock {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        let mut map = s.serialize_map(None)?;
-        map.serialize_entry("start", &self.span.start)?;
-        map.serialize_entry("end", &self.span.end)?;
-        map.serialize_entry("type", "SnippetBlock")?;
-        map.serialize_entry("expression", &self.expression)?;
-
-        if let Some(ref tp) = self.type_params {
-            map.serialize_entry("typeParams", tp)?;
-        }
-
-        map.serialize_entry("parameters", &self.parameters)?;
-        map.serialize_entry("body", &self.body)?;
-        map.end()
-    }
+    pub body: Fragment<'a>,
 }

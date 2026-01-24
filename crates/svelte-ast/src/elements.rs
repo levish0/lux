@@ -1,258 +1,142 @@
-use serde::Serialize;
+use oxc_ast::ast::Expression;
 
-use crate::JsNode;
 use crate::node::AttributeNode;
 use crate::root::Fragment;
 use crate::span::{SourceLocation, Span};
 
 /*
- * interface RegularElement extends BaseElement {
- *   type: 'RegularElement';
+ * interface BaseElement extends BaseNode {
  *   name: string;
- *   attributes: Array<Attribute | SpreadAttribute | Directive>;
+ *   name_loc: SourceLocation;
+ *   attributes: Array<Attribute | SpreadAttribute | Directive | AttachTag>;
  *   fragment: Fragment;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct RegularElement {
-    #[serde(flatten)]
+
+#[derive(Debug)]
+pub struct RegularElement<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface Component extends BaseElement {
- *   type: 'Component';
- *   name: string;
- *   attributes: Array<Attribute | SpreadAttribute | Directive>;
- *   fragment: Fragment;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct Component {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct Component<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface SvelteElement extends BaseElement {
- *   type: 'SvelteElement';
- *   name: 'svelte:element';
- *   tag: Expression;
- *   attributes: Array<Attribute | SpreadAttribute | Directive>;
- *   fragment: Fragment;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct SvelteElement {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct SvelteElement<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub tag: JsNode,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub tag: Expression<'a>,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface SvelteComponent extends BaseElement {
- *   type: 'SvelteComponent';
- *   name: 'svelte:component';
- *   expression: Expression;
- *   attributes: Array<Attribute | SpreadAttribute | Directive>;
- *   fragment: Fragment;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct SvelteComponent {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct SvelteComponent<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub expression: JsNode,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub expression: Expression<'a>,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface SvelteSelf extends BaseElement {
- *   type: 'SvelteSelf';
- *   name: 'svelte:self';
- *   attributes: Array<Attribute | SpreadAttribute | Directive>;
- *   fragment: Fragment;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct SvelteSelf {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct SvelteSelf<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface SlotElement extends BaseElement {
- *   type: 'SlotElement';
- *   name: 'slot';
- *   attributes: Array<Attribute | SpreadAttribute | Directive>;
- *   fragment: Fragment;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct SlotElement {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct SlotElement<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface SvelteHead extends BaseElement {
- *   type: 'SvelteHead';
- *   name: 'svelte:head';
- *   fragment: Fragment;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct SvelteHead {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct SvelteHead<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface SvelteBody extends BaseElement {
- *   type: 'SvelteBody';
- *   name: 'svelte:body';
- *   attributes: Array<Attribute | SpreadAttribute | Directive>;
- *   fragment: Fragment;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct SvelteBody {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct SvelteBody<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface SvelteWindow extends BaseElement {
- *   type: 'SvelteWindow';
- *   name: 'svelte:window';
- *   attributes: Array<Attribute | SpreadAttribute | Directive>;
- *   fragment: Fragment;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct SvelteWindow {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct SvelteWindow<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface SvelteDocument extends BaseElement {
- *   type: 'SvelteDocument';
- *   name: 'svelte:document';
- *   attributes: Array<Attribute | SpreadAttribute | Directive>;
- *   fragment: Fragment;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct SvelteDocument {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct SvelteDocument<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface SvelteFragment extends BaseElement {
- *   type: 'SvelteFragment';
- *   name: 'svelte:fragment';
- *   attributes: Array<Attribute | SpreadAttribute | Directive>;
- *   fragment: Fragment;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct SvelteFragment {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct SvelteFragment<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface SvelteBoundary extends BaseElement {
- *   type: 'SvelteBoundary';
- *   name: 'svelte:boundary';
- *   attributes: Array<Attribute | SpreadAttribute | Directive>;
- *   fragment: Fragment;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct SvelteBoundary {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct SvelteBoundary<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface TitleElement extends BaseElement {
- *   type: 'TitleElement';
- *   name: 'title';
- *   attributes: Array<Attribute | SpreadAttribute | Directive>;
- *   fragment: Fragment;
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct TitleElement {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct TitleElement<'a> {
     pub span: Span,
     pub name: String,
     pub name_loc: SourceLocation,
-    pub attributes: Vec<AttributeNode>,
-    pub fragment: Fragment,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }
 
-/*
- * interface SvelteOptionsRaw extends BaseElement {
- *   type: 'SvelteOptions';
- *   name: 'svelte:options';
- *   attributes: Attribute[];
- * }
- */
-#[derive(Debug, Clone, Serialize)]
-pub struct SvelteOptionsRaw {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct SvelteOptionsRaw<'a> {
     pub span: Span,
+    pub name: String,
     pub name_loc: SourceLocation,
-    pub attributes: Vec<AttributeNode>,
+    pub attributes: Vec<AttributeNode<'a>>,
+    pub fragment: Fragment<'a>,
 }

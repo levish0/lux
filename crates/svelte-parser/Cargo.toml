@@ -10,13 +10,14 @@ description = "svelte-parser"
 
 [dependencies]
 svelte-ast = { workspace = true }
-winnow = { workspace = true }
 serde_json = { workspace = true }
 serde = { workspace = true }
 oxc_parser = { workspace = true }
 oxc_allocator = { workspace = true }
 oxc_ast = { workspace = true }
 oxc_span = { workspace = true }
+oxc_syntax = { workspace = true }
 oxc_diagnostics = { workspace = true }
 oxc_estree = { workspace = true }
+regex = {workspace = true}
 line-span = { workspace = true }

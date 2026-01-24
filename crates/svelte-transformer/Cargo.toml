@@ -9,7 +9,6 @@ rust-version.workspace = true
 description = "svelte-transformer"
 
 [dependencies]
-winnow = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 rayon={workspace = true}

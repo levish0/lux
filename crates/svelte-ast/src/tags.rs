@@ -1,7 +1,5 @@
-use serde::ser::SerializeMap;
-use serde::{Serialize, Serializer};
+use oxc_ast::ast::{Expression, VariableDeclaration};
 
-use crate::JsNode;
 use crate::span::Span;
 
 /*
@@ -10,33 +8,10 @@ use crate::span::Span;
  *   expression: Expression;
  * }
  */
-#[derive(Debug, Clone)]
-pub struct ExpressionTag {
+#[derive(Debug)]
+pub struct ExpressionTag<'a> {
     pub span: Span,
-    pub expression: JsNode,
-    /// When true, expression gets character-inclusive loc (shorthand attribute case)
-    pub force_expression_loc: bool,
-}
-
-impl Serialize for ExpressionTag {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        let mut map = s.serialize_map(None)?;
-        map.serialize_entry("start", &self.span.start)?;
-        map.serialize_entry("end", &self.span.end)?;
-        map.serialize_entry("type", "ExpressionTag")?;
-
-        if self.force_expression_loc {
-            crate::utils::estree::set_force_char_loc(true);
-        }
-        let mut expr_val = self.expression.0.clone();
-        crate::utils::estree::add_loc(&mut expr_val);
-        if self.force_expression_loc {
-            crate::utils::estree::set_force_char_loc(false);
-        }
-        map.serialize_entry("expression", &expr_val)?;
-
-        map.end()
-    }
+    pub expression: Expression<'a>,
 }
 
 /*
@@ -45,11 +20,10 @@ impl Serialize for ExpressionTag {
  *   expression: Expression;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct HtmlTag {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct HtmlTag<'a> {
     pub span: Span,
-    pub expression: JsNode,
+    pub expression: Expression<'a>,
 }
 
 /*
@@ -58,11 +32,10 @@ pub struct HtmlTag {
  *   declaration: VariableDeclaration;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct ConstTag {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct ConstTag<'a> {
     pub span: Span,
-    pub declaration: JsNode,
+    pub declaration: VariableDeclaration<'a>,
 }
 
 /*
@@ -71,11 +44,10 @@ pub struct ConstTag {
  *   identifiers: Identifier[];
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct DebugTag {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct DebugTag<'a> {
     pub span: Span,
-    pub identifiers: JsNode,
+    pub identifiers: Vec<Expression<'a>>,
 }
 
 /*
@@ -84,11 +56,10 @@ pub struct DebugTag {
  *   expression: SimpleCallExpression | (ChainExpression & { expression: SimpleCallExpression });
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct RenderTag {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct RenderTag<'a> {
     pub span: Span,
-    pub expression: JsNode,
+    pub expression: Expression<'a>,
 }
 
 /*
@@ -97,9 +68,8 @@ pub struct RenderTag {
  *   expression: Expression;
  * }
  */
-#[derive(Debug, Clone, Serialize)]
-pub struct AttachTag {
-    #[serde(flatten)]
+#[derive(Debug)]
+pub struct AttachTag<'a> {
     pub span: Span,
-    pub expression: JsNode,
+    pub expression: Expression<'a>,
 }

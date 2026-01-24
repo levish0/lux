@@ -2,6 +2,7 @@ use std::fs;
 use std::process;
 use std::time::Instant;
 
+use oxc_allocator::Allocator;
 use svelte_parser::{ParseOptions, parse};
 
 fn main() {
@@ -17,8 +18,9 @@ fn main() {
     let document_len = source.len();
     println!("Input ({} bytes):\n{}\n", document_len, "=".repeat(50));
 
+    let allocator = Allocator::default();
     let start_time = Instant::now();
-    let root = match parse(&source, ParseOptions::default()) {
+    let root = match parse(&source, &allocator, ParseOptions::default()) {
         Ok(root) => root,
         Err(errors) => {
             eprintln!("Parse errors:");
@@ -31,11 +33,10 @@ fn main() {
     let duration = start_time.elapsed();
 
     println!("Parsed in {:?}", duration);
-
-    let json = serde_json::to_string_pretty(&root).unwrap();
-    fs::write("ToParse.json", &json).unwrap();
-
-    println!("\nResult saved to ToParse.json");
+    println!("Fragment nodes: {}", root.fragment.nodes.len());
+    println!("Has instance script: {}", root.instance.is_some());
+    println!("Has module script: {}", root.module.is_some());
+    println!("Has CSS: {}", root.css.is_some());
     println!(
         "Performance: {:.2} KB/s",
         document_len as f64 / 1024.0 / duration.as_secs_f64()
