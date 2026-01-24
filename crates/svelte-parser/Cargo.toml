@@ -18,4 +18,5 @@ oxc_allocator = { workspace = true }
 oxc_ast = { workspace = true }
 oxc_span = { workspace = true }
 oxc_diagnostics = { workspace = true }
+oxc_estree = { workspace = true }
 line-span = { workspace = true }

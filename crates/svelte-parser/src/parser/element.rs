@@ -306,41 +306,49 @@ fn classify_element(
     match name {
         "svelte:head" => FragmentNode::SvelteHead(SvelteHead {
             span,
+            name: name.to_string(),
             name_loc,
+            attributes,
             fragment,
         }),
         "svelte:body" => FragmentNode::SvelteBody(SvelteBody {
             span,
+            name: name.to_string(),
             name_loc,
             attributes,
             fragment,
         }),
         "svelte:window" => FragmentNode::SvelteWindow(SvelteWindow {
             span,
+            name: name.to_string(),
             name_loc,
             attributes,
             fragment,
         }),
         "svelte:document" => FragmentNode::SvelteDocument(SvelteDocument {
             span,
+            name: name.to_string(),
             name_loc,
             attributes,
             fragment,
         }),
         "svelte:fragment" => FragmentNode::SvelteFragment(SvelteFragment {
             span,
+            name: name.to_string(),
             name_loc,
             attributes,
             fragment,
         }),
         "svelte:boundary" => FragmentNode::SvelteBoundary(SvelteBoundary {
             span,
+            name: name.to_string(),
             name_loc,
             attributes,
             fragment,
         }),
         "svelte:self" => FragmentNode::SvelteSelf(SvelteSelf {
             span,
+            name: name.to_string(),
             name_loc,
             attributes,
             fragment,
@@ -372,6 +380,7 @@ fn classify_element(
         }
         "title" => FragmentNode::TitleElement(TitleElement {
             span,
+            name: name.to_string(),
             name_loc,
             attributes,
             fragment,

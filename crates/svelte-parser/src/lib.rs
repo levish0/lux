@@ -7,7 +7,6 @@ use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::{CustomElementOptions, Fragment, Root, Script, SvelteOptions};
 use svelte_ast::span::Span;
 use svelte_ast::text::{JsComment, JsCommentKind};
-use swc_ecma_ast as swc;
 use winnow::stream::{LocatingSlice, Stateful};
 
 use crate::context::ParseContext;
@@ -140,10 +139,14 @@ fn extract_svelte_options(nodes: &mut Vec<FragmentNode>) -> Option<SvelteOptions
 fn get_boolean_attribute_value(value: &AttributeValue) -> Option<bool> {
     match value {
         AttributeValue::True => Some(true),
-        AttributeValue::Expression(expr_tag) => match expr_tag.expression.as_ref() {
-            swc::Expr::Lit(swc::Lit::Bool(b)) => Some(b.value),
-            _ => None,
-        },
+        AttributeValue::Expression(expr_tag) => {
+            let expr = &expr_tag.expression.0;
+            if expr.get("type").and_then(|t| t.as_str()) == Some("Literal") {
+                expr.get("value").and_then(|v| v.as_bool())
+            } else {
+                None
+            }
+        }
         _ => None,
     }
 }
@@ -684,7 +687,7 @@ mod tests {
         match &root.fragment.nodes[0] {
             FragmentNode::SnippetBlock(block) => {
                 assert_eq!(block.body.nodes.len(), 1);
-                assert_eq!(block.parameters.len(), 1);
+                assert_eq!(block.parameters.0.as_array().map_or(0, |a| a.len()), 1);
             }
             _ => panic!("expected SnippetBlock"),
         }
@@ -721,7 +724,7 @@ mod tests {
         let root = parse("{@debug x, y}", ParseOptions::default()).unwrap();
         match &root.fragment.nodes[0] {
             FragmentNode::DebugTag(tag) => {
-                assert_eq!(tag.identifiers.len(), 2);
+                assert_eq!(tag.identifiers.0.as_array().map_or(0, |a| a.len()), 2);
             }
             _ => panic!("expected DebugTag"),
         }
@@ -732,7 +735,7 @@ mod tests {
         let root = parse("{@debug}", ParseOptions::default()).unwrap();
         match &root.fragment.nodes[0] {
             FragmentNode::DebugTag(tag) => {
-                assert_eq!(tag.identifiers.len(), 0);
+                assert_eq!(tag.identifiers.0.as_array().map_or(0, |a| a.len()), 0);
             }
             _ => panic!("expected DebugTag"),
         }

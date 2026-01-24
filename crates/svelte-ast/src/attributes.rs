@@ -54,8 +54,8 @@ impl Serialize for AttributeValue {
                     crate::utils::estree::set_force_char_loc(true);
                 }
                 let mut expr_val = e.expression.0.clone();
+                crate::utils::estree::add_loc(&mut expr_val);
                 if e.force_expression_loc {
-                    crate::utils::estree::add_loc(&mut expr_val);
                     crate::utils::estree::set_force_char_loc(false);
                 }
                 map.serialize_entry("expression", &expr_val)?;
@@ -76,7 +76,6 @@ pub enum AttributeSequenceValue {
 /*
  * interface SpreadAttribute extends BaseNode {
  *   type: 'SpreadAttribute';
- *   name_loc: SourceLocation | null;
  *   expression: Expression;
  * }
  */
@@ -84,7 +83,6 @@ pub enum AttributeSequenceValue {
 pub struct SpreadAttribute {
     #[serde(flatten)]
     pub span: Span,
-    pub name_loc: Option<SourceLocation>,
     pub expression: JsNode,
 }
 
@@ -111,8 +109,9 @@ impl Serialize for BindDirective {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
 
-        // Serialize expression with optional leadingComments
+        // Serialize expression with loc and optional leadingComments
         let mut expr_val = self.expression.0.clone();
+        crate::utils::estree::add_loc(&mut expr_val);
         if !self.leading_comments.is_empty() {
             if let serde_json::Value::Object(ref mut obj) = expr_val {
                 let comments_val: Vec<serde_json::Value> = self
@@ -150,6 +149,7 @@ pub struct ClassDirective {
     pub name: String,
     pub name_loc: Option<SourceLocation>,
     pub expression: JsNode,
+    pub modifiers: Vec<String>,
 }
 
 /*
@@ -196,12 +196,14 @@ pub struct OnDirective {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub enum EventModifier {
     Capture,
     Nonpassive,
     Once,
     Passive,
     PreventDefault,
+    #[serde(rename = "self")]
     Self_,
     StopImmediatePropagation,
     StopPropagation,
@@ -232,6 +234,7 @@ pub struct TransitionDirective {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum TransitionModifier {
     Local,
     Global,
@@ -252,6 +255,7 @@ pub struct AnimateDirective {
     pub name: String,
     pub name_loc: Option<SourceLocation>,
     pub expression: Option<JsNode>,
+    pub modifiers: Vec<String>,
 }
 
 /*
@@ -269,6 +273,7 @@ pub struct UseDirective {
     pub name: String,
     pub name_loc: Option<SourceLocation>,
     pub expression: Option<JsNode>,
+    pub modifiers: Vec<String>,
 }
 
 /*
@@ -286,4 +291,5 @@ pub struct LetDirective {
     pub name: String,
     pub name_loc: Option<SourceLocation>,
     pub expression: Option<JsNode>,
+    pub modifiers: Vec<String>,
 }

@@ -28,10 +28,9 @@ impl Serialize for ExpressionTag {
         if self.force_expression_loc {
             crate::utils::estree::set_force_char_loc(true);
         }
-        // Add loc to the expression if needed
         let mut expr_val = self.expression.0.clone();
+        crate::utils::estree::add_loc(&mut expr_val);
         if self.force_expression_loc {
-            crate::utils::estree::add_loc(&mut expr_val);
             crate::utils::estree::set_force_char_loc(false);
         }
         map.serialize_entry("expression", &expr_val)?;

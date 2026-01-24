@@ -42,6 +42,72 @@ fn offset_to_line_col(offset: usize, line_starts: &[usize]) -> (usize, usize) {
     (line, col + adjust)
 }
 
+/// Strip OXC-specific fields that acorn/Svelte don't produce.
+/// OXC always outputs structural TS fields even for JS code.
+pub fn strip_oxc_extras(value: &mut Value) {
+    match value {
+        Value::Object(obj) => {
+            let node_type = obj
+                .get("type")
+                .and_then(|t| t.as_str())
+                .unwrap_or("")
+                .to_string();
+
+            // Always remove TS-only structural fields
+            obj.remove("decorators");
+            obj.remove("definite");
+            obj.remove("declare");
+            obj.remove("accessibility");
+            obj.remove("override");
+
+            // typeAnnotation: keep on nodes that actually need it in TS mode,
+            // strip from nodes where acorn wouldn't have it
+            // For now, only keep typeAnnotation if it's not null
+            if obj.get("typeAnnotation") == Some(&Value::Null) {
+                obj.remove("typeAnnotation");
+            }
+
+            // Remove OXC-added fields not in acorn ESTree
+            obj.remove("hashbang"); // Program.hashbang
+            obj.remove("phase"); // ImportDeclaration.phase
+
+            // `optional` is valid on CallExpression and MemberExpression (for ?.)
+            // but OXC adds it to Identifier and other nodes where acorn doesn't
+            match node_type.as_str() {
+                "CallExpression" | "MemberExpression" => {
+                    // Keep optional on these - it's real ESTree
+                }
+                _ => {
+                    obj.remove("optional");
+                }
+            }
+
+            // Import/Export: Svelte reference keeps `attributes: []` and does NOT have
+            // importKind/exportKind. OXC may add these TS-ESTree extensions - remove them.
+            match node_type.as_str() {
+                "ImportDeclaration" | "ImportSpecifier" => {
+                    obj.remove("importKind");
+                }
+                "ExportNamedDeclaration" | "ExportAllDeclaration" => {
+                    obj.remove("exportKind");
+                }
+                _ => {}
+            }
+
+            // Recurse into remaining values
+            for (_, v) in obj.iter_mut() {
+                strip_oxc_extras(v);
+            }
+        }
+        Value::Array(arr) => {
+            for item in arr {
+                strip_oxc_extras(item);
+            }
+        }
+        _ => {}
+    }
+}
+
 /// Recursively add `offset` to all start/end fields in ESTree JSON.
 pub fn adjust_offsets(value: &mut Value, offset: u32) {
     match value {

@@ -60,7 +60,6 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
 
         return Ok(AttributeNode::SpreadAttribute(SpreadAttribute {
             span: Span::new(start, end),
-            name_loc: None,
             expression,
         }));
     }
@@ -106,24 +105,32 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
         }));
     }
 
+    let name_start_pos = start + 1; // after {
+    let name_end_pos = name_start_pos + name.len();
+
     literal("}").parse_next(parser_input)?;
     let end = parser_input.previous_token_end();
+
+    let name_loc = parser_input
+        .state
+        .locator
+        .locate_span(name_start_pos, name_end_pos);
 
     let expression = JsNode(serde_json::json!({
         "type": "Identifier",
         "name": name,
-        "start": 0,
-        "end": 0
+        "start": name_start_pos,
+        "end": name_end_pos
     }));
 
     Ok(AttributeNode::Attribute(Attribute {
         span: Span::new(start, end),
         name: name.to_string(),
-        name_loc: None,
+        name_loc: Some(name_loc),
         value: AttributeValue::Expression(ExpressionTag {
-            span: Span::new(start, end),
+            span: Span::new(name_start_pos, name_end_pos),
             expression,
-            force_expression_loc: false,
+            force_expression_loc: true,
         }),
     }))
 }
@@ -278,9 +285,13 @@ fn parse_on_directive(
 fn parse_class_directive(
     parser_input: &mut ParserInput,
     start: usize,
-    name: &str,
+    name_and_modifiers: &str,
     name_loc: SourceLocation,
 ) -> ParseResult<AttributeNode> {
+    let parts: Vec<&str> = name_and_modifiers.split('|').collect();
+    let name = parts[0];
+    let modifiers: Vec<String> = parts[1..].iter().map(|s| s.to_string()).collect();
+
     let expression = parse_optional_directive_value(parser_input)?;
     let end = parser_input.previous_token_end();
 
@@ -298,6 +309,7 @@ fn parse_class_directive(
         name: name.to_string(),
         name_loc: Some(name_loc),
         expression: expr,
+        modifiers,
     }))
 }
 
@@ -373,9 +385,13 @@ fn parse_transition_directive(
 fn parse_animate_directive(
     parser_input: &mut ParserInput,
     start: usize,
-    name: &str,
+    name_and_modifiers: &str,
     name_loc: SourceLocation,
 ) -> ParseResult<AttributeNode> {
+    let parts: Vec<&str> = name_and_modifiers.split('|').collect();
+    let name = parts[0];
+    let modifiers: Vec<String> = parts[1..].iter().map(|s| s.to_string()).collect();
+
     let expression = parse_optional_directive_value(parser_input)?;
     let end = parser_input.previous_token_end();
 
@@ -384,15 +400,20 @@ fn parse_animate_directive(
         name: name.to_string(),
         name_loc: Some(name_loc),
         expression,
+        modifiers,
     }))
 }
 
 fn parse_use_directive(
     parser_input: &mut ParserInput,
     start: usize,
-    name: &str,
+    name_and_modifiers: &str,
     name_loc: SourceLocation,
 ) -> ParseResult<AttributeNode> {
+    let parts: Vec<&str> = name_and_modifiers.split('|').collect();
+    let name = parts[0];
+    let modifiers: Vec<String> = parts[1..].iter().map(|s| s.to_string()).collect();
+
     let expression = parse_optional_directive_value(parser_input)?;
     let end = parser_input.previous_token_end();
 
@@ -401,15 +422,20 @@ fn parse_use_directive(
         name: name.to_string(),
         name_loc: Some(name_loc),
         expression,
+        modifiers,
     }))
 }
 
 fn parse_let_directive(
     parser_input: &mut ParserInput,
     start: usize,
-    name: &str,
+    name_and_modifiers: &str,
     name_loc: SourceLocation,
 ) -> ParseResult<AttributeNode> {
+    let parts: Vec<&str> = name_and_modifiers.split('|').collect();
+    let name = parts[0];
+    let modifiers: Vec<String> = parts[1..].iter().map(|s| s.to_string()).collect();
+
     let expression = parse_optional_directive_value(parser_input)?;
     let end = parser_input.previous_token_end();
 
@@ -418,6 +444,7 @@ fn parse_let_directive(
         name: name.to_string(),
         name_loc: Some(name_loc),
         expression,
+        modifiers,
     }))
 }
 

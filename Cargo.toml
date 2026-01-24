@@ -27,5 +27,6 @@ oxc_allocator = "0.110.0"
 oxc_ast = { version = "0.110.0", features = ["serialize"] }
 oxc_span = { version = "0.110.0", features = ["serialize"] }
 oxc_diagnostics = "0.110.0"
+oxc_estree = { version = "0.110.0", features = ["serialize"] }
 rayon = "1.11.0"
 line-span = "0.1.5"

@@ -17,6 +17,8 @@ pub struct JsNode(pub serde_json::Value);
 
 impl serde::Serialize for JsNode {
     fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        self.0.serialize(s)
+        let mut value = self.0.clone();
+        utils::estree::add_loc(&mut value);
+        value.serialize(s)
     }
 }

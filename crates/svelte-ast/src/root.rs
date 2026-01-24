@@ -84,6 +84,9 @@ impl Serialize for Script {
         // Build program value with comments and loc
         let mut program = self.content.0.clone();
 
+        // Add loc to all nodes in the program
+        crate::utils::estree::add_loc(&mut program);
+
         // Set Program start/end to content boundaries, loc to script tag boundaries
         crate::utils::estree::add_program_loc(
             &mut program,

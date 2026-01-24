@@ -1,11 +1,13 @@
 use oxc_allocator::Allocator;
+use oxc_ast::ast::CommentKind;
+use oxc_estree::{CompactJSSerializer, ESTree};
 use oxc_parser::{ParseOptions, Parser, ParserReturn};
 use oxc_span::SourceType;
 use serde_json::Value;
-use svelte_ast::JsNode;
 use svelte_ast::span::Span;
 use svelte_ast::text::{JsComment, JsCommentKind};
-use svelte_ast::utils::estree::adjust_offsets;
+use svelte_ast::utils::estree::{adjust_offsets, strip_oxc_extras};
+use svelte_ast::JsNode;
 use winnow::Result as ParseResult;
 
 fn make_source_type(ts: bool) -> SourceType {
@@ -21,6 +23,17 @@ fn make_parse_options() -> ParseOptions {
         preserve_parens: false,
         ..Default::default()
     }
+}
+
+/// Serialize an OXC AST node implementing ESTree to serde_json::Value.
+fn estree_to_value<T: ESTree>(node: &T) -> Result<Value, winnow::error::ContextError> {
+    let mut serializer = CompactJSSerializer::new(false);
+    node.serialize(&mut serializer);
+    let json_str = serializer.into_string();
+    let mut value: Value =
+        serde_json::from_str(&json_str).map_err(|_| winnow::error::ContextError::new())?;
+    strip_oxc_extras(&mut value);
+    Ok(value)
 }
 
 /// Parse a JavaScript/TypeScript expression from source text.
@@ -48,9 +61,8 @@ pub fn parse_expression(source: &str, ts: bool, offset: u32) -> ParseResult<JsNo
         return Err(winnow::error::ContextError::new());
     }
 
-    // Serialize the program and extract expression from body[0].expression
-    let program_val = serde_json::to_value(&ret.program)
-        .map_err(|_| winnow::error::ContextError::new())?;
+    // Serialize the program to ESTree JSON and extract expression from body[0].expression
+    let program_val = estree_to_value(&ret.program)?;
 
     let mut expr = program_val
         .get("body")
@@ -95,12 +107,11 @@ pub fn parse_expression_with_comments(
         return Err(winnow::error::ContextError::new());
     }
 
-    // Extract comments from trivias
-    let js_comments = collect_comments_from_trivias(&ret, &wrapper, actual_offset, 1);
+    // Extract comments from program.comments
+    let js_comments = collect_comments(&ret, &wrapper, actual_offset, 1);
 
     // Serialize and extract expression
-    let program_val = serde_json::to_value(&ret.program)
-        .map_err(|_| winnow::error::ContextError::new())?;
+    let program_val = estree_to_value(&ret.program)?;
 
     let mut expr = program_val
         .get("body")
@@ -141,8 +152,7 @@ pub fn parse_pattern(source: &str, ts: bool, offset: u32) -> ParseResult<JsNode>
     }
 
     // Serialize program and extract first param from ArrowFunctionExpression
-    let program_val = serde_json::to_value(&ret.program)
-        .map_err(|_| winnow::error::ContextError::new())?;
+    let program_val = estree_to_value(&ret.program)?;
 
     let mut param = program_val
         .get("body")
@@ -165,13 +175,16 @@ pub fn parse_pattern(source: &str, ts: bool, offset: u32) -> ParseResult<JsNode>
 
 /// Parse a variable declaration from source text (for @const).
 pub fn parse_var_decl(source: &str, ts: bool, offset: u32) -> ParseResult<JsNode> {
-    let full = if source.trim_start().starts_with("const ")
-        || source.trim_start().starts_with("let ")
-        || source.trim_start().starts_with("var ")
+    let leading_ws = source.len() - source.trim_start().len();
+    let trimmed = source.trim();
+
+    let (full, prefix_len) = if trimmed.starts_with("const ")
+        || trimmed.starts_with("let ")
+        || trimmed.starts_with("var ")
     {
-        source.trim().to_string()
+        (trimmed.to_string(), 0u32)
     } else {
-        format!("const {}", source.trim())
+        (format!("const {}", trimmed), 6u32)
     };
 
     let allocator = Allocator::default();
@@ -185,8 +198,7 @@ pub fn parse_var_decl(source: &str, ts: bool, offset: u32) -> ParseResult<JsNode
         return Err(winnow::error::ContextError::new());
     }
 
-    let program_val = serde_json::to_value(&ret.program)
-        .map_err(|_| winnow::error::ContextError::new())?;
+    let program_val = estree_to_value(&ret.program)?;
 
     // Find the first statement which should be a VariableDeclaration
     let mut decl = program_val
@@ -201,7 +213,24 @@ pub fn parse_var_decl(source: &str, ts: bool, offset: u32) -> ParseResult<JsNode
         return Err(winnow::error::ContextError::new());
     }
 
-    adjust_offsets(&mut decl, offset);
+    // Adjust offsets: account for leading whitespace and any prepended prefix
+    let actual_offset = offset + leading_ws as u32;
+    let adjustment = actual_offset.saturating_sub(prefix_len);
+    adjust_offsets(&mut decl, adjustment);
+
+    // Strip loc from VariableDeclaration and VariableDeclarator nodes.
+    // Svelte reference only has loc on leaf expression nodes, not on declaration wrappers.
+    if let Value::Object(ref mut obj) = decl {
+        obj.remove("loc");
+        if let Some(Value::Array(decls)) = obj.get_mut("declarations") {
+            for d in decls.iter_mut() {
+                if let Value::Object(dobj) = d {
+                    dobj.remove("loc");
+                }
+            }
+        }
+    }
+
     Ok(JsNode(decl))
 }
 
@@ -227,8 +256,7 @@ pub fn parse_param_list(source: &str, ts: bool, offset: u32) -> ParseResult<JsNo
         return Ok(JsNode(Value::Array(vec![])));
     }
 
-    let program_val = serde_json::to_value(&ret.program)
-        .map_err(|_| winnow::error::ContextError::new())?;
+    let program_val = estree_to_value(&ret.program)?;
 
     let mut params = program_val
         .get("body")
@@ -263,27 +291,33 @@ pub fn parse_program(
         return Err(winnow::error::ContextError::new());
     }
 
-    // Serialize the Program
-    let mut value = serde_json::to_value(&ret.program)
-        .map_err(|_| winnow::error::ContextError::new())?;
+    // Serialize the Program using ESTree serializer
+    let mut value = estree_to_value(&ret.program)?;
     adjust_offsets(&mut value, offset);
 
-    // Collect comments
-    let js_comments = collect_comments_from_trivias(&ret, source, offset, 0);
+    // Strip leadingComments/trailingComments from Program node.
+    // Svelte attaches comments to individual statements, not to the Program.
+    if let Value::Object(ref mut obj) = value {
+        obj.remove("leadingComments");
+        obj.remove("trailingComments");
+    }
+
+    // Collect comments from program.comments
+    let js_comments = collect_comments(&ret, source, offset, 0);
 
     Ok((JsNode(value), js_comments))
 }
 
-/// Collect comments from parser trivias.
+/// Collect comments from parser's program.comments.
 /// `wrapper_offset` is the number of bytes prepended as wrapper before the actual source.
-fn collect_comments_from_trivias(
+fn collect_comments(
     ret: &ParserReturn,
     source: &str,
     target_offset: u32,
     wrapper_offset: u32,
 ) -> Vec<JsComment> {
     let mut js_comments = Vec::new();
-    for comment in ret.trivias.comments() {
+    for comment in ret.program.comments.iter() {
         let span_start = comment.span.start as usize;
         let span_end = comment.span.end as usize;
         if span_end > source.len() {
@@ -299,15 +333,17 @@ fn collect_comments_from_trivias(
         let (kind, content) = if comment_text.starts_with("//") {
             (JsCommentKind::Line, comment_text[2..].to_string())
         } else if comment_text.starts_with("/*") && comment_text.ends_with("*/") {
-            (JsCommentKind::Block, comment_text[2..comment_text.len() - 2].to_string())
+            (
+                JsCommentKind::Block,
+                comment_text[2..comment_text.len() - 2].to_string(),
+            )
         } else {
-            // Fallback: OXC span may only cover the content (between delimiters)
-            // Determine kind by checking if the character before start is / or *
-            let is_block = span_start >= 2 && &source[span_start - 2..span_start] == "/*";
-            if is_block {
-                (JsCommentKind::Block, comment_text.to_string())
-            } else {
-                (JsCommentKind::Line, comment_text.to_string())
+            // Fallback: use OXC's CommentKind
+            match comment.kind {
+                CommentKind::Line => (JsCommentKind::Line, comment_text.to_string()),
+                CommentKind::SingleLineBlock | CommentKind::MultiLineBlock => {
+                    (JsCommentKind::Block, comment_text.to_string())
+                }
             }
         };
 
@@ -327,7 +363,8 @@ pub fn is_call_expression(node: &JsNode) -> bool {
         Some("CallExpression") => true,
         Some("ChainExpression") => {
             // Check if the inner expression is a CallExpression
-            node.0.get("expression")
+            node.0
+                .get("expression")
                 .and_then(|e| e.get("type"))
                 .and_then(|t| t.as_str())
                 == Some("CallExpression")

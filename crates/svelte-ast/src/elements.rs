@@ -91,6 +91,7 @@ pub struct SvelteComponent {
 pub struct SvelteSelf {
     #[serde(flatten)]
     pub span: Span,
+    pub name: String,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode>,
     pub fragment: Fragment,
@@ -125,7 +126,9 @@ pub struct SlotElement {
 pub struct SvelteHead {
     #[serde(flatten)]
     pub span: Span,
+    pub name: String,
     pub name_loc: SourceLocation,
+    pub attributes: Vec<AttributeNode>,
     pub fragment: Fragment,
 }
 
@@ -141,6 +144,7 @@ pub struct SvelteHead {
 pub struct SvelteBody {
     #[serde(flatten)]
     pub span: Span,
+    pub name: String,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode>,
     pub fragment: Fragment,
@@ -158,6 +162,7 @@ pub struct SvelteBody {
 pub struct SvelteWindow {
     #[serde(flatten)]
     pub span: Span,
+    pub name: String,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode>,
     pub fragment: Fragment,
@@ -175,6 +180,7 @@ pub struct SvelteWindow {
 pub struct SvelteDocument {
     #[serde(flatten)]
     pub span: Span,
+    pub name: String,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode>,
     pub fragment: Fragment,
@@ -192,6 +198,7 @@ pub struct SvelteDocument {
 pub struct SvelteFragment {
     #[serde(flatten)]
     pub span: Span,
+    pub name: String,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode>,
     pub fragment: Fragment,
@@ -209,6 +216,7 @@ pub struct SvelteFragment {
 pub struct SvelteBoundary {
     #[serde(flatten)]
     pub span: Span,
+    pub name: String,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode>,
     pub fragment: Fragment,
@@ -226,6 +234,7 @@ pub struct SvelteBoundary {
 pub struct TitleElement {
     #[serde(flatten)]
     pub span: Span,
+    pub name: String,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode>,
     pub fragment: Fragment,

@@ -2,619 +2,1242 @@
   "css": null,
   "js": [],
   "start": 0,
-  "end": 345,
+  "end": 2109,
   "type": "Root",
   "fragment": {
     "type": "Fragment",
     "nodes": [
       {
-        "type": "EachBlock",
-        "start": 0,
-        "end": 94,
-        "expression": {
-          "end": 13,
-          "name": "people",
-          "start": 7,
-          "type": "Identifier"
-        },
-        "context": {
-          "end": 38,
-          "properties": [
-            {
-              "computed": false,
-              "end": 23,
-              "key": {
-                "end": 23,
-                "name": "name",
-                "start": 19,
-                "type": "Identifier"
-              },
-              "kind": "init",
-              "method": false,
-              "shorthand": true,
-              "start": 19,
-              "type": "Property",
-              "value": {
-                "end": 23,
-                "name": "name",
-                "start": 19,
-                "type": "Identifier"
-              }
-            },
-            {
-              "computed": false,
-              "end": 36,
-              "key": {
-                "end": 29,
-                "name": "cool",
-                "start": 25,
-                "type": "Identifier"
-              },
-              "kind": "init",
-              "method": false,
-              "shorthand": true,
-              "start": 25,
-              "type": "Property",
-              "value": {
-                "end": 36,
-                "left": {
-                  "end": 29,
-                  "name": "cool",
-                  "start": 25,
-                  "type": "Identifier"
-                },
-                "right": {
-                  "end": 36,
-                  "raw": "true",
-                  "start": 32,
-                  "type": "Literal",
-                  "value": true
-                },
-                "start": 25,
-                "type": "AssignmentPattern"
-              }
-            }
-          ],
-          "start": 17,
-          "type": "ObjectPattern"
-        },
-        "body": {
-          "type": "Fragment",
-          "nodes": [
-            {
-              "type": "Text",
-              "start": 39,
-              "end": 41,
-              "data": "\n\t",
-              "raw": "\n\t"
-            },
-            {
-              "type": "RegularElement",
-              "start": 41,
-              "end": 86,
-              "name": "p",
-              "name_loc": {
-                "start": {
-                  "line": 2,
-                  "column": 2,
-                  "character": 42
-                },
-                "end": {
-                  "line": 2,
-                  "column": 3,
-                  "character": 43
-                }
-              },
-              "attributes": [],
-              "fragment": {
-                "type": "Fragment",
-                "nodes": [
-                  {
-                    "type": "ExpressionTag",
-                    "start": 44,
-                    "end": 50,
-                    "expression": {
-                      "end": 49,
-                      "name": "name",
-                      "start": 45,
-                      "type": "Identifier"
-                    }
-                  },
-                  {
-                    "type": "Text",
-                    "start": 50,
-                    "end": 54,
-                    "data": " is ",
-                    "raw": " is "
-                  },
-                  {
-                    "type": "ExpressionTag",
-                    "start": 54,
-                    "end": 82,
-                    "expression": {
-                      "alternate": {
-                        "end": 81,
-                        "raw": "'not cool'",
-                        "start": 71,
-                        "type": "Literal",
-                        "value": "not cool"
-                      },
-                      "consequent": {
-                        "end": 68,
-                        "raw": "'cool'",
-                        "start": 62,
-                        "type": "Literal",
-                        "value": "cool"
-                      },
-                      "end": 81,
-                      "start": 55,
-                      "test": {
-                        "end": 59,
-                        "name": "cool",
-                        "start": 55,
-                        "type": "Identifier"
-                      },
-                      "type": "ConditionalExpression"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "type": "Text",
-              "start": 86,
-              "end": 87,
-              "data": "\n",
-              "raw": "\n"
-            }
-          ]
-        }
-      },
-      {
         "type": "Text",
-        "start": 94,
-        "end": 96,
+        "start": 710,
+        "end": 712,
         "data": "\n\n",
         "raw": "\n\n"
       },
       {
-        "type": "EachBlock",
-        "start": 96,
-        "end": 208,
-        "expression": {
-          "end": 109,
-          "name": "people",
-          "start": 103,
-          "type": "Identifier"
+        "type": "Component",
+        "start": 712,
+        "end": 2108,
+        "name": "Dialog.Root",
+        "name_loc": {
+          "start": {
+            "line": 25,
+            "column": 1,
+            "character": 713
+          },
+          "end": {
+            "line": 25,
+            "column": 12,
+            "character": 724
+          }
         },
-        "context": {
-          "end": 152,
-          "properties": [
-            {
-              "computed": false,
-              "end": 137,
-              "key": {
-                "end": 119,
-                "name": "name",
-                "start": 115,
-                "type": "Identifier"
+        "attributes": [
+          {
+            "type": "Attribute",
+            "start": 725,
+            "end": 731,
+            "name": "open",
+            "name_loc": {
+              "start": {
+                "line": 25,
+                "column": 14,
+                "character": 726
               },
-              "kind": "init",
-              "method": false,
-              "shorthand": true,
-              "start": 115,
-              "type": "Property",
-              "value": {
-                "end": 137,
-                "left": {
-                  "end": 119,
-                  "name": "name",
-                  "start": 115,
-                  "type": "Identifier"
+              "end": {
+                "line": 25,
+                "column": 18,
+                "character": 730
+              }
+            },
+            "value": {
+              "type": "ExpressionTag",
+              "start": 726,
+              "end": 730,
+              "expression": {
+                "end": 730,
+                "name": "open",
+                "start": 726,
+                "type": "Identifier"
+              }
+            }
+          },
+          {
+            "type": "Attribute",
+            "start": 732,
+            "end": 746,
+            "name": "onOpenChange",
+            "name_loc": {
+              "start": {
+                "line": 25,
+                "column": 21,
+                "character": 733
+              },
+              "end": {
+                "line": 25,
+                "column": 33,
+                "character": 745
+              }
+            },
+            "value": {
+              "type": "ExpressionTag",
+              "start": 733,
+              "end": 745,
+              "expression": {
+                "end": 745,
+                "name": "onOpenChange",
+                "start": 733,
+                "type": "Identifier"
+              }
+            }
+          }
+        ],
+        "fragment": {
+          "type": "Fragment",
+          "nodes": [
+            {
+              "type": "Text",
+              "start": 747,
+              "end": 752,
+              "data": "\n    ",
+              "raw": "\n    "
+            },
+            {
+              "type": "Component",
+              "start": 752,
+              "end": 2093,
+              "name": "Dialog.Content",
+              "name_loc": {
+                "start": {
+                  "line": 26,
+                  "column": 5,
+                  "character": 753
                 },
-                "right": {
-                  "end": 137,
-                  "expressions": [
-                    {
-                      "end": 135,
-                      "raw": "\"Doe\"",
-                      "start": 130,
-                      "type": "Literal",
-                      "value": "Doe"
+                "end": {
+                  "line": 26,
+                  "column": 19,
+                  "character": 767
+                }
+              },
+              "attributes": [
+                {
+                  "type": "Attribute",
+                  "start": 768,
+                  "end": 787,
+                  "name": "class",
+                  "name_loc": {
+                    "start": {
+                      "line": 26,
+                      "column": 20,
+                      "character": 768
+                    },
+                    "end": {
+                      "line": 26,
+                      "column": 25,
+                      "character": 773
                     }
-                  ],
-                  "quasis": [
+                  },
+                  "value": [
                     {
-                      "end": 128,
-                      "start": 123,
-                      "tail": false,
-                      "type": "TemplateElement",
-                      "value": {
-                        "cooked": "Jane ",
-                        "raw": "Jane "
+                      "type": "Text",
+                      "start": 775,
+                      "end": 786,
+                      "data": "sm:max-w-md",
+                      "raw": "sm:max-w-md"
+                    }
+                  ]
+                }
+              ],
+              "fragment": {
+                "type": "Fragment",
+                "nodes": [
+                  {
+                    "type": "Text",
+                    "start": 788,
+                    "end": 797,
+                    "data": "\n        ",
+                    "raw": "\n        "
+                  },
+                  {
+                    "type": "Component",
+                    "start": 797,
+                    "end": 1098,
+                    "name": "Dialog.Header",
+                    "name_loc": {
+                      "start": {
+                        "line": 27,
+                        "column": 9,
+                        "character": 798
+                      },
+                      "end": {
+                        "line": 27,
+                        "column": 22,
+                        "character": 811
                       }
                     },
-                    {
-                      "end": 136,
-                      "start": 136,
-                      "tail": true,
-                      "type": "TemplateElement",
-                      "value": {
-                        "cooked": "",
-                        "raw": ""
-                      }
-                    }
-                  ],
-                  "start": 122,
-                  "type": "TemplateLiteral"
-                },
-                "start": 115,
-                "type": "AssignmentPattern"
-              }
-            },
-            {
-              "computed": false,
-              "end": 150,
-              "key": {
-                "end": 143,
-                "name": "cool",
-                "start": 139,
-                "type": "Identifier"
-              },
-              "kind": "init",
-              "method": false,
-              "shorthand": true,
-              "start": 139,
-              "type": "Property",
-              "value": {
-                "end": 150,
-                "left": {
-                  "end": 143,
-                  "name": "cool",
-                  "start": 139,
-                  "type": "Identifier"
-                },
-                "right": {
-                  "end": 150,
-                  "raw": "true",
-                  "start": 146,
-                  "type": "Literal",
-                  "value": true
-                },
-                "start": 139,
-                "type": "AssignmentPattern"
-              }
-            }
-          ],
-          "start": 113,
-          "type": "ObjectPattern"
-        },
-        "body": {
-          "type": "Fragment",
-          "nodes": [
-            {
-              "type": "Text",
-              "start": 153,
-              "end": 155,
-              "data": "\n\t",
-              "raw": "\n\t"
-            },
-            {
-              "type": "RegularElement",
-              "start": 155,
-              "end": 200,
-              "name": "p",
-              "name_loc": {
-                "start": {
-                  "line": 6,
-                  "column": 2,
-                  "character": 156
-                },
-                "end": {
-                  "line": 6,
-                  "column": 3,
-                  "character": 157
-                }
-              },
-              "attributes": [],
-              "fragment": {
-                "type": "Fragment",
-                "nodes": [
-                  {
-                    "type": "ExpressionTag",
-                    "start": 158,
-                    "end": 164,
-                    "expression": {
-                      "end": 163,
-                      "name": "name",
-                      "start": 159,
-                      "type": "Identifier"
+                    "attributes": [],
+                    "fragment": {
+                      "type": "Fragment",
+                      "nodes": [
+                        {
+                          "type": "Text",
+                          "start": 812,
+                          "end": 825,
+                          "data": "\n            ",
+                          "raw": "\n            "
+                        },
+                        {
+                          "type": "Component",
+                          "start": 825,
+                          "end": 876,
+                          "name": "Dialog.Title",
+                          "name_loc": {
+                            "start": {
+                              "line": 28,
+                              "column": 13,
+                              "character": 826
+                            },
+                            "end": {
+                              "line": 28,
+                              "column": 25,
+                              "character": 838
+                            }
+                          },
+                          "attributes": [],
+                          "fragment": {
+                            "type": "Fragment",
+                            "nodes": [
+                              {
+                                "type": "Text",
+                                "start": 839,
+                                "end": 861,
+                                "data": "리비전 되돌리기",
+                                "raw": "리비전 되돌리기"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "Text",
+                          "start": 876,
+                          "end": 889,
+                          "data": "\n            ",
+                          "raw": "\n            "
+                        },
+                        {
+                          "type": "Component",
+                          "start": 889,
+                          "end": 1073,
+                          "name": "Dialog.Description",
+                          "name_loc": {
+                            "start": {
+                              "line": 29,
+                              "column": 13,
+                              "character": 890
+                            },
+                            "end": {
+                              "line": 29,
+                              "column": 31,
+                              "character": 908
+                            }
+                          },
+                          "attributes": [],
+                          "fragment": {
+                            "type": "Fragment",
+                            "nodes": [
+                              {
+                                "type": "Text",
+                                "start": 909,
+                                "end": 926,
+                                "data": "\n                ",
+                                "raw": "\n                "
+                              },
+                              {
+                                "type": "IfBlock",
+                                "start": 926,
+                                "end": 1039,
+                                "elseif": false,
+                                "test": {
+                                  "end": 945,
+                                  "name": "revisionNumber",
+                                  "start": 931,
+                                  "type": "Identifier"
+                                },
+                                "consequent": {
+                                  "type": "Fragment",
+                                  "nodes": [
+                                    {
+                                      "type": "Text",
+                                      "start": 946,
+                                      "end": 968,
+                                      "data": "\n                    r",
+                                      "raw": "\n                    r"
+                                    },
+                                    {
+                                      "type": "ExpressionTag",
+                                      "start": 968,
+                                      "end": 984,
+                                      "type": "ExpressionTag",
+                                      "expression": {
+                                        "end": 983,
+                                        "name": "revisionNumber",
+                                        "start": 969,
+                                        "type": "Identifier"
+                                      }
+                                    },
+                                    {
+                                      "type": "Text",
+                                      "start": 984,
+                                      "end": 1034,
+                                      "data": " 리비전으로 되돌립니다.\n                ",
+                                      "raw": " 리비전으로 되돌립니다.\n                "
+                                    }
+                                  ]
+                                },
+                                "alternate": null
+                              },
+                              {
+                                "type": "Text",
+                                "start": 1039,
+                                "end": 1052,
+                                "data": "\n            ",
+                                "raw": "\n            "
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "Text",
+                          "start": 1073,
+                          "end": 1082,
+                          "data": "\n        ",
+                          "raw": "\n        "
+                        }
+                      ]
                     }
                   },
                   {
                     "type": "Text",
-                    "start": 164,
-                    "end": 168,
-                    "data": " is ",
-                    "raw": " is "
+                    "start": 1098,
+                    "end": 1107,
+                    "data": "\n        ",
+                    "raw": "\n        "
                   },
                   {
-                    "type": "ExpressionTag",
-                    "start": 168,
-                    "end": 196,
-                    "expression": {
-                      "alternate": {
-                        "end": 195,
-                        "raw": "'not cool'",
-                        "start": 185,
-                        "type": "Literal",
-                        "value": "not cool"
+                    "type": "RegularElement",
+                    "start": 1107,
+                    "end": 1694,
+                    "name": "div",
+                    "name_loc": {
+                      "start": {
+                        "line": 35,
+                        "column": 9,
+                        "character": 1108
                       },
-                      "consequent": {
-                        "end": 182,
-                        "raw": "'cool'",
-                        "start": 176,
-                        "type": "Literal",
-                        "value": "cool"
-                      },
-                      "end": 195,
-                      "start": 169,
-                      "test": {
-                        "end": 173,
-                        "name": "cool",
-                        "start": 169,
-                        "type": "Identifier"
-                      },
-                      "type": "ConditionalExpression"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "type": "Text",
-              "start": 200,
-              "end": 201,
-              "data": "\n",
-              "raw": "\n"
-            }
-          ]
-        }
-      },
-      {
-        "type": "Text",
-        "start": 208,
-        "end": 210,
-        "data": "\n\n",
-        "raw": "\n\n"
-      },
-      {
-        "type": "EachBlock",
-        "start": 210,
-        "end": 344,
-        "expression": {
-          "end": 223,
-          "name": "people",
-          "start": 217,
-          "type": "Identifier"
-        },
-        "context": {
-          "end": 288,
-          "properties": [
-            {
-              "computed": false,
-              "end": 273,
-              "key": {
-                "end": 233,
-                "name": "name",
-                "start": 229,
-                "type": "Identifier"
-              },
-              "kind": "init",
-              "method": false,
-              "shorthand": true,
-              "start": 229,
-              "type": "Property",
-              "value": {
-                "end": 273,
-                "left": {
-                  "end": 233,
-                  "name": "name",
-                  "start": 229,
-                  "type": "Identifier"
-                },
-                "right": {
-                  "arguments": [],
-                  "callee": {
-                    "async": false,
-                    "body": {
-                      "body": [
+                      "end": {
+                        "line": 35,
+                        "column": 12,
+                        "character": 1111
+                      }
+                    },
+                    "attributes": [
+                      {
+                        "type": "Attribute",
+                        "start": 1112,
+                        "end": 1134,
+                        "name": "class",
+                        "name_loc": {
+                          "start": {
+                            "line": 35,
+                            "column": 13,
+                            "character": 1112
+                          },
+                          "end": {
+                            "line": 35,
+                            "column": 18,
+                            "character": 1117
+                          }
+                        },
+                        "value": [
+                          {
+                            "type": "Text",
+                            "start": 1119,
+                            "end": 1133,
+                            "data": "space-y-4 py-4",
+                            "raw": "space-y-4 py-4"
+                          }
+                        ]
+                      }
+                    ],
+                    "fragment": {
+                      "type": "Fragment",
+                      "nodes": [
                         {
-                          "argument": {
-                            "end": 267,
-                            "expressions": [
+                          "type": "Text",
+                          "start": 1135,
+                          "end": 1148,
+                          "data": "\n            ",
+                          "raw": "\n            "
+                        },
+                        {
+                          "type": "RegularElement",
+                          "start": 1148,
+                          "end": 1679,
+                          "name": "div",
+                          "name_loc": {
+                            "start": {
+                              "line": 36,
+                              "column": 13,
+                              "character": 1149
+                            },
+                            "end": {
+                              "line": 36,
+                              "column": 16,
+                              "character": 1152
+                            }
+                          },
+                          "attributes": [
+                            {
+                              "type": "Attribute",
+                              "start": 1153,
+                              "end": 1170,
+                              "name": "class",
+                              "name_loc": {
+                                "start": {
+                                  "line": 36,
+                                  "column": 17,
+                                  "character": 1153
+                                },
+                                "end": {
+                                  "line": 36,
+                                  "column": 22,
+                                  "character": 1158
+                                }
+                              },
+                              "value": [
+                                {
+                                  "type": "Text",
+                                  "start": 1160,
+                                  "end": 1169,
+                                  "data": "space-y-2",
+                                  "raw": "space-y-2"
+                                }
+                              ]
+                            }
+                          ],
+                          "fragment": {
+                            "type": "Fragment",
+                            "nodes": [
                               {
-                                "end": 265,
-                                "raw": "\"Doe\"",
-                                "start": 260,
-                                "type": "Literal",
-                                "value": "Doe"
-                              }
-                            ],
-                            "quasis": [
+                                "type": "Text",
+                                "start": 1171,
+                                "end": 1188,
+                                "data": "\n                ",
+                                "raw": "\n                "
+                              },
                               {
-                                "end": 258,
-                                "start": 253,
-                                "tail": false,
-                                "type": "TemplateElement",
-                                "value": {
-                                  "cooked": "Jane ",
-                                  "raw": "Jane "
+                                "type": "RegularElement",
+                                "start": 1188,
+                                "end": 1344,
+                                "name": "label",
+                                "name_loc": {
+                                  "start": {
+                                    "line": 37,
+                                    "column": 17,
+                                    "character": 1189
+                                  },
+                                  "end": {
+                                    "line": 37,
+                                    "column": 22,
+                                    "character": 1194
+                                  }
+                                },
+                                "attributes": [
+                                  {
+                                    "type": "Attribute",
+                                    "start": 1195,
+                                    "end": 1214,
+                                    "name": "for",
+                                    "name_loc": {
+                                      "start": {
+                                        "line": 37,
+                                        "column": 23,
+                                        "character": 1195
+                                      },
+                                      "end": {
+                                        "line": 37,
+                                        "column": 26,
+                                        "character": 1198
+                                      }
+                                    },
+                                    "value": [
+                                      {
+                                        "type": "Text",
+                                        "start": 1200,
+                                        "end": 1213,
+                                        "data": "revert-reason",
+                                        "raw": "revert-reason"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "Attribute",
+                                    "start": 1215,
+                                    "end": 1242,
+                                    "name": "class",
+                                    "name_loc": {
+                                      "start": {
+                                        "line": 37,
+                                        "column": 43,
+                                        "character": 1215
+                                      },
+                                      "end": {
+                                        "line": 37,
+                                        "column": 48,
+                                        "character": 1220
+                                      }
+                                    },
+                                    "value": [
+                                      {
+                                        "type": "Text",
+                                        "start": 1222,
+                                        "end": 1241,
+                                        "data": "text-sm font-medium",
+                                        "raw": "text-sm font-medium"
+                                      }
+                                    ]
+                                  }
+                                ],
+                                "fragment": {
+                                  "type": "Fragment",
+                                  "nodes": [
+                                    {
+                                      "type": "Text",
+                                      "start": 1243,
+                                      "end": 1284,
+                                      "data": "\n                    되돌리기 사유 ",
+                                      "raw": "\n                    되돌리기 사유 "
+                                    },
+                                    {
+                                      "type": "RegularElement",
+                                      "start": 1284,
+                                      "end": 1319,
+                                      "name": "span",
+                                      "name_loc": {
+                                        "start": {
+                                          "line": 38,
+                                          "column": 41,
+                                          "character": 1285
+                                        },
+                                        "end": {
+                                          "line": 38,
+                                          "column": 45,
+                                          "character": 1289
+                                        }
+                                      },
+                                      "attributes": [
+                                        {
+                                          "type": "Attribute",
+                                          "start": 1290,
+                                          "end": 1310,
+                                          "name": "class",
+                                          "name_loc": {
+                                            "start": {
+                                              "line": 38,
+                                              "column": 46,
+                                              "character": 1290
+                                            },
+                                            "end": {
+                                              "line": 38,
+                                              "column": 51,
+                                              "character": 1295
+                                            }
+                                          },
+                                          "value": [
+                                            {
+                                              "type": "Text",
+                                              "start": 1297,
+                                              "end": 1309,
+                                              "data": "text-red-500",
+                                              "raw": "text-red-500"
+                                            }
+                                          ]
+                                        }
+                                      ],
+                                      "fragment": {
+                                        "type": "Fragment",
+                                        "nodes": [
+                                          {
+                                            "type": "Text",
+                                            "start": 1311,
+                                            "end": 1312,
+                                            "data": "*",
+                                            "raw": "*"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "type": "Text",
+                                      "start": 1319,
+                                      "end": 1336,
+                                      "data": "\n                ",
+                                      "raw": "\n                "
+                                    }
+                                  ]
                                 }
                               },
                               {
-                                "end": 266,
-                                "start": 266,
-                                "tail": true,
-                                "type": "TemplateElement",
-                                "value": {
-                                  "cooked": "",
-                                  "raw": ""
+                                "type": "Text",
+                                "start": 1344,
+                                "end": 1361,
+                                "data": "\n                ",
+                                "raw": "\n                "
+                              },
+                              {
+                                "type": "Component",
+                                "start": 1361,
+                                "end": 1660,
+                                "name": "Textarea",
+                                "name_loc": {
+                                  "start": {
+                                    "line": 40,
+                                    "column": 17,
+                                    "character": 1362
+                                  },
+                                  "end": {
+                                    "line": 40,
+                                    "column": 25,
+                                    "character": 1370
+                                  }
+                                },
+                                "attributes": [
+                                  {
+                                    "type": "Attribute",
+                                    "start": 1395,
+                                    "end": 1413,
+                                    "name": "id",
+                                    "name_loc": {
+                                      "start": {
+                                        "line": 41,
+                                        "column": 24,
+                                        "character": 1395
+                                      },
+                                      "end": {
+                                        "line": 41,
+                                        "column": 26,
+                                        "character": 1397
+                                      }
+                                    },
+                                    "value": [
+                                      {
+                                        "type": "Text",
+                                        "start": 1399,
+                                        "end": 1412,
+                                        "data": "revert-reason",
+                                        "raw": "revert-reason"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "Attribute",
+                                    "start": 1438,
+                                    "end": 1490,
+                                    "name": "placeholder",
+                                    "name_loc": {
+                                      "start": {
+                                        "line": 42,
+                                        "column": 24,
+                                        "character": 1438
+                                      },
+                                      "end": {
+                                        "line": 42,
+                                        "column": 35,
+                                        "character": 1449
+                                      }
+                                    },
+                                    "value": [
+                                      {
+                                        "type": "Text",
+                                        "start": 1451,
+                                        "end": 1489,
+                                        "data": "되돌리기 사유를 입력하세요",
+                                        "raw": "되돌리기 사유를 입력하세요"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "Attribute",
+                                    "start": 1515,
+                                    "end": 1529,
+                                    "name": "value",
+                                    "name_loc": {
+                                      "start": {
+                                        "line": 43,
+                                        "column": 24,
+                                        "character": 1515
+                                      },
+                                      "end": {
+                                        "line": 43,
+                                        "column": 29,
+                                        "character": 1520
+                                      }
+                                    },
+                                    "value": {
+                                      "type": "ExpressionTag",
+                                      "start": 1521,
+                                      "end": 1529,
+                                      "expression": {
+                                        "end": 1528,
+                                        "name": "reason",
+                                        "start": 1522,
+                                        "type": "Identifier"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "Attribute",
+                                    "start": 1554,
+                                    "end": 1608,
+                                    "name": "oninput",
+                                    "name_loc": {
+                                      "start": {
+                                        "line": 44,
+                                        "column": 24,
+                                        "character": 1554
+                                      },
+                                      "end": {
+                                        "line": 44,
+                                        "column": 31,
+                                        "character": 1561
+                                      }
+                                    },
+                                    "value": {
+                                      "type": "ExpressionTag",
+                                      "start": 1562,
+                                      "end": 1608,
+                                      "expression": {
+                                        "async": false,
+                                        "body": {
+                                          "arguments": [
+                                            {
+                                              "computed": false,
+                                              "end": 1606,
+                                              "object": {
+                                                "computed": false,
+                                                "end": 1600,
+                                                "object": {
+                                                  "end": 1586,
+                                                  "name": "e",
+                                                  "start": 1585,
+                                                  "type": "Identifier"
+                                                },
+                                                "optional": false,
+                                                "property": {
+                                                  "end": 1600,
+                                                  "name": "currentTarget",
+                                                  "start": 1587,
+                                                  "type": "Identifier"
+                                                },
+                                                "start": 1585,
+                                                "type": "MemberExpression"
+                                              },
+                                              "optional": false,
+                                              "property": {
+                                                "end": 1606,
+                                                "name": "value",
+                                                "start": 1601,
+                                                "type": "Identifier"
+                                              },
+                                              "start": 1585,
+                                              "type": "MemberExpression"
+                                            }
+                                          ],
+                                          "callee": {
+                                            "end": 1584,
+                                            "name": "onReasonChange",
+                                            "start": 1570,
+                                            "type": "Identifier"
+                                          },
+                                          "end": 1607,
+                                          "optional": false,
+                                          "start": 1570,
+                                          "type": "CallExpression"
+                                        },
+                                        "end": 1607,
+                                        "expression": true,
+                                        "generator": false,
+                                        "id": null,
+                                        "params": [
+                                          {
+                                            "end": 1565,
+                                            "name": "e",
+                                            "start": 1564,
+                                            "type": "Identifier"
+                                          }
+                                        ],
+                                        "start": 1563,
+                                        "type": "ArrowFunctionExpression"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "Attribute",
+                                    "start": 1633,
+                                    "end": 1641,
+                                    "name": "rows",
+                                    "name_loc": {
+                                      "start": {
+                                        "line": 45,
+                                        "column": 24,
+                                        "character": 1633
+                                      },
+                                      "end": {
+                                        "line": 45,
+                                        "column": 28,
+                                        "character": 1637
+                                      }
+                                    },
+                                    "value": {
+                                      "type": "ExpressionTag",
+                                      "start": 1638,
+                                      "end": 1641,
+                                      "expression": {
+                                        "end": 1640,
+                                        "raw": "3",
+                                        "start": 1639,
+                                        "type": "Literal",
+                                        "value": 3
+                                      }
+                                    }
+                                  }
+                                ],
+                                "fragment": {
+                                  "type": "Fragment",
+                                  "nodes": []
                                 }
+                              },
+                              {
+                                "type": "Text",
+                                "start": 1660,
+                                "end": 1673,
+                                "data": "\n            ",
+                                "raw": "\n            "
                               }
-                            ],
-                            "start": 252,
-                            "type": "TemplateLiteral"
-                          },
-                          "end": 268,
-                          "start": 245,
-                          "type": "ReturnStatement"
+                            ]
+                          }
+                        },
+                        {
+                          "type": "Text",
+                          "start": 1679,
+                          "end": 1688,
+                          "data": "\n        ",
+                          "raw": "\n        "
                         }
-                      ],
-                      "end": 270,
-                      "start": 243,
-                      "type": "BlockStatement"
-                    },
-                    "end": 270,
-                    "expression": false,
-                    "generator": false,
-                    "id": null,
-                    "params": [],
-                    "start": 237,
-                    "type": "ArrowFunctionExpression"
-                  },
-                  "end": 273,
-                  "optional": false,
-                  "start": 236,
-                  "type": "CallExpression"
-                },
-                "start": 229,
-                "type": "AssignmentPattern"
-              }
-            },
-            {
-              "computed": false,
-              "end": 286,
-              "key": {
-                "end": 279,
-                "name": "cool",
-                "start": 275,
-                "type": "Identifier"
-              },
-              "kind": "init",
-              "method": false,
-              "shorthand": true,
-              "start": 275,
-              "type": "Property",
-              "value": {
-                "end": 286,
-                "left": {
-                  "end": 279,
-                  "name": "cool",
-                  "start": 275,
-                  "type": "Identifier"
-                },
-                "right": {
-                  "end": 286,
-                  "raw": "true",
-                  "start": 282,
-                  "type": "Literal",
-                  "value": true
-                },
-                "start": 275,
-                "type": "AssignmentPattern"
-              }
-            }
-          ],
-          "start": 227,
-          "type": "ObjectPattern"
-        },
-        "body": {
-          "type": "Fragment",
-          "nodes": [
-            {
-              "type": "Text",
-              "start": 289,
-              "end": 291,
-              "data": "\n\t",
-              "raw": "\n\t"
-            },
-            {
-              "type": "RegularElement",
-              "start": 291,
-              "end": 336,
-              "name": "p",
-              "name_loc": {
-                "start": {
-                  "line": 10,
-                  "column": 2,
-                  "character": 292
-                },
-                "end": {
-                  "line": 10,
-                  "column": 3,
-                  "character": 293
-                }
-              },
-              "attributes": [],
-              "fragment": {
-                "type": "Fragment",
-                "nodes": [
-                  {
-                    "type": "ExpressionTag",
-                    "start": 294,
-                    "end": 300,
-                    "expression": {
-                      "end": 299,
-                      "name": "name",
-                      "start": 295,
-                      "type": "Identifier"
+                      ]
                     }
                   },
                   {
                     "type": "Text",
-                    "start": 300,
-                    "end": 304,
-                    "data": " is ",
-                    "raw": " is "
+                    "start": 1694,
+                    "end": 1703,
+                    "data": "\n        ",
+                    "raw": "\n        "
                   },
                   {
-                    "type": "ExpressionTag",
-                    "start": 304,
-                    "end": 332,
-                    "expression": {
-                      "alternate": {
-                        "end": 331,
-                        "raw": "'not cool'",
-                        "start": 321,
-                        "type": "Literal",
-                        "value": "not cool"
+                    "type": "Component",
+                    "start": 1703,
+                    "end": 2071,
+                    "name": "Dialog.Footer",
+                    "name_loc": {
+                      "start": {
+                        "line": 49,
+                        "column": 9,
+                        "character": 1704
                       },
-                      "consequent": {
-                        "end": 318,
-                        "raw": "'cool'",
-                        "start": 312,
-                        "type": "Literal",
-                        "value": "cool"
-                      },
-                      "end": 331,
-                      "start": 305,
-                      "test": {
-                        "end": 309,
-                        "name": "cool",
-                        "start": 305,
-                        "type": "Identifier"
-                      },
-                      "type": "ConditionalExpression"
+                      "end": {
+                        "line": 49,
+                        "column": 22,
+                        "character": 1717
+                      }
+                    },
+                    "attributes": [],
+                    "fragment": {
+                      "type": "Fragment",
+                      "nodes": [
+                        {
+                          "type": "Text",
+                          "start": 1718,
+                          "end": 1731,
+                          "data": "\n            ",
+                          "raw": "\n            "
+                        },
+                        {
+                          "type": "Component",
+                          "start": 1731,
+                          "end": 1813,
+                          "name": "Button",
+                          "name_loc": {
+                            "start": {
+                              "line": 50,
+                              "column": 13,
+                              "character": 1732
+                            },
+                            "end": {
+                              "line": 50,
+                              "column": 19,
+                              "character": 1738
+                            }
+                          },
+                          "attributes": [
+                            {
+                              "type": "Attribute",
+                              "start": 1739,
+                              "end": 1756,
+                              "name": "variant",
+                              "name_loc": {
+                                "start": {
+                                  "line": 50,
+                                  "column": 20,
+                                  "character": 1739
+                                },
+                                "end": {
+                                  "line": 50,
+                                  "column": 27,
+                                  "character": 1746
+                                }
+                              },
+                              "value": [
+                                {
+                                  "type": "Text",
+                                  "start": 1748,
+                                  "end": 1755,
+                                  "data": "outline",
+                                  "raw": "outline"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "Attribute",
+                              "start": 1757,
+                              "end": 1778,
+                              "name": "onclick",
+                              "name_loc": {
+                                "start": {
+                                  "line": 50,
+                                  "column": 38,
+                                  "character": 1757
+                                },
+                                "end": {
+                                  "line": 50,
+                                  "column": 45,
+                                  "character": 1764
+                                }
+                              },
+                              "value": {
+                                "type": "ExpressionTag",
+                                "start": 1765,
+                                "end": 1778,
+                                "expression": {
+                                  "end": 1777,
+                                  "name": "handleClose",
+                                  "start": 1766,
+                                  "type": "Identifier"
+                                }
+                              }
+                            },
+                            {
+                              "type": "Attribute",
+                              "start": 1779,
+                              "end": 1797,
+                              "name": "disabled",
+                              "name_loc": {
+                                "start": {
+                                  "line": 50,
+                                  "column": 60,
+                                  "character": 1779
+                                },
+                                "end": {
+                                  "line": 50,
+                                  "column": 68,
+                                  "character": 1787
+                                }
+                              },
+                              "value": {
+                                "type": "ExpressionTag",
+                                "start": 1788,
+                                "end": 1797,
+                                "expression": {
+                                  "end": 1796,
+                                  "name": "loading",
+                                  "start": 1789,
+                                  "type": "Identifier"
+                                }
+                              }
+                            }
+                          ],
+                          "fragment": {
+                            "type": "Fragment",
+                            "nodes": [
+                              {
+                                "type": "Text",
+                                "start": 1798,
+                                "end": 1804,
+                                "data": "취소",
+                                "raw": "취소"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "Text",
+                          "start": 1813,
+                          "end": 1826,
+                          "data": "\n            ",
+                          "raw": "\n            "
+                        },
+                        {
+                          "type": "Component",
+                          "start": 1826,
+                          "end": 2046,
+                          "name": "Button",
+                          "name_loc": {
+                            "start": {
+                              "line": 51,
+                              "column": 13,
+                              "character": 1827
+                            },
+                            "end": {
+                              "line": 51,
+                              "column": 19,
+                              "character": 1833
+                            }
+                          },
+                          "attributes": [
+                            {
+                              "type": "Attribute",
+                              "start": 1834,
+                              "end": 1853,
+                              "name": "onclick",
+                              "name_loc": {
+                                "start": {
+                                  "line": 51,
+                                  "column": 20,
+                                  "character": 1834
+                                },
+                                "end": {
+                                  "line": 51,
+                                  "column": 27,
+                                  "character": 1841
+                                }
+                              },
+                              "value": {
+                                "type": "ExpressionTag",
+                                "start": 1842,
+                                "end": 1853,
+                                "expression": {
+                                  "end": 1852,
+                                  "name": "onConfirm",
+                                  "start": 1843,
+                                  "type": "Identifier"
+                                }
+                              }
+                            },
+                            {
+                              "type": "Attribute",
+                              "start": 1854,
+                              "end": 1890,
+                              "name": "disabled",
+                              "name_loc": {
+                                "start": {
+                                  "line": 51,
+                                  "column": 40,
+                                  "character": 1854
+                                },
+                                "end": {
+                                  "line": 51,
+                                  "column": 48,
+                                  "character": 1862
+                                }
+                              },
+                              "value": {
+                                "type": "ExpressionTag",
+                                "start": 1863,
+                                "end": 1890,
+                                "expression": {
+                                  "end": 1889,
+                                  "left": {
+                                    "end": 1871,
+                                    "name": "loading",
+                                    "start": 1864,
+                                    "type": "Identifier"
+                                  },
+                                  "operator": "||",
+                                  "right": {
+                                    "argument": {
+                                      "arguments": [],
+                                      "callee": {
+                                        "computed": false,
+                                        "end": 1887,
+                                        "object": {
+                                          "end": 1882,
+                                          "name": "reason",
+                                          "start": 1876,
+                                          "type": "Identifier"
+                                        },
+                                        "optional": false,
+                                        "property": {
+                                          "end": 1887,
+                                          "name": "trim",
+                                          "start": 1883,
+                                          "type": "Identifier"
+                                        },
+                                        "start": 1876,
+                                        "type": "MemberExpression"
+                                      },
+                                      "end": 1889,
+                                      "optional": false,
+                                      "start": 1876,
+                                      "type": "CallExpression"
+                                    },
+                                    "end": 1889,
+                                    "operator": "!",
+                                    "prefix": true,
+                                    "start": 1875,
+                                    "type": "UnaryExpression"
+                                  },
+                                  "start": 1864,
+                                  "type": "LogicalExpression"
+                                }
+                              }
+                            }
+                          ],
+                          "fragment": {
+                            "type": "Fragment",
+                            "nodes": [
+                              {
+                                "type": "Text",
+                                "start": 1891,
+                                "end": 1908,
+                                "data": "\n                ",
+                                "raw": "\n                "
+                              },
+                              {
+                                "type": "IfBlock",
+                                "start": 1908,
+                                "end": 1995,
+                                "elseif": false,
+                                "test": {
+                                  "end": 1920,
+                                  "name": "loading",
+                                  "start": 1913,
+                                  "type": "Identifier"
+                                },
+                                "consequent": {
+                                  "type": "Fragment",
+                                  "nodes": [
+                                    {
+                                      "type": "Text",
+                                      "start": 1921,
+                                      "end": 1942,
+                                      "data": "\n                    ",
+                                      "raw": "\n                    "
+                                    },
+                                    {
+                                      "type": "Component",
+                                      "start": 1942,
+                                      "end": 1973,
+                                      "name": "Spinner",
+                                      "name_loc": {
+                                        "start": {
+                                          "line": 53,
+                                          "column": 21,
+                                          "character": 1943
+                                        },
+                                        "end": {
+                                          "line": 53,
+                                          "column": 28,
+                                          "character": 1950
+                                        }
+                                      },
+                                      "attributes": [
+                                        {
+                                          "type": "Attribute",
+                                          "start": 1951,
+                                          "end": 1970,
+                                          "name": "class",
+                                          "name_loc": {
+                                            "start": {
+                                              "line": 53,
+                                              "column": 29,
+                                              "character": 1951
+                                            },
+                                            "end": {
+                                              "line": 53,
+                                              "column": 34,
+                                              "character": 1956
+                                            }
+                                          },
+                                          "value": [
+                                            {
+                                              "type": "Text",
+                                              "start": 1958,
+                                              "end": 1969,
+                                              "data": "mr-2 size-4",
+                                              "raw": "mr-2 size-4"
+                                            }
+                                          ]
+                                        }
+                                      ],
+                                      "fragment": {
+                                        "type": "Fragment",
+                                        "nodes": []
+                                      }
+                                    },
+                                    {
+                                      "type": "Text",
+                                      "start": 1973,
+                                      "end": 1990,
+                                      "data": "\n                ",
+                                      "raw": "\n                "
+                                    }
+                                  ]
+                                },
+                                "alternate": null
+                              },
+                              {
+                                "type": "Text",
+                                "start": 1995,
+                                "end": 2037,
+                                "data": "\n                되돌리기\n            ",
+                                "raw": "\n                되돌리기\n            "
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "Text",
+                          "start": 2046,
+                          "end": 2055,
+                          "data": "\n        ",
+                          "raw": "\n        "
+                        }
+                      ]
                     }
+                  },
+                  {
+                    "type": "Text",
+                    "start": 2071,
+                    "end": 2076,
+                    "data": "\n    ",
+                    "raw": "\n    "
                   }
                 ]
               }
             },
             {
               "type": "Text",
-              "start": 336,
-              "end": 337,
+              "start": 2093,
+              "end": 2094,
               "data": "\n",
               "raw": "\n"
             }
@@ -623,12 +1246,654 @@
       },
       {
         "type": "Text",
-        "start": 344,
-        "end": 345,
+        "start": 2108,
+        "end": 2109,
         "data": "\n",
         "raw": "\n"
       }
     ]
   },
-  "options": null
+  "options": null,
+  "instance": {
+    "type": "Script",
+    "start": 0,
+    "end": 710,
+    "context": "default",
+    "content": {
+      "body": [
+        {
+          "attributes": [],
+          "end": 74,
+          "source": {
+            "end": 73,
+            "raw": "'$lib/components/ui/button'",
+            "start": 46,
+            "type": "Literal",
+            "value": "$lib/components/ui/button"
+          },
+          "specifiers": [
+            {
+              "end": 38,
+              "imported": {
+                "end": 38,
+                "name": "Button",
+                "start": 32,
+                "type": "Identifier"
+              },
+              "local": {
+                "end": 38,
+                "name": "Button",
+                "start": 32,
+                "type": "Identifier"
+              },
+              "start": 32,
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 23,
+          "type": "ImportDeclaration"
+        },
+        {
+          "attributes": [],
+          "end": 134,
+          "source": {
+            "end": 133,
+            "raw": "'$lib/components/ui/textarea'",
+            "start": 104,
+            "type": "Literal",
+            "value": "$lib/components/ui/textarea"
+          },
+          "specifiers": [
+            {
+              "end": 96,
+              "imported": {
+                "end": 96,
+                "name": "Textarea",
+                "start": 88,
+                "type": "Identifier"
+              },
+              "local": {
+                "end": 96,
+                "name": "Textarea",
+                "start": 88,
+                "type": "Identifier"
+              },
+              "start": 88,
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 79,
+          "type": "ImportDeclaration"
+        },
+        {
+          "attributes": [],
+          "end": 192,
+          "source": {
+            "end": 191,
+            "raw": "'$lib/components/ui/spinner'",
+            "start": 163,
+            "type": "Literal",
+            "value": "$lib/components/ui/spinner"
+          },
+          "specifiers": [
+            {
+              "end": 155,
+              "imported": {
+                "end": 155,
+                "name": "Spinner",
+                "start": 148,
+                "type": "Identifier"
+              },
+              "local": {
+                "end": 155,
+                "name": "Spinner",
+                "start": 148,
+                "type": "Identifier"
+              },
+              "start": 148,
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 139,
+          "type": "ImportDeclaration"
+        },
+        {
+          "attributes": [],
+          "end": 249,
+          "source": {
+            "end": 248,
+            "raw": "'$lib/components/ui/dialog'",
+            "start": 221,
+            "type": "Literal",
+            "value": "$lib/components/ui/dialog"
+          },
+          "specifiers": [
+            {
+              "end": 215,
+              "local": {
+                "end": 215,
+                "name": "Dialog",
+                "start": 209,
+                "type": "Identifier"
+              },
+              "start": 204,
+              "type": "ImportNamespaceSpecifier"
+            }
+          ],
+          "start": 197,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 516,
+          "id": {
+            "end": 265,
+            "name": "Props",
+            "start": 260,
+            "type": "Identifier"
+          },
+          "start": 255,
+          "type": "TSTypeAliasDeclaration",
+          "typeAnnotation": {
+            "end": 515,
+            "members": [
+              {
+                "computed": false,
+                "end": 292,
+                "key": {
+                  "end": 282,
+                  "name": "open",
+                  "start": 278,
+                  "type": "Identifier"
+                },
+                "readonly": false,
+                "start": 278,
+                "static": false,
+                "type": "TSPropertySignature",
+                "typeAnnotation": {
+                  "end": 291,
+                  "start": 282,
+                  "type": "TSTypeAnnotation",
+                  "typeAnnotation": {
+                    "end": 291,
+                    "start": 284,
+                    "type": "TSBooleanKeyword"
+                  }
+                }
+              },
+              {
+                "computed": false,
+                "end": 331,
+                "key": {
+                  "end": 315,
+                  "name": "revisionNumber",
+                  "start": 301,
+                  "type": "Identifier"
+                },
+                "readonly": false,
+                "start": 301,
+                "static": false,
+                "type": "TSPropertySignature",
+                "typeAnnotation": {
+                  "end": 330,
+                  "start": 315,
+                  "type": "TSTypeAnnotation",
+                  "typeAnnotation": {
+                    "end": 330,
+                    "start": 317,
+                    "type": "TSUnionType",
+                    "types": [
+                      {
+                        "end": 323,
+                        "start": 317,
+                        "type": "TSNumberKeyword"
+                      },
+                      {
+                        "end": 330,
+                        "start": 326,
+                        "type": "TSNullKeyword"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "computed": false,
+                "end": 355,
+                "key": {
+                  "end": 346,
+                  "name": "reason",
+                  "start": 340,
+                  "type": "Identifier"
+                },
+                "readonly": false,
+                "start": 340,
+                "static": false,
+                "type": "TSPropertySignature",
+                "typeAnnotation": {
+                  "end": 354,
+                  "start": 346,
+                  "type": "TSTypeAnnotation",
+                  "typeAnnotation": {
+                    "end": 354,
+                    "start": 348,
+                    "type": "TSStringKeyword"
+                  }
+                }
+              },
+              {
+                "computed": false,
+                "end": 381,
+                "key": {
+                  "end": 371,
+                  "name": "loading",
+                  "start": 364,
+                  "type": "Identifier"
+                },
+                "readonly": false,
+                "start": 364,
+                "static": false,
+                "type": "TSPropertySignature",
+                "typeAnnotation": {
+                  "end": 380,
+                  "start": 371,
+                  "type": "TSTypeAnnotation",
+                  "typeAnnotation": {
+                    "end": 380,
+                    "start": 373,
+                    "type": "TSBooleanKeyword"
+                  }
+                }
+              },
+              {
+                "computed": false,
+                "end": 428,
+                "key": {
+                  "end": 402,
+                  "name": "onOpenChange",
+                  "start": 390,
+                  "type": "Identifier"
+                },
+                "readonly": false,
+                "start": 390,
+                "static": false,
+                "type": "TSPropertySignature",
+                "typeAnnotation": {
+                  "end": 427,
+                  "start": 402,
+                  "type": "TSTypeAnnotation",
+                  "typeAnnotation": {
+                    "end": 427,
+                    "params": [
+                      {
+                        "end": 409,
+                        "name": "open",
+                        "start": 405,
+                        "type": "Identifier"
+                      }
+                    ],
+                    "returnType": {
+                      "end": 427,
+                      "start": 420,
+                      "type": "TSTypeAnnotation",
+                      "typeAnnotation": {
+                        "end": 427,
+                        "start": 423,
+                        "type": "TSVoidKeyword"
+                      }
+                    },
+                    "start": 404,
+                    "type": "TSFunctionType",
+                    "typeParameters": null
+                  }
+                }
+              },
+              {
+                "computed": false,
+                "end": 478,
+                "key": {
+                  "end": 451,
+                  "name": "onReasonChange",
+                  "start": 437,
+                  "type": "Identifier"
+                },
+                "readonly": false,
+                "start": 437,
+                "static": false,
+                "type": "TSPropertySignature",
+                "typeAnnotation": {
+                  "end": 477,
+                  "start": 451,
+                  "type": "TSTypeAnnotation",
+                  "typeAnnotation": {
+                    "end": 477,
+                    "params": [
+                      {
+                        "end": 460,
+                        "name": "reason",
+                        "start": 454,
+                        "type": "Identifier"
+                      }
+                    ],
+                    "returnType": {
+                      "end": 477,
+                      "start": 470,
+                      "type": "TSTypeAnnotation",
+                      "typeAnnotation": {
+                        "end": 477,
+                        "start": 473,
+                        "type": "TSVoidKeyword"
+                      }
+                    },
+                    "start": 453,
+                    "type": "TSFunctionType",
+                    "typeParameters": null
+                  }
+                }
+              },
+              {
+                "computed": false,
+                "end": 509,
+                "key": {
+                  "end": 496,
+                  "name": "onConfirm",
+                  "start": 487,
+                  "type": "Identifier"
+                },
+                "readonly": false,
+                "start": 487,
+                "static": false,
+                "type": "TSPropertySignature",
+                "typeAnnotation": {
+                  "end": 508,
+                  "start": 496,
+                  "type": "TSTypeAnnotation",
+                  "typeAnnotation": {
+                    "end": 508,
+                    "params": [],
+                    "returnType": {
+                      "end": 508,
+                      "start": 501,
+                      "type": "TSTypeAnnotation",
+                      "typeAnnotation": {
+                        "end": 508,
+                        "start": 504,
+                        "type": "TSVoidKeyword"
+                      }
+                    },
+                    "start": 498,
+                    "type": "TSFunctionType",
+                    "typeParameters": null
+                  }
+                }
+              }
+            ],
+            "start": 268,
+            "type": "TSTypeLiteral"
+          },
+          "typeParameters": null
+        },
+        {
+          "declarations": [
+            {
+              "end": 634,
+              "id": {
+                "end": 615,
+                "properties": [
+                  {
+                    "computed": false,
+                    "end": 532,
+                    "key": {
+                      "end": 532,
+                      "name": "open",
+                      "start": 528,
+                      "type": "Identifier"
+                    },
+                    "kind": "init",
+                    "method": false,
+                    "shorthand": true,
+                    "start": 528,
+                    "type": "Property",
+                    "value": {
+                      "end": 532,
+                      "name": "open",
+                      "start": 528,
+                      "type": "Identifier"
+                    }
+                  },
+                  {
+                    "computed": false,
+                    "end": 548,
+                    "key": {
+                      "end": 548,
+                      "name": "revisionNumber",
+                      "start": 534,
+                      "type": "Identifier"
+                    },
+                    "kind": "init",
+                    "method": false,
+                    "shorthand": true,
+                    "start": 534,
+                    "type": "Property",
+                    "value": {
+                      "end": 548,
+                      "name": "revisionNumber",
+                      "start": 534,
+                      "type": "Identifier"
+                    }
+                  },
+                  {
+                    "computed": false,
+                    "end": 556,
+                    "key": {
+                      "end": 556,
+                      "name": "reason",
+                      "start": 550,
+                      "type": "Identifier"
+                    },
+                    "kind": "init",
+                    "method": false,
+                    "shorthand": true,
+                    "start": 550,
+                    "type": "Property",
+                    "value": {
+                      "end": 556,
+                      "name": "reason",
+                      "start": 550,
+                      "type": "Identifier"
+                    }
+                  },
+                  {
+                    "computed": false,
+                    "end": 565,
+                    "key": {
+                      "end": 565,
+                      "name": "loading",
+                      "start": 558,
+                      "type": "Identifier"
+                    },
+                    "kind": "init",
+                    "method": false,
+                    "shorthand": true,
+                    "start": 558,
+                    "type": "Property",
+                    "value": {
+                      "end": 565,
+                      "name": "loading",
+                      "start": 558,
+                      "type": "Identifier"
+                    }
+                  },
+                  {
+                    "computed": false,
+                    "end": 579,
+                    "key": {
+                      "end": 579,
+                      "name": "onOpenChange",
+                      "start": 567,
+                      "type": "Identifier"
+                    },
+                    "kind": "init",
+                    "method": false,
+                    "shorthand": true,
+                    "start": 567,
+                    "type": "Property",
+                    "value": {
+                      "end": 579,
+                      "name": "onOpenChange",
+                      "start": 567,
+                      "type": "Identifier"
+                    }
+                  },
+                  {
+                    "computed": false,
+                    "end": 595,
+                    "key": {
+                      "end": 595,
+                      "name": "onReasonChange",
+                      "start": 581,
+                      "type": "Identifier"
+                    },
+                    "kind": "init",
+                    "method": false,
+                    "shorthand": true,
+                    "start": 581,
+                    "type": "Property",
+                    "value": {
+                      "end": 595,
+                      "name": "onReasonChange",
+                      "start": 581,
+                      "type": "Identifier"
+                    }
+                  },
+                  {
+                    "computed": false,
+                    "end": 606,
+                    "key": {
+                      "end": 606,
+                      "name": "onConfirm",
+                      "start": 597,
+                      "type": "Identifier"
+                    },
+                    "kind": "init",
+                    "method": false,
+                    "shorthand": true,
+                    "start": 597,
+                    "type": "Property",
+                    "value": {
+                      "end": 606,
+                      "name": "onConfirm",
+                      "start": 597,
+                      "type": "Identifier"
+                    }
+                  }
+                ],
+                "start": 526,
+                "type": "ObjectPattern"
+              },
+              "init": {
+                "arguments": [],
+                "callee": {
+                  "end": 632,
+                  "name": "$props",
+                  "start": 626,
+                  "type": "Identifier"
+                },
+                "end": 634,
+                "optional": false,
+                "start": 626,
+                "type": "CallExpression"
+              },
+              "start": 526,
+              "type": "VariableDeclarator"
+            }
+          ],
+          "end": 635,
+          "kind": "let",
+          "start": 522,
+          "type": "VariableDeclaration"
+        },
+        {
+          "async": false,
+          "body": {
+            "body": [
+              {
+                "end": 694,
+                "expression": {
+                  "arguments": [
+                    {
+                      "end": 692,
+                      "raw": "false",
+                      "start": 687,
+                      "type": "Literal",
+                      "value": false
+                    }
+                  ],
+                  "callee": {
+                    "end": 686,
+                    "name": "onOpenChange",
+                    "start": 674,
+                    "type": "Identifier"
+                  },
+                  "end": 693,
+                  "optional": false,
+                  "start": 674,
+                  "type": "CallExpression"
+                },
+                "start": 674,
+                "type": "ExpressionStatement"
+              }
+            ],
+            "end": 700,
+            "start": 664,
+            "type": "BlockStatement"
+          },
+          "end": 700,
+          "expression": false,
+          "generator": false,
+          "id": {
+            "end": 661,
+            "name": "handleClose",
+            "start": 650,
+            "type": "Identifier"
+          },
+          "params": [],
+          "start": 641,
+          "type": "FunctionDeclaration"
+        }
+      ],
+      "end": 701,
+      "sourceType": "module",
+      "start": 18,
+      "type": "Program"
+    },
+    "attributes": [
+      {
+        "type": "Attribute",
+        "start": 8,
+        "end": 17,
+        "name": "lang",
+        "name_loc": {
+          "start": {
+            "line": 1,
+            "column": 8,
+            "character": 8
+          },
+          "end": {
+            "line": 1,
+            "column": 12,
+            "character": 12
+          }
+        },
+        "value": [
+          {
+            "type": "Text",
+            "start": 14,
+            "end": 16,
+            "data": "ts",
+            "raw": "ts"
+          }
+        ]
+      }
+    ]
+  }
 }
