@@ -18,7 +18,8 @@
       "Bash(cargo doc:*)",
       "Bash(cargo search:*)",
       "Bash(cargo info:*)",
-      "Bash(cargo fetch:*)"
+      "Bash(cargo fetch:*)",
+      "Bash(node diff_analysis.mjs:*)"
     ]
   }
 }

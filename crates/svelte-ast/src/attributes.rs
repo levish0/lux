@@ -28,6 +28,7 @@ impl Serialize for Attribute<'_> {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("name_loc", &self.name_loc)?;
         map.serialize_entry("value", &self.value)?;
         map.end()
     }
@@ -55,19 +56,11 @@ impl Serialize for AttributeValue<'_> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
+#[serde(untagged)]
 pub enum AttributeSequenceValue<'a> {
     Text(Text<'a>),
     ExpressionTag(ExpressionTag<'a>),
-}
-
-impl Serialize for AttributeSequenceValue<'_> {
-    fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        match self {
-            Self::Text(n) => n.serialize(s),
-            Self::ExpressionTag(n) => n.serialize(s),
-        }
-    }
 }
 
 /*
@@ -116,6 +109,7 @@ impl Serialize for BindDirective<'_> {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("name_loc", &self.name_loc)?;
         map.serialize_entry("expression", &OxcSerialize(&self.expression))?;
         map.serialize_entry("modifiers", &self.modifiers)?;
         map.end()
@@ -145,6 +139,7 @@ impl Serialize for ClassDirective<'_> {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("name_loc", &self.name_loc)?;
         map.serialize_entry("expression", &OxcSerialize(&self.expression))?;
         map.serialize_entry("modifiers", &self.modifiers)?;
         map.end()
@@ -175,6 +170,7 @@ impl Serialize for StyleDirective<'_> {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("name_loc", &self.name_loc)?;
         map.serialize_entry("value", &self.value)?;
         map.serialize_entry("modifiers", &self.modifiers)?;
         map.end()
@@ -205,6 +201,7 @@ impl Serialize for OnDirective<'_> {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("name_loc", &self.name_loc)?;
         map.serialize_entry("expression", &OxcOptionSerialize(&self.expression))?;
         map.serialize_entry("modifiers", &self.modifiers)?;
         map.end()
@@ -239,6 +236,7 @@ impl Serialize for TransitionDirective<'_> {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("name_loc", &self.name_loc)?;
         map.serialize_entry("expression", &OxcOptionSerialize(&self.expression))?;
         map.serialize_entry("modifiers", &self.modifiers)?;
         map.serialize_entry("intro", &self.intro)?;
@@ -270,6 +268,7 @@ impl Serialize for AnimateDirective<'_> {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("name_loc", &self.name_loc)?;
         map.serialize_entry("expression", &OxcOptionSerialize(&self.expression))?;
         map.serialize_entry("modifiers", &self.modifiers)?;
         map.end()
@@ -299,6 +298,7 @@ impl Serialize for UseDirective<'_> {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("name_loc", &self.name_loc)?;
         map.serialize_entry("expression", &OxcOptionSerialize(&self.expression))?;
         map.serialize_entry("modifiers", &self.modifiers)?;
         map.end()
@@ -328,6 +328,7 @@ impl Serialize for LetDirective<'_> {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("name_loc", &self.name_loc)?;
         map.serialize_entry("expression", &OxcOptionSerialize(&self.expression))?;
         map.serialize_entry("modifiers", &self.modifiers)?;
         map.end()
