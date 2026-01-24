@@ -15,15 +15,15 @@ pub struct StyleSheet<'a> {
     pub span: Span,
     pub attributes: Vec<Attribute<'a>>,
     pub children: Vec<StyleSheetChild>,
-    pub content: CssContent,
+    pub content: CssContent<'a>,
 }
 
 #[derive(Debug, Clone)]
-pub struct CssContent {
+pub struct CssContent<'a> {
     pub start: u32,
     pub end: u32,
     pub styles: String,
-    pub comment: Option<Comment>,
+    pub comment: Option<Comment<'a>>,
 }
 
 /*

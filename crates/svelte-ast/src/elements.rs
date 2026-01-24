@@ -16,7 +16,7 @@ use crate::span::{SourceLocation, Span};
 #[derive(Debug)]
 pub struct RegularElement<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
@@ -25,7 +25,7 @@ pub struct RegularElement<'a> {
 #[derive(Debug)]
 pub struct Component<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
@@ -34,7 +34,7 @@ pub struct Component<'a> {
 #[derive(Debug)]
 pub struct SvelteElement<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub tag: Expression<'a>,
     pub attributes: Vec<AttributeNode<'a>>,
@@ -44,7 +44,7 @@ pub struct SvelteElement<'a> {
 #[derive(Debug)]
 pub struct SvelteComponent<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub expression: Expression<'a>,
     pub attributes: Vec<AttributeNode<'a>>,
@@ -54,7 +54,7 @@ pub struct SvelteComponent<'a> {
 #[derive(Debug)]
 pub struct SvelteSelf<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
@@ -63,7 +63,7 @@ pub struct SvelteSelf<'a> {
 #[derive(Debug)]
 pub struct SlotElement<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
@@ -72,7 +72,7 @@ pub struct SlotElement<'a> {
 #[derive(Debug)]
 pub struct SvelteHead<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
@@ -81,7 +81,7 @@ pub struct SvelteHead<'a> {
 #[derive(Debug)]
 pub struct SvelteBody<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
@@ -90,7 +90,7 @@ pub struct SvelteBody<'a> {
 #[derive(Debug)]
 pub struct SvelteWindow<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
@@ -99,7 +99,7 @@ pub struct SvelteWindow<'a> {
 #[derive(Debug)]
 pub struct SvelteDocument<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
@@ -108,7 +108,7 @@ pub struct SvelteDocument<'a> {
 #[derive(Debug)]
 pub struct SvelteFragment<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
@@ -117,7 +117,7 @@ pub struct SvelteFragment<'a> {
 #[derive(Debug)]
 pub struct SvelteBoundary<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
@@ -126,7 +126,7 @@ pub struct SvelteBoundary<'a> {
 #[derive(Debug)]
 pub struct TitleElement<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
@@ -135,8 +135,9 @@ pub struct TitleElement<'a> {
 #[derive(Debug)]
 pub struct SvelteOptionsRaw<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
 }
+

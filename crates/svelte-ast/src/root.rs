@@ -25,7 +25,7 @@ pub struct Root<'a> {
     pub css: Option<StyleSheet<'a>>,
     pub instance: Option<Script<'a>>,
     pub module: Option<Script<'a>>,
-    pub comments: Vec<JsComment>,
+    pub comments: Vec<JsComment<'a>>,
     pub ts: bool,
 }
 
@@ -103,9 +103,9 @@ pub enum CssMode {
 
 #[derive(Debug)]
 pub struct CustomElementOptions<'a> {
-    pub tag: Option<String>,
+    pub tag: Option<&'a str>,
     pub shadow: Option<ShadowMode>,
-    pub props: Option<std::collections::HashMap<String, CustomElementProp>>,
+    pub props: Option<std::collections::HashMap<&'a str, CustomElementProp<'a>>>,
     pub extend: Option<Expression<'a>>,
 }
 
@@ -116,8 +116,8 @@ pub enum ShadowMode {
 }
 
 #[derive(Debug, Clone)]
-pub struct CustomElementProp {
-    pub attribute: Option<String>,
+pub struct CustomElementProp<'a> {
+    pub attribute: Option<&'a str>,
     pub reflect: Option<bool>,
     pub prop_type: Option<PropType>,
 }

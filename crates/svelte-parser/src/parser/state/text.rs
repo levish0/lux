@@ -17,11 +17,12 @@ pub fn text(parser: &mut Parser) {
     }
 
     let raw = &parser.template[start..parser.index];
-    let data = decode_character_references(raw, false);
+    let decoded = decode_character_references(raw, false);
+    let data = parser.allocator.alloc_str(&decoded);
 
     parser.append(FragmentNode::Text(Text {
         span: Span::new(start, parser.index),
-        raw: raw.to_string(),
+        raw,
         data,
     }));
 }

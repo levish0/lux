@@ -17,8 +17,8 @@ use crate::text::{Comment, Text};
 #[derive(Debug)]
 pub enum FragmentNode<'a> {
     // Text
-    Text(Text),
-    Comment(Comment),
+    Text(Text<'a>),
+    Comment(Comment<'a>),
 
     // Tags
     ExpressionTag(ExpressionTag<'a>),

@@ -68,7 +68,7 @@ pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
                 None
             } else {
                 parser.allow_whitespace();
-                Some(name.to_string())
+                Some(name)
             }
         } else {
             None
@@ -196,7 +196,7 @@ pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
             if let Some(end) =
                 crate::parser::bracket::match_bracket(parser.template, tp_start, pointy_brackets)
             {
-                type_params = Some(parser.template[tp_start + 1..end - 1].to_string());
+                type_params = Some(&parser.template[tp_start + 1..end - 1]);
                 parser.index = end;
             }
         }

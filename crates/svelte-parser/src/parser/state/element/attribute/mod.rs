@@ -76,10 +76,10 @@ fn match_static_attribute_value<'a>(parser: &Parser<'a>) -> Option<&'a str> {
 /// Reference: element.js lines 226-244
 fn check_duplicate_attr(attr: &AttributeNode, unique_names: &mut HashSet<String>) -> bool {
     let (type_prefix, attr_name) = match attr {
-        AttributeNode::Attribute(a) => ("Attribute", a.name.as_str()),
-        AttributeNode::BindDirective(b) => ("Attribute", b.name.as_str()),
-        AttributeNode::StyleDirective(s) => ("StyleDirective", s.name.as_str()),
-        AttributeNode::ClassDirective(c) => ("ClassDirective", c.name.as_str()),
+        AttributeNode::Attribute(a) => ("Attribute", a.name),
+        AttributeNode::BindDirective(b) => ("Attribute", b.name),
+        AttributeNode::StyleDirective(s) => ("StyleDirective", s.name),
+        AttributeNode::ClassDirective(c) => ("ClassDirective", c.name),
         _ => return false,
     };
     if attr_name == "this" {
@@ -116,7 +116,7 @@ fn read_static_attribute<'a>(parser: &mut Parser<'a>) -> Option<AttributeNode<'a
     let start = parser.index;
 
     // Read attribute name
-    let name = parser.read_until_char(is_token_ending_char).to_string();
+    let name = parser.read_until_char(is_token_ending_char);
     if name.is_empty() {
         return None;
     }
@@ -139,23 +139,23 @@ fn read_static_attribute<'a>(parser: &mut Parser<'a>) -> Option<AttributeNode<'a
             }
             return None;
         };
-        let raw_full = raw_full.to_string();
         parser.index += raw_full.len();
 
         let quoted = raw_full.starts_with('"') || raw_full.starts_with('\'');
         let raw = if quoted {
             &raw_full[1..raw_full.len() - 1]
         } else {
-            &raw_full[..]
+            raw_full
         };
 
         let val_start = parser.index - raw.len() - if quoted { 1 } else { 0 };
         let val_end = if quoted { parser.index - 1 } else { parser.index };
-        let data = decode_character_references(raw, true);
+        let decoded = decode_character_references(raw, true);
+        let data = parser.allocator.alloc_str(&decoded);
 
         AttributeValue::Sequence(vec![AttributeSequenceValue::Text(Text {
             span: Span::new(val_start, val_end),
-            raw: raw.to_string(),
+            raw,
             data,
         })])
     } else {

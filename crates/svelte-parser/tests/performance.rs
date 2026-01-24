@@ -96,7 +96,7 @@ fn run_node_parser(file_path: &std::path::Path, iterations: u32) -> Option<Durat
 
 /// Run Rust parser and return duration
 fn run_rust_parser(source: &str, iterations: u32) -> Duration {
-    // Warmup
+    // Warmup with fresh allocators
     for _ in 0..3 {
         let allocator = Allocator::default();
         let _ = parse(source, &allocator, ParseOptions::default());
@@ -104,6 +104,7 @@ fn run_rust_parser(source: &str, iterations: u32) -> Duration {
     
     let start = Instant::now();
     for _ in 0..iterations {
+        // Note: allocator must be created each time because Root borrows from it
         let allocator = Allocator::default();
         let _ = parse(source, &allocator, ParseOptions::default());
     }

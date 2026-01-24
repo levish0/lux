@@ -6,7 +6,7 @@ Svelte 5+ compiler implemented in Rust. Aims for 100% compatibility with the off
 Pipeline: **Parse → Analyze → Transform**
 
 - **svelte-ast**: AST type definitions, ESTree serialization
-- **svelte-parser**: winnow-based template/CSS parser, OXC for JS/TS expressions
+- **svelte-parser**: Zero-copy parsing with OXC allocator, winnow-based template/CSS parser, OXC for JS/TS expressions
 - **svelte-analyzer**: Semantic analysis (scope, bindings, validation)
 - **svelte-transformer**: Code generation (JS/CSS output)
 

@@ -10,7 +10,7 @@ use crate::parser::read::expression::read_expression;
 use crate::parser::Parser;
 
 /// Check if current position matches an invalid unquoted attribute value char.
-/// Replaces regex_invalid_unquoted_attribute_value = /^(\/>|[\s"'=<>`])/
+/// Replaces regex_invalid_unquoted_attribute_value = /^(\/\>|[\s\"'=<>`])/
 #[inline]
 fn is_invalid_unquoted_attr_value(parser: &Parser) -> bool {
     let bytes = parser.template.as_bytes();
@@ -23,7 +23,7 @@ fn is_invalid_unquoted_attr_value(parser: &Parser) -> bool {
     if ch == b'/' && bytes.get(i + 1).copied() == Some(b'>') {
         return true;
     }
-    // Check for [\s"'=<>`]
+    // Check for [\s\"'=<>`]
     matches!(ch, b' ' | b'\t' | b'\r' | b'\n' | b'"' | b'\'' | b'=' | b'<' | b'>' | b'`')
 }
 
@@ -49,8 +49,8 @@ pub fn read_attribute_value<'a>(parser: &mut Parser<'a>) -> AttributeValue<'a> {
             let pos = parser.index - 1;
             return AttributeValue::Sequence(vec![AttributeSequenceValue::Text(Text {
                 span: Span::new(pos, pos),
-                raw: String::new(),
-                data: String::new(),
+                raw: "",
+                data: "",
             })]);
         }
     }
@@ -124,16 +124,17 @@ pub fn read_sequence<'a>(
 ) -> Vec<AttributeSequenceValue<'a>> {
     let mut chunks: Vec<AttributeSequenceValue<'a>> = Vec::new();
     let mut text_start = parser.index;
-    let mut raw = String::new();
 
     while parser.index < parser.template.len() {
         if done(parser) {
             // Flush any pending text
-            if !raw.is_empty() {
-                let data = decode_character_references(&raw, true);
+            if text_start < parser.index {
+                let raw = &parser.template[text_start..parser.index];
+                let decoded = decode_character_references(raw, true);
+                let data = parser.allocator.alloc_str(&decoded);
                 chunks.push(AttributeSequenceValue::Text(Text {
                     span: Span::new(text_start, parser.index),
-                    raw: raw.clone(),
+                    raw,
                     data,
                 }));
             }
@@ -145,7 +146,7 @@ pub fn read_sequence<'a>(
             if parser.match_str("#") {
                 let block_start = parser.index - 1;
                 parser.index += 1; // skip '#'
-                let block_name = parser.read_until_char(is_non_alpha).to_string();
+                let block_name = parser.read_until_char(is_non_alpha);
                 if !parser.loose {
                     parser.error(
                         ErrorKind::BlockInvalidPlacement,
@@ -156,7 +157,7 @@ pub fn read_sequence<'a>(
             } else if parser.match_str("@") {
                 let tag_start = parser.index - 1;
                 parser.index += 1; // skip '@'
-                let tag_name = parser.read_until_char(is_non_alpha).to_string();
+                let tag_name = parser.read_until_char(is_non_alpha);
                 if !parser.loose {
                     parser.error(
                         ErrorKind::TagInvalidPlacement,
@@ -167,14 +168,15 @@ pub fn read_sequence<'a>(
             }
 
             // Flush pending text
-            if !raw.is_empty() {
-                let data = decode_character_references(&raw, true);
+            if text_start < parser.index - 1 {
+                let raw = &parser.template[text_start..parser.index - 1];
+                let decoded = decode_character_references(raw, true);
+                let data = parser.allocator.alloc_str(&decoded);
                 chunks.push(AttributeSequenceValue::Text(Text {
                     span: Span::new(text_start, parser.index - 1),
-                    raw: raw.clone(),
+                    raw,
                     data,
                 }));
-                raw.clear();
             }
 
             let expr_start = parser.index - 1; // include the `{`
@@ -198,10 +200,9 @@ pub fn read_sequence<'a>(
 
             text_start = parser.index;
         } else {
-            // Fix: properly handle UTF-8 characters instead of byte-by-byte
+            // Move forward by one character (UTF-8 aware)
             let remaining = &parser.template[parser.index..];
             if let Some(ch) = remaining.chars().next() {
-                raw.push(ch);
                 parser.index += ch.len_utf8();
             } else {
                 parser.index += 1;
@@ -209,35 +210,28 @@ pub fn read_sequence<'a>(
         }
     }
 
+    // Flush remaining text
+    if text_start < parser.index {
+        let raw = &parser.template[text_start..parser.index];
+        let decoded = decode_character_references(raw, true);
+        let data = parser.allocator.alloc_str(&decoded);
+        chunks.push(AttributeSequenceValue::Text(Text {
+            span: Span::new(text_start, parser.index),
+            raw,
+            data,
+        }));
+    }
+
     // Reference: e.unexpected_eof in non-loose mode
-    if parser.loose {
-        // Flush remaining text
-        if !raw.is_empty() {
-            let data = decode_character_references(&raw, true);
-            chunks.push(AttributeSequenceValue::Text(Text {
-                span: Span::new(text_start, parser.index),
-                raw,
-                data,
-            }));
-        }
-        chunks
-    } else {
-        // Flush remaining text before erroring
-        if !raw.is_empty() {
-            let data = decode_character_references(&raw, true);
-            chunks.push(AttributeSequenceValue::Text(Text {
-                span: Span::new(text_start, parser.index),
-                raw,
-                data,
-            }));
-        }
+    if !parser.loose {
         parser.error(
             ErrorKind::UnexpectedEof,
             parser.template.len(),
             "Unexpected end of input".to_string(),
         );
-        chunks
     }
+
+    chunks
 }
 
 /// Skip to closing `}` for attribute expressions.

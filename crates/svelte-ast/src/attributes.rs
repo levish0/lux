@@ -13,7 +13,7 @@ use crate::text::Text;
 #[derive(Debug)]
 pub struct Attribute<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: Option<SourceLocation>,
     pub value: AttributeValue<'a>,
 }
@@ -27,7 +27,7 @@ pub enum AttributeValue<'a> {
 
 #[derive(Debug)]
 pub enum AttributeSequenceValue<'a> {
-    Text(Text),
+    Text(Text<'a>),
     ExpressionTag(ExpressionTag<'a>),
 }
 
@@ -53,10 +53,10 @@ pub struct SpreadAttribute<'a> {
 #[derive(Debug)]
 pub struct BindDirective<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: Option<SourceLocation>,
     pub expression: Expression<'a>,
-    pub modifiers: Vec<String>,
+    pub modifiers: Vec<&'a str>,
 }
 
 /*
@@ -69,10 +69,10 @@ pub struct BindDirective<'a> {
 #[derive(Debug)]
 pub struct ClassDirective<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: Option<SourceLocation>,
     pub expression: Expression<'a>,
-    pub modifiers: Vec<String>,
+    pub modifiers: Vec<&'a str>,
 }
 
 /*
@@ -86,10 +86,10 @@ pub struct ClassDirective<'a> {
 #[derive(Debug)]
 pub struct StyleDirective<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: Option<SourceLocation>,
     pub value: AttributeValue<'a>,
-    pub modifiers: Vec<String>,
+    pub modifiers: Vec<&'a str>,
 }
 
 /*
@@ -103,10 +103,10 @@ pub struct StyleDirective<'a> {
 #[derive(Debug)]
 pub struct OnDirective<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: Option<SourceLocation>,
     pub expression: Option<Expression<'a>>,
-    pub modifiers: Vec<String>,
+    pub modifiers: Vec<&'a str>,
 }
 
 /*
@@ -122,10 +122,10 @@ pub struct OnDirective<'a> {
 #[derive(Debug)]
 pub struct TransitionDirective<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: Option<SourceLocation>,
     pub expression: Option<Expression<'a>>,
-    pub modifiers: Vec<String>,
+    pub modifiers: Vec<&'a str>,
     pub intro: bool,
     pub outro: bool,
 }
@@ -140,10 +140,10 @@ pub struct TransitionDirective<'a> {
 #[derive(Debug)]
 pub struct AnimateDirective<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: Option<SourceLocation>,
     pub expression: Option<Expression<'a>>,
-    pub modifiers: Vec<String>,
+    pub modifiers: Vec<&'a str>,
 }
 
 /*
@@ -156,10 +156,10 @@ pub struct AnimateDirective<'a> {
 #[derive(Debug)]
 pub struct UseDirective<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: Option<SourceLocation>,
     pub expression: Option<Expression<'a>>,
-    pub modifiers: Vec<String>,
+    pub modifiers: Vec<&'a str>,
 }
 
 /*
@@ -172,8 +172,8 @@ pub struct UseDirective<'a> {
 #[derive(Debug)]
 pub struct LetDirective<'a> {
     pub span: Span,
-    pub name: String,
+    pub name: &'a str,
     pub name_loc: Option<SourceLocation>,
     pub expression: Option<Expression<'a>>,
-    pub modifiers: Vec<String>,
+    pub modifiers: Vec<&'a str>,
 }

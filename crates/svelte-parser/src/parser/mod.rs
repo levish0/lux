@@ -26,87 +26,87 @@ use crate::error::ErrorKind;
 pub enum StackFrame<'a> {
     RegularElement {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     Component {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     SvelteElement {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         tag: Option<Expression<'a>>,
         attributes: Vec<AttributeNode<'a>>,
     },
     SvelteComponent {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         expression: Option<Expression<'a>>,
         attributes: Vec<AttributeNode<'a>>,
     },
     SvelteSelf {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     SvelteHead {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     SvelteBody {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     SvelteWindow {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     SvelteDocument {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     SvelteFragment {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     SvelteOptions {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     TitleElement {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     SlotElement {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     SvelteBoundary {
         start: usize,
-        name: String,
+        name: &'a str,
         name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
@@ -121,7 +121,7 @@ pub enum StackFrame<'a> {
         start: usize,
         expression: Expression<'a>,
         context: Option<BindingPattern<'a>>,
-        index: Option<String>,
+        index: Option<&'a str>,
         key: Option<Expression<'a>>,
         /// Set when `:else` (fallback) is encountered
         body: Option<Vec<FragmentNode<'a>>>,
@@ -143,7 +143,7 @@ pub enum StackFrame<'a> {
         start: usize,
         expression: Expression<'a>,
         parameters: Vec<BindingPattern<'a>>,
-        type_params: Option<String>,
+        type_params: Option<&'a str>,
     },
 }
 
@@ -182,9 +182,9 @@ impl<'a> StackFrame<'a> {
 
 /// Info about the last auto-closed tag (matches reference)
 #[derive(Debug)]
-pub struct LastAutoClosedTag {
-    pub tag: String,
-    pub reason: String,
+pub struct LastAutoClosedTag<'a> {
+    pub tag: &'a str,
+    pub reason: &'a str,
     pub depth: usize,
 }
 
@@ -224,13 +224,13 @@ pub struct Parser<'a> {
     /// Parsed <svelte:options>.
     pub options: Option<SvelteOptions<'a>>,
     /// Collected JS comments from expressions and scripts.
-    pub comments: Vec<JsComment>,
+    pub comments: Vec<JsComment<'a>>,
 
     /// Set of meta tags encountered (for duplicate detection).
-    pub meta_tags: HashSet<String>,
+    pub meta_tags: HashSet<&'a str>,
 
     /// Last auto-closed tag info.
-    pub last_auto_closed_tag: Option<LastAutoClosedTag>,
+    pub last_auto_closed_tag: Option<LastAutoClosedTag<'a>>,
 
     /// Collected errors.
     pub errors: Vec<ParseError>,

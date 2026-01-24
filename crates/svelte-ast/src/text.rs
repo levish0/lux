@@ -8,10 +8,10 @@ use crate::span::Span;
  * }
  */
 #[derive(Debug, Clone)]
-pub struct Text {
+pub struct Text<'a> {
     pub span: Span,
-    pub data: String,
-    pub raw: String,
+    pub data: &'a str,
+    pub raw: &'a str,
 }
 
 /*
@@ -21,9 +21,9 @@ pub struct Text {
  * }
  */
 #[derive(Debug, Clone)]
-pub struct Comment {
+pub struct Comment<'a> {
     pub span: Span,
-    pub data: String,
+    pub data: &'a str,
 }
 
 /*
@@ -35,10 +35,10 @@ pub struct Comment {
  * }
  */
 #[derive(Debug, Clone)]
-pub struct JsComment {
+pub struct JsComment<'a> {
     pub span: Span,
     pub kind: JsCommentKind,
-    pub value: String,
+    pub value: &'a str,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

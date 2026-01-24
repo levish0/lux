@@ -41,7 +41,7 @@ pub struct EachBlock<'a> {
     pub context: Option<BindingPattern<'a>>,
     pub body: Fragment<'a>,
     pub fallback: Option<Fragment<'a>>,
-    pub index: Option<String>,
+    pub index: Option<&'a str>,
     pub key: Option<Expression<'a>>,
 }
 
@@ -97,7 +97,7 @@ pub struct SnippetBlock<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
     pub parameters: Vec<BindingPattern<'a>>,
-    pub type_params: Option<String>,
+    pub type_params: Option<&'a str>,
     pub body: Fragment<'a>,
     pub metadata: SnippetBlockMetadata,
 }

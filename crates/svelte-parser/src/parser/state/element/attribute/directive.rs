@@ -12,8 +12,8 @@ use crate::parser::Parser;
 pub fn build_directive<'a>(
     parser: &mut Parser<'a>,
     prefix: &str,
-    dir_name: &str,
-    modifiers: &[String],
+    dir_name: &'a str,
+    modifiers: Vec<&'a str>,
     value: AttributeValue<'a>,
     name_loc: SourceLocation,
     start: usize,
@@ -37,10 +37,10 @@ pub fn build_directive<'a>(
     if prefix == "style" {
         return Some(AttributeNode::StyleDirective(StyleDirective {
             span,
-            name: dir_name.to_string(),
+            name: dir_name,
             name_loc: Some(name_loc),
             value,
-            modifiers: modifiers.to_vec(),
+            modifiers,
         }));
     }
 
@@ -94,65 +94,68 @@ pub fn build_directive<'a>(
     match prefix {
         "on" => Some(AttributeNode::OnDirective(OnDirective {
             span,
-            name: dir_name.to_string(),
+            name: dir_name,
             name_loc: Some(name_loc),
             expression,
-            modifiers: modifiers.to_vec(),
+            modifiers,
         })),
         "bind" => Some(AttributeNode::BindDirective(BindDirective {
             span,
-            name: dir_name.to_string(),
+            name: dir_name,
             name_loc: Some(name_loc),
             expression: expression.unwrap_or_else(|| {
                 make_identifier(parser, dir_name, start, end)
             }),
-            modifiers: modifiers.to_vec(),
+            modifiers,
         })),
         "class" => Some(AttributeNode::ClassDirective(ClassDirective {
             span,
-            name: dir_name.to_string(),
+            name: dir_name,
             name_loc: Some(name_loc),
             expression: expression.unwrap_or_else(|| {
                 make_identifier(parser, dir_name, start, end)
             }),
-            modifiers: modifiers.to_vec(),
+            modifiers,
         })),
         "use" => Some(AttributeNode::UseDirective(UseDirective {
             span,
-            name: dir_name.to_string(),
+            name: dir_name,
             name_loc: Some(name_loc),
             expression,
-            modifiers: modifiers.to_vec(),
+            modifiers,
         })),
         "animate" => Some(AttributeNode::AnimateDirective(AnimateDirective {
             span,
-            name: dir_name.to_string(),
+            name: dir_name,
             name_loc: Some(name_loc),
             expression,
-            modifiers: modifiers.to_vec(),
+            modifiers,
         })),
         "transition" | "in" | "out" => {
             Some(AttributeNode::TransitionDirective(TransitionDirective {
                 span,
-                name: dir_name.to_string(),
+                name: dir_name,
                 name_loc: Some(name_loc),
                 expression,
-                modifiers: modifiers.to_vec(),
+                modifiers,
                 intro: prefix == "in" || prefix == "transition",
                 outro: prefix == "out" || prefix == "transition",
             }))
         }
         "let" => Some(AttributeNode::LetDirective(LetDirective {
             span,
-            name: dir_name.to_string(),
+            name: dir_name,
             name_loc: Some(name_loc),
             expression,
-            modifiers: modifiers.to_vec(),
+            modifiers,
         })),
         _ => {
+            // For unknown prefix, create attribute with combined name
+            // This requires allocating a new string in the arena
+            let combined = parser.allocator.alloc_str(&format!("{}:{}", prefix, dir_name));
             Some(AttributeNode::Attribute(Attribute {
                 span,
-                name: format!("{}:{}", prefix, dir_name),
+                name: combined,
                 name_loc: Some(name_loc),
                 value: AttributeValue::True,
             }))

@@ -12,7 +12,7 @@ use crate::parser::Parser;
 use super::directive::{build_directive, get_directive_type, make_identifier};
 use super::value::{read_attribute_value, skip_to_closing_brace_attr};
 
-/// Byte predicate: matches /[\s=/>"']/ — token ending characters
+/// Byte predicate: matches /[\s=/>\"']/ — token ending characters
 #[inline]
 pub fn is_token_ending_char(ch: u8) -> bool {
     matches!(ch, b' ' | b'\t' | b'\r' | b'\n' | b'=' | b'/' | b'>' | b'"' | b'\'')
@@ -104,7 +104,6 @@ pub fn read_attribute<'a>(parser: &mut Parser<'a>) -> Option<AttributeNode<'a>> 
                 return None;
             }
         }
-        let id_name_str = id_name.to_string();
 
         parser.allow_whitespace();
         parser.eat_required("}").ok();
@@ -122,7 +121,7 @@ pub fn read_attribute<'a>(parser: &mut Parser<'a>) -> Option<AttributeNode<'a>> 
 
         return Some(AttributeNode::Attribute(Attribute {
             span: Span::new(start, parser.index),
-            name: id_name_str,
+            name: id_name,
             name_loc: Some(name_loc),
             value: AttributeValue::ExpressionTag(expr_tag),
         }));
@@ -162,8 +161,8 @@ pub fn read_attribute<'a>(parser: &mut Parser<'a>) -> Option<AttributeNode<'a>> 
             end = parser.index;
             AttributeValue::Sequence(vec![AttributeSequenceValue::Text(Text {
                 span: Span::new(char_start, char_start + 1),
-                raw: "/".to_string(),
-                data: "/".to_string(),
+                raw: "/",
+                data: "/",
             })])
         } else {
             let v = read_attribute_value(parser);
@@ -188,11 +187,11 @@ pub fn read_attribute<'a>(parser: &mut Parser<'a>) -> Option<AttributeNode<'a>> 
 
             // Split modifiers by '|'
             let parts: Vec<&str> = directive_name.split('|').collect();
-            let dir_name = parts[0].to_string();
-            let modifiers: Vec<String> = parts[1..].iter().map(|s| s.to_string()).collect();
+            let dir_name = parts[0];
+            let modifiers: Vec<&'a str> = parts[1..].to_vec();
 
             return build_directive(
-                parser, prefix, &dir_name, &modifiers, value, name_loc, start, end,
+                parser, prefix, dir_name, modifiers, value, name_loc, start, end,
             );
         }
     }
@@ -207,6 +206,6 @@ pub fn read_attribute<'a>(parser: &mut Parser<'a>) -> Option<AttributeNode<'a>> 
 
 /// Read an attribute/tag name: consume until token ending character.
 /// Port of reference `read_tag(parser, regex_token_ending_character)`.
-fn read_tag(parser: &mut Parser) -> String {
-    parser.read_until_char(is_token_ending_char).to_string()
+fn read_tag<'a>(parser: &mut Parser<'a>) -> &'a str {
+    parser.read_until_char(is_token_ending_char)
 }
