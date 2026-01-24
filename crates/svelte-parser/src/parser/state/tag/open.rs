@@ -539,7 +539,7 @@ fn parse_snippet_params<'a>(
     parser: &mut Parser<'a>,
     params_start: usize,
     params_source: &str,
-) -> Vec<BindingPattern<'a>> {
+) -> Vec<FormalParameter<'a>> {
     // Parse `<params> => {}` without padding, then shift spans.
     let snippet = format!("{} => {{}}", params_source);
     let snippet_str = parser.allocator.alloc_str(&snippet);
@@ -583,10 +583,9 @@ fn parse_snippet_params<'a>(
                         .unbox()
                         .items
                         .into_iter()
-                        .map(|param| {
-                            let mut pattern = param.pattern;
-                            shift_binding_pattern_spans(&mut pattern, offset);
-                            pattern
+                        .map(|mut param| {
+                            shift_formal_parameter_spans(&mut param, offset);
+                            param
                         })
                         .collect()
                 }
