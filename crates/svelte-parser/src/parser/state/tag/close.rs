@@ -1,15 +1,16 @@
 use svelte_ast::blocks::{AwaitBlock, EachBlock, IfBlock, KeyBlock, SnippetBlock};
+use svelte_ast::metadata::{ExpressionNodeMetadata, SnippetBlockMetadata};
 use svelte_ast::node::FragmentNode;
 use svelte_ast::root::Fragment;
 use svelte_ast::span::Span;
 
 use crate::error::ErrorKind;
-use crate::parser::{AwaitPhase, Parser, StackFrame};
+use crate::parser::{AwaitPhase, ParseError, Parser, StackFrame};
 
 use super::skip_to_closing_brace;
 
 /// `{/...}` — close block
-pub fn close<'a>(parser: &mut Parser<'a>) {
+pub fn close<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
     let current_type = match parser.current() {
         Some(StackFrame::IfBlock { .. }) => "if",
         Some(StackFrame::EachBlock { .. }) => "each",
@@ -18,37 +19,56 @@ pub fn close<'a>(parser: &mut Parser<'a>) {
         Some(StackFrame::SnippetBlock { .. }) => "snippet",
         _ => {
             if !parser.loose {
-                parser.error(
+                return Err(parser.error(
                     ErrorKind::BlockUnexpectedClose,
                     parser.index,
                     "Unexpected block close".to_string(),
-                );
+                ));
             }
             skip_to_closing_brace(parser);
-            return;
+            return Ok(());
         }
     };
 
     match current_type {
-        "if" => close_if(parser),
-        "each" => close_each(parser),
-        "await" => close_await(parser),
-        "key" => close_key(parser),
-        "snippet" => close_snippet(parser),
+        "if" => close_if(parser)?,
+        "each" => close_each(parser)?,
+        "await" => close_await(parser)?,
+        "key" => close_key(parser)?,
+        "snippet" => close_snippet(parser)?,
         _ => skip_to_closing_brace(parser),
     }
+
+    Ok(())
 }
 
-fn close_if<'a>(parser: &mut Parser<'a>) {
-    if !parser.eat_required_with_loose("if", false) {
+fn close_if<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
+    let matched = parser.eat_required_with_loose("if", false)?;
+    if !matched {
         // Loose mode: mismatched close, pop and retry
         let fragment_nodes = parser.fragments.pop().unwrap_or_default();
         let frame = parser.stack.pop();
-        if let Some(StackFrame::IfBlock { start, test, consequent, elseif }) = frame {
+        if let Some(StackFrame::IfBlock {
+            start,
+            test,
+            consequent,
+            elseif,
+        }) = frame
+        {
             let (cons, alt) = if let Some(cons_nodes) = consequent {
-                (Fragment { nodes: cons_nodes }, Some(Fragment { nodes: fragment_nodes }))
+                (
+                    Fragment { nodes: cons_nodes },
+                    Some(Fragment {
+                        nodes: fragment_nodes,
+                    }),
+                )
             } else {
-                (Fragment { nodes: fragment_nodes }, None)
+                (
+                    Fragment {
+                        nodes: fragment_nodes,
+                    },
+                    None,
+                )
             };
             parser.append(FragmentNode::IfBlock(IfBlock {
                 span: Span::new(start, parser.index),
@@ -56,14 +76,15 @@ fn close_if<'a>(parser: &mut Parser<'a>) {
                 test,
                 consequent: cons,
                 alternate: alt,
+                metadata: ExpressionNodeMetadata::default(),
             }));
         }
-        close(parser);
-        return;
+        close(parser)?;
+        return Ok(());
     }
 
     parser.allow_whitespace();
-    parser.eat_required("}");
+    parser.eat_required("}")?;
 
     // Unwind elseif chain from inside out
     let mut alternate: Option<Fragment> = None;
@@ -72,7 +93,13 @@ fn close_if<'a>(parser: &mut Parser<'a>) {
         let fragment_nodes = parser.fragments.pop().unwrap_or_default();
         let frame = parser.stack.pop();
 
-        let Some(StackFrame::IfBlock { start, elseif, test, consequent }) = frame else {
+        let Some(StackFrame::IfBlock {
+            start,
+            elseif,
+            test,
+            consequent,
+        }) = frame
+        else {
             break;
         };
 
@@ -83,12 +110,19 @@ fn close_if<'a>(parser: &mut Parser<'a>) {
                 alternate.take()
             } else {
                 // Simple :else — fragment_nodes is the alternate content
-                Some(Fragment { nodes: fragment_nodes })
+                Some(Fragment {
+                    nodes: fragment_nodes,
+                })
             };
             (Fragment { nodes: cons_nodes }, alt)
         } else {
             // No :else — fragment_nodes is the consequent
-            (Fragment { nodes: fragment_nodes }, alternate.take())
+            (
+                Fragment {
+                    nodes: fragment_nodes,
+                },
+                alternate.take(),
+            )
         };
 
         let if_block = IfBlock {
@@ -97,6 +131,7 @@ fn close_if<'a>(parser: &mut Parser<'a>) {
             test,
             consequent: cons_frag,
             alternate: alt_frag,
+            metadata: ExpressionNodeMetadata::default(),
         };
 
         if elseif {
@@ -110,29 +145,47 @@ fn close_if<'a>(parser: &mut Parser<'a>) {
             break;
         }
     }
+
+    Ok(())
 }
 
-fn close_each<'a>(parser: &mut Parser<'a>) {
-    if !parser.eat_required_with_loose("each", false) {
+fn close_each<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
+    let matched = parser.eat_required_with_loose("each", false)?;
+    if !matched {
         parser.fragments.pop();
         parser.stack.pop();
-        close(parser);
-        return;
+        close(parser)?;
+        return Ok(());
     }
     parser.allow_whitespace();
-    parser.eat_required("}");
+    parser.eat_required("}")?;
 
     let fragment_nodes = parser.fragments.pop().unwrap_or_default();
     let frame = parser.stack.pop();
 
     if let Some(StackFrame::EachBlock {
-        start, expression, context, index, key, body,
+        start,
+        expression,
+        context,
+        index,
+        key,
+        body,
     }) = frame
     {
         let (body_frag, fallback) = if let Some(body_nodes) = body {
-            (Fragment { nodes: body_nodes }, Some(Fragment { nodes: fragment_nodes }))
+            (
+                Fragment { nodes: body_nodes },
+                Some(Fragment {
+                    nodes: fragment_nodes,
+                }),
+            )
         } else {
-            (Fragment { nodes: fragment_nodes }, None)
+            (
+                Fragment {
+                    nodes: fragment_nodes,
+                },
+                None,
+            )
         };
 
         parser.append(FragmentNode::EachBlock(EachBlock {
@@ -145,40 +198,55 @@ fn close_each<'a>(parser: &mut Parser<'a>) {
             key,
         }));
     }
+
+    Ok(())
 }
 
-fn close_await<'a>(parser: &mut Parser<'a>) {
-    if !parser.eat_required_with_loose("await", false) {
+fn close_await<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
+    let matched = parser.eat_required_with_loose("await", false)?;
+    if !matched {
         parser.fragments.pop();
         parser.stack.pop();
-        close(parser);
-        return;
+        close(parser)?;
+        return Ok(());
     }
     parser.allow_whitespace();
-    parser.eat_required("}");
+    parser.eat_required("}")?;
 
     let fragment_nodes = parser.fragments.pop().unwrap_or_default();
     let frame = parser.stack.pop();
 
     if let Some(StackFrame::AwaitBlock {
-        start, expression, value, error, pending, then, phase,
+        start,
+        expression,
+        value,
+        error,
+        pending,
+        then,
+        phase,
     }) = frame
     {
         let (pending_frag, then_frag, catch_frag) = match phase {
             AwaitPhase::Pending => (
-                Some(Fragment { nodes: fragment_nodes }),
+                Some(Fragment {
+                    nodes: fragment_nodes,
+                }),
                 then.map(|n| Fragment { nodes: n }),
                 None,
             ),
             AwaitPhase::Then => (
                 pending.map(|n| Fragment { nodes: n }),
-                Some(Fragment { nodes: fragment_nodes }),
+                Some(Fragment {
+                    nodes: fragment_nodes,
+                }),
                 None,
             ),
             AwaitPhase::Catch => (
                 pending.map(|n| Fragment { nodes: n }),
                 then.map(|n| Fragment { nodes: n }),
-                Some(Fragment { nodes: fragment_nodes }),
+                Some(Fragment {
+                    nodes: fragment_nodes,
+                }),
             ),
         };
 
@@ -190,19 +258,23 @@ fn close_await<'a>(parser: &mut Parser<'a>) {
             pending: pending_frag,
             then: then_frag,
             catch: catch_frag,
+            metadata: ExpressionNodeMetadata::default(),
         }));
     }
+
+    Ok(())
 }
 
-fn close_key<'a>(parser: &mut Parser<'a>) {
-    if !parser.eat_required_with_loose("key", false) {
+fn close_key<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
+    let matched = parser.eat_required_with_loose("key", false)?;
+    if !matched {
         parser.fragments.pop();
         parser.stack.pop();
-        close(parser);
-        return;
+        close(parser)?;
+        return Ok(());
     }
     parser.allow_whitespace();
-    parser.eat_required("}");
+    parser.eat_required("}")?;
 
     let fragment_nodes = parser.fragments.pop().unwrap_or_default();
     let frame = parser.stack.pop();
@@ -211,26 +283,35 @@ fn close_key<'a>(parser: &mut Parser<'a>) {
         parser.append(FragmentNode::KeyBlock(KeyBlock {
             span: Span::new(start, parser.index),
             expression,
-            fragment: Fragment { nodes: fragment_nodes },
+            fragment: Fragment {
+                nodes: fragment_nodes,
+            },
+            metadata: ExpressionNodeMetadata::default(),
         }));
     }
+
+    Ok(())
 }
 
-fn close_snippet<'a>(parser: &mut Parser<'a>) {
-    if !parser.eat_required_with_loose("snippet", false) {
+fn close_snippet<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
+    let matched = parser.eat_required_with_loose("snippet", false)?;
+    if !matched {
         parser.fragments.pop();
         parser.stack.pop();
-        close(parser);
-        return;
+        close(parser)?;
+        return Ok(());
     }
     parser.allow_whitespace();
-    parser.eat_required("}");
+    parser.eat_required("}")?;
 
     let fragment_nodes = parser.fragments.pop().unwrap_or_default();
     let frame = parser.stack.pop();
 
     if let Some(StackFrame::SnippetBlock {
-        start, expression, parameters, type_params,
+        start,
+        expression,
+        parameters,
+        type_params,
     }) = frame
     {
         parser.append(FragmentNode::SnippetBlock(SnippetBlock {
@@ -238,7 +319,12 @@ fn close_snippet<'a>(parser: &mut Parser<'a>) {
             expression,
             parameters,
             type_params,
-            body: Fragment { nodes: fragment_nodes },
+            body: Fragment {
+                nodes: fragment_nodes,
+            },
+            metadata: SnippetBlockMetadata::default(),
         }));
     }
+
+    Ok(())
 }

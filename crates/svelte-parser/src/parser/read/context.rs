@@ -4,8 +4,8 @@ use oxc_ast::ast::{BindingIdentifier, BindingPattern};
 use oxc_span::SourceType;
 
 use crate::error::ErrorKind;
-use crate::parser::bracket::match_bracket;
 use crate::parser::Parser;
+use crate::parser::bracket::match_bracket;
 
 /// Read a destructuring pattern at the current parser position.
 /// Port of reference `read/context.js`.
@@ -128,7 +128,7 @@ pub fn read_pattern<'a>(parser: &mut Parser<'a>) -> Option<BindingPattern<'a>> {
 }
 
 /// Extract the BindingPattern from a parsed `let <pattern> = 1;`
-fn extract_pattern<'a>(program: oxc_ast::ast::Program<'a>) -> Option<BindingPattern<'a>> {
+fn extract_pattern(program: oxc_ast::ast::Program) -> Option<BindingPattern> {
     let body = program.body;
     if body.len() != 1 {
         return None;

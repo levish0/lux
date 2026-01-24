@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use serde_json::Value;
-use svelte_ast::utils::estree::{set_loc_source, clear_loc_source};
+use svelte_ast::utils::estree::{clear_loc_source, set_loc_source};
 use svelte_parser::{ParseOptions, parse};
 
 fn tests_dir() -> PathBuf {
@@ -29,10 +29,7 @@ fn run_cmd(program: &str, args: &[&str], dir: &Path) {
             .current_dir(dir)
             .status()
     } else {
-        Command::new(program)
-            .args(args)
-            .current_dir(dir)
-            .status()
+        Command::new(program).args(args).current_dir(dir).status()
     };
     let status = status.unwrap_or_else(|e| panic!("Failed to run {}: {}", program, e));
     assert!(status.success(), "{} failed with {:?}", program, status);
@@ -68,7 +65,9 @@ fn is_superset(actual: &Value, expected: &Value) -> bool {
             if a.len() != e.len() {
                 return false;
             }
-            a.iter().zip(e.iter()).all(|(a_item, e_item)| is_superset(a_item, e_item))
+            a.iter()
+                .zip(e.iter())
+                .all(|(a_item, e_item)| is_superset(a_item, e_item))
         }
         _ => actual == expected,
     }
@@ -78,7 +77,9 @@ const SKIP_CATEGORIES: &[&str] = &["parser-legacy"];
 
 /// Recursively find all .svelte files
 fn find_svelte_files(dir: &Path, results: &mut Vec<PathBuf>) {
-    let Ok(entries) = fs::read_dir(dir) else { return };
+    let Ok(entries) = fs::read_dir(dir) else {
+        return;
+    };
     for entry in entries.flatten() {
         let path = entry.path();
         if path.is_dir() {
@@ -92,7 +93,8 @@ fn find_svelte_files(dir: &Path, results: &mut Vec<PathBuf>) {
 /// Build a unique name from relative path, matching generate.mjs logic
 fn build_name(file: &Path, base: &Path) -> String {
     let rel = file.strip_prefix(base).unwrap();
-    let parts: Vec<&str> = rel.iter()
+    let parts: Vec<&str> = rel
+        .iter()
         .filter_map(|p| p.to_str())
         .filter(|p| *p != "samples")
         .collect();

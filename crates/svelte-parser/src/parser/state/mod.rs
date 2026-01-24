@@ -1,4 +1,4 @@
-pub mod fragment;
-pub mod text;
-pub mod tag;
 pub mod element;
+pub mod fragment;
+pub mod tag;
+pub mod text;

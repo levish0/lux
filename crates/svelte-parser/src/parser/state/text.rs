@@ -9,13 +9,10 @@ use super::super::html_entities::decode_character_references;
 /// Matches reference: `state/text.js`
 ///
 /// Consumes characters until `<` or `{` is encountered.
-pub fn text<'a>(parser: &mut Parser<'a>) {
+pub fn text(parser: &mut Parser) {
     let start = parser.index;
 
-    while parser.index < parser.template.len()
-        && !parser.match_str("<")
-        && !parser.match_str("{")
-    {
+    while parser.index < parser.template.len() && !parser.match_str("<") && !parser.match_str("{") {
         parser.index += 1;
     }
 

@@ -139,7 +139,7 @@ fn match_quote(template: &str, start: usize, quote: char) -> Option<usize> {
         if quote == '`' && ch == '$' && i < bytes.len() && bytes[i] == b'{' {
             // Template literal interpolation: ${...}
             i += 1; // skip {
-            let default_brackets = [( '{', '}'), ('(', ')'), ('[', ']')];
+            let default_brackets = [('{', '}'), ('(', ')'), ('[', ']')];
             // Find matching } using match_bracket logic
             let end = match_bracket(template, i - 1, &default_brackets)?;
             i = end;
@@ -157,7 +157,8 @@ fn find_string_end(string: &str, search_start: usize, quote: char) -> usize {
         string
     } else {
         // Non-template strings: only search until newline
-        let nl_pos = string[search_start..].find('\n')
+        let nl_pos = string[search_start..]
+            .find('\n')
             .map(|p| search_start + p)
             .unwrap_or(string.len());
         &string[..nl_pos]

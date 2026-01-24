@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
+#[rustfmt::skip]
 pub static ENTITIES: LazyLock<HashMap<&'static str, u32>> = LazyLock::new(|| {
     let mut m = HashMap::with_capacity(2225);
         m.insert("CounterClockwiseContourIntegral;", 8755);

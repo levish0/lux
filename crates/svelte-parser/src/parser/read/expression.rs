@@ -4,14 +4,14 @@ use oxc_ast::ast::Expression;
 use oxc_span::SourceType;
 
 use crate::error::ErrorKind;
-use crate::parser::Parser;
+use crate::parser::{ParseError, Parser};
 
 /// Read a JS/TS expression at the current parser position.
 /// Port of reference `read/expression.js`.
 ///
 /// Uses bracket tracking to find the expression boundary,
 /// then parses with OXC. Advances `parser.index` past the expression.
-pub fn read_expression<'a>(parser: &mut Parser<'a>) -> Expression<'a> {
+pub fn read_expression<'a>(parser: &mut Parser<'a>) -> Result<Expression<'a>, ParseError> {
     let start = parser.index;
 
     // Find where the expression ends by locating the closing bracket.
@@ -19,14 +19,13 @@ pub fn read_expression<'a>(parser: &mut Parser<'a>) -> Expression<'a> {
 
     if end <= start {
         if parser.loose {
-            return loose_identifier(parser, start, start);
+            return Ok(loose_identifier(parser, start, start));
         }
-        parser.error(
+        return Err(parser.error(
             ErrorKind::ExpectedExpression,
             start,
             "Expected expression".to_string(),
-        );
-        return loose_identifier(parser, start, start);
+        ));
     }
 
     let expr_source = &parser.template[start..end];
@@ -38,20 +37,17 @@ pub fn read_expression<'a>(parser: &mut Parser<'a>) -> Expression<'a> {
     if trimmed.is_empty() {
         if parser.loose {
             parser.index = end;
-            return loose_identifier(parser, start, end);
+            return Ok(loose_identifier(parser, start, end));
         }
-        parser.error(
+        parser.index = end;
+        return Err(parser.error(
             ErrorKind::ExpectedExpression,
             start,
             "Expected expression".to_string(),
-        );
-        parser.index = end;
-        return loose_identifier(parser, start, end);
+        ));
     }
 
     // Parse with OXC.
-    // Preserve newlines for correct line numbers (matching reference's
-    // `template.slice(0, start).replace(/[^\n]/g, ' ')`)
     let prefix: String = parser.template[..start]
         .chars()
         .map(|c| if c == '\n' { '\n' } else { ' ' })
@@ -70,31 +66,29 @@ pub fn read_expression<'a>(parser: &mut Parser<'a>) -> Expression<'a> {
     if !result.errors.is_empty() {
         if parser.loose {
             parser.index = end;
-            return loose_identifier(parser, start, end);
+            return Ok(loose_identifier(parser, start, end));
         }
         let first_err = &result.errors[0];
-        parser.error(
+        parser.index = end;
+        return Err(parser.error(
             ErrorKind::JsParseError,
             start,
             format!("JS parse error: {}", first_err),
-        );
-        parser.index = end;
-        return loose_identifier(parser, start, end);
+        ));
     }
 
     // Extract expression from the parsed program.
-    // The program should have one ExpressionStatement.
     let program = result.program;
     let expr = extract_expression(program);
 
     match expr {
         Some(e) => {
             parser.index = effective_end;
-            e
+            Ok(e)
         }
         None => {
             parser.index = end;
-            loose_identifier(parser, start, end)
+            Ok(loose_identifier(parser, start, end))
         }
     }
 }
@@ -203,7 +197,7 @@ fn skip_string_in_expr(bytes: &[u8], start: usize) -> usize {
 }
 
 /// Extract the expression from a parsed OXC Program.
-fn extract_expression<'a>(program: oxc_ast::ast::Program<'a>) -> Option<Expression<'a>> {
+pub fn extract_expression<'a>(program: oxc_ast::ast::Program<'a>) -> Option<Expression<'a>> {
     let body = program.body;
 
     if body.len() != 1 {
@@ -223,7 +217,7 @@ fn extract_expression<'a>(program: oxc_ast::ast::Program<'a>) -> Option<Expressi
 }
 
 /// Create a dummy Identifier expression for loose/error recovery.
-fn loose_identifier<'a>(parser: &Parser<'a>, start: usize, end: usize) -> Expression<'a> {
+pub fn loose_identifier<'a>(parser: &Parser<'a>, start: usize, end: usize) -> Expression<'a> {
     Expression::Identifier(oxc_allocator::Box::new_in(
         oxc_ast::ast::IdentifierReference {
             span: oxc_span::Span::new(start as u32, end as u32),

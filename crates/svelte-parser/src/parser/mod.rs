@@ -1,8 +1,8 @@
-pub mod state;
-pub mod read;
-pub mod html_entities;
 pub mod bracket;
+pub mod html_entities;
 pub mod patterns;
+pub mod read;
+pub mod state;
 pub mod utils;
 
 use std::collections::HashSet;
@@ -14,8 +14,10 @@ use regex::Regex;
 use svelte_ast::css::StyleSheet;
 use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::{Fragment, Root, Script, SvelteOptions};
-use svelte_ast::span::Span;
+use svelte_ast::span::{Position, SourceLocation, Span};
 use svelte_ast::text::JsComment;
+
+use line_span::LineSpans;
 
 use crate::error::ErrorKind;
 
@@ -27,11 +29,13 @@ pub enum StackFrame<'a> {
     RegularElement {
         start: usize,
         name: String,
+        name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     Component {
         start: usize,
         name: String,
+        name_loc: SourceLocation,
         attributes: Vec<AttributeNode<'a>>,
     },
     SvelteElement {
@@ -206,6 +210,9 @@ pub struct Parser<'a> {
 
     /// Collected errors.
     pub errors: Vec<ParseError>,
+
+    /// Precomputed line start offsets for O(log n) offset→line/column lookup.
+    line_starts: Vec<usize>,
 }
 
 /// Matches HTML comments (to skip) or `<script` tags with a `lang` attribute.
@@ -226,6 +233,9 @@ impl<'a> Parser<'a> {
         // Detect TypeScript (matches reference constructor logic)
         let ts = detect_lang_ts(template);
 
+        // Precompute line start offsets for locate()
+        let line_starts: Vec<usize> = template.line_spans().map(|s| s.start()).collect();
+
         let mut parser = Self {
             template,
             index: 0,
@@ -242,11 +252,14 @@ impl<'a> Parser<'a> {
             meta_tags: HashSet::new(),
             last_auto_closed_tag: None,
             errors: Vec::new(),
+            line_starts,
         };
 
         // State machine loop (matches reference constructor)
         while parser.index < parser.template.len() {
-            state::fragment::fragment(&mut parser);
+            if state::fragment::fragment(&mut parser).is_err() {
+                break;
+            }
         }
 
         // Check for unclosed blocks/elements
@@ -281,12 +294,39 @@ impl<'a> Parser<'a> {
         Root {
             span: Span::new(0, self.template.len()),
             options: self.options,
-            fragment: Fragment { nodes: fragment_nodes },
+            fragment: Fragment {
+                nodes: fragment_nodes,
+            },
             css: self.css,
             instance: self.instance,
             module: self.module,
             comments: self.comments,
             ts: self.ts,
+        }
+    }
+
+    // ─── Locator ─────────────────────────────────────────────────
+
+    /// Convert a byte offset to a Position { line, column, character }.
+    /// Line is 1-based, column is 0-based. Uses binary search on precomputed line_starts.
+    pub fn locate(&self, offset: usize) -> Position {
+        let line_idx = self
+            .line_starts
+            .binary_search(&offset)
+            .unwrap_or_else(|i| i - 1);
+        let line_start = self.line_starts[line_idx];
+        Position {
+            line: line_idx + 1,
+            column: offset - line_start,
+            character: offset,
+        }
+    }
+
+    /// Create a SourceLocation from byte offsets.
+    pub fn source_location(&self, start: usize, end: usize) -> SourceLocation {
+        SourceLocation {
+            start: self.locate(start),
+            end: self.locate(end),
         }
     }
 
@@ -305,8 +345,7 @@ impl<'a> Parser<'a> {
     /// `parser.match(str)` — check if template at current position starts with str.
     pub fn match_str(&self, s: &str) -> bool {
         if s.len() == 1 {
-            self.template.as_bytes().get(self.index).copied()
-                == s.as_bytes().first().copied()
+            self.template.as_bytes().get(self.index).copied() == s.as_bytes().first().copied()
         } else {
             self.template.get(self.index..self.index + s.len()) == Some(s)
         }
@@ -323,31 +362,37 @@ impl<'a> Parser<'a> {
     }
 
     /// `parser.eat(str, true)` — consume str or error.
-    pub fn eat_required(&mut self, s: &str) {
-        if !self.eat(s) {
-            if !self.loose {
-                self.error(
-                    ErrorKind::ExpectedToken,
-                    self.index,
-                    format!("Expected '{}'", s),
-                );
-            }
+    pub fn eat_required(&mut self, s: &str) -> Result<(), ParseError> {
+        if self.eat(s) {
+            return Ok(());
         }
+        let err = self.error(
+            ErrorKind::ExpectedToken,
+            self.index,
+            format!("Expected '{}'", s),
+        );
+        if self.loose { Ok(()) } else { Err(err) }
     }
 
     /// `parser.eat(str, true, required_in_loose)` — with loose control.
-    pub fn eat_required_with_loose(&mut self, s: &str, required_in_loose: bool) -> bool {
+    /// Returns Ok(true) if eaten, Ok(false) if not eaten but allowed, Err if fatal.
+    pub fn eat_required_with_loose(
+        &mut self,
+        s: &str,
+        required_in_loose: bool,
+    ) -> Result<bool, ParseError> {
         if self.eat(s) {
-            return true;
+            return Ok(true);
         }
-        if !self.loose || required_in_loose {
-            self.error(
-                ErrorKind::ExpectedToken,
-                self.index,
-                format!("Expected '{}'", s),
-            );
+        if self.loose && !required_in_loose {
+            return Ok(false);
         }
-        false
+        let err = self.error(
+            ErrorKind::ExpectedToken,
+            self.index,
+            format!("Expected '{}'", s),
+        );
+        if self.loose { Ok(false) } else { Err(err) }
     }
 
     /// `parser.match_regex(pattern)` — match regex at current position.
@@ -375,18 +420,22 @@ impl<'a> Parser<'a> {
     }
 
     /// `parser.require_whitespace()` — error if not whitespace, then skip.
-    pub fn require_whitespace(&mut self) {
+    pub fn require_whitespace(&mut self) -> Result<(), ParseError> {
         if self.index < self.template.len() {
             let ch = self.template.as_bytes()[self.index];
             if ch != b' ' && ch != b'\t' && ch != b'\r' && ch != b'\n' {
-                self.error(
+                let err = self.error(
                     ErrorKind::ExpectedToken,
                     self.index,
                     "Expected whitespace".to_string(),
                 );
+                if !self.loose {
+                    return Err(err);
+                }
             }
         }
         self.allow_whitespace();
+        Ok(())
     }
 
     /// `parser.read(pattern)` — match regex and advance if matched.
@@ -494,13 +543,15 @@ impl<'a> Parser<'a> {
         &self.template[self.index..]
     }
 
-    /// Emit a parse error.
-    pub fn error(&mut self, kind: ErrorKind, position: usize, message: String) {
-        self.errors.push(ParseError {
+    /// Emit a parse error. Returns the error for use with `Err(...)`.
+    pub fn error(&mut self, kind: ErrorKind, position: usize, message: String) -> ParseError {
+        let err = ParseError {
             kind,
             position,
             message,
-        });
+        };
+        self.errors.push(err.clone());
+        err
     }
 }
 
@@ -516,7 +567,8 @@ fn detect_lang_ts(template: &str) -> bool {
             continue;
         }
         // First <script> match with lang attr — check if lang value is "ts"
-        let lang = caps.get(1)
+        let lang = caps
+            .get(1)
             .or_else(|| caps.get(2))
             .or_else(|| caps.get(3))
             .map(|m| m.as_str());
@@ -524,4 +576,3 @@ fn detect_lang_ts(template: &str) -> bool {
     }
     false
 }
-

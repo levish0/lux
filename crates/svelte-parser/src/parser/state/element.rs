@@ -1,24 +1,16 @@
 use svelte_ast::elements::{Component, RegularElement};
 use svelte_ast::node::FragmentNode;
 use svelte_ast::root::Fragment;
-use svelte_ast::span::{Position, SourceLocation, Span};
+use svelte_ast::span::Span;
 use svelte_ast::text::Comment;
 
-use super::super::{Parser, StackFrame};
-
-/// Create a SourceLocation from byte offsets (line/column computed later at serialization).
-fn name_loc_from_offsets(start: usize, end: usize) -> SourceLocation {
-    SourceLocation {
-        start: Position { line: 0, column: 0, character: start },
-        end: Position { line: 0, column: 0, character: end },
-    }
-}
+use crate::parser::{ParseError, Parser, StackFrame};
 
 /// Element state.
 /// Matches reference: `state/element.js`
 ///
 /// Handles `<...>` — opening tags, closing tags, comments, special elements.
-pub fn element<'a>(parser: &mut Parser<'a>) {
+pub fn element(parser: &mut Parser) -> Result<(), ParseError> {
     let start = parser.index;
     parser.index += 1; // skip `<`
 
@@ -26,21 +18,22 @@ pub fn element<'a>(parser: &mut Parser<'a>) {
     if parser.match_str("!--") {
         parser.index += 3;
         read_comment(parser, start);
-        return;
+        return Ok(());
     }
 
     // Closing tag: </name>
     if parser.eat("/") {
-        close_tag(parser);
-        return;
+        close_tag(parser)?;
+        return Ok(());
     }
 
     // Opening tag
-    open_tag(parser, start);
+    open_tag(parser, start)?;
+    Ok(())
 }
 
 /// Read an HTML comment: `<!-- ... -->`
-fn read_comment<'a>(parser: &mut Parser<'a>, start: usize) {
+fn read_comment(parser: &mut Parser, start: usize) {
     let data_start = parser.index;
     loop {
         if parser.index >= parser.template.len() {
@@ -65,19 +58,18 @@ fn read_comment<'a>(parser: &mut Parser<'a>, start: usize) {
 }
 
 /// Handle a closing tag: `</name>`
-fn close_tag<'a>(parser: &mut Parser<'a>) {
+fn close_tag(parser: &mut Parser) -> Result<(), ParseError> {
     parser.allow_whitespace();
     let (name, _name_start, _name_end) = parser.read_identifier();
     let name = name.to_string();
     parser.allow_whitespace();
-    parser.eat_required(">");
+    parser.eat_required(">")?;
 
     // Find matching open element on the stack
     let mut found = false;
     for frame in parser.stack.iter().rev() {
         match frame {
-            StackFrame::RegularElement { name: n, .. }
-            | StackFrame::Component { name: n, .. } => {
+            StackFrame::RegularElement { name: n, .. } | StackFrame::Component { name: n, .. } => {
                 if *n == name {
                     found = true;
                     break;
@@ -89,13 +81,13 @@ fn close_tag<'a>(parser: &mut Parser<'a>) {
 
     if !found {
         if !parser.loose {
-            parser.error(
+            return Err(parser.error(
                 crate::error::ErrorKind::BlockUnexpectedClose,
                 parser.index,
                 format!("'</{name}>' has no matching open tag"),
-            );
+            ));
         }
-        return;
+        return Ok(());
     }
 
     // Pop until we find the matching element
@@ -105,28 +97,42 @@ fn close_tag<'a>(parser: &mut Parser<'a>) {
         let fragment_nodes = fragment.unwrap_or_default();
 
         match frame {
-            StackFrame::RegularElement { start, name: n, attributes } => {
+            StackFrame::RegularElement {
+                start,
+                name: n,
+                name_loc,
+                attributes,
+            } => {
                 let is_match = n == name;
                 let node = FragmentNode::RegularElement(RegularElement {
                     span: Span::new(start, parser.index),
-                    name_loc: name_loc_from_offsets(start + 1, start + 1 + n.len()),
+                    name_loc,
                     name: n,
                     attributes,
-                    fragment: Fragment { nodes: fragment_nodes },
+                    fragment: Fragment {
+                        nodes: fragment_nodes,
+                    },
                 });
                 parser.append(node);
                 if is_match {
                     break;
                 }
             }
-            StackFrame::Component { start, name: n, attributes } => {
+            StackFrame::Component {
+                start,
+                name: n,
+                name_loc,
+                attributes,
+            } => {
                 let is_match = n == name;
                 let node = FragmentNode::Component(Component {
                     span: Span::new(start, parser.index),
-                    name_loc: name_loc_from_offsets(start + 1, start + 1 + n.len()),
+                    name_loc,
                     name: n,
                     attributes,
-                    fragment: Fragment { nodes: fragment_nodes },
+                    fragment: Fragment {
+                        nodes: fragment_nodes,
+                    },
                 });
                 parser.append(node);
                 if is_match {
@@ -138,46 +144,47 @@ fn close_tag<'a>(parser: &mut Parser<'a>) {
             }
         }
     }
+
+    Ok(())
 }
 
 /// Handle an opening tag: `<name ...>`
-fn open_tag<'a>(parser: &mut Parser<'a>, start: usize) {
+fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
     let (name, name_start, name_end) = parser.read_identifier();
     if name.is_empty() {
         // Not a valid tag — treat as text
         parser.index = start;
         super::text::text(parser);
-        return;
+        return Ok(());
     }
     let name = name.to_string();
+    let name_loc = parser.source_location(name_start, name_end);
 
     let attributes = read_attributes(parser);
 
     parser.allow_whitespace();
 
     let self_closing = parser.eat("/");
-    parser.eat_required(">");
+    parser.eat_required(">")?;
 
-    let is_component = name.chars().next().map_or(false, |c| c.is_uppercase())
-        || name.contains('.');
+    let is_component =
+        name.chars().next().map_or(false, |c| c.is_uppercase()) || name.contains('.');
 
     let is_void = crate::parser::utils::is_void(&name);
 
     if self_closing || is_void {
         if is_component {
-            parser.append(FragmentNode::Component(
-                svelte_ast::elements::Component {
-                    span: Span::new(start, parser.index),
-                    name_loc: name_loc_from_offsets(name_start, name_end),
-                    name,
-                    attributes,
-                    fragment: Fragment { nodes: Vec::new() },
-                },
-            ));
+            parser.append(FragmentNode::Component(Component {
+                span: Span::new(start, parser.index),
+                name_loc,
+                name,
+                attributes,
+                fragment: Fragment { nodes: Vec::new() },
+            }));
         } else {
             parser.append(FragmentNode::RegularElement(RegularElement {
                 span: Span::new(start, parser.index),
-                name_loc: name_loc_from_offsets(name_start, name_end),
+                name_loc,
                 name,
                 attributes,
                 fragment: Fragment { nodes: Vec::new() },
@@ -185,12 +192,24 @@ fn open_tag<'a>(parser: &mut Parser<'a>, start: usize) {
         }
     } else {
         if is_component {
-            parser.stack.push(StackFrame::Component { start, name, attributes });
+            parser.stack.push(StackFrame::Component {
+                start,
+                name,
+                name_loc,
+                attributes,
+            });
         } else {
-            parser.stack.push(StackFrame::RegularElement { start, name, attributes });
+            parser.stack.push(StackFrame::RegularElement {
+                start,
+                name,
+                name_loc,
+                attributes,
+            });
         }
         parser.fragments.push(Vec::new());
     }
+
+    Ok(())
 }
 
 /// Read attributes until `>` or `/>`.
@@ -235,8 +254,12 @@ fn read_attributes<'a>(parser: &mut Parser<'a>) -> Vec<svelte_ast::node::Attribu
             } else {
                 while parser.index < parser.template.len() {
                     let ch = parser.template.as_bytes()[parser.index];
-                    if ch == b' ' || ch == b'\t' || ch == b'\r' || ch == b'\n'
-                        || ch == b'>' || ch == b'/'
+                    if ch == b' '
+                        || ch == b'\t'
+                        || ch == b'\r'
+                        || ch == b'\n'
+                        || ch == b'>'
+                        || ch == b'/'
                     {
                         break;
                     }
@@ -340,4 +363,3 @@ fn skip_string(parser: &mut Parser, quote: u8) {
         parser.index += 1;
     }
 }
-

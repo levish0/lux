@@ -4,30 +4,27 @@ use oxc_ast::ast::{BindingPattern, Expression};
 use oxc_span::SourceType;
 
 use crate::error::ErrorKind;
-use crate::parser::read::context::read_pattern;
-use crate::parser::read::expression::read_expression;
-use crate::parser::{AwaitPhase, Parser, StackFrame};
 use crate::parser::patterns::REGEX_WHITESPACE_WITH_CLOSING_CURLY_BRACE;
+use crate::parser::read::context::read_pattern;
+use crate::parser::read::expression::{extract_expression, loose_identifier, read_expression};
+use crate::parser::{AwaitPhase, ParseError, Parser, StackFrame};
 
-use super::{
-    extract_expression, loose_identifier, skip_string_bytes, skip_to_closing_brace,
-    is_whitespace_byte, is_identifier_byte,
-};
+use super::{is_identifier_byte, is_whitespace_byte, skip_string_bytes, skip_to_closing_brace};
 
 /// `{#...}` — open block (if, each, await, key, snippet)
-pub fn open<'a>(parser: &mut Parser<'a>) {
+pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
     let mut start = parser.index - 2;
     while start > 0 && parser.template.as_bytes()[start] != b'{' {
         start -= 1;
     }
 
     if parser.eat("if") {
-        parser.require_whitespace();
+        parser.require_whitespace()?;
 
-        let test = read_expression(parser);
+        let test = read_expression(parser)?;
 
         parser.allow_whitespace();
-        parser.eat_required("}");
+        parser.eat_required("}")?;
 
         parser.stack.push(StackFrame::IfBlock {
             start,
@@ -37,19 +34,19 @@ pub fn open<'a>(parser: &mut Parser<'a>) {
         });
         parser.fragments.push(Vec::new());
 
-        return;
+        return Ok(());
     }
 
     if parser.eat("each") {
-        parser.require_whitespace();
+        parser.require_whitespace()?;
 
-        let expression = read_each_expression(parser);
+        let expression = read_each_expression(parser)?;
 
         parser.allow_whitespace();
 
         // Read context pattern (after "as")
         let context = if parser.eat("as") {
-            parser.require_whitespace();
+            parser.require_whitespace()?;
             read_pattern(parser)
         } else {
             None
@@ -63,11 +60,11 @@ pub fn open<'a>(parser: &mut Parser<'a>) {
             let (name, _start, _end) = parser.read_identifier();
             if name.is_empty() {
                 if !parser.loose {
-                    parser.error(
+                    return Err(parser.error(
                         ErrorKind::ExpectedToken,
                         parser.index,
                         "Expected identifier".to_string(),
-                    );
+                    ));
                 }
                 None
             } else {
@@ -81,16 +78,16 @@ pub fn open<'a>(parser: &mut Parser<'a>) {
         // Read key expression (inside parentheses)
         let key = if parser.eat("(") {
             parser.allow_whitespace();
-            let k = read_expression(parser);
+            let k = read_expression(parser)?;
             parser.allow_whitespace();
-            parser.eat_required(")");
+            parser.eat_required(")")?;
             parser.allow_whitespace();
             Some(k)
         } else {
             None
         };
 
-        parser.eat_required("}");
+        parser.eat_required("}")?;
 
         parser.stack.push(StackFrame::EachBlock {
             start,
@@ -102,12 +99,12 @@ pub fn open<'a>(parser: &mut Parser<'a>) {
         });
         parser.fragments.push(Vec::new());
 
-        return;
+        return Ok(());
     }
 
     if parser.eat("await") {
-        parser.require_whitespace();
-        let expression = read_expression(parser);
+        parser.require_whitespace()?;
+        let expression = read_expression(parser)?;
         parser.allow_whitespace();
 
         let mut value = None;
@@ -115,19 +112,25 @@ pub fn open<'a>(parser: &mut Parser<'a>) {
         let phase;
 
         if parser.eat("then") {
-            if parser.match_regex(&REGEX_WHITESPACE_WITH_CLOSING_CURLY_BRACE).is_some() {
+            if parser
+                .match_regex(&REGEX_WHITESPACE_WITH_CLOSING_CURLY_BRACE)
+                .is_some()
+            {
                 parser.allow_whitespace();
             } else {
-                parser.require_whitespace();
+                parser.require_whitespace()?;
                 value = read_pattern(parser);
                 parser.allow_whitespace();
             }
             phase = AwaitPhase::Then;
         } else if parser.eat("catch") {
-            if parser.match_regex(&REGEX_WHITESPACE_WITH_CLOSING_CURLY_BRACE).is_some() {
+            if parser
+                .match_regex(&REGEX_WHITESPACE_WITH_CLOSING_CURLY_BRACE)
+                .is_some()
+            {
                 parser.allow_whitespace();
             } else {
-                parser.require_whitespace();
+                parser.require_whitespace()?;
                 error = read_pattern(parser);
                 parser.allow_whitespace();
             }
@@ -136,7 +139,7 @@ pub fn open<'a>(parser: &mut Parser<'a>) {
             phase = AwaitPhase::Pending;
         }
 
-        parser.eat_required("}");
+        parser.eat_required("}")?;
 
         parser.stack.push(StackFrame::AwaitBlock {
             start,
@@ -149,36 +152,35 @@ pub fn open<'a>(parser: &mut Parser<'a>) {
         });
         parser.fragments.push(Vec::new());
 
-        return;
+        return Ok(());
     }
 
     if parser.eat("key") {
-        parser.require_whitespace();
+        parser.require_whitespace()?;
 
-        let expression = read_expression(parser);
+        let expression = read_expression(parser)?;
         parser.allow_whitespace();
 
-        parser.eat_required("}");
+        parser.eat_required("}")?;
 
-        parser.stack.push(StackFrame::KeyBlock {
-            start,
-            expression,
-        });
+        parser
+            .stack
+            .push(StackFrame::KeyBlock { start, expression });
         parser.fragments.push(Vec::new());
 
-        return;
+        return Ok(());
     }
 
     if parser.eat("snippet") {
-        parser.require_whitespace();
+        parser.require_whitespace()?;
 
         let (name, name_start, name_end) = parser.read_identifier();
         if name.is_empty() && !parser.loose {
-            parser.error(
+            return Err(parser.error(
                 ErrorKind::ExpectedToken,
                 parser.index,
                 "Expected identifier".to_string(),
-            );
+            ));
         }
 
         // Build identifier expression for the snippet name
@@ -198,11 +200,9 @@ pub fn open<'a>(parser: &mut Parser<'a>) {
         if parser.ts && parser.match_str("<") {
             let tp_start = parser.index;
             let pointy_brackets: &[(char, char)] = &[('<', '>')];
-            if let Some(end) = crate::parser::bracket::match_bracket(
-                parser.template,
-                tp_start,
-                pointy_brackets,
-            ) {
+            if let Some(end) =
+                crate::parser::bracket::match_bracket(parser.template, tp_start, pointy_brackets)
+            {
                 type_params = Some(parser.template[tp_start + 1..end - 1].to_string());
                 parser.index = end;
             }
@@ -229,7 +229,7 @@ pub fn open<'a>(parser: &mut Parser<'a>) {
                 }
                 parser.index += 1;
             }
-            parser.eat_required(")");
+            parser.eat_required(")")?;
             let params_end = parser.index;
 
             let params_source = &parser.template[params_start..params_end];
@@ -239,7 +239,7 @@ pub fn open<'a>(parser: &mut Parser<'a>) {
         };
 
         parser.allow_whitespace();
-        parser.eat_required("}");
+        parser.eat_required("}")?;
 
         parser.stack.push(StackFrame::SnippetBlock {
             start,
@@ -249,24 +249,25 @@ pub fn open<'a>(parser: &mut Parser<'a>) {
         });
         parser.fragments.push(Vec::new());
 
-        return;
+        return Ok(());
     }
 
     if !parser.loose {
-        parser.error(
+        return Err(parser.error(
             ErrorKind::ExpectedToken,
             parser.index,
             "Expected block type (if, each, await, key, or snippet)".to_string(),
-        );
+        ));
     }
     skip_to_closing_brace(parser);
+    Ok(())
 }
 
 // ─── Each Expression Helpers ────────────────────────────────────────
 
 /// Read the collection expression for an each block.
 /// Scans for the "as" keyword at bracket depth 0 to find the expression boundary.
-fn read_each_expression<'a>(parser: &mut Parser<'a>) -> Expression<'a> {
+fn read_each_expression<'a>(parser: &mut Parser<'a>) -> Result<Expression<'a>, ParseError> {
     let start = parser.index;
 
     let as_pos = find_as_keyword(parser.template, start);
@@ -276,22 +277,19 @@ fn read_each_expression<'a>(parser: &mut Parser<'a>) -> Expression<'a> {
             let slice = &parser.template[start..pos];
             start + slice.trim_end().len()
         }
-        None => {
-            find_closing_brace_pos(parser.template, start)
-        }
+        None => find_closing_brace_pos(parser.template, start),
     };
 
     if expr_end <= start {
         if parser.loose {
             parser.index = expr_end;
-            return loose_identifier(parser, start, start);
+            return Ok(loose_identifier(parser, start, start));
         }
-        parser.error(
+        return Err(parser.error(
             ErrorKind::ExpectedExpression,
             start,
             "Expected expression".to_string(),
-        );
-        return loose_identifier(parser, start, start);
+        ));
     }
 
     let expr_source = &parser.template[start..expr_end];
@@ -300,7 +298,7 @@ fn read_each_expression<'a>(parser: &mut Parser<'a>) -> Expression<'a> {
 
     if trimmed.is_empty() {
         parser.index = expr_end;
-        return loose_identifier(parser, start, expr_end);
+        return Ok(loose_identifier(parser, start, expr_end));
     }
 
     // Parse with OXC
@@ -322,16 +320,14 @@ fn read_each_expression<'a>(parser: &mut Parser<'a>) -> Expression<'a> {
     if !result.errors.is_empty() {
         if parser.loose {
             parser.index = effective_end;
-            return loose_identifier(parser, start, effective_end);
+            return Ok(loose_identifier(parser, start, effective_end));
         }
         let first_err = &result.errors[0];
-        parser.error(
+        return Err(parser.error(
             ErrorKind::JsParseError,
             start,
             format!("JS parse error: {}", first_err),
-        );
-        parser.index = effective_end;
-        return loose_identifier(parser, start, effective_end);
+        ));
     }
 
     let program = result.program;
@@ -340,11 +336,11 @@ fn read_each_expression<'a>(parser: &mut Parser<'a>) -> Expression<'a> {
     match expr {
         Some(e) => {
             parser.index = effective_end;
-            e
+            Ok(e)
         }
         None => {
             parser.index = effective_end;
-            loose_identifier(parser, start, effective_end)
+            Ok(loose_identifier(parser, start, effective_end))
         }
     }
 }

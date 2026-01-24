@@ -1,11 +1,9 @@
-use std::sync::LazyLock;
 use regex::Regex;
+use std::sync::LazyLock;
 
-pub static REGEX_WHITESPACE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"\s").unwrap());
+pub static REGEX_WHITESPACE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\s").unwrap());
 
-pub static REGEX_WHITESPACES: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"\s+").unwrap());
+pub static REGEX_WHITESPACES: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\s+").unwrap());
 
 pub static REGEX_STARTS_WITH_NEWLINE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\r?\n").unwrap());
@@ -46,17 +44,15 @@ pub static REGEX_INVALID_IDENTIFIER_CHARS: LazyLock<Regex> =
 pub static REGEX_STARTS_WITH_VOWEL: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[aeiou]").unwrap());
 
-pub static REGEX_HEADING_TAGS: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^h[1-6]$").unwrap());
+pub static REGEX_HEADING_TAGS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^h[1-6]$").unwrap());
 
 pub static REGEX_ILLEGAL_ATTRIBUTE_CHARACTER: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"(^[0-9\-.])|[\^$@%&#?!|()\[\]{}*+~;]"#).unwrap());
 
-pub static REGEX_BIDIRECTIONAL_CONTROL_CHARACTERS: LazyLock<Regex> =
-    LazyLock::new(|| {
-        Regex::new(r"[\u{202a}\u{202b}\u{202c}\u{202d}\u{202e}\u{2066}\u{2067}\u{2068}\u{2069}]+")
-            .unwrap()
-    });
+pub static REGEX_BIDIRECTIONAL_CONTROL_CHARACTERS: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"[\u{202a}\u{202b}\u{202c}\u{202d}\u{202e}\u{2066}\u{2067}\u{2068}\u{2069}]+")
+        .unwrap()
+});
 
 pub static REGEX_JS_PREFIX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?i)^\W*javascript:").unwrap());

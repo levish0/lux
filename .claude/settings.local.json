@@ -14,7 +14,8 @@
       "WebFetch(domain:lib.rs)",
       "Bash(xargs cat:*)",
       "Bash(find:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(cargo doc:*)"
     ]
   }
 }

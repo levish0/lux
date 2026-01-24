@@ -1,5 +1,6 @@
 use oxc_ast::ast::{Expression, VariableDeclaration};
 
+use crate::metadata::{ExpressionNodeMetadata, RenderTagMetadata};
 use crate::span::Span;
 
 /*
@@ -12,6 +13,7 @@ use crate::span::Span;
 pub struct ExpressionTag<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
+    pub metadata: ExpressionNodeMetadata,
 }
 
 /*
@@ -24,6 +26,7 @@ pub struct ExpressionTag<'a> {
 pub struct HtmlTag<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
+    pub metadata: ExpressionNodeMetadata,
 }
 
 /*
@@ -36,6 +39,7 @@ pub struct HtmlTag<'a> {
 pub struct ConstTag<'a> {
     pub span: Span,
     pub declaration: VariableDeclaration<'a>,
+    pub metadata: ExpressionNodeMetadata,
 }
 
 /*
@@ -60,6 +64,7 @@ pub struct DebugTag<'a> {
 pub struct RenderTag<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
+    pub metadata: RenderTagMetadata,
 }
 
 /*

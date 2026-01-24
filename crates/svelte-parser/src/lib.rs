@@ -22,13 +22,17 @@ pub fn parse<'a>(
     if parser.errors.is_empty() {
         Ok(parser.into_root())
     } else {
-        let errors = parser.errors.iter().map(|e| {
-            ParseError::new(
-                e.kind,
-                svelte_ast::span::Span::new(e.position, e.position),
-                &e.message,
-            )
-        }).collect();
+        let errors = parser
+            .errors
+            .iter()
+            .map(|e| {
+                ParseError::new(
+                    e.kind,
+                    svelte_ast::span::Span::new(e.position, e.position),
+                    &e.message,
+                )
+            })
+            .collect();
         Err(errors)
     }
 }

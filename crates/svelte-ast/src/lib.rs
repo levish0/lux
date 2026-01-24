@@ -2,6 +2,7 @@ pub mod attributes;
 pub mod blocks;
 pub mod css;
 pub mod elements;
+pub mod metadata;
 pub mod node;
 pub mod root;
 pub mod span;

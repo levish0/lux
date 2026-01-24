@@ -1,58 +1,55 @@
-mod open;
-mod next;
 mod close;
+mod next;
+mod open;
 mod special;
 
-use std::cell::Cell;
-
-use oxc_ast::ast::{BindingIdentifier, BindingPattern, Expression};
+use oxc_ast::ast::{BindingPattern, Expression};
 use oxc_span::GetSpan;
 
+use svelte_ast::metadata::ExpressionNodeMetadata;
 use svelte_ast::node::FragmentNode;
 use svelte_ast::span::Span;
 use svelte_ast::tags::ExpressionTag;
 
 use crate::parser::read::expression::read_expression;
-use crate::parser::Parser;
+use crate::parser::{ParseError, Parser};
 
 /// Tag state.
 /// Matches reference: `state/tag.js`
 ///
 /// Handles `{...}` expressions and blocks (`{#if}`, `{:else}`, `{/if}`, `{@html}`, etc.)
-pub fn tag<'a>(parser: &mut Parser<'a>) {
+pub fn tag<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
     let start = parser.index;
     parser.index += 1; // skip `{`
 
     parser.allow_whitespace();
 
     if parser.eat("#") {
-        open::open(parser);
-        return;
+        return open::open(parser);
     }
     if parser.eat(":") {
-        next::next(parser);
-        return;
+        return next::next(parser);
     }
     if parser.eat("@") {
-        special::special(parser);
-        return;
+        return special::special(parser);
     }
     if parser.match_str("/") && !parser.match_str("/*") && !parser.match_str("//") {
         parser.eat("/");
-        close::close(parser);
-        return;
+        return close::close(parser);
     }
 
     // Expression tag: {expression}
-    let expression = read_expression(parser);
+    let expression = read_expression(parser)?;
 
     parser.allow_whitespace();
-    parser.eat_required("}");
+    parser.eat_required("}")?;
 
     parser.append(FragmentNode::ExpressionTag(ExpressionTag {
         span: Span::new(start, parser.index),
         expression,
+        metadata: ExpressionNodeMetadata::default(),
     }));
+    Ok(())
 }
 
 // ─── Shared Helper Functions ────────────────────────────────────────
@@ -104,57 +101,6 @@ fn skip_string(parser: &mut Parser, quote: u8) {
     }
 }
 
-/// Create a dummy Identifier expression for loose/error recovery.
-pub fn loose_identifier<'a>(parser: &Parser<'a>, start: usize, end: usize) -> Expression<'a> {
-    Expression::Identifier(oxc_allocator::Box::new_in(
-        oxc_ast::ast::IdentifierReference {
-            span: oxc_span::Span::new(start as u32, end as u32),
-            name: oxc_span::Atom::from(""),
-            reference_id: Cell::new(None),
-        },
-        parser.allocator,
-    ))
-}
-
-/// Create a dummy BindingPattern for error recovery.
-pub fn dummy_binding_pattern<'a>(parser: &Parser<'a>, pos: usize) -> BindingPattern<'a> {
-    BindingPattern::BindingIdentifier(oxc_allocator::Box::new_in(
-        BindingIdentifier {
-            span: oxc_span::Span::new(pos as u32, pos as u32),
-            name: oxc_span::Atom::from(""),
-            symbol_id: Cell::new(None),
-        },
-        parser.allocator,
-    ))
-}
-
-/// Extract expression from a parsed OXC Program.
-pub fn extract_expression<'a>(program: oxc_ast::ast::Program<'a>) -> Option<Expression<'a>> {
-    let body = program.body;
-    if body.len() != 1 {
-        return None;
-    }
-    let stmt = body.into_iter().next()?;
-    match stmt {
-        oxc_ast::ast::Statement::ExpressionStatement(expr_stmt) => {
-            let inner = expr_stmt.unbox();
-            Some(inner.expression)
-        }
-        _ => None,
-    }
-}
-
-/// Get the span start/end from an optional BindingPattern.
-pub fn pattern_span(pattern: &Option<BindingPattern>) -> (u32, u32) {
-    match pattern {
-        Some(p) => {
-            let span = binding_pattern_span(p);
-            (span.start, span.end)
-        }
-        None => (0, 0),
-    }
-}
-
 /// Get span from a BindingPattern.
 pub fn binding_pattern_span(pattern: &BindingPattern) -> oxc_span::Span {
     match pattern {
@@ -190,7 +136,9 @@ pub fn skip_string_bytes(bytes: &[u8], start: usize) -> usize {
                 match bytes[i] {
                     b'{' => depth += 1,
                     b'}' => depth -= 1,
-                    b'\\' => { i += 1; }
+                    b'\\' => {
+                        i += 1;
+                    }
                     _ => {}
                 }
                 i += 1;
