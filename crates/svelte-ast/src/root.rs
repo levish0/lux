@@ -1,8 +1,8 @@
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
 use std::collections::HashMap;
-use swc_ecma_ast as swc;
 
+use crate::JsNode;
 use crate::css::StyleSheet;
 use crate::node::{AttributeNode, FragmentNode};
 use crate::span::Span;
@@ -66,7 +66,7 @@ impl Serialize for Root {
 pub struct Script {
     pub span: Span,
     pub context: ScriptContext,
-    pub content: swc::Program,
+    pub content: JsNode,
     pub content_comments: Vec<JsComment>,
     pub content_start: usize,
     pub content_end: usize,
@@ -80,17 +80,68 @@ impl Serialize for Script {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("context", &self.context)?;
-        map.serialize_entry(
-            "content",
-            &crate::utils::estree::ProgramWithComments {
-                program: &self.content,
-                comments: &self.content_comments,
-                content_start: self.content_start,
-                content_end: self.content_end,
-                script_start: self.span.start,
-                script_end: self.span.end,
-            },
-        )?;
+
+        // Build program value with comments and loc
+        let mut program = self.content.0.clone();
+
+        // Set Program start/end to content boundaries, loc to script tag boundaries
+        crate::utils::estree::add_program_loc(
+            &mut program,
+            self.content_start,
+            self.content_end,
+            self.span.start,
+            self.span.end,
+        );
+
+        // Attach comments
+        if !self.content_comments.is_empty() {
+            if let serde_json::Value::Object(ref mut obj) = program {
+                let body_is_empty = obj
+                    .get("body")
+                    .and_then(|b| b.as_array())
+                    .map(|arr| arr.is_empty())
+                    .unwrap_or(true);
+
+                if body_is_empty {
+                    let comments_val: Vec<serde_json::Value> = self
+                        .content_comments
+                        .iter()
+                        .map(|c| serde_json::to_value(c).map_err(serde::ser::Error::custom))
+                        .collect::<Result<_, _>>()?;
+                    obj.insert("trailingComments".to_string(), serde_json::Value::Array(comments_val));
+                } else {
+                    let body_start = obj
+                        .get("body")
+                        .and_then(|b| b.as_array())
+                        .and_then(|arr| arr.first())
+                        .and_then(|node| node.get("start"))
+                        .and_then(|s| s.as_u64())
+                        .unwrap_or(u64::MAX);
+
+                    let mut leading = Vec::new();
+                    let mut trailing = Vec::new();
+
+                    for comment in &self.content_comments {
+                        let c_val = serde_json::to_value(comment).map_err(serde::ser::Error::custom)?;
+                        let comment_start = comment.span.map_or(0, |s| s.start) as u64;
+                        if comment_start < body_start {
+                            leading.push(c_val);
+                        } else {
+                            trailing.push(c_val);
+                        }
+                    }
+
+                    if !leading.is_empty() {
+                        obj.insert("leadingComments".to_string(), serde_json::Value::Array(leading));
+                    }
+                    if !trailing.is_empty() {
+                        obj.insert("trailingComments".to_string(), serde_json::Value::Array(trailing));
+                    }
+                }
+            }
+        }
+
+        map.serialize_entry("content", &program)?;
         map.serialize_entry("attributes", &self.attributes)?;
         map.end()
     }
@@ -176,11 +227,8 @@ pub struct CustomElementOptions {
     pub shadow: Option<ShadowMode>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub props: Option<HashMap<String, CustomElementProp>>,
-    #[serde(
-        serialize_with = "crate::utils::estree::serialize_opt_expr",
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub extend: Option<Box<swc::Expr>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extend: Option<JsNode>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]

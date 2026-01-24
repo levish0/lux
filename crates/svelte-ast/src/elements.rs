@@ -1,6 +1,6 @@
 use serde::Serialize;
-use swc_ecma_ast as swc;
 
+use crate::JsNode;
 use crate::node::AttributeNode;
 use crate::root::Fragment;
 use crate::span::{SourceLocation, Span};
@@ -55,7 +55,7 @@ pub struct SvelteElement {
     #[serde(flatten)]
     pub span: Span,
     pub name_loc: SourceLocation,
-    pub tag: Box<swc::Expr>,
+    pub tag: JsNode,
     pub attributes: Vec<AttributeNode>,
     pub fragment: Fragment,
 }
@@ -74,7 +74,7 @@ pub struct SvelteComponent {
     #[serde(flatten)]
     pub span: Span,
     pub name_loc: SourceLocation,
-    pub expression: Box<swc::Expr>,
+    pub expression: JsNode,
     pub attributes: Vec<AttributeNode>,
     pub fragment: Fragment,
 }

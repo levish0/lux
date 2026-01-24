@@ -1,7 +1,7 @@
+use svelte_ast::JsNode;
 use svelte_ast::node::FragmentNode;
 use svelte_ast::span::Span;
 use svelte_ast::tags::{AttachTag, ConstTag, DebugTag, ExpressionTag, HtmlTag, RenderTag};
-use swc_ecma_ast as swc;
 use winnow::Result as ParseResult;
 use winnow::combinator::{opt, peek};
 use winnow::prelude::*;
@@ -11,7 +11,7 @@ use winnow::token::{literal, take_while};
 use super::ParserInput;
 use super::bracket::read_until_close_brace;
 use super::expression::read_expression;
-use super::swc_parse::{parse_expression, parse_var_decl};
+use super::oxc_parse::{is_call_expression, parse_expression, parse_var_decl, var_decl_count};
 use crate::error::{ErrorKind, ParseError};
 
 /// Parse `{expression}` tag.
@@ -83,15 +83,18 @@ fn debug_tag_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult
     if opt(peek(literal("}"))).parse_next(parser_input)?.is_none() {
         loop {
             take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
+            let ident_start = parser_input.current_token_start();
             let name: &str = take_while(1.., |c: char| {
                 c.is_ascii_alphanumeric() || c == '_' || c == '$'
             })
             .parse_next(parser_input)?;
-            identifiers.push(swc::Ident::new(
-                name.into(),
-                swc_common::DUMMY_SP,
-                Default::default(),
-            ));
+            let ident_end = parser_input.current_token_start();
+            identifiers.push(serde_json::json!({
+                "type": "Identifier",
+                "name": name,
+                "start": ident_start,
+                "end": ident_end
+            }));
             take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
             if opt(literal(",")).parse_next(parser_input)?.is_none() {
                 break;
@@ -104,7 +107,7 @@ fn debug_tag_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult
 
     Ok(FragmentNode::DebugTag(DebugTag {
         span: Span::new(start, end),
-        identifiers,
+        identifiers: JsNode(serde_json::Value::Array(identifiers)),
     }))
 }
 
@@ -112,14 +115,15 @@ fn debug_tag_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult
 fn const_tag_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult<FragmentNode> {
     take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
+    let offset = parser_input.current_token_start();
     let content = read_until_close_brace(parser_input)?;
     literal("}").parse_next(parser_input)?;
     let end = parser_input.previous_token_end();
 
-    let declaration = parse_var_decl(content, parser_input.state.ts)?;
+    let declaration = parse_var_decl(content, parser_input.state.ts, offset as u32)?;
 
-    // Validate: must have exactly one declarator (rejects `{@const a = 1, b = 2}`)
-    if declaration.decls.len() != 1 {
+    // Validate: must have exactly one declarator
+    if var_decl_count(&declaration) != 1 {
         parser_input.state.errors.push(ParseError::new(
             ErrorKind::ConstTagInvalidExpression,
             Span::new(start, end),
@@ -143,12 +147,7 @@ fn render_tag_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
     let expression = parse_expression(content, parser_input.state.ts, offset as u32)?;
 
     // Validate: must be CallExpression or optional chain call
-    let is_valid = match expression.as_ref() {
-        swc::Expr::Call(_) => true,
-        swc::Expr::OptChain(opt) => matches!(opt.base.as_ref(), swc::OptChainBase::Call(_)),
-        _ => false,
-    };
-    if !is_valid {
+    if !is_call_expression(&expression) {
         parser_input.state.errors.push(ParseError::new(
             ErrorKind::RenderTagInvalidExpression,
             Span::new(offset, parser_input.current_token_start()),

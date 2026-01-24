@@ -1,3 +1,4 @@
+use svelte_ast::JsNode;
 use svelte_ast::attributes::{
     AnimateDirective, Attribute, AttributeSequenceValue, AttributeValue, BindDirective,
     ClassDirective, EventModifier, LetDirective, OnDirective, SpreadAttribute, StyleDirective,
@@ -7,7 +8,6 @@ use svelte_ast::node::AttributeNode;
 use svelte_ast::span::{SourceLocation, Span};
 use svelte_ast::tags::{AttachTag, ExpressionTag};
 use svelte_ast::text::Text;
-use swc_ecma_ast as swc;
 use winnow::Result as ParseResult;
 use winnow::combinator::{dispatch, opt, peek};
 use winnow::prelude::*;
@@ -17,7 +17,7 @@ use winnow::token::{any, literal, take_while};
 use super::ParserInput;
 use super::bracket::read_until_close_brace;
 use super::html_entities::decode_character_references;
-use super::swc_parse::{parse_expression, parse_expression_with_comments};
+use super::oxc_parse::{parse_expression, parse_expression_with_comments};
 
 /// Parse a single attribute, directive, or spread.
 pub fn attribute_parser(parser_input: &mut ParserInput) -> ParseResult<AttributeNode> {
@@ -77,21 +77,17 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
 
     // In loose mode with empty name, the expression content might be invalid
     if name.is_empty() {
-        // Consume any remaining content until }
         let expr_offset = parser_input.current_token_start() as u32;
         let _remaining = read_until_close_brace(parser_input)?;
         literal("}").parse_next(parser_input)?;
         let end = parser_input.previous_token_end();
 
-        let expr_span = Span::new(expr_offset as usize, expr_offset as usize);
-        let expression = Box::new(swc::Expr::Ident(swc::Ident::new(
-            "".into(),
-            swc_common::Span::new(
-                swc_common::BytePos(expr_offset),
-                swc_common::BytePos(expr_offset),
-            ),
-            Default::default(),
-        )));
+        let expression = JsNode(serde_json::json!({
+            "type": "Identifier",
+            "name": "",
+            "start": expr_offset,
+            "end": expr_offset
+        }));
 
         return Ok(AttributeNode::Attribute(Attribute {
             span: Span::new(start, end),
@@ -103,7 +99,7 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
                     .locate_span(expr_offset as usize, expr_offset as usize),
             ),
             value: AttributeValue::Expression(ExpressionTag {
-                span: expr_span,
+                span: Span::new(expr_offset as usize, expr_offset as usize),
                 expression,
                 force_expression_loc: true,
             }),
@@ -113,11 +109,12 @@ fn spread_or_shorthand_parser(parser_input: &mut ParserInput) -> ParseResult<Att
     literal("}").parse_next(parser_input)?;
     let end = parser_input.previous_token_end();
 
-    let expression = Box::new(swc::Expr::Ident(swc::Ident::new(
-        name.into(),
-        swc_common::DUMMY_SP,
-        Default::default(),
-    )));
+    let expression = JsNode(serde_json::json!({
+        "type": "Identifier",
+        "name": name,
+        "start": 0,
+        "end": 0
+    }));
 
     Ok(AttributeNode::Attribute(Attribute {
         span: Span::new(start, end),
@@ -226,13 +223,14 @@ fn parse_bind_directive(
 fn parse_bind_directive_value(
     parser_input: &mut ParserInput,
     name: &str,
-) -> ParseResult<(Box<swc::Expr>, Vec<svelte_ast::text::JsComment>)> {
+) -> ParseResult<(JsNode, Vec<svelte_ast::text::JsComment>)> {
     if opt(literal("=")).parse_next(parser_input)?.is_none() {
-        let expr = Box::new(swc::Expr::Ident(swc::Ident::new(
-            name.into(),
-            swc_common::DUMMY_SP,
-            Default::default(),
-        )));
+        let expr = JsNode(serde_json::json!({
+            "type": "Identifier",
+            "name": name,
+            "start": 0,
+            "end": 0
+        }));
         return Ok((expr, vec![]));
     }
 
@@ -287,11 +285,12 @@ fn parse_class_directive(
     let end = parser_input.previous_token_end();
 
     let expr = expression.unwrap_or_else(|| {
-        Box::new(swc::Expr::Ident(swc::Ident::new(
-            name.into(),
-            swc_common::DUMMY_SP,
-            Default::default(),
-        )))
+        JsNode(serde_json::json!({
+            "type": "Identifier",
+            "name": name,
+            "start": 0,
+            "end": 0
+        }))
     });
 
     Ok(AttributeNode::ClassDirective(ClassDirective {
@@ -427,7 +426,7 @@ fn parse_let_directive(
 /// Parse optional `={expr}` value for directives.
 fn parse_optional_directive_value(
     parser_input: &mut ParserInput,
-) -> ParseResult<Option<Box<swc::Expr>>> {
+) -> ParseResult<Option<JsNode>> {
     if opt(literal("=")).parse_next(parser_input)?.is_none() {
         return Ok(None);
     }

@@ -1,7 +1,7 @@
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
-use swc_ecma_ast as swc;
 
+use crate::JsNode;
 use crate::span::{SourceLocation, Span};
 use crate::tags::ExpressionTag;
 use crate::text::Text;
@@ -46,7 +46,6 @@ impl Serialize for AttributeValue {
         match self {
             AttributeValue::True => s.serialize_bool(true),
             AttributeValue::Expression(e) => {
-                // Need to include "type": "ExpressionTag" since we're not in a tagged enum
                 let mut map = s.serialize_map(None)?;
                 map.serialize_entry("type", "ExpressionTag")?;
                 map.serialize_entry("start", &e.span.start)?;
@@ -54,13 +53,12 @@ impl Serialize for AttributeValue {
                 if e.force_expression_loc {
                     crate::utils::estree::set_force_char_loc(true);
                 }
-                map.serialize_entry(
-                    "expression",
-                    &crate::utils::estree::ExprWrapper(&e.expression),
-                )?;
+                let mut expr_val = e.expression.0.clone();
                 if e.force_expression_loc {
+                    crate::utils::estree::add_loc(&mut expr_val);
                     crate::utils::estree::set_force_char_loc(false);
                 }
+                map.serialize_entry("expression", &expr_val)?;
                 map.end()
             }
             AttributeValue::Sequence(items) => items.serialize(s),
@@ -87,8 +85,7 @@ pub struct SpreadAttribute {
     #[serde(flatten)]
     pub span: Span,
     pub name_loc: Option<SourceLocation>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
-    pub expression: Box<swc::Expr>,
+    pub expression: JsNode,
 }
 
 /*
@@ -104,24 +101,20 @@ pub struct BindDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    pub expression: Box<swc::Expr>,
+    pub expression: JsNode,
     pub leading_comments: Vec<crate::text::JsComment>,
 }
 
 impl Serialize for BindDirective {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        use serde::ser::Error as SerError;
-
         let mut map = s.serialize_map(None)?;
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
 
         // Serialize expression with optional leadingComments
-        let expr_value =
-            serde_json::to_value(self.expression.as_ref()).map_err(S::Error::custom)?;
-        let mut transformed = crate::utils::estree::transform_value_pub(expr_value);
+        let mut expr_val = self.expression.0.clone();
         if !self.leading_comments.is_empty() {
-            if let serde_json::Value::Object(ref mut obj) = transformed {
+            if let serde_json::Value::Object(ref mut obj) = expr_val {
                 let comments_val: Vec<serde_json::Value> = self
                     .leading_comments
                     .iter()
@@ -133,7 +126,7 @@ impl Serialize for BindDirective {
                 );
             }
         }
-        map.serialize_entry("expression", &transformed)?;
+        map.serialize_entry("expression", &expr_val)?;
 
         map.serialize_entry("modifiers", &Vec::<String>::new())?;
         map.serialize_entry("name", &self.name)?;
@@ -156,8 +149,7 @@ pub struct ClassDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
-    pub expression: Box<swc::Expr>,
+    pub expression: JsNode,
 }
 
 /*
@@ -199,8 +191,7 @@ pub struct OnDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
-    pub expression: Option<Box<swc::Expr>>,
+    pub expression: Option<JsNode>,
     pub modifiers: Vec<EventModifier>,
 }
 
@@ -234,8 +225,7 @@ pub struct TransitionDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
-    pub expression: Option<Box<swc::Expr>>,
+    pub expression: Option<JsNode>,
     pub modifiers: Vec<TransitionModifier>,
     pub intro: bool,
     pub outro: bool,
@@ -261,8 +251,7 @@ pub struct AnimateDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
-    pub expression: Option<Box<swc::Expr>>,
+    pub expression: Option<JsNode>,
 }
 
 /*
@@ -279,8 +268,7 @@ pub struct UseDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
-    pub expression: Option<Box<swc::Expr>>,
+    pub expression: Option<JsNode>,
 }
 
 /*
@@ -297,6 +285,5 @@ pub struct LetDirective {
     pub span: Span,
     pub name: String,
     pub name_loc: Option<SourceLocation>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_opt_expr")]
-    pub expression: Option<Box<swc::Expr>>,
+    pub expression: Option<JsNode>,
 }

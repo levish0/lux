@@ -1,7 +1,7 @@
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
-use swc_ecma_ast as swc;
 
+use crate::JsNode;
 use crate::root::Fragment;
 use crate::span::Span;
 
@@ -19,8 +19,7 @@ pub struct IfBlock {
     #[serde(flatten)]
     pub span: Span,
     pub elseif: bool,
-    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
-    pub test: Box<swc::Expr>,
+    pub test: JsNode,
     pub consequent: Fragment,
     pub alternate: Option<Fragment>,
 }
@@ -40,20 +39,15 @@ pub struct IfBlock {
 pub struct EachBlock {
     #[serde(flatten)]
     pub span: Span,
-    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
-    pub expression: Box<swc::Expr>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_opt_pat_adjusted")]
-    pub context: Option<Box<swc::Pat>>,
+    pub expression: JsNode,
+    pub context: Option<JsNode>,
     pub body: Fragment,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fallback: Option<Fragment>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub index: Option<String>,
-    #[serde(
-        skip_serializing_if = "Option::is_none",
-        serialize_with = "crate::utils::estree::serialize_opt_expr"
-    )]
-    pub key: Option<Box<swc::Expr>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub key: Option<JsNode>,
 }
 
 /*
@@ -71,12 +65,9 @@ pub struct EachBlock {
 pub struct AwaitBlock {
     #[serde(flatten)]
     pub span: Span,
-    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
-    pub expression: Box<swc::Expr>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_opt_pat")]
-    pub value: Option<Box<swc::Pat>>,
-    #[serde(serialize_with = "crate::utils::estree::serialize_opt_pat")]
-    pub error: Option<Box<swc::Pat>>,
+    pub expression: JsNode,
+    pub value: Option<JsNode>,
+    pub error: Option<JsNode>,
     pub pending: Option<Fragment>,
     pub then: Option<Fragment>,
     pub catch: Option<Fragment>,
@@ -93,8 +84,7 @@ pub struct AwaitBlock {
 pub struct KeyBlock {
     #[serde(flatten)]
     pub span: Span,
-    #[serde(serialize_with = "crate::utils::estree::serialize_boxed_expr")]
-    pub expression: Box<swc::Expr>,
+    pub expression: JsNode,
     pub fragment: Fragment,
 }
 
@@ -110,9 +100,9 @@ pub struct KeyBlock {
 #[derive(Debug, Clone)]
 pub struct SnippetBlock {
     pub span: Span,
-    pub expression: Box<swc::Ident>,
+    pub expression: JsNode,
     pub type_params: Option<String>,
-    pub parameters: Vec<swc::Pat>,
+    pub parameters: JsNode,
     pub body: Fragment,
 }
 
@@ -122,23 +112,13 @@ impl Serialize for SnippetBlock {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("type", "SnippetBlock")?;
-
-        // Expression: Identifier with character-inclusive loc (matches reference Svelte)
-        map.serialize_entry(
-            "expression",
-            &crate::utils::estree::IdentWithCharLoc(&self.expression),
-        )?;
+        map.serialize_entry("expression", &self.expression)?;
 
         if let Some(ref tp) = self.type_params {
             map.serialize_entry("typeParams", tp)?;
         }
 
-        // Parameters go through normal ESTree transform
-        let params_val = serde_json::to_value(&self.parameters)
-            .map_err(serde::ser::Error::custom)?;
-        let params_transformed = crate::utils::estree::transform_value_pub(params_val);
-        map.serialize_entry("parameters", &params_transformed)?;
-
+        map.serialize_entry("parameters", &self.parameters)?;
         map.serialize_entry("body", &self.body)?;
         map.end()
     }

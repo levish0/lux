@@ -1,7 +1,6 @@
 # svelte-rs
 
-Svelte 5 compiler implemented in Rust. Aims to produce output identical to the official Svelte compiler.
-
+Svelte 5+ compiler implemented in Rust. Aims for 100% compatibility with the official Svelte compiler.
 ## Architecture
 
 Pipeline: **Parse → Analyze → Transform**

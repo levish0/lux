@@ -22,9 +22,10 @@ svelte-transformer = { path = "crates/svelte-transformer" }
 winnow = { version = "0.7.14", features = ["simd"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
-swc_ecma_parser = "33.0.0"
-swc_ecma_ast = { version = "20.0.0", features = ["serde-impl"] }
-swc_ecma_visit = "20.0.0"
-swc_common = { version = "18.0.1", features = ["sourcemap"] }
+oxc_parser = "0.110.0"
+oxc_allocator = "0.110.0"
+oxc_ast = { version = "0.110.0", features = ["serialize"] }
+oxc_span = { version = "0.110.0", features = ["serialize"] }
+oxc_diagnostics = "0.110.0"
 rayon = "1.11.0"
 line-span = "0.1.5"

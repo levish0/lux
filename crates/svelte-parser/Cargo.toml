@@ -12,7 +12,10 @@ description = "svelte-parser"
 svelte-ast = { workspace = true }
 winnow = { workspace = true }
 serde_json = { workspace = true }
-swc_ecma_parser = { workspace = true }
-swc_ecma_ast = { workspace = true }
-swc_common = { workspace = true }
-line-span = {workspace = true}
+serde = { workspace = true }
+oxc_parser = { workspace = true }
+oxc_allocator = { workspace = true }
+oxc_ast = { workspace = true }
+oxc_span = { workspace = true }
+oxc_diagnostics = { workspace = true }
+line-span = { workspace = true }

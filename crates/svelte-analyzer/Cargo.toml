@@ -11,4 +11,3 @@ description = "svelte-analyzer"
 [dependencies]
 serde = { workspace = true }
 serde_json = { workspace = true }
-swc_ecma_ast = { workspace = true }

@@ -6,7 +6,13 @@
       "WebSearch",
       "Bash(dir:*)",
       "Bash(findstr:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(node:*)",
+      "WebFetch(domain:docs.rs)",
+      "WebFetch(domain:crates.io)",
+      "WebFetch(domain:oxc.rs)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:lib.rs)"
     ]
   }
 }

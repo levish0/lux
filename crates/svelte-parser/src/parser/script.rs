@@ -1,20 +1,16 @@
 use svelte_ast::node::AttributeNode;
 use svelte_ast::root::{Script, ScriptContext};
 use svelte_ast::span::Span;
-use svelte_ast::text::{JsComment, JsCommentKind};
-use swc_common::BytePos;
-use swc_common::comments::{Comment, CommentKind, SingleThreadedComments};
-use swc_common::input::StringInput;
-use swc_ecma_ast as swc;
-use swc_ecma_parser::{EsSyntax, Syntax, TsSyntax};
+use svelte_ast::attributes::{AttributeSequenceValue, AttributeValue};
 use winnow::Result as ParseResult;
 use winnow::combinator::peek;
 use winnow::prelude::*;
 use winnow::stream::Location;
 use winnow::token::{any, literal, take_while};
-use svelte_ast::attributes::{AttributeSequenceValue, AttributeValue};
+
 use super::ParserInput;
 use super::attribute::attribute_parser;
+use super::oxc_parse::parse_program;
 
 /// Parse a `<script>` tag and return a Script node.
 /// Consumes from `<script` to `</script>`.
@@ -43,9 +39,9 @@ pub fn script_parser(parser_input: &mut ParserInput) -> ParseResult<Script> {
     literal("</script>").parse_next(parser_input)?;
     let end = parser_input.previous_token_end();
 
-    // Parse content with SWC
+    // Parse content with OXC
     let ts = parser_input.state.ts;
-    let (content, content_comments) = swc_parse_program(&content_text, ts, content_offset)?;
+    let (content, content_comments) = parse_program(&content_text, ts, content_offset)?;
 
     Ok(Script {
         span: Span::new(start, end),
@@ -59,8 +55,6 @@ pub fn script_parser(parser_input: &mut ParserInput) -> ParseResult<Script> {
 }
 
 fn parse_script_attributes(parser_input: &mut ParserInput) -> ParseResult<Vec<AttributeNode>> {
-    // Script tag attributes should not have expression interpolation in quoted values
-    // e.g. generics="T extends { foo: number }" should be plain text
     parser_input.state.text_only_attributes = true;
     let mut attributes = Vec::new();
     loop {
@@ -78,7 +72,6 @@ fn parse_script_attributes(parser_input: &mut ParserInput) -> ParseResult<Vec<At
 fn detect_script_context(attributes: &[AttributeNode]) -> ScriptContext {
     for attr in attributes {
         if let AttributeNode::Attribute(a) = attr {
-            // <script module> or <script context="module">
             if a.name == "module" {
                 return ScriptContext::Module;
             }
@@ -110,85 +103,4 @@ fn read_until_closing_script(parser_input: &mut ParserInput) -> ParseResult<Stri
         buf.push(c);
     }
     Ok(buf)
-}
-
-fn swc_parse_program(
-    source: &str,
-    ts: bool,
-    offset: u32,
-) -> ParseResult<(swc::Program, Vec<JsComment>)> {
-    let syntax = if ts {
-        Syntax::Typescript(TsSyntax {
-            tsx: true,
-            ..Default::default()
-        })
-    } else {
-        Syntax::Es(EsSyntax {
-            jsx: true,
-            ..Default::default()
-        })
-    };
-
-    let comments = SingleThreadedComments::default();
-    let input = StringInput::new(
-        source,
-        BytePos(offset),
-        BytePos(offset + source.len() as u32),
-    );
-    let mut parser = swc_ecma_parser::Parser::new(syntax, input, Some(&comments));
-
-    let module = parser.parse_module().map_err(|e| {
-        e.into_diagnostic(&swc_common::errors::Handler::with_emitter(
-            true,
-            false,
-            Box::new(swc_common::errors::EmitterWriter::new(
-                Box::new(std::io::sink()),
-                None,
-                false,
-                false,
-            )),
-        ))
-        .cancel();
-        winnow::error::ContextError::new()
-    })?;
-
-    // Collect all comments from SWC into JsComment format
-    let js_comments = collect_comments(&comments);
-
-    Ok((swc::Program::Module(module), js_comments))
-}
-
-fn collect_comments(comments: &SingleThreadedComments) -> Vec<JsComment> {
-    let mut result = Vec::new();
-
-    let (leading_map, trailing_map) = comments.borrow_all();
-
-    for (_pos, comment_vec) in leading_map.iter() {
-        for comment in comment_vec {
-            result.push(swc_comment_to_js_comment(comment));
-        }
-    }
-    for (_pos, comment_vec) in trailing_map.iter() {
-        for comment in comment_vec {
-            result.push(swc_comment_to_js_comment(comment));
-        }
-    }
-
-    // Sort by start position
-    result.sort_by_key(|c| c.span.map_or(0, |s| s.start));
-    result
-}
-
-fn swc_comment_to_js_comment(comment: &Comment) -> JsComment {
-    let start = comment.span.lo.0 as usize;
-    let end = comment.span.hi.0 as usize;
-    let kind = match comment.kind {
-        CommentKind::Line => JsCommentKind::Line,
-        CommentKind::Block => JsCommentKind::Block,
-    };
-    JsComment {
-        span: Some(Span::new(start, end)),
-        kind,
-        value: comment.text.to_string(),
-    }
 }

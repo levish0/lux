@@ -1,14 +1,14 @@
-use swc_ecma_ast as swc;
+use svelte_ast::JsNode;
 use winnow::Result as ParseResult;
 use winnow::stream::Location;
 
 use super::ParserInput;
 use super::bracket::scan_expression_content;
-use super::swc_parse::parse_expression;
+use super::oxc_parse::parse_expression;
 
 /// Read a JS/TS expression enclosed in `{ ... }`.
-/// Consumes from `{` to matching `}`, parses with SWC.
-pub fn read_expression(parser_input: &mut ParserInput) -> ParseResult<Box<swc::Expr>> {
+/// Consumes from `{` to matching `}`, parses with OXC.
+pub fn read_expression(parser_input: &mut ParserInput) -> ParseResult<JsNode> {
     let start = parser_input.current_token_start();
     let content = scan_expression_content(parser_input)?;
     let ts = parser_input.state.ts;
@@ -26,23 +26,24 @@ pub fn parse_expression_or_loose(
     ts: bool,
     offset: u32,
     loose: bool,
-) -> ParseResult<Box<swc::Expr>> {
+) -> ParseResult<JsNode> {
     match parse_expression(content, ts, offset) {
-        Ok(expr) => Ok(expr),
-        Err(e) if loose => Ok(make_empty_ident(content, offset)),
+        Ok(node) => Ok(node),
+        Err(_) if loose => Ok(make_empty_ident(content, offset)),
         Err(e) => Err(e),
     }
 }
 
 /// Create an empty-name Identifier covering the trimmed content span.
-pub fn make_empty_ident(content: &str, offset: u32) -> Box<swc::Expr> {
+pub fn make_empty_ident(content: &str, offset: u32) -> JsNode {
     let leading_ws = content.len() - content.trim_start().len();
     let trimmed = content.trim();
     let start = offset + leading_ws as u32;
     let end = start + trimmed.len() as u32;
-    Box::new(swc::Expr::Ident(swc::Ident::new(
-        "".into(),
-        swc_common::Span::new(swc_common::BytePos(start), swc_common::BytePos(end)),
-        Default::default(),
-    )))
+    JsNode(serde_json::json!({
+        "type": "Identifier",
+        "name": "",
+        "start": start,
+        "end": end
+    }))
 }

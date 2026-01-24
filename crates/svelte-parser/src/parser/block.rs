@@ -1,8 +1,8 @@
+use svelte_ast::JsNode;
 use svelte_ast::blocks::{AwaitBlock, EachBlock, IfBlock, KeyBlock, SnippetBlock};
 use svelte_ast::node::FragmentNode;
 use svelte_ast::root::Fragment;
 use svelte_ast::span::Span;
-use swc_ecma_ast as swc;
 use winnow::Result as ParseResult;
 use winnow::combinator::{opt, peek, repeat_till};
 use winnow::prelude::*;
@@ -16,7 +16,7 @@ use super::bracket::{
 };
 use super::expression::{make_empty_ident, parse_expression_or_loose};
 use super::fragment::fragment_node_parser;
-use super::swc_parse::{parse_expression, parse_param_list, parse_pattern};
+use super::oxc_parse::{parse_expression, parse_param_list, parse_pattern};
 use crate::error::{ErrorKind, ParseError};
 
 /// Dispatch `{#block}` to the appropriate block parser.
@@ -161,8 +161,6 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
     let ts = parser_input.state.ts;
 
     // Read expression until " as " keyword.
-    // In TS mode, use the LAST " as " at depth 0 to handle TypeScript type assertions
-    // like `{#each items as Type[] as item}` where the first "as" is a TS assertion.
     let expr_offset = parser_input.current_token_start();
     let (expression, has_as) = if ts {
         let remaining: &str = &parser_input.input;
@@ -329,8 +327,8 @@ fn await_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResu
     let mut pending: Option<Fragment> = None;
     let mut then_fragment: Option<Fragment> = None;
     let mut catch_fragment: Option<Fragment> = None;
-    let mut value: Option<Box<swc::Pat>> = None;
-    let mut error: Option<Box<swc::Pat>> = None;
+    let mut value: Option<JsNode> = None;
+    let mut error: Option<JsNode> = None;
 
     if let Some(then_pos) = inline_then_pos {
         // Inline then: {#await expr then value}
@@ -447,24 +445,23 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
     }
 
     let name_end = parser_input.current_token_start();
-    let ident = Box::new(swc::Ident::new(
-        name.into(),
-        swc_common::Span::new(
-            swc_common::BytePos(name_start as u32),
-            swc_common::BytePos(name_end as u32),
-        ),
-        Default::default(),
-    ));
+
+    // Create Identifier JsNode for the expression
+    let expression = JsNode(serde_json::json!({
+        "type": "Identifier",
+        "name": name,
+        "start": name_start,
+        "end": name_end
+    }));
 
     // Optional generic type params: <T extends string>
     let type_params = if parser_input.state.ts {
         let _: &str =
             take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
         if !parser_input.input.is_empty() && parser_input.input.as_bytes()[0] == b'<' {
-            // Find matching > handling nested <>, strings, etc.
             let remaining: &str = &parser_input.input;
             if let Some(end_offset) = find_matching_angle_bracket(remaining) {
-                let content = &remaining[1..end_offset]; // between < and >
+                let content = &remaining[1..end_offset];
                 let type_params_str = content.to_string();
                 let _: &str = take(end_offset + 1).parse_next(parser_input)?;
                 Some(type_params_str)
@@ -489,7 +486,7 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
         take_while(0.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
         parse_param_list(params_content, parser_input.state.ts, paren_offset as u32)?
     } else if loose {
-        vec![]
+        JsNode(serde_json::Value::Array(vec![]))
     } else {
         return Err(winnow::error::ContextError::new());
     };
@@ -508,7 +505,7 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
 
     Ok(FragmentNode::SnippetBlock(SnippetBlock {
         span: Span::new(start, end),
-        expression: ident,
+        expression,
         type_params,
         parameters,
         body: Fragment { nodes },
@@ -516,8 +513,6 @@ fn snippet_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseRe
 }
 
 /// Find the position of the matching `>` for an opening `<` at position 0.
-/// Handles nested `<>`, string literals, and escaped chars.
-/// Returns the byte offset of the closing `>`, or None if not found.
 fn find_matching_angle_bracket(s: &str) -> Option<usize> {
     let bytes = s.as_bytes();
     if bytes.is_empty() || bytes[0] != b'<' {
@@ -552,7 +547,7 @@ fn find_matching_angle_bracket(s: &str) -> Option<usize> {
                     i += 1;
                 }
                 if i < bytes.len() {
-                    i += 1; // past closing quote
+                    i += 1;
                 }
             }
             _ => {
