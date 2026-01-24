@@ -90,7 +90,6 @@ fn close_if(parser: &mut Parser) -> Result<(), ParseError> {
     let mut alternate: Option<Fragment> = None;
 
     loop {
-        let fragment_nodes = parser.fragments.pop().unwrap_or_default();
         let frame = parser.stack.pop();
 
         let Some(StackFrame::IfBlock {
@@ -104,19 +103,22 @@ fn close_if(parser: &mut Parser) -> Result<(), ParseError> {
         };
 
         let (cons_frag, alt_frag) = if let Some(cons_nodes) = consequent {
-            // :else or :else if was encountered
-            let alt = if alternate.is_some() {
-                // Child elseif provides the alternate
-                alternate.take()
+            if alternate.is_some() {
+                // {:else if} — alternate provided by child, no fragment to pop
+                (Fragment { nodes: cons_nodes }, alternate.take())
             } else {
-                // Simple :else — fragment_nodes is the alternate content
-                Some(Fragment {
-                    nodes: fragment_nodes,
-                })
-            };
-            (Fragment { nodes: cons_nodes }, alt)
+                // {:else} — fragment_nodes is the alternate content
+                let fragment_nodes = parser.fragments.pop().unwrap_or_default();
+                (
+                    Fragment { nodes: cons_nodes },
+                    Some(Fragment {
+                        nodes: fragment_nodes,
+                    }),
+                )
+            }
         } else {
             // No :else — fragment_nodes is the consequent
+            let fragment_nodes = parser.fragments.pop().unwrap_or_default();
             (
                 Fragment {
                     nodes: fragment_nodes,
