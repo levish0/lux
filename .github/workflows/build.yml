@@ -1,4 +1,4 @@
-name: svelte-rs build
+name: lux build
 
 on:
   push:

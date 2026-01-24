@@ -7,7 +7,7 @@ version = "0.1.0"
 authors = ["Levi Laine <shiueo.csh@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/levish0/svelte-rs"
-description = "svelte-rs"
+description = "Svelte 5+ compiler implemented in Rust. Aims for 100% compatibility with the official Svelte compiler."
 edition = "2024"
 rust-version = "1.92.0"
 
