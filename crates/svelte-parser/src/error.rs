@@ -39,6 +39,14 @@ pub enum ErrorKind {
     ScriptDuplicate,
     StyleDuplicate,
     SvelteElementMissingThis,
+    SvelteOptionsInvalidAttribute,
+    SvelteOptionsUnknownAttribute,
+    SvelteOptionsInvalidAttributeValue,
+    SvelteOptionsInvalidCustomElement,
+    SvelteOptionsInvalidCustomElementProps,
+    SvelteOptionsInvalidCustomElementShadow,
+    SvelteOptionsInvalidTagName,
+    SvelteOptionsDeprecatedTag,
 }
 
 impl ParseError {

@@ -302,11 +302,28 @@ impl<'a> Parser<'a> {
     }
 
     /// Build the Root AST node from parsed state.
-    pub fn into_root(self) -> Root<'a> {
-        let fragment_nodes = self.fragments.into_iter().next().unwrap_or_default();
+    pub fn into_root(mut self) -> Root<'a> {
+        let mut fragment_nodes = self.fragments.into_iter().next().unwrap_or_default();
+
+        // Extract <svelte:options> from fragment and process into structured options.
+        // Reference: index.js constructor, after state machine loop.
+        let options = if let Some(idx) = fragment_nodes
+            .iter()
+            .position(|n| matches!(n, FragmentNode::SvelteOptionsRaw(_)))
+        {
+            let node = fragment_nodes.remove(idx);
+            if let FragmentNode::SvelteOptionsRaw(raw) = node {
+                Some(read::options::read_options(raw, &mut self.errors, self.allocator))
+            } else {
+                unreachable!()
+            }
+        } else {
+            self.options
+        };
+
         Root {
             span: Span::new(0, self.template.len()),
-            options: self.options,
+            options,
             fragment: Fragment {
                 nodes: fragment_nodes,
             },

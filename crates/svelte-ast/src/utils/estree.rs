@@ -47,6 +47,31 @@ pub fn clear_loc_source() {
     });
 }
 
+/// Unwrap ParenthesizedExpression nodes, replacing them with their inner expression.
+/// Svelte's AST doesn't preserve parenthesization as node wrappers.
+fn unwrap_parenthesized(value: &mut serde_json::Value) {
+    match value {
+        serde_json::Value::Object(map) => {
+            // First recurse into all children
+            for (_, v) in map.iter_mut() {
+                unwrap_parenthesized(v);
+            }
+            // Then check if this is a ParenthesizedExpression and unwrap
+            if map.get("type").and_then(|v| v.as_str()) == Some("ParenthesizedExpression") {
+                if let Some(expr) = map.remove("expression") {
+                    *value = expr;
+                }
+            }
+        }
+        serde_json::Value::Array(arr) => {
+            for v in arr.iter_mut() {
+                unwrap_parenthesized(v);
+            }
+        }
+        _ => {}
+    }
+}
+
 /// Add `loc` fields to a JSON Value tree. Any object with numeric `start`/`end`
 /// fields gets a `loc` field with line/column positions.
 fn add_loc(value: &mut serde_json::Value, loc_source: &LocSource) {
@@ -80,13 +105,15 @@ fn add_loc(value: &mut serde_json::Value, loc_source: &LocSource) {
     }
 }
 
-/// Serialize an OXC ESTree node to a `serde_json::Value`, adding `loc` fields.
+/// Serialize an OXC ESTree node to a `serde_json::Value`, adding `loc` fields
+/// and unwrapping ParenthesizedExpression nodes.
 pub fn oxc_node_to_value<T: ESTree>(node: &T) -> serde_json::Value {
     let mut serializer = CompactTSSerializer::default();
     node.serialize(&mut serializer);
     let json_str = serializer.into_string();
     let mut value: serde_json::Value =
         serde_json::from_str(&json_str).unwrap_or(serde_json::Value::Null);
+    unwrap_parenthesized(&mut value);
     LOC_SOURCE.with(|cell| {
         if let Some(ref loc_source) = *cell.borrow() {
             add_loc(&mut value, loc_source);
