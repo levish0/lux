@@ -121,39 +121,49 @@ fn read_selector(
         let start = parser.index;
 
         if parser.eat("&") {
-            relative_selector.selectors.push(SimpleSelector::NestingSelector(NestingSelector {
-                span: Span::new(start, parser.index),
-                name: "&".to_string(),
-            }));
+            relative_selector
+                .selectors
+                .push(SimpleSelector::NestingSelector(NestingSelector {
+                    span: Span::new(start, parser.index),
+                    name: "&".to_string(),
+                }));
         } else if parser.eat("*") {
             let mut name = "*".to_string();
             if parser.eat("|") {
                 name = read_identifier(parser)?;
             }
-            relative_selector.selectors.push(SimpleSelector::TypeSelector(TypeSelector {
-                span: Span::new(start, parser.index),
-                name,
-            }));
-        } else if parser.eat("#") {
-            let name = read_identifier(parser)?;
-            relative_selector.selectors.push(SimpleSelector::IdSelector(IdSelector {
-                span: Span::new(start, parser.index),
-                name,
-            }));
-        } else if parser.eat(".") {
-            let name = read_identifier(parser)?;
-            relative_selector.selectors.push(SimpleSelector::ClassSelector(ClassSelector {
-                span: Span::new(start, parser.index),
-                name,
-            }));
-        } else if parser.eat("::") {
-            let name = read_identifier(parser)?;
-            relative_selector.selectors.push(SimpleSelector::PseudoElementSelector(
-                PseudoElementSelector {
+            relative_selector
+                .selectors
+                .push(SimpleSelector::TypeSelector(TypeSelector {
                     span: Span::new(start, parser.index),
                     name,
-                },
-            ));
+                }));
+        } else if parser.eat("#") {
+            let name = read_identifier(parser)?;
+            relative_selector
+                .selectors
+                .push(SimpleSelector::IdSelector(IdSelector {
+                    span: Span::new(start, parser.index),
+                    name,
+                }));
+        } else if parser.eat(".") {
+            let name = read_identifier(parser)?;
+            relative_selector
+                .selectors
+                .push(SimpleSelector::ClassSelector(ClassSelector {
+                    span: Span::new(start, parser.index),
+                    name,
+                }));
+        } else if parser.eat("::") {
+            let name = read_identifier(parser)?;
+            relative_selector
+                .selectors
+                .push(SimpleSelector::PseudoElementSelector(
+                    PseudoElementSelector {
+                        span: Span::new(start, parser.index),
+                        name,
+                    },
+                ));
             // Read inner selectors of pseudo element to ensure it parses correctly
             if parser.eat("(") {
                 read_selector_list(parser, true)?;
@@ -168,13 +178,13 @@ fn read_selector(
             } else {
                 None
             };
-            relative_selector.selectors.push(SimpleSelector::PseudoClassSelector(
-                PseudoClassSelector {
+            relative_selector
+                .selectors
+                .push(SimpleSelector::PseudoClassSelector(PseudoClassSelector {
                     span: Span::new(start, parser.index),
                     name,
                     args,
-                },
-            ));
+                }));
         } else if parser.eat("[") {
             parser.allow_whitespace();
             let name = read_identifier(parser)?;
@@ -193,15 +203,15 @@ fn read_selector(
             parser.allow_whitespace();
             parser.eat_required("]")?;
 
-            relative_selector.selectors.push(SimpleSelector::AttributeSelector(
-                AttributeSelector {
+            relative_selector
+                .selectors
+                .push(SimpleSelector::AttributeSelector(AttributeSelector {
                     span: Span::new(start, parser.index),
                     name,
                     matcher,
                     value,
                     flags,
-                },
-            ));
+                }));
         } else if inside_pseudo_class && match_nth_of(parser) {
             // nth of matcher must come before combinator matcher
             let value = read_nth_of(parser);
@@ -211,19 +221,23 @@ fn read_selector(
             }));
         } else if match_percentage(parser) {
             let value = read_percentage(parser);
-            relative_selector.selectors.push(SimpleSelector::Percentage(Percentage {
-                span: Span::new(start, parser.index),
-                value,
-            }));
+            relative_selector
+                .selectors
+                .push(SimpleSelector::Percentage(Percentage {
+                    span: Span::new(start, parser.index),
+                    value,
+                }));
         } else if !match_combinator(parser) {
             let mut name = read_identifier(parser)?;
             if parser.eat("|") {
                 name = read_identifier(parser)?;
             }
-            relative_selector.selectors.push(SimpleSelector::TypeSelector(TypeSelector {
-                span: Span::new(start, parser.index),
-                name,
-            }));
+            relative_selector
+                .selectors
+                .push(SimpleSelector::TypeSelector(TypeSelector {
+                    span: Span::new(start, parser.index),
+                    name,
+                }));
         }
 
         let index = parser.index;
@@ -893,8 +907,8 @@ fn read_nth_of_len(parser: &Parser<'_>) -> Option<usize> {
 
 #[cfg(test)]
 mod tests {
-    use oxc_allocator::Allocator;
     use crate::parser::Parser;
+    use oxc_allocator::Allocator;
     use svelte_ast::css::*;
 
     #[test]
@@ -946,7 +960,11 @@ mod tests {
     #[test]
     fn test_at_rule() {
         let allocator = Allocator::default();
-        let parser = Parser::new("<style>@media (max-width: 600px) { .foo { display: none; } }</style>", &allocator, false);
+        let parser = Parser::new(
+            "<style>@media (max-width: 600px) { .foo { display: none; } }</style>",
+            &allocator,
+            false,
+        );
         let root = parser.into_root();
         let css = root.css.unwrap();
         assert_eq!(css.children.len(), 1);
@@ -997,7 +1015,11 @@ mod tests {
     #[test]
     fn test_child_combinator() {
         let allocator = Allocator::default();
-        let parser = Parser::new("<style>.a > .b { color: green; }</style>", &allocator, false);
+        let parser = Parser::new(
+            "<style>.a > .b { color: green; }</style>",
+            &allocator,
+            false,
+        );
         let root = parser.into_root();
         let css = root.css.unwrap();
         match &css.children[0] {
@@ -1032,7 +1054,11 @@ mod tests {
     #[test]
     fn test_attribute_selector() {
         let allocator = Allocator::default();
-        let parser = Parser::new("<style>[data-x=\"foo\"] { color: red; }</style>", &allocator, false);
+        let parser = Parser::new(
+            "<style>[data-x=\"foo\"] { color: red; }</style>",
+            &allocator,
+            false,
+        );
         let root = parser.into_root();
         let css = root.css.unwrap();
         match &css.children[0] {
@@ -1095,7 +1121,11 @@ mod tests {
     #[test]
     fn test_pseudo_element() {
         let allocator = Allocator::default();
-        let parser = Parser::new("<style>p::before { content: ''; }</style>", &allocator, false);
+        let parser = Parser::new(
+            "<style>p::before { content: ''; }</style>",
+            &allocator,
+            false,
+        );
         let root = parser.into_root();
         let css = root.css.unwrap();
         match &css.children[0] {
@@ -1114,7 +1144,11 @@ mod tests {
     #[test]
     fn test_nesting_selector() {
         let allocator = Allocator::default();
-        let parser = Parser::new("<style>.foo { & .bar { color: red; } }</style>", &allocator, false);
+        let parser = Parser::new(
+            "<style>.foo { & .bar { color: red; } }</style>",
+            &allocator,
+            false,
+        );
         let root = parser.into_root();
         let css = root.css.unwrap();
         match &css.children[0] {

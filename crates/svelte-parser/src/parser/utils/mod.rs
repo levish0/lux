@@ -418,10 +418,33 @@ fn autoclosing_rule(tag: &str) -> Option<AutoCloseRule> {
         "dt" => Some(AutoCloseRule::Descendant(&["dt", "dd"])),
         "dd" => Some(AutoCloseRule::Descendant(&["dt", "dd"])),
         "p" => Some(AutoCloseRule::Descendant(&[
-            "address", "article", "aside", "blockquote", "div", "dl",
-            "fieldset", "footer", "form", "h1", "h2", "h3", "h4",
-            "h5", "h6", "header", "hgroup", "hr", "main", "menu",
-            "nav", "ol", "p", "pre", "section", "table", "ul",
+            "address",
+            "article",
+            "aside",
+            "blockquote",
+            "div",
+            "dl",
+            "fieldset",
+            "footer",
+            "form",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "header",
+            "hgroup",
+            "hr",
+            "main",
+            "menu",
+            "nav",
+            "ol",
+            "p",
+            "pre",
+            "section",
+            "table",
+            "ul",
         ])),
         "rt" => Some(AutoCloseRule::Descendant(&["rt", "rp"])),
         "rp" => Some(AutoCloseRule::Descendant(&["rt", "rp"])),
@@ -466,15 +489,15 @@ pub fn is_tag_valid_with_parent(child_tag: &str, parent_tag: &str) -> Option<Str
 
     // Tags only valid with specific parents
     match child_tag {
-        "body" | "caption" | "col" | "colgroup" | "frameset" | "frame" | "head" | "html" => {
-            Some(format!("`<{child_tag}>` cannot be a child of `<{parent_tag}>`"))
-        }
-        "thead" | "tbody" | "tfoot" => {
-            Some(format!("`<{child_tag}>` must be the child of a `<table>`, not a `<{parent_tag}>`"))
-        }
-        "td" | "th" => {
-            Some(format!("`<{child_tag}>` must be the child of a `<tr>`, not a `<{parent_tag}>`"))
-        }
+        "body" | "caption" | "col" | "colgroup" | "frameset" | "frame" | "head" | "html" => Some(
+            format!("`<{child_tag}>` cannot be a child of `<{parent_tag}>`"),
+        ),
+        "thead" | "tbody" | "tfoot" => Some(format!(
+            "`<{child_tag}>` must be the child of a `<table>`, not a `<{parent_tag}>`"
+        )),
+        "td" | "th" => Some(format!(
+            "`<{child_tag}>` must be the child of a `<tr>`, not a `<{parent_tag}>`"
+        )),
         "tr" => Some(format!(
             "`<tr>` must be the child of a `<thead>`, `<tbody>`, or `<tfoot>`, not a `<{parent_tag}>`"
         )),
@@ -489,8 +512,13 @@ fn check_disallowed(child_tag: &str, parent_tag: &str) -> Option<String> {
         "tr" => Some(&["th", "td", "style", "script", "template"]),
         "tbody" | "thead" | "tfoot" => Some(&["tr", "style", "script", "template"]),
         "colgroup" => Some(&["col", "template"]),
-        "table" => Some(&["caption", "colgroup", "tbody", "thead", "tfoot", "style", "script", "template"]),
-        "head" => Some(&["base", "basefont", "bgsound", "link", "meta", "title", "noscript", "noframes", "style", "script", "template"]),
+        "table" => Some(&[
+            "caption", "colgroup", "tbody", "thead", "tfoot", "style", "script", "template",
+        ]),
+        "head" => Some(&[
+            "base", "basefont", "bgsound", "link", "meta", "title", "noscript", "noframes",
+            "style", "script", "template",
+        ]),
         "html" => Some(&["head", "body", "frameset"]),
         "frameset" => Some(&["frame"]),
         _ => None,
@@ -530,10 +558,33 @@ fn check_disallowed(child_tag: &str, parent_tag: &str) -> Option<String> {
     let descendant_disallowed: Option<&[&str]> = match parent_tag {
         "dt" | "dd" => Some(&["dt", "dd"]),
         "p" => Some(&[
-            "address", "article", "aside", "blockquote", "div", "dl",
-            "fieldset", "footer", "form", "h1", "h2", "h3", "h4",
-            "h5", "h6", "header", "hgroup", "hr", "main", "menu",
-            "nav", "ol", "p", "pre", "section", "table", "ul",
+            "address",
+            "article",
+            "aside",
+            "blockquote",
+            "div",
+            "dl",
+            "fieldset",
+            "footer",
+            "form",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "header",
+            "hgroup",
+            "hr",
+            "main",
+            "menu",
+            "nav",
+            "ol",
+            "p",
+            "pre",
+            "section",
+            "table",
+            "ul",
         ]),
         "rt" | "rp" => Some(&["rt", "rp"]),
         "optgroup" => Some(&["optgroup"]),
@@ -541,9 +592,7 @@ fn check_disallowed(child_tag: &str, parent_tag: &str) -> Option<String> {
         "form" => Some(&["form"]),
         "a" => Some(&["a"]),
         "button" => Some(&["button"]),
-        "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => {
-            Some(&["h1", "h2", "h3", "h4", "h5", "h6"])
-        }
+        "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => Some(&["h1", "h2", "h3", "h4", "h5", "h6"]),
         _ => None,
     };
 

@@ -1,5 +1,5 @@
-use std::borrow::Cow;
 use super::entities_data::ENTITIES;
+use std::borrow::Cow;
 
 const WINDOWS_1252: [u32; 32] = [
     8364, 129, 8218, 402, 8222, 8230, 8224, 8225, 710, 8240, 352, 8249, 338, 141, 381, 143, 144,
@@ -50,7 +50,7 @@ fn validate_code(code: u32) -> u32 {
 /// Decode HTML character references in a string.
 /// `is_attribute_value` controls whether entities without semicolons are decoded
 /// when followed by alphanumeric, underscore, or equals characters.
-/// 
+///
 /// Returns `Cow::Borrowed` if no entities are found (zero-copy),
 /// or `Cow::Owned` if decoding was performed.
 pub fn decode_character_references(html: &'_ str, is_attribute_value: bool) -> Cow<'_, str> {

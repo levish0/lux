@@ -354,8 +354,7 @@ fn read_custom_element<'a>(
                             continue;
                         };
                         if let Expression::ObjectExpression(prop_obj) = &prop.value {
-                            let ce_prop =
-                                read_custom_element_prop(prop_obj, errors, error_pos);
+                            let ce_prop = read_custom_element_prop(prop_obj, errors, error_pos);
                             props_map.insert(prop_name, ce_prop);
                         } else {
                             errors.push(ParseError {

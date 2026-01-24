@@ -1,6 +1,6 @@
 use oxc_ast::ast::{BindingPattern, Expression};
-use serde::ser::SerializeMap;
 use serde::Serialize;
+use serde::ser::SerializeMap;
 
 use crate::metadata::{ExpressionNodeMetadata, SnippetBlockMetadata};
 use crate::root::Fragment;

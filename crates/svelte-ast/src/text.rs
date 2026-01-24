@@ -1,5 +1,5 @@
-use serde::ser::SerializeMap;
 use serde::Serialize;
+use serde::ser::SerializeMap;
 
 use crate::span::Span;
 
@@ -70,10 +70,13 @@ pub struct JsComment<'a> {
 impl Serialize for JsComment<'_> {
     fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         let mut map = s.serialize_map(None)?;
-        map.serialize_entry("type", match self.kind {
-            JsCommentKind::Line => "Line",
-            JsCommentKind::Block => "Block",
-        })?;
+        map.serialize_entry(
+            "type",
+            match self.kind {
+                JsCommentKind::Line => "Line",
+                JsCommentKind::Block => "Block",
+            },
+        )?;
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("value", &self.value)?;

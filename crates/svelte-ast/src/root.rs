@@ -1,6 +1,6 @@
 use oxc_ast::ast::{Expression, Program};
-use serde::ser::SerializeMap;
 use serde::Serialize;
+use serde::ser::SerializeMap;
 
 use crate::css::StyleSheet;
 use crate::node::{AttributeNode, FragmentNode};

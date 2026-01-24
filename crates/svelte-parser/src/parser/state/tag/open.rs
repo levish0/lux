@@ -303,8 +303,7 @@ fn read_each_expression<'a>(parser: &mut Parser<'a>) -> Result<Expression<'a>, P
     };
 
     let snippet = parser.allocator.alloc_str(trimmed);
-    let result =
-        oxc_parser::Parser::new(parser.allocator, snippet, source_type).parse_expression();
+    let result = oxc_parser::Parser::new(parser.allocator, snippet, source_type).parse_expression();
 
     match result {
         Ok(mut e) => {
@@ -441,8 +440,7 @@ fn read_await_expression<'a>(parser: &mut Parser<'a>) -> Result<Expression<'a>, 
     };
 
     let snippet = parser.allocator.alloc_str(trimmed);
-    let result =
-        oxc_parser::Parser::new(parser.allocator, snippet, source_type).parse_expression();
+    let result = oxc_parser::Parser::new(parser.allocator, snippet, source_type).parse_expression();
 
     match result {
         Ok(mut e) => {

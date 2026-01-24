@@ -1,12 +1,12 @@
 use oxc_ast::ast::Program;
 use oxc_span::SourceType;
 
-use svelte_ast::node::AttributeNode;
-use svelte_ast::root::{Script, ScriptContext};
-use svelte_ast::span::Span;
 use crate::error::ErrorKind::{ElementUnclosed, JsParseError};
 use crate::parser::span_offset::shift_program_spans;
 use crate::parser::{ParseError, Parser};
+use svelte_ast::node::AttributeNode;
+use svelte_ast::root::{Script, ScriptContext};
+use svelte_ast::span::Span;
 
 /// Read the content of a `<script>` tag and parse it as a JS/TS program.
 /// Port of reference `read/script.js`.

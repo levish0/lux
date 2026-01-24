@@ -1,7 +1,7 @@
+use crate::parser::{ParseError, Parser};
 use svelte_ast::css::{CssContent, StyleSheet};
 use svelte_ast::node::AttributeNode;
 use svelte_ast::span::Span;
-use crate::parser::{ParseError, Parser};
 
 use super::css;
 

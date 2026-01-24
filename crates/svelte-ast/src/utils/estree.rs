@@ -22,7 +22,10 @@ impl LocSource {
     /// Compute (line, column) from a byte offset using binary search.
     /// Lines are 1-indexed, columns are 0-indexed (ESTree convention).
     fn offset_to_line_col(&self, offset: u32) -> (u32, u32) {
-        let line_idx = self.line_starts.binary_search(&offset).unwrap_or_else(|i| i - 1);
+        let line_idx = self
+            .line_starts
+            .binary_search(&offset)
+            .unwrap_or_else(|i| i - 1);
         let line = (line_idx + 1) as u32;
         let col = offset - self.line_starts[line_idx];
         (line, col)
@@ -79,7 +82,10 @@ fn add_loc(value: &mut serde_json::Value, loc_source: &LocSource) {
         serde_json::Value::Object(map) => {
             let has_start_end = matches!(
                 (map.get("start"), map.get("end")),
-                (Some(serde_json::Value::Number(_)), Some(serde_json::Value::Number(_)))
+                (
+                    Some(serde_json::Value::Number(_)),
+                    Some(serde_json::Value::Number(_))
+                )
             );
             if has_start_end {
                 let start = map["start"].as_u64().unwrap_or(0) as u32;
@@ -161,4 +167,3 @@ impl<T: ESTree> serde::Serialize for OxcOptionSerialize<'_, T> {
         }
     }
 }
-

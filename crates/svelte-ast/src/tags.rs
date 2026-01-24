@@ -1,6 +1,6 @@
 use oxc_ast::ast::{Expression, VariableDeclaration};
-use serde::ser::SerializeMap;
 use serde::Serialize;
+use serde::ser::SerializeMap;
 
 use crate::metadata::{ExpressionNodeMetadata, RenderTagMetadata};
 use crate::span::Span;

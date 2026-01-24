@@ -21,7 +21,7 @@ fn fixtures_dir() -> PathBuf {
 /// Run Node.js Svelte parser and return duration
 fn run_node_parser(file_path: &std::path::Path, iterations: u32) -> Option<Duration> {
     let tests = tests_dir();
-    
+
     // Ensure node_modules exists
     let node_modules = tests.join("node_modules");
     if !node_modules.exists() {
@@ -41,7 +41,7 @@ fn run_node_parser(file_path: &std::path::Path, iterations: u32) -> Option<Durat
             return None;
         }
     }
-    
+
     // Create script that reads the file and measures parse time
     let file_path_str = file_path.to_string_lossy().replace("\\", "/");
     let script = format!(
@@ -64,15 +64,14 @@ fn run_node_parser(file_path: &std::path::Path, iterations: u32) -> Option<Durat
         
         console.log(JSON.stringify({{ elapsed_ms: end - start }}));
         "#,
-        file_path_str,
-        iterations,
+        file_path_str, iterations,
     );
-    
+
     let output = Command::new("node")
         .args(["-e", &script])
         .current_dir(&tests)
         .output();
-    
+
     match output {
         Ok(out) => {
             if !out.status.success() {
@@ -101,7 +100,7 @@ fn run_rust_parser(source: &str, iterations: u32) -> Duration {
         let allocator = Allocator::default();
         let _ = parse(source, &allocator, ParseOptions::default());
     }
-    
+
     let start = Instant::now();
     for _ in 0..iterations {
         // Note: allocator must be created each time because Root borrows from it
@@ -125,19 +124,17 @@ fn format_duration(d: Duration) -> String {
 #[test]
 fn performance_comparison() {
     let fixture = fixtures_dir().join("performance.svelte");
-    
+
     if !fixture.exists() {
         eprintln!("Skipping: fixtures/performance.svelte not found.");
         return;
     }
-    
-    let source = fs::read_to_string(&fixture)
-        .unwrap()
-        .replace("\r\n", "\n");
-    
+
+    let source = fs::read_to_string(&fixture).unwrap().replace("\r\n", "\n");
+
     let source_lines = source.lines().count();
     let source_bytes = source.len();
-    
+
     println!();
     println!("═══════════════════════════════════════════════════════════════");
     println!("  Svelte Parser Performance Comparison");
@@ -146,16 +143,16 @@ fn performance_comparison() {
     println!("  Lines: {}  |  Bytes: {}", source_lines, source_bytes);
     println!("═══════════════════════════════════════════════════════════════");
     println!();
-    
+
     // Single parse comparison
     println!("── Single Parse ──");
-    
+
     let rust_single = run_rust_parser(&source, 1);
     println!("  Rust:    {}", format_duration(rust_single));
-    
+
     if let Some(node_single) = run_node_parser(&fixture, 1) {
         println!("  Node.js: {}", format_duration(node_single));
-        
+
         let speedup = node_single.as_secs_f64() / rust_single.as_secs_f64();
         if speedup > 1.0 {
             println!("  → Rust is {:.3}x faster\n", speedup);
@@ -165,19 +162,27 @@ fn performance_comparison() {
     } else {
         println!("  Node.js: (skipped - not available)\n");
     }
-    
+
     // Bulk parse comparison (100 iterations)
     let iterations = 100;
     println!("── {} Iterations ──", iterations);
-    
+
     let rust_bulk = run_rust_parser(&source, iterations);
     let rust_per_parse = rust_bulk.as_secs_f64() * 1000.0 / iterations as f64;
-    println!("  Rust:    {} total ({:.6}ms per parse)", format_duration(rust_bulk), rust_per_parse);
-    
+    println!(
+        "  Rust:    {} total ({:.6}ms per parse)",
+        format_duration(rust_bulk),
+        rust_per_parse
+    );
+
     if let Some(node_bulk) = run_node_parser(&fixture, iterations) {
         let node_per_parse = node_bulk.as_secs_f64() * 1000.0 / iterations as f64;
-        println!("  Node.js: {} total ({:.6}ms per parse)", format_duration(node_bulk), node_per_parse);
-        
+        println!(
+            "  Node.js: {} total ({:.6}ms per parse)",
+            format_duration(node_bulk),
+            node_per_parse
+        );
+
         let speedup = node_bulk.as_secs_f64() / rust_bulk.as_secs_f64();
         if speedup > 1.0 {
             println!("  → Rust is {:.3}x faster\n", speedup);
@@ -187,11 +192,12 @@ fn performance_comparison() {
     } else {
         println!("  Node.js: (skipped - not available)\n");
     }
-    
+
     // Throughput
     println!("── Throughput ──");
-    let rust_throughput_mb = (source_bytes as f64 * iterations as f64) / rust_bulk.as_secs_f64() / 1_000_000.0;
+    let rust_throughput_mb =
+        (source_bytes as f64 * iterations as f64) / rust_bulk.as_secs_f64() / 1_000_000.0;
     println!("  Rust:    {:.2} MB/s", rust_throughput_mb);
-    
+
     println!("\n✓ Performance test completed");
 }

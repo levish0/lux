@@ -7,9 +7,9 @@ use svelte_ast::tags::ExpressionTag;
 use svelte_ast::text::Text;
 
 use crate::error::ErrorKind;
+use crate::parser::Parser;
 use crate::parser::html_entities::decode_character_references;
 use crate::parser::read::expression::read_expression;
-use crate::parser::Parser;
 
 /// Check if current position matches an invalid unquoted attribute value char.
 /// Replaces regex_invalid_unquoted_attribute_value = /^(\/\>|[\s\"'=<>`])/
@@ -26,7 +26,10 @@ fn is_invalid_unquoted_attr_value(parser: &Parser) -> bool {
         return true;
     }
     // Check for [\s\"'=<>`]
-    matches!(ch, b' ' | b'\t' | b'\r' | b'\n' | b'"' | b'\'' | b'=' | b'<' | b'>' | b'`')
+    matches!(
+        ch,
+        b' ' | b'\t' | b'\r' | b'\n' | b'"' | b'\'' | b'=' | b'<' | b'>' | b'`'
+    )
 }
 
 /// Read an attribute value after `=`.

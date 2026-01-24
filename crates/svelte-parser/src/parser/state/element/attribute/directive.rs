@@ -1,11 +1,11 @@
+use crate::error::ErrorKind;
+use crate::parser::Parser;
 use svelte_ast::attributes::{
     AnimateDirective, Attribute, AttributeSequenceValue, AttributeValue, BindDirective,
     ClassDirective, LetDirective, OnDirective, StyleDirective, TransitionDirective, UseDirective,
 };
 use svelte_ast::node::AttributeNode;
 use svelte_ast::span::{SourceLocation, Span};
-use crate::error::ErrorKind;
-use crate::parser::Parser;
 
 /// Build a directive node from parsed attribute parts.
 /// Reference: element.js lines 619-693
@@ -51,8 +51,8 @@ pub fn build_directive<'a>(
         AttributeValue::ExpressionTag(et) => Some(et.expression),
         AttributeValue::Sequence(chunks) => {
             // Reference: attribute_contains_text = value.length > 1 || first_value.type === 'Text'
-            let contains_text = chunks.len() > 1
-                || matches!(chunks.first(), Some(AttributeSequenceValue::Text(_)));
+            let contains_text =
+                chunks.len() > 1 || matches!(chunks.first(), Some(AttributeSequenceValue::Text(_)));
             if contains_text {
                 // Reference: e.directive_invalid_value(first_value.start)
                 if !parser.loose {
@@ -64,7 +64,10 @@ pub fn build_directive<'a>(
                     parser.error(
                         ErrorKind::DirectiveInvalidValue,
                         err_pos,
-                        format!("`{}:{}` directive value must be a single expression", prefix, dir_name),
+                        format!(
+                            "`{}:{}` directive value must be a single expression",
+                            prefix, dir_name
+                        ),
                     );
                 }
                 None
@@ -103,18 +106,14 @@ pub fn build_directive<'a>(
             span,
             name: dir_name,
             name_loc: Some(name_loc),
-            expression: expression.unwrap_or_else(|| {
-                make_identifier(parser, dir_name, start, end)
-            }),
+            expression: expression.unwrap_or_else(|| make_identifier(parser, dir_name, start, end)),
             modifiers,
         })),
         "class" => Some(AttributeNode::ClassDirective(ClassDirective {
             span,
             name: dir_name,
             name_loc: Some(name_loc),
-            expression: expression.unwrap_or_else(|| {
-                make_identifier(parser, dir_name, start, end)
-            }),
+            expression: expression.unwrap_or_else(|| make_identifier(parser, dir_name, start, end)),
             modifiers,
         })),
         "use" => Some(AttributeNode::UseDirective(UseDirective {
@@ -152,7 +151,9 @@ pub fn build_directive<'a>(
         _ => {
             // For unknown prefix, create attribute with combined name
             // This requires allocating a new string in the arena
-            let combined = parser.allocator.alloc_str(&format!("{}:{}", prefix, dir_name));
+            let combined = parser
+                .allocator
+                .alloc_str(&format!("{}:{}", prefix, dir_name));
             Some(AttributeNode::Attribute(Attribute {
                 span,
                 name: combined,
@@ -187,7 +188,6 @@ pub fn make_identifier<'a>(
 pub fn get_directive_type(prefix: &str) -> bool {
     matches!(
         prefix,
-        "on" | "bind" | "class" | "style" | "use" | "animate" | "transition" | "in" | "out"
-            | "let"
+        "on" | "bind" | "class" | "style" | "use" | "animate" | "transition" | "in" | "out" | "let"
     )
 }

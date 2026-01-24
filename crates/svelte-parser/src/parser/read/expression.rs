@@ -56,8 +56,7 @@ pub fn read_expression<'a>(parser: &mut Parser<'a>) -> Result<Expression<'a>, Pa
     };
 
     let snippet = parser.allocator.alloc_str(trimmed);
-    let result =
-        oxc_parser::Parser::new(parser.allocator, snippet, source_type).parse_expression();
+    let result = oxc_parser::Parser::new(parser.allocator, snippet, source_type).parse_expression();
 
     match result {
         Ok(mut e) => {

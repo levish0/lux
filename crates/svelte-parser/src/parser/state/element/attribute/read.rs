@@ -6,8 +6,8 @@ use svelte_ast::tags::{AttachTag, ExpressionTag};
 use svelte_ast::text::Text;
 
 use crate::error::ErrorKind;
-use crate::parser::read::expression::read_expression;
 use crate::parser::Parser;
+use crate::parser::read::expression::read_expression;
 
 use super::directive::{build_directive, get_directive_type, make_identifier};
 use super::value::{read_attribute_value, skip_to_closing_brace_attr};
@@ -15,7 +15,10 @@ use super::value::{read_attribute_value, skip_to_closing_brace_attr};
 /// Byte predicate: matches /[\s=/>\"']/ — token ending characters
 #[inline]
 pub fn is_token_ending_char(ch: u8) -> bool {
-    matches!(ch, b' ' | b'\t' | b'\r' | b'\n' | b'=' | b'/' | b'>' | b'"' | b'\'')
+    matches!(
+        ch,
+        b' ' | b'\t' | b'\r' | b'\n' | b'=' | b'/' | b'>' | b'"' | b'\''
+    )
 }
 
 /// Check if current position starts with a quote character (" or ')

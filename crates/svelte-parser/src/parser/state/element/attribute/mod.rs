@@ -11,10 +11,10 @@ use svelte_ast::node::AttributeNode;
 use svelte_ast::span::Span;
 use svelte_ast::text::Text;
 
-use crate::parser::html_entities::decode_character_references;
 use crate::parser::Parser;
+use crate::parser::html_entities::decode_character_references;
 
-use read::{read_attribute, is_token_ending_char};
+use read::{is_token_ending_char, read_attribute};
 pub use value::read_sequence;
 
 /// Check if current position starts with a quote character (" or ')
@@ -150,7 +150,11 @@ fn read_static_attribute<'a>(parser: &mut Parser<'a>) -> Option<AttributeNode<'a
         };
 
         let val_start = parser.index - raw.len() - if quoted { 1 } else { 0 };
-        let val_end = if quoted { parser.index - 1 } else { parser.index };
+        let val_end = if quoted {
+            parser.index - 1
+        } else {
+            parser.index
+        };
         let decoded = decode_character_references(raw, true);
         let data = match decoded {
             Cow::Borrowed(s) => s,

@@ -1,5 +1,5 @@
-use serde::ser::SerializeMap;
 use serde::Serialize;
+use serde::ser::SerializeMap;
 
 use crate::attributes::Attribute;
 use crate::span::Span;
@@ -156,7 +156,11 @@ pub struct RelativeSelector {
     pub selectors: Vec<SimpleSelector>,
 }
 
-impl_css_serialize!(RelativeSelector, "RelativeSelector", [combinator, selectors]);
+impl_css_serialize!(
+    RelativeSelector,
+    "RelativeSelector",
+    [combinator, selectors]
+);
 
 #[derive(Debug, Clone)]
 pub struct CssCombinator {
@@ -199,7 +203,11 @@ pub struct AttributeSelector {
     pub flags: Option<String>,
 }
 
-impl_css_serialize!(AttributeSelector, "AttributeSelector", [name, matcher, value, flags]);
+impl_css_serialize!(
+    AttributeSelector,
+    "AttributeSelector",
+    [name, matcher, value, flags]
+);
 
 #[derive(Debug, Clone)]
 pub struct PseudoClassSelector {

@@ -5,16 +5,16 @@ pub mod span_offset;
 pub mod state;
 pub mod utils;
 
-use std::collections::HashSet;
+use crate::error::ErrorKind;
+use line_span::LineSpans;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{BindingPattern, Expression};
+use std::collections::HashSet;
 use svelte_ast::css::StyleSheet;
 use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::{Fragment, Root, Script, SvelteOptions};
 use svelte_ast::span::{Position, SourceLocation, Span};
 use svelte_ast::text::JsComment;
-use line_span::LineSpans;
-use crate::error::ErrorKind;
 
 /// Stack frame representing a nested element or block being parsed.
 /// In JS reference, the stack holds mutable AST nodes directly.
@@ -236,7 +236,6 @@ pub struct Parser<'a> {
     line_starts: Vec<usize>,
 }
 
-
 impl<'a> Parser<'a> {
     /// Create a new parser and run the state machine.
     pub fn new(template: &'a str, allocator: &'a Allocator, loose: bool) -> Self {
@@ -313,7 +312,11 @@ impl<'a> Parser<'a> {
         {
             let node = fragment_nodes.remove(idx);
             if let FragmentNode::SvelteOptionsRaw(raw) = node {
-                Some(read::options::read_options(raw, &mut self.errors, self.allocator))
+                Some(read::options::read_options(
+                    raw,
+                    &mut self.errors,
+                    self.allocator,
+                ))
             } else {
                 unreachable!()
             }
@@ -424,8 +427,6 @@ impl<'a> Parser<'a> {
         );
         if self.loose { Ok(false) } else { Err(err) }
     }
-
-
 
     /// `parser.allow_whitespace()` — skip whitespace.
     pub fn allow_whitespace(&mut self) {
@@ -681,7 +682,9 @@ fn detect_lang_ts(template: &str) -> bool {
         if i + 7 <= bytes.len()
             && bytes[i] == b'<'
             && template[i + 1..].starts_with("script")
-            && (bytes.get(i + 7).map_or(true, |&b| b.is_ascii_whitespace() || b == b'>'))
+            && (bytes
+                .get(i + 7)
+                .map_or(true, |&b| b.is_ascii_whitespace() || b == b'>'))
         {
             // Found <script — scan attributes for `lang=`
             let tag_start = i + 7;
@@ -705,7 +708,11 @@ fn find_lang_value(template: &str, start: usize) -> Option<&str> {
         }
         // Read attribute name
         let name_start = i;
-        while i < bytes.len() && bytes[i] != b'=' && bytes[i] != b'>' && !bytes[i].is_ascii_whitespace() {
+        while i < bytes.len()
+            && bytes[i] != b'='
+            && bytes[i] != b'>'
+            && !bytes[i].is_ascii_whitespace()
+        {
             i += 1;
         }
         let name = &template[name_start..i];

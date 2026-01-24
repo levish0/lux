@@ -2,6 +2,15 @@ mod attribute;
 
 use std::sync::LazyLock;
 
+use crate::parser::read::script::read_script;
+use crate::parser::read::style::read_style;
+use crate::parser::utils::closing_tag_omitted;
+use crate::parser::{LastAutoClosedTag, ParseError, Parser, StackFrame};
+use ErrorKind::{
+    SvelteMetaDuplicate, SvelteMetaInvalidPlacement, SvelteMetaInvalidTag, TagInvalidName,
+};
+use oxc_allocator::Allocator;
+use regex::Regex;
 use svelte_ast::attributes::{AttributeSequenceValue, AttributeValue};
 use svelte_ast::elements::{
     Component, RegularElement, SlotElement, SvelteBody, SvelteBoundary, SvelteComponent,
@@ -12,18 +21,9 @@ use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::{Fragment, ScriptContext};
 use svelte_ast::span::Span;
 use svelte_ast::text::{Comment, Text};
-use oxc_allocator::Allocator;
-use regex::Regex;
-use ErrorKind::{
-    SvelteMetaDuplicate, SvelteMetaInvalidPlacement, SvelteMetaInvalidTag, TagInvalidName,
-};
-use crate::parser::read::script::read_script;
-use crate::parser::read::style::read_style;
-use crate::parser::utils::closing_tag_omitted;
-use crate::parser::{LastAutoClosedTag, ParseError, Parser, StackFrame};
 
-use attribute::{read_attributes, read_sequence, read_static_attributes};
 use crate::error::ErrorKind;
+use attribute::{read_attributes, read_sequence, read_static_attributes};
 
 /// Check if a name is a valid HTML/SVG element name.
 /// Matches: `![A-Za-z]+`, `[A-Za-z]([A-Za-z0-9-]*[A-Za-z0-9])?`, or namespaced `tag:name`.
@@ -51,7 +51,9 @@ fn is_valid_element_name(name: &str) -> bool {
             && local.len() >= 1
             && local[0].is_ascii_alphabetic()
             && local[local.len() - 1].is_ascii_alphanumeric()
-            && local[1..local.len().saturating_sub(1)].iter().all(|b| b.is_ascii_alphanumeric() || *b == b'-');
+            && local[1..local.len().saturating_sub(1)]
+                .iter()
+                .all(|b| b.is_ascii_alphanumeric() || *b == b'-');
     }
     // Case 2: [a-zA-Z]([a-zA-Z0-9-]*[a-zA-Z0-9])?
     if bytes.len() == 1 {
@@ -62,7 +64,9 @@ fn is_valid_element_name(name: &str) -> bool {
         return false;
     }
     // Middle chars: alphanumeric or hyphen
-    bytes[1..bytes.len() - 1].iter().all(|b| b.is_ascii_alphanumeric() || *b == b'-')
+    bytes[1..bytes.len() - 1]
+        .iter()
+        .all(|b| b.is_ascii_alphanumeric() || *b == b'-')
 }
 
 /// Reference: regex_valid_component_name (keep as regex — Unicode properties)
@@ -191,8 +195,7 @@ fn read_comment(parser: &mut Parser, start: usize) {
 fn close_tag(parser: &mut Parser) -> Result<(), ParseError> {
     let start = parser.index - 2; // position of `<` (we already consumed `</`)
 
-    let name = parser
-        .read_until_char(is_whitespace_or_slash_or_closing_tag);
+    let name = parser.read_until_char(is_whitespace_or_slash_or_closing_tag);
     parser.allow_whitespace();
     parser.eat_required(">")?;
 
@@ -208,7 +211,11 @@ fn close_tag(parser: &mut Parser) -> Result<(), ParseError> {
     }
 
     // Find matching open element on the stack
-    let found = parser.stack.iter().rev().any(|frame| frame_name(frame) == Some(&name));
+    let found = parser
+        .stack
+        .iter()
+        .rev()
+        .any(|frame| frame_name(frame) == Some(&name));
 
     if !found {
         if !parser.loose {
@@ -302,78 +309,184 @@ fn frame_to_node<'a>(
 ) -> Option<FragmentNode<'a>> {
     let fragment = Fragment { nodes };
     match frame {
-        StackFrame::RegularElement { start, name, name_loc, attributes } => {
-            Some(FragmentNode::RegularElement(RegularElement {
-                span: Span::new(start, end), name, name_loc, attributes, fragment,
-            }))
-        }
-        StackFrame::Component { start, name, name_loc, attributes } => {
-            Some(FragmentNode::Component(Component {
-                span: Span::new(start, end), name, name_loc, attributes, fragment,
-            }))
-        }
-        StackFrame::SvelteElement { start, name, name_loc, tag, attributes } => {
+        StackFrame::RegularElement {
+            start,
+            name,
+            name_loc,
+            attributes,
+        } => Some(FragmentNode::RegularElement(RegularElement {
+            span: Span::new(start, end),
+            name,
+            name_loc,
+            attributes,
+            fragment,
+        })),
+        StackFrame::Component {
+            start,
+            name,
+            name_loc,
+            attributes,
+        } => Some(FragmentNode::Component(Component {
+            span: Span::new(start, end),
+            name,
+            name_loc,
+            attributes,
+            fragment,
+        })),
+        StackFrame::SvelteElement {
+            start,
+            name,
+            name_loc,
+            tag,
+            attributes,
+        } => {
             let tag = tag.unwrap_or_else(|| make_null_literal(allocator));
             Some(FragmentNode::SvelteElement(SvelteElement {
-                span: Span::new(start, end), name, name_loc, tag, attributes, fragment,
+                span: Span::new(start, end),
+                name,
+                name_loc,
+                tag,
+                attributes,
+                fragment,
             }))
         }
-        StackFrame::SvelteComponent { start, name, name_loc, expression, attributes } => {
+        StackFrame::SvelteComponent {
+            start,
+            name,
+            name_loc,
+            expression,
+            attributes,
+        } => {
             let expression = expression.unwrap_or_else(|| make_null_literal(allocator));
             Some(FragmentNode::SvelteComponent(SvelteComponent {
-                span: Span::new(start, end), name, name_loc, expression, attributes, fragment,
+                span: Span::new(start, end),
+                name,
+                name_loc,
+                expression,
+                attributes,
+                fragment,
             }))
         }
-        StackFrame::SvelteSelf { start, name, name_loc, attributes } => {
-            Some(FragmentNode::SvelteSelf(SvelteSelf {
-                span: Span::new(start, end), name, name_loc, attributes, fragment,
-            }))
-        }
-        StackFrame::SvelteHead { start, name, name_loc, attributes } => {
-            Some(FragmentNode::SvelteHead(SvelteHead {
-                span: Span::new(start, end), name, name_loc, attributes, fragment,
-            }))
-        }
-        StackFrame::SvelteBody { start, name, name_loc, attributes } => {
-            Some(FragmentNode::SvelteBody(SvelteBody {
-                span: Span::new(start, end), name, name_loc, attributes, fragment,
-            }))
-        }
-        StackFrame::SvelteWindow { start, name, name_loc, attributes } => {
-            Some(FragmentNode::SvelteWindow(SvelteWindow {
-                span: Span::new(start, end), name, name_loc, attributes, fragment,
-            }))
-        }
-        StackFrame::SvelteDocument { start, name, name_loc, attributes } => {
-            Some(FragmentNode::SvelteDocument(SvelteDocument {
-                span: Span::new(start, end), name, name_loc, attributes, fragment,
-            }))
-        }
-        StackFrame::SvelteFragment { start, name, name_loc, attributes } => {
-            Some(FragmentNode::SvelteFragment(SvelteFragment {
-                span: Span::new(start, end), name, name_loc, attributes, fragment,
-            }))
-        }
-        StackFrame::SvelteBoundary { start, name, name_loc, attributes } => {
-            Some(FragmentNode::SvelteBoundary(SvelteBoundary {
-                span: Span::new(start, end), name, name_loc, attributes, fragment,
-            }))
-        }
-        StackFrame::SvelteOptions { start, name, name_loc, attributes } => {
-            Some(FragmentNode::SvelteOptionsRaw(SvelteOptionsRaw {
-                span: Span::new(start, end), name, name_loc, attributes, fragment,
-            }))
-        }
-        StackFrame::TitleElement { start, name, name_loc, attributes } => {
-            Some(FragmentNode::TitleElement(TitleElement {
-                span: Span::new(start, end), name, name_loc, attributes, fragment,
-            }))
-        }
-        StackFrame::SlotElement { start, name, name_loc, attributes } => {
-            Some(FragmentNode::SlotElement(SlotElement {
-                span: Span::new(start, end), name, name_loc, attributes, fragment,
-            }))
-        }
+        StackFrame::SvelteSelf {
+            start,
+            name,
+            name_loc,
+            attributes,
+        } => Some(FragmentNode::SvelteSelf(SvelteSelf {
+            span: Span::new(start, end),
+            name,
+            name_loc,
+            attributes,
+            fragment,
+        })),
+        StackFrame::SvelteHead {
+            start,
+            name,
+            name_loc,
+            attributes,
+        } => Some(FragmentNode::SvelteHead(SvelteHead {
+            span: Span::new(start, end),
+            name,
+            name_loc,
+            attributes,
+            fragment,
+        })),
+        StackFrame::SvelteBody {
+            start,
+            name,
+            name_loc,
+            attributes,
+        } => Some(FragmentNode::SvelteBody(SvelteBody {
+            span: Span::new(start, end),
+            name,
+            name_loc,
+            attributes,
+            fragment,
+        })),
+        StackFrame::SvelteWindow {
+            start,
+            name,
+            name_loc,
+            attributes,
+        } => Some(FragmentNode::SvelteWindow(SvelteWindow {
+            span: Span::new(start, end),
+            name,
+            name_loc,
+            attributes,
+            fragment,
+        })),
+        StackFrame::SvelteDocument {
+            start,
+            name,
+            name_loc,
+            attributes,
+        } => Some(FragmentNode::SvelteDocument(SvelteDocument {
+            span: Span::new(start, end),
+            name,
+            name_loc,
+            attributes,
+            fragment,
+        })),
+        StackFrame::SvelteFragment {
+            start,
+            name,
+            name_loc,
+            attributes,
+        } => Some(FragmentNode::SvelteFragment(SvelteFragment {
+            span: Span::new(start, end),
+            name,
+            name_loc,
+            attributes,
+            fragment,
+        })),
+        StackFrame::SvelteBoundary {
+            start,
+            name,
+            name_loc,
+            attributes,
+        } => Some(FragmentNode::SvelteBoundary(SvelteBoundary {
+            span: Span::new(start, end),
+            name,
+            name_loc,
+            attributes,
+            fragment,
+        })),
+        StackFrame::SvelteOptions {
+            start,
+            name,
+            name_loc,
+            attributes,
+        } => Some(FragmentNode::SvelteOptionsRaw(SvelteOptionsRaw {
+            span: Span::new(start, end),
+            name,
+            name_loc,
+            attributes,
+            fragment,
+        })),
+        StackFrame::TitleElement {
+            start,
+            name,
+            name_loc,
+            attributes,
+        } => Some(FragmentNode::TitleElement(TitleElement {
+            span: Span::new(start, end),
+            name,
+            name_loc,
+            attributes,
+            fragment,
+        })),
+        StackFrame::SlotElement {
+            start,
+            name,
+            name_loc,
+            attributes,
+        } => Some(FragmentNode::SlotElement(SlotElement {
+            span: Span::new(start, end),
+            name,
+            name_loc,
+            attributes,
+            fragment,
+        })),
         _ => None, // Block frames — handled elsewhere
     }
 }
@@ -381,7 +494,9 @@ fn frame_to_node<'a>(
 /// Create a dummy NullLiteral expression (fallback for missing `this` in loose mode).
 fn make_null_literal(allocator: &'_ Allocator) -> oxc_ast::ast::Expression<'_> {
     oxc_ast::ast::Expression::NullLiteral(oxc_allocator::Box::new_in(
-        oxc_ast::ast::NullLiteral { span: oxc_span::Span::new(0, 0) },
+        oxc_ast::ast::NullLiteral {
+            span: oxc_span::Span::new(0, 0),
+        },
         allocator,
     ))
 }
@@ -411,8 +526,7 @@ fn is_meta_tag(name: &str) -> bool {
 /// Reference: element.js lines 60-421
 fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
     let name_start = parser.index;
-    let name = parser
-        .read_until_char(is_whitespace_or_slash_or_closing_tag);
+    let name = parser.read_until_char(is_whitespace_or_slash_or_closing_tag);
     let name_end = parser.index;
 
     if name.is_empty() {
@@ -435,9 +549,7 @@ fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
     }
 
     // Reference: element.js:137-143 — invalid tag name
-    if !is_valid_element_name(&name)
-        && !REGEX_VALID_COMPONENT_NAME.is_match(&name)
-    {
+    if !is_valid_element_name(&name) && !REGEX_VALID_COMPONENT_NAME.is_match(&name) {
         if !parser.loose || !name.ends_with('.') {
             return Err(parser.error(
                 TagInvalidName,
@@ -477,7 +589,10 @@ fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
     // Reference: element.js:203-213 — implicit closing
     // If the parent is a RegularElement that should auto-close when this tag opens, pop it.
     // Need to extract values first to avoid borrow checker issues
-    let should_auto_close = if let Some(StackFrame::RegularElement { name: parent_name, .. }) = parser.stack.last() {
+    let should_auto_close = if let Some(StackFrame::RegularElement {
+        name: parent_name, ..
+    }) = parser.stack.last()
+    {
         if closing_tag_omitted(parent_name, &name) {
             Some(*parent_name)
         } else {
@@ -486,7 +601,7 @@ fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
     } else {
         None
     };
-    
+
     if let Some(parent_name_copy) = should_auto_close {
         let (frame, fragment) = parser.pop();
         if let Some(frame) = frame {
@@ -536,7 +651,8 @@ fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
                     parser.error(
                         ErrorKind::ScriptDuplicate,
                         start,
-                        "A component can only have one instance-level `<script>` element".to_string(),
+                        "A component can only have one instance-level `<script>` element"
+                            .to_string(),
                     );
                 }
                 parser.instance = Some(script);
@@ -610,8 +726,14 @@ fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
     if self_closing || is_void || !closed {
         // Self-closing or void — no children, immediately append
         let node = make_element_node(
-            &name, start, parser.index, name_loc.clone(),
-            attributes, Fragment { nodes: Vec::new() }, this_expression, parser,
+            &name,
+            start,
+            parser.index,
+            name_loc.clone(),
+            attributes,
+            Fragment { nodes: Vec::new() },
+            this_expression,
+            parser,
         );
         parser.append(node);
     } else if name == "textarea" {
@@ -631,8 +753,16 @@ fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
             })
             .collect();
         let node = make_element_node(
-            &name, start, parser.index, name_loc.clone(),
-            attributes, Fragment { nodes: fragment_nodes }, this_expression, parser,
+            &name,
+            start,
+            parser.index,
+            name_loc.clone(),
+            attributes,
+            Fragment {
+                nodes: fragment_nodes,
+            },
+            this_expression,
+            parser,
         );
         parser.append(node);
     } else if name == "script" || name == "style" {
@@ -648,15 +778,21 @@ fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
             data,
         });
         let node = make_element_node(
-            &name, start, parser.index, name_loc.clone(),
-            attributes, Fragment { nodes: vec![text_node] }, this_expression, parser,
+            &name,
+            start,
+            parser.index,
+            name_loc.clone(),
+            attributes,
+            Fragment {
+                nodes: vec![text_node],
+            },
+            this_expression,
+            parser,
         );
         parser.append(node);
     } else {
         // Normal element — push onto stack, children parsed in fragment loop
-        let frame = make_stack_frame(
-            &name, start, name_loc, attributes, this_expression, parser,
-        );
+        let frame = make_stack_frame(&name, start, name_loc, attributes, this_expression, parser);
         parser.stack.push(frame);
         parser.fragments.push(Vec::new());
     }
@@ -682,9 +818,9 @@ fn parent_is_head(stack: &[StackFrame]) -> bool {
 fn parent_is_shadowroot_template(stack: &[StackFrame]) -> bool {
     for frame in stack.iter().rev() {
         if let StackFrame::RegularElement { attributes, .. } = frame {
-            if attributes.iter().any(|a| {
-                matches!(a, AttributeNode::Attribute(attr) if attr.name == "shadowrootmode")
-            }) {
+            if attributes.iter().any(
+                |a| matches!(a, AttributeNode::Attribute(attr) if attr.name == "shadowrootmode"),
+            ) {
                 return true;
             }
         }
@@ -706,9 +842,9 @@ fn extract_this_attribute<'a>(
     name: &str,
     start: usize,
 ) -> Option<oxc_ast::ast::Expression<'a>> {
-    let index = attributes.iter().position(|a| {
-        matches!(a, AttributeNode::Attribute(attr) if attr.name == "this")
-    });
+    let index = attributes
+        .iter()
+        .position(|a| matches!(a, AttributeNode::Attribute(attr) if attr.name == "this"));
 
     let Some(index) = index else {
         if !parser.loose {
@@ -731,7 +867,10 @@ fn extract_this_attribute<'a>(
         AttributeValue::Sequence(chunks) => {
             // Check if it's a single ExpressionTag (the "expression attribute" case)
             let is_expression_attr = chunks.len() == 1
-                && matches!(chunks.first(), Some(AttributeSequenceValue::ExpressionTag(_)));
+                && matches!(
+                    chunks.first(),
+                    Some(AttributeSequenceValue::ExpressionTag(_))
+                );
 
             if is_expression_attr {
                 let chunk = chunks.into_iter().next().unwrap();
@@ -836,54 +975,112 @@ fn make_element_node<'a>(
     let span = Span::new(start, end);
     match name {
         "svelte:head" => FragmentNode::SvelteHead(SvelteHead {
-            span, name, name_loc, attributes, fragment,
+            span,
+            name,
+            name_loc,
+            attributes,
+            fragment,
         }),
         "svelte:options" => FragmentNode::SvelteOptionsRaw(SvelteOptionsRaw {
-            span, name, name_loc, attributes, fragment,
+            span,
+            name,
+            name_loc,
+            attributes,
+            fragment,
         }),
         "svelte:window" => FragmentNode::SvelteWindow(SvelteWindow {
-            span, name, name_loc, attributes, fragment,
+            span,
+            name,
+            name_loc,
+            attributes,
+            fragment,
         }),
         "svelte:document" => FragmentNode::SvelteDocument(SvelteDocument {
-            span, name, name_loc, attributes, fragment,
+            span,
+            name,
+            name_loc,
+            attributes,
+            fragment,
         }),
         "svelte:body" => FragmentNode::SvelteBody(SvelteBody {
-            span, name, name_loc, attributes, fragment,
+            span,
+            name,
+            name_loc,
+            attributes,
+            fragment,
         }),
         "svelte:element" => {
             let tag = this_expression.unwrap_or_else(|| make_null_literal(parser.allocator));
             FragmentNode::SvelteElement(SvelteElement {
-                span, name, name_loc, tag, attributes, fragment,
+                span,
+                name,
+                name_loc,
+                tag,
+                attributes,
+                fragment,
             })
         }
         "svelte:component" => {
             let expression = this_expression.unwrap_or_else(|| make_null_literal(parser.allocator));
             FragmentNode::SvelteComponent(SvelteComponent {
-                span, name, name_loc, expression, attributes, fragment,
+                span,
+                name,
+                name_loc,
+                expression,
+                attributes,
+                fragment,
             })
         }
         "svelte:self" => FragmentNode::SvelteSelf(SvelteSelf {
-            span, name, name_loc, attributes, fragment,
+            span,
+            name,
+            name_loc,
+            attributes,
+            fragment,
         }),
         "svelte:fragment" => FragmentNode::SvelteFragment(SvelteFragment {
-            span, name, name_loc, attributes, fragment,
+            span,
+            name,
+            name_loc,
+            attributes,
+            fragment,
         }),
         "svelte:boundary" => FragmentNode::SvelteBoundary(SvelteBoundary {
-            span, name, name_loc, attributes, fragment,
+            span,
+            name,
+            name_loc,
+            attributes,
+            fragment,
         }),
         _ if is_component_name(name, parser.loose) => FragmentNode::Component(Component {
-            span, name, name_loc, attributes, fragment,
+            span,
+            name,
+            name_loc,
+            attributes,
+            fragment,
         }),
         "title" if parent_is_head(&parser.stack) => FragmentNode::TitleElement(TitleElement {
-            span, name, name_loc, attributes, fragment,
+            span,
+            name,
+            name_loc,
+            attributes,
+            fragment,
         }),
         "slot" if !parent_is_shadowroot_template(&parser.stack) => {
             FragmentNode::SlotElement(SlotElement {
-                span, name, name_loc, attributes, fragment,
+                span,
+                name,
+                name_loc,
+                attributes,
+                fragment,
             })
         }
         _ => FragmentNode::RegularElement(RegularElement {
-            span, name, name_loc, attributes, fragment,
+            span,
+            name,
+            name_loc,
+            attributes,
+            fragment,
         }),
     }
 }
@@ -900,46 +1097,90 @@ fn make_stack_frame<'a>(
 ) -> StackFrame<'a> {
     match name {
         "svelte:head" => StackFrame::SvelteHead {
-            start, name, name_loc, attributes,
+            start,
+            name,
+            name_loc,
+            attributes,
         },
         "svelte:options" => StackFrame::SvelteOptions {
-            start, name, name_loc, attributes,
+            start,
+            name,
+            name_loc,
+            attributes,
         },
         "svelte:window" => StackFrame::SvelteWindow {
-            start, name, name_loc, attributes,
+            start,
+            name,
+            name_loc,
+            attributes,
         },
         "svelte:document" => StackFrame::SvelteDocument {
-            start, name, name_loc, attributes,
+            start,
+            name,
+            name_loc,
+            attributes,
         },
         "svelte:body" => StackFrame::SvelteBody {
-            start, name, name_loc, attributes,
+            start,
+            name,
+            name_loc,
+            attributes,
         },
         "svelte:element" => StackFrame::SvelteElement {
-            start, name, name_loc, tag: this_expression, attributes,
+            start,
+            name,
+            name_loc,
+            tag: this_expression,
+            attributes,
         },
         "svelte:component" => StackFrame::SvelteComponent {
-            start, name, name_loc, expression: this_expression, attributes,
+            start,
+            name,
+            name_loc,
+            expression: this_expression,
+            attributes,
         },
         "svelte:self" => StackFrame::SvelteSelf {
-            start, name, name_loc, attributes,
+            start,
+            name,
+            name_loc,
+            attributes,
         },
         "svelte:fragment" => StackFrame::SvelteFragment {
-            start, name, name_loc, attributes,
+            start,
+            name,
+            name_loc,
+            attributes,
         },
         "svelte:boundary" => StackFrame::SvelteBoundary {
-            start, name, name_loc, attributes,
+            start,
+            name,
+            name_loc,
+            attributes,
         },
         _ if is_component_name(name, parser.loose) => StackFrame::Component {
-            start, name, name_loc, attributes,
+            start,
+            name,
+            name_loc,
+            attributes,
         },
         "title" if parent_is_head(&parser.stack) => StackFrame::TitleElement {
-            start, name, name_loc, attributes,
+            start,
+            name,
+            name_loc,
+            attributes,
         },
         "slot" if !parent_is_shadowroot_template(&parser.stack) => StackFrame::SlotElement {
-            start, name, name_loc, attributes,
+            start,
+            name,
+            name_loc,
+            attributes,
         },
         _ => StackFrame::RegularElement {
-            start, name, name_loc, attributes,
+            start,
+            name,
+            name_loc,
+            attributes,
         },
     }
 }
