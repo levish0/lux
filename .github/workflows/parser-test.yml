@@ -1,4 +1,4 @@
-name: parser-test.yml
+name: Parser Tests
 
 on:
   push:
@@ -10,26 +10,36 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: .
-
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          toolchain: stable
-          override: true
+          node-version: '22'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Cache Cargo dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-parser-test-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Run Specific Parser Test
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Run parser_modern tests
         run: cargo test --package svelte-parser --test parser_modern
+
+      - name: Run compare tests
+        run: cargo test --package svelte-parser --test compare -- --nocapture

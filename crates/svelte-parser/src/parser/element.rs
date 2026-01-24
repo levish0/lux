@@ -14,6 +14,7 @@ use winnow::token::{literal, take_while};
 use super::ParserInput;
 use super::attribute::attribute_parser;
 use super::fragment::fragment_node_parser;
+use crate::error::{ErrorKind, ParseError};
 
 const ROOT_ONLY_META_TAGS: &[&str] = &[
     "svelte:head",
@@ -55,15 +56,35 @@ pub fn element_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNod
     // Validate svelte: meta tags (skip in loose mode)
     if !loose && name.starts_with("svelte:") {
         if !ALL_META_TAGS.contains(&name.as_str()) {
+            let list = ALL_META_TAGS
+                .iter()
+                .map(|t| format!("`<{}>`", t))
+                .collect::<Vec<_>>()
+                .join(", ");
+            parser_input.state.errors.push(ParseError::new(
+                ErrorKind::SvelteMetaInvalidTag,
+                Span::new(name_start, name_end),
+                format!("Valid `<svelte:...>` tag names are {}", list),
+            ));
             return Err(winnow::error::ContextError::new());
         }
         if ROOT_ONLY_META_TAGS.contains(&name.as_str()) {
             // Must be at root level (no parent elements)
             if !parser_input.state.element_stack.is_empty() {
+                parser_input.state.errors.push(ParseError::new(
+                    ErrorKind::SvelteMetaInvalidPlacement,
+                    Span::new(name_start, name_end),
+                    format!("`<{}>` tags cannot be inside elements or blocks", name),
+                ));
                 return Err(winnow::error::ContextError::new());
             }
             // Must not be duplicated
             if parser_input.state.seen_meta_tags.contains(&name) {
+                parser_input.state.errors.push(ParseError::new(
+                    ErrorKind::SvelteMetaDuplicate,
+                    Span::new(name_start, name_end),
+                    format!("A component can only have one `<{}>` element", name),
+                ));
                 return Err(winnow::error::ContextError::new());
             }
             parser_input.state.seen_meta_tags.insert(name.clone());

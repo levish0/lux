@@ -31,11 +31,15 @@ pub fn parse(source: &str, options: ParseOptions) -> Result<Root, Vec<ParseError
     };
 
     let mut nodes = document_parser(&mut parser_input).map_err(|_| {
-        vec![ParseError::new(
-            error::ErrorKind::UnexpectedEof,
-            Span::new(0, source.len()),
-            "Failed to parse template",
-        )]
+        if parser_input.state.errors.is_empty() {
+            vec![ParseError::new(
+                error::ErrorKind::UnexpectedEof,
+                Span::new(0, source.len()),
+                "Unexpected end of input",
+            )]
+        } else {
+            parser_input.state.errors.clone()
+        }
     })?;
 
     // Extract svelte:options from fragment (like reference Svelte's post-parse step)

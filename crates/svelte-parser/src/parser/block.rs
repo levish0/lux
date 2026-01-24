@@ -11,11 +11,13 @@ use winnow::token::{literal, take, take_while};
 
 use super::ParserInput;
 use super::bracket::{
-    read_until_chars_balanced, read_until_close_brace, read_until_keyword_balanced,
+    find_last_keyword_at_depth_zero, read_until_chars_balanced, read_until_close_brace,
+    read_until_keyword_balanced,
 };
 use super::expression::{make_empty_ident, parse_expression_or_loose};
 use super::fragment::fragment_node_parser;
 use super::swc_parse::{parse_expression, parse_param_list, parse_pattern};
+use crate::error::{ErrorKind, ParseError};
 
 /// Dispatch `{#block}` to the appropriate block parser.
 pub fn block_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNode> {
@@ -34,7 +36,15 @@ pub fn block_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNode>
         "await" => await_block_parser(parser_input, start),
         "key" => key_block_parser(parser_input, start),
         "snippet" => snippet_block_parser(parser_input, start),
-        _ => Err(winnow::error::ContextError::new()),
+        _ => {
+            let end = parser_input.current_token_start();
+            parser_input.state.errors.push(ParseError::new(
+                ErrorKind::ExpectedBlockType,
+                Span::new(start, end),
+                "Expected 'if', 'each', 'await', 'key' or 'snippet'",
+            ));
+            Err(winnow::error::ContextError::new())
+        }
     }
 }
 
@@ -148,26 +158,50 @@ fn each_block_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
     take_while(1.., |c: char| c.is_ascii_whitespace()).parse_next(parser_input)?;
 
     let loose = parser_input.state.loose;
+    let ts = parser_input.state.ts;
 
-    // Read expression until " as " keyword
+    // Read expression until " as " keyword.
+    // In TS mode, use the LAST " as " at depth 0 to handle TypeScript type assertions
+    // like `{#each items as Type[] as item}` where the first "as" is a TS assertion.
     let expr_offset = parser_input.current_token_start();
-    let (expression, has_as) = match read_until_keyword_balanced(parser_input, " as ") {
-        Ok(expr_text) => {
-            let expr = parse_expression_or_loose(
-                expr_text,
-                parser_input.state.ts,
-                expr_offset as u32,
-                loose,
-            )?;
-            (expr, true)
+    let (expression, has_as) = if ts {
+        let remaining: &str = &parser_input.input;
+        match find_last_keyword_at_depth_zero(remaining, " as ") {
+            Some(end) => {
+                let expr_text: &str = take(end).parse_next(parser_input)?;
+                let expr = parse_expression_or_loose(
+                    expr_text,
+                    ts,
+                    expr_offset as u32,
+                    loose,
+                )?;
+                (expr, true)
+            }
+            None if loose => {
+                let content = read_until_close_brace(parser_input)?;
+                let expr = make_empty_ident(content, expr_offset as u32);
+                (expr, false)
+            }
+            None => return Err(winnow::error::ContextError::new()),
         }
-        Err(_) if loose => {
-            // No " as " found - read until } and use as expression
-            let content = read_until_close_brace(parser_input)?;
-            let expr = make_empty_ident(content, expr_offset as u32);
-            (expr, false)
+    } else {
+        match read_until_keyword_balanced(parser_input, " as ") {
+            Ok(expr_text) => {
+                let expr = parse_expression_or_loose(
+                    expr_text,
+                    ts,
+                    expr_offset as u32,
+                    loose,
+                )?;
+                (expr, true)
+            }
+            Err(_) if loose => {
+                let content = read_until_close_brace(parser_input)?;
+                let expr = make_empty_ident(content, expr_offset as u32);
+                (expr, false)
+            }
+            Err(e) => return Err(e),
         }
-        Err(e) => return Err(e),
     };
 
     let (context, index, key) = if has_as {

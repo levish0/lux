@@ -72,6 +72,66 @@ pub fn find_matching_bracket(s: &str, open: char) -> Option<usize> {
     None
 }
 
+/// Find the LAST occurrence of the keyword `kw` at bracket depth 0.
+///
+/// Same as `find_keyword_at_depth_zero` but returns the last match instead of the first.
+/// Used in TS mode for `{#each}` blocks where TypeScript `as` assertions
+/// may precede the Svelte `as` keyword.
+pub fn find_last_keyword_at_depth_zero(s: &str, kw: &str) -> Option<usize> {
+    let bytes = s.as_bytes();
+    let mut depth: u32 = 0;
+    let mut i = 0;
+    let mut last_match: Option<usize> = None;
+
+    while i < bytes.len() {
+        if depth == 0 && bytes[i..].starts_with(kw.as_bytes()) {
+            last_match = Some(i);
+            i += kw.len();
+            continue;
+        }
+
+        let ch = bytes[i];
+        match ch {
+            b'\'' | b'"' | b'`' => {
+                i = skip_string(s, i + 1, ch as char).unwrap_or(bytes.len());
+            }
+            b'{' | b'(' | b'[' => {
+                depth += 1;
+                i += 1;
+            }
+            b'}' | b')' | b']' => {
+                depth = depth.saturating_sub(1);
+                i += 1;
+            }
+            b'/' => {
+                let next = bytes.get(i + 1).copied();
+                match next {
+                    Some(b'/') => {
+                        i = s[i..]
+                            .find('\n')
+                            .map(|pos| i + pos + 1)
+                            .unwrap_or(bytes.len());
+                    }
+                    Some(b'*') => {
+                        i = s[i + 2..]
+                            .find("*/")
+                            .map(|pos| i + 2 + pos + 2)
+                            .unwrap_or(bytes.len());
+                    }
+                    _ => {
+                        i += 1;
+                    }
+                }
+            }
+            _ => {
+                i += 1;
+            }
+        }
+    }
+
+    last_match
+}
+
 /// Find the end position of the keyword `kw` at bracket depth 0.
 ///
 /// `s` starts after the opening bracket/whitespace.

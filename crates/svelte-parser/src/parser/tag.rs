@@ -12,6 +12,7 @@ use super::ParserInput;
 use super::bracket::read_until_close_brace;
 use super::expression::read_expression;
 use super::swc_parse::{parse_expression, parse_var_decl};
+use crate::error::{ErrorKind, ParseError};
 
 /// Parse `{expression}` tag.
 pub fn expression_tag_parser(parser_input: &mut ParserInput) -> ParseResult<FragmentNode> {
@@ -44,7 +45,15 @@ pub fn special_tag_parser(parser_input: &mut ParserInput) -> ParseResult<Fragmen
         "const" => const_tag_parser(parser_input, start),
         "render" => render_tag_parser(parser_input, start),
         "attach" => attach_tag_parser(parser_input, start),
-        _ => Err(winnow::error::ContextError::new()),
+        _ => {
+            let end = parser_input.current_token_start();
+            parser_input.state.errors.push(ParseError::new(
+                ErrorKind::ExpectedTag,
+                Span::new(start, end),
+                "Expected 'html', 'render', 'attach', 'const', or 'debug'",
+            ));
+            Err(winnow::error::ContextError::new())
+        }
     }
 }
 
@@ -111,6 +120,11 @@ fn const_tag_parser(parser_input: &mut ParserInput, start: usize) -> ParseResult
 
     // Validate: must have exactly one declarator (rejects `{@const a = 1, b = 2}`)
     if declaration.decls.len() != 1 {
+        parser_input.state.errors.push(ParseError::new(
+            ErrorKind::ConstTagInvalidExpression,
+            Span::new(start, end),
+            "{@const ...} must consist of a single variable declaration",
+        ));
         return Err(winnow::error::ContextError::new());
     }
 
@@ -135,6 +149,11 @@ fn render_tag_parser(parser_input: &mut ParserInput, start: usize) -> ParseResul
         _ => false,
     };
     if !is_valid {
+        parser_input.state.errors.push(ParseError::new(
+            ErrorKind::RenderTagInvalidExpression,
+            Span::new(offset, parser_input.current_token_start()),
+            "`{@render ...}` tags can only contain call expressions",
+        ));
         return Err(winnow::error::ContextError::new());
     }
 
