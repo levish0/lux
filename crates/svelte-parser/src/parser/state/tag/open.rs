@@ -1,6 +1,6 @@
 use std::cell::Cell;
 
-use oxc_ast::ast::{BindingPattern, Expression, FormalParameter};
+use oxc_ast::ast::{Expression, FormalParameter};
 use oxc_span::{GetSpan, SourceType};
 
 use crate::error::ErrorKind;
