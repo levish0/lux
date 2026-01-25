@@ -39,6 +39,11 @@ pub struct AnalysisState<'s, 'a> {
     pub reactive_statement: Option<Span>,
     /// Depth at which $derived was seen (-1 if not in derived)
     pub derived_function_depth: i32,
+    /// Whether we're currently inside a template expression (e.g., {expression})
+    pub in_template_expression: bool,
+    /// Current expression span being analyzed (for expression metadata tracking)
+    /// When set, visitors update the expression metadata in analysis.expression_meta
+    pub current_expression: Option<Span>,
 }
 
 impl<'s, 'a> AnalysisState<'s, 'a> {
@@ -55,6 +60,8 @@ impl<'s, 'a> AnalysisState<'s, 'a> {
             function_depth: 0,
             reactive_statement: None,
             derived_function_depth: -1,
+            in_template_expression: false,
+            current_expression: None,
         }
     }
 

@@ -137,6 +137,7 @@ name = "lux-analyzer"
 version = "0.1.0"
 dependencies = [
  "lux-ast",
+ "lux-parser",
  "lux-utils",
  "oxc_allocator",
  "oxc_ast",

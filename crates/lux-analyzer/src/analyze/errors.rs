@@ -100,6 +100,74 @@ pub enum ErrorCode {
     RenderTagInvalidSpreadArgument,
     RenderTagInvalidCallExpression,
 
+    // Const tag errors
+    ConstTagInvalidPlacement,
+
+    // Slot element errors
+    SlotElementDeprecated,
+    SlotElementInvalidName,
+    SlotElementInvalidNameDefault,
+    SlotElementInvalidAttribute,
+
+    // Component errors
+    ComponentInvalidDirective,
+    EventHandlerInvalidComponentModifier,
+
+    // Svelte special element errors
+    SvelteSelfInvalidPlacement,
+    SvelteBodyIllegalAttribute,
+    SvelteWindowIllegalAttribute,
+    SvelteDocumentIllegalAttribute,
+    SvelteHeadIllegalAttribute,
+    SvelteFragmentInvalidPlacement,
+    SvelteFragmentInvalidAttribute,
+    SvelteBoundaryInvalidAttribute,
+    SvelteBoundaryInvalidAttributeValue,
+
+    // Title element errors
+    TitleIllegalAttribute,
+    TitleInvalidContent,
+
+    // Directive errors
+    StyleDirectiveInvalidModifier,
+    LetDirectiveInvalidPlacement,
+
+    // Reactive statement errors
+    LegacyReactiveStatementInvalid,
+
+    // Export errors
+    ModuleIllegalDefaultExport,
+    LegacyExportInvalid,
+    DerivedInvalidExport,
+    StateInvalidExport,
+
+    // Props errors
+    PropsInvalidIdentifier,
+    PropsInvalidPattern,
+    PropsIllegalName,
+
+    // Rune errors in non-runes mode
+    RuneInvalidUsage,
+
+    // Assignment errors
+    ConstantAssignment,
+    ConstantBinding,
+    EachItemInvalidAssignment,
+    SnippetParameterAssignment,
+    DollarBindingInvalid,
+    DollarPrefixInvalid,
+
+    // Import errors
+    ImportSvelteInternalForbidden,
+    RunesModeInvalidImport,
+
+    // Await errors
+    ExperimentalAsync,
+    LegacyAwaitInvalid,
+
+    // Legacy component errors
+    LegacyComponentCreation,
+
     // Other errors
     InvalidArgumentsUsage,
     IllegalAwaitExpression,
@@ -519,6 +587,373 @@ pub fn render_tag_invalid_call_expression(span: Span) -> AnalysisError {
     AnalysisError::new(
         ErrorCode::RenderTagInvalidCallExpression,
         "Render tag callee cannot be `.bind()`, `.apply()`, or `.call()`",
+        span,
+    )
+}
+
+// =============================================================================
+// Const tag errors
+// =============================================================================
+
+pub fn const_tag_invalid_placement(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::ConstTagInvalidPlacement,
+        "`{@const ...}` must be the immediate child of `{#if ...}`, `{:else if ...}`, `{:else}`, `{#each ...}`, `{:then ...}`, `{:catch ...}`, `{#snippet ...}` or a `<Component />`",
+        span,
+    )
+}
+
+// =============================================================================
+// Slot element errors
+// =============================================================================
+
+pub fn slot_element_invalid_name(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SlotElementInvalidName,
+        "`name` attribute must be a static value",
+        span,
+    )
+}
+
+pub fn slot_element_invalid_name_default(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SlotElementInvalidNameDefault,
+        "The default slot cannot have a name",
+        span,
+    )
+}
+
+pub fn slot_element_invalid_attribute(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SlotElementInvalidAttribute,
+        "`<slot>` can only have a `name` attribute and `let:` directives",
+        span,
+    )
+}
+
+// =============================================================================
+// Component errors
+// =============================================================================
+
+pub fn component_invalid_directive(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::ComponentInvalidDirective,
+        "This directive is not allowed on components",
+        span,
+    )
+}
+
+pub fn event_handler_invalid_component_modifier(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::EventHandlerInvalidComponentModifier,
+        "Event handlers on components can only have the `once` modifier",
+        span,
+    )
+}
+
+// =============================================================================
+// Svelte special element errors
+// =============================================================================
+
+pub fn svelte_self_invalid_placement(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SvelteSelfInvalidPlacement,
+        "`<svelte:self>` can only appear inside an if block, each block, component, or snippet",
+        span,
+    )
+}
+
+pub fn svelte_body_illegal_attribute(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SvelteBodyIllegalAttribute,
+        "`<svelte:body>` can only have event handlers",
+        span,
+    )
+}
+
+pub fn svelte_window_illegal_attribute(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SvelteWindowIllegalAttribute,
+        "`<svelte:window>` can only have event handlers and bindings",
+        span,
+    )
+}
+
+pub fn svelte_document_illegal_attribute(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SvelteDocumentIllegalAttribute,
+        "`<svelte:document>` can only have event handlers and bindings",
+        span,
+    )
+}
+
+pub fn svelte_head_illegal_attribute(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SvelteHeadIllegalAttribute,
+        "`<svelte:head>` cannot have attributes",
+        span,
+    )
+}
+
+pub fn svelte_fragment_invalid_placement(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SvelteFragmentInvalidPlacement,
+        "`<svelte:fragment>` can only appear as a direct child of a component",
+        span,
+    )
+}
+
+pub fn svelte_fragment_invalid_attribute(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SvelteFragmentInvalidAttribute,
+        "`<svelte:fragment>` can only have `slot` attribute and `let:` directives",
+        span,
+    )
+}
+
+pub fn svelte_boundary_invalid_attribute(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SvelteBoundaryInvalidAttribute,
+        "`<svelte:boundary>` can only have `onerror`, `failed`, and `pending` attributes",
+        span,
+    )
+}
+
+pub fn svelte_boundary_invalid_attribute_value(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SvelteBoundaryInvalidAttributeValue,
+        "`<svelte:boundary>` attributes must have an expression value",
+        span,
+    )
+}
+
+// =============================================================================
+// Title element errors
+// =============================================================================
+
+pub fn title_illegal_attribute(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::TitleIllegalAttribute,
+        "`<title>` cannot have attributes",
+        span,
+    )
+}
+
+pub fn title_invalid_content(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::TitleInvalidContent,
+        "`<title>` can only contain text and expression tags",
+        span,
+    )
+}
+
+// =============================================================================
+// Directive errors
+// =============================================================================
+
+pub fn style_directive_invalid_modifier(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::StyleDirectiveInvalidModifier,
+        "`style:` directive can only use the `important` modifier",
+        span,
+    )
+}
+
+pub fn let_directive_invalid_placement(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::LetDirectiveInvalidPlacement,
+        "`let:` directive can only be used on components, `<slot>`, `<svelte:element>`, `<svelte:component>`, `<svelte:self>`, or `<svelte:fragment>`",
+        span,
+    )
+}
+
+// =============================================================================
+// Reactive statement errors
+// =============================================================================
+
+pub fn legacy_reactive_statement_invalid(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::LegacyReactiveStatementInvalid,
+        "`$:` is not allowed in runes mode. Use `$derived` or `$effect` instead",
+        span,
+    )
+}
+
+// =============================================================================
+// Export errors
+// =============================================================================
+
+pub fn module_illegal_default_export(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::ModuleIllegalDefaultExport,
+        "A component cannot have a default export",
+        span,
+    )
+}
+
+pub fn legacy_export_invalid(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::LegacyExportInvalid,
+        "`export let` is not allowed in runes mode. Use `$props()` instead",
+        span,
+    )
+}
+
+pub fn derived_invalid_export(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::DerivedInvalidExport,
+        "Cannot export derived state",
+        span,
+    )
+}
+
+pub fn state_invalid_export(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::StateInvalidExport,
+        "Cannot export state if it is reassigned",
+        span,
+    )
+}
+
+// =============================================================================
+// Props errors
+// =============================================================================
+
+pub fn props_invalid_identifier(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::PropsInvalidIdentifier,
+        "`$props()` must be assigned to an object destructuring pattern or an identifier",
+        span,
+    )
+}
+
+pub fn props_invalid_pattern(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::PropsInvalidPattern,
+        "`$props()` patterns can only have computed keys with literal values",
+        span,
+    )
+}
+
+pub fn props_illegal_name(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::PropsIllegalName,
+        "Property names starting with `$$` are reserved",
+        span,
+    )
+}
+
+// =============================================================================
+// Rune usage errors
+// =============================================================================
+
+pub fn rune_invalid_usage(span: Span, name: &str) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::RuneInvalidUsage,
+        format!(
+            "`{}` is only available inside `.svelte` files with runes mode enabled",
+            name
+        ),
+        span,
+    )
+}
+
+// =============================================================================
+// Assignment errors
+// =============================================================================
+
+pub fn constant_assignment(span: Span, thing: &str) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::ConstantAssignment,
+        format!("Cannot assign to {}", thing),
+        span,
+    )
+}
+
+pub fn constant_binding(span: Span, thing: &str) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::ConstantBinding,
+        format!("Cannot bind to {}", thing),
+        span,
+    )
+}
+
+pub fn each_item_invalid_assignment(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::EachItemInvalidAssignment,
+        "Cannot reassign or bind to each block argument in runes mode. Use the array and index variables instead (e.g. `array[i] = value` instead of `entry = value`)",
+        span,
+    )
+}
+
+pub fn snippet_parameter_assignment(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::SnippetParameterAssignment,
+        "Cannot reassign or bind to snippet parameter",
+        span,
+    )
+}
+
+pub fn dollar_binding_invalid(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::DollarBindingInvalid,
+        "The $ name is reserved, and cannot be used for variables and imports",
+        span,
+    )
+}
+
+pub fn dollar_prefix_invalid(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::DollarPrefixInvalid,
+        "The $ prefix is reserved, and cannot be used for variables and imports",
+        span,
+    )
+}
+
+pub fn props_id_invalid_placement(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::PropsIdInvalidPlacement,
+        "`$props.id()` can only be used at the top level of the instance script as a variable declaration initializer",
+        span,
+    )
+}
+
+// =============================================================================
+// Import errors
+// =============================================================================
+
+pub fn import_svelte_internal_forbidden(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::ImportSvelteInternalForbidden,
+        "Importing from `svelte/internal/*` is forbidden. It contains private APIs that your app should not use",
+        span,
+    )
+}
+
+pub fn runes_mode_invalid_import(span: Span, name: &str) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::RunesModeInvalidImport,
+        format!("`{}` is not available in runes mode. Use `$effect.pre` instead", name),
+        span,
+    )
+}
+
+// =============================================================================
+// Await errors
+// =============================================================================
+
+pub fn experimental_async(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::ExperimentalAsync,
+        "Top-level `await` and `await` in template expressions require `experimental.async` to be enabled",
+        span,
+    )
+}
+
+pub fn legacy_await_invalid(span: Span) -> AnalysisError {
+    AnalysisError::new(
+        ErrorCode::LegacyAwaitInvalid,
+        "`await` in template expressions is only allowed in runes mode",
         span,
     )
 }

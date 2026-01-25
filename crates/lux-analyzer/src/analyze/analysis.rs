@@ -111,6 +111,27 @@ pub struct SnippetBlockMeta {
     pub can_hoist: bool,
 }
 
+/// Metadata for RegularElement, populated during analysis.
+/// Reference: `packages/svelte/src/compiler/phases/2-analyze/visitors/RegularElement.js`
+#[derive(Debug, Default)]
+pub struct RegularElementMeta {
+    /// Whether this element has any spread attributes
+    pub has_spread: bool,
+    /// Whether this is an SVG element
+    pub svg: bool,
+    /// Whether this is a MathML element
+    pub mathml: bool,
+    /// For <option> elements with single ExpressionTag child, stores the synthetic value node span
+    pub synthetic_value_node: Option<Span>,
+}
+
+/// Metadata for Component, populated during analysis.
+#[derive(Debug, Default)]
+pub struct ComponentMeta {
+    /// Whether this component has any spread attributes
+    pub has_spread: bool,
+}
+
 /// CSS analysis result.
 #[derive(Debug)]
 pub struct CssAnalysis {
@@ -222,6 +243,32 @@ pub struct ComponentAnalysis<'s> {
     pub key_block_meta: FxHashMap<Span, KeyBlockMeta>,
     /// Metadata for SnippetBlock nodes
     pub snippet_block_meta: FxHashMap<Span, SnippetBlockMeta>,
+
+    // ========================================================================
+    // Element Metadata (keyed by node span)
+    // ========================================================================
+
+    /// Metadata for RegularElement nodes
+    pub regular_element_meta: FxHashMap<Span, RegularElementMeta>,
+    /// Metadata for Component nodes
+    pub component_meta: FxHashMap<Span, ComponentMeta>,
+
+    // ========================================================================
+    // Fragment Metadata
+    // ========================================================================
+
+    /// Fragments that are marked as dynamic (by parent element/block span).
+    /// Used by mark_subtree_dynamic to track which subtrees need dynamic handling.
+    /// Reference: Fragment.metadata.dynamic in the JS implementation
+    pub dynamic_fragments: FxHashSet<Span>,
+
+    // ========================================================================
+    // Expression Metadata
+    // ========================================================================
+
+    /// Metadata for template expressions, keyed by expression span.
+    /// Reference: ExpressionTag, ConstTag, etc. have metadata.expression
+    pub expression_meta: FxHashMap<Span, ExpressionMeta>,
 }
 
 /// An exported binding.
@@ -275,6 +322,10 @@ impl<'s> ComponentAnalysis<'s> {
             await_block_meta: FxHashMap::default(),
             key_block_meta: FxHashMap::default(),
             snippet_block_meta: FxHashMap::default(),
+            regular_element_meta: FxHashMap::default(),
+            component_meta: FxHashMap::default(),
+            dynamic_fragments: FxHashSet::default(),
+            expression_meta: FxHashMap::default(),
         }
     }
 
@@ -291,5 +342,58 @@ impl<'s> ComponentAnalysis<'s> {
     /// Returns true if there are any errors.
     pub fn has_errors(&self) -> bool {
         !self.errors.is_empty()
+    }
+
+    /// Returns true if the fragment at the given span is marked as dynamic.
+    /// Used by transform phase to determine if a fragment needs dynamic handling.
+    pub fn is_fragment_dynamic(&self, span: Span) -> bool {
+        self.dynamic_fragments.contains(&span)
+    }
+
+    /// Marks a fragment as dynamic.
+    pub fn mark_fragment_dynamic(&mut self, span: Span) {
+        self.dynamic_fragments.insert(span);
+    }
+
+    /// Gets or creates expression metadata for a given span.
+    pub fn get_or_create_expression_meta(&mut self, span: Span) -> &mut ExpressionMeta {
+        self.expression_meta.entry(span).or_default()
+    }
+
+    /// Gets expression metadata for a given span (if it exists).
+    pub fn get_expression_meta(&self, span: Span) -> Option<&ExpressionMeta> {
+        self.expression_meta.get(&span)
+    }
+
+    /// Updates expression metadata: sets has_state to true.
+    pub fn mark_expression_has_state(&mut self, span: Span) {
+        self.get_or_create_expression_meta(span).has_state = true;
+    }
+
+    /// Updates expression metadata: sets has_call to true.
+    pub fn mark_expression_has_call(&mut self, span: Span) {
+        self.get_or_create_expression_meta(span).has_call = true;
+    }
+
+    /// Updates expression metadata: sets has_await to true.
+    pub fn mark_expression_has_await(&mut self, span: Span) {
+        self.get_or_create_expression_meta(span).has_await = true;
+    }
+
+    /// Updates expression metadata: sets has_member_expression to true.
+    pub fn mark_expression_has_member(&mut self, span: Span) {
+        self.get_or_create_expression_meta(span).has_member_expression = true;
+    }
+
+    /// Updates expression metadata: sets has_assignment to true.
+    pub fn mark_expression_has_assignment(&mut self, span: Span) {
+        self.get_or_create_expression_meta(span).has_assignment = true;
+    }
+
+    /// Adds a dependency to expression metadata.
+    pub fn add_expression_dependency(&mut self, span: Span, binding_id: BindingId) {
+        let meta = self.get_or_create_expression_meta(span);
+        meta.dependencies.insert(binding_id);
+        meta.references.insert(binding_id);
     }
 }

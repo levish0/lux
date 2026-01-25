@@ -26,6 +26,7 @@
 use lux_ast::blocks::EachBlock;
 use oxc_ast::ast::{BindingPattern, Expression};
 
+use crate::analyze::analysis::EachBlockMeta;
 use crate::analyze::errors;
 use crate::analyze::state::AnalysisState;
 use crate::analyze::visitor::NodeKind;
@@ -34,7 +35,11 @@ use crate::analyze::visitors::shared::{validate_block_not_empty, validate_openin
 /// EachBlock visitor.
 ///
 /// Reference: `packages/svelte/src/compiler/phases/2-analyze/visitors/EachBlock.js`
-pub fn visit_each_block(node: &EachBlock<'_>, state: &mut AnalysisState<'_, '_>, _path: &[NodeKind<'_>]) {
+pub fn visit_each_block(
+    node: &EachBlock<'_>,
+    state: &mut AnalysisState<'_, '_>,
+    _path: &[NodeKind<'_>],
+) {
     // validate_opening_tag(node, context.state, '#');
     validate_opening_tag(node.span.into(), "#", state);
 
@@ -52,7 +57,9 @@ pub fn visit_each_block(node: &EachBlock<'_>, state: &mut AnalysisState<'_, '_>,
         if let BindingPattern::BindingIdentifier(id) = &context.pattern {
             let name = id.name.as_str();
             if name == "$state" || name == "$derived" {
-                state.analysis.error(errors::state_invalid_placement(context.span, name));
+                state
+                    .analysis
+                    .error(errors::state_invalid_placement(context.span, name));
             }
         }
     }
@@ -62,8 +69,6 @@ pub fn visit_each_block(node: &EachBlock<'_>, state: &mut AnalysisState<'_, '_>,
     //     node.metadata.keyed =
     //         node.key.type !== 'Identifier' || !node.index || node.key.name !== node.index;
     // }
-    // Note: metadata.keyed is set during parsing or should be computed here
-    // For now we compute the "keyed" status for validation purposes
     let is_keyed = if let Some(ref key) = node.key {
         match key {
             Expression::Identifier(id) => {
@@ -89,6 +94,43 @@ pub fn visit_each_block(node: &EachBlock<'_>, state: &mut AnalysisState<'_, '_>,
         }
     }
 
-    // The rest of the reference (context.visit, legacy mode handling, mark_subtree_dynamic)
-    // is handled by the main visitor traversal and other analysis passes
+    // Store metadata in analysis
+    // node.metadata.keyed = is_keyed;
+    let meta = state
+        .analysis
+        .each_block_meta
+        .entry(node.span.into())
+        .or_insert_with(EachBlockMeta::default);
+    meta.keyed = is_keyed;
+
+    // Legacy mode handling:
+    // if (!context.state.analysis.runes) {
+    //     let mutated = !!node.context && extract_identifiers(node.context).some((id) => {
+    //         const binding = context.state.scope.get(id.name);
+    //         return !!binding?.mutated;
+    //     });
+    //     // collect transitive dependencies...
+    //     for (const binding of node.metadata.expression.dependencies) {
+    //         if (binding.declaration_kind !== 'function') {
+    //             collect_transitive_dependencies(binding, node.metadata.transitive_deps);
+    //         }
+    //     }
+    //     // ...and ensure they are marked as state
+    //     if (mutated) {
+    //         for (const binding of node.metadata.transitive_deps) {
+    //             if (binding.kind === 'normal' && ...) {
+    //                 binding.kind = 'state';
+    //             }
+    //         }
+    //     }
+    // }
+    // TODO: Implement legacy mode transitive dependency collection
+    // This requires:
+    // 1. extract_identifiers utility to get all identifiers from a pattern
+    // 2. Check if any context binding is mutated
+    // 3. Collect transitive dependencies from expression.dependencies
+    // 4. Mark bindings as 'state' if mutated
+
+    // mark_subtree_dynamic(context.path);
+    // TODO: implement mark_subtree_dynamic
 }

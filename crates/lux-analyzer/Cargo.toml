@@ -17,3 +17,6 @@ oxc_span = { workspace = true }
 oxc_syntax = { workspace = true }
 rustc-hash = { workspace = true }
 oxc_ast_visit = {workspace = true}
+
+[dev-dependencies]
+lux-parser = {workspace = true}

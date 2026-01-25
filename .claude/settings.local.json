@@ -21,7 +21,8 @@
       "Bash(cargo fetch:*)",
       "Bash(node diff_analysis.mjs:*)",
       "Bash(node check_diff.mjs:*)",
-      "Bash(cargo run:*)"
+      "Bash(cargo run:*)",
+      "Bash(cargo build:*)"
     ]
   }
 }

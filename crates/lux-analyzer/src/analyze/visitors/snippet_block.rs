@@ -21,6 +21,7 @@
 use lux_ast::blocks::SnippetBlock;
 use oxc_ast::ast::Expression;
 
+use crate::analyze::analysis::SnippetBlockMeta;
 use crate::analyze::errors;
 use crate::analyze::state::AnalysisState;
 use crate::analyze::visitor::NodeKind;
@@ -36,6 +37,13 @@ pub fn visit_snippet_block(
 ) {
     // context.state.analysis.snippets.add(node);
     state.analysis.snippets.insert(node.span.into());
+
+    // Initialize metadata for this snippet block
+    let _meta = state
+        .analysis
+        .snippet_block_meta
+        .entry(node.span.into())
+        .or_insert_with(SnippetBlockMeta::default);
 
     // validate_block_not_empty(node.body, context);
     validate_block_not_empty(Some(&node.body), state);

@@ -305,3 +305,13 @@ impl Default for ScopeTree {
         Self::new()
     }
 }
+
+impl ScopeTree {
+    /// Returns an iterator over all scopes.
+    pub fn iter_scopes(&self) -> impl Iterator<Item = (ScopeId, &Scope)> {
+        self.scopes
+            .iter()
+            .enumerate()
+            .map(|(i, scope)| (ScopeId::new(i as u32), scope))
+    }
+}

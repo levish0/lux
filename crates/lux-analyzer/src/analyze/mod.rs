@@ -7,9 +7,12 @@
 //! - Analyzes CSS
 //! - Orders reactive statements
 
+pub mod a11y;
 mod analysis;
+mod css;
 pub mod errors;
 mod state;
+pub mod utils;
 mod visitor;
 pub mod visitors;
 pub mod warnings;
@@ -131,17 +134,19 @@ fn detect_runes_mode(
         return runes;
     }
 
-    // Check for rune usage in references
-    // If any rune is referenced, enable runes mode
-    for (name, _) in analysis.scope_tree.get_scope(analysis.scope_tree.root_scope_id()).references.iter() {
-        if is_rune(name) {
-            return true;
-        }
-    }
-
     // Check for top-level await (implies runes mode)
     if has_await {
         return true;
+    }
+
+    // Check for rune usage in references across ALL scopes
+    // Runes like $state, $derived are referenced in the instance script scope
+    for (_, scope) in analysis.scope_tree.iter_scopes() {
+        for name in scope.references.keys() {
+            if is_rune(name) {
+                return true;
+            }
+        }
     }
 
     false

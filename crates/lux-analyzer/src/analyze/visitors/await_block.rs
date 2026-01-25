@@ -21,6 +21,7 @@
 
 use lux_ast::blocks::AwaitBlock;
 
+use crate::analyze::analysis::AwaitBlockMeta;
 use crate::analyze::errors;
 use crate::analyze::state::AnalysisState;
 use crate::analyze::visitor::NodeKind;
@@ -29,7 +30,11 @@ use crate::analyze::visitors::shared::{validate_block_not_empty, validate_openin
 /// AwaitBlock visitor.
 ///
 /// Reference: `packages/svelte/src/compiler/phases/2-analyze/visitors/AwaitBlock.js`
-pub fn visit_await_block(node: &AwaitBlock<'_>, state: &mut AnalysisState<'_, '_>, _path: &[NodeKind<'_>]) {
+pub fn visit_await_block(
+    node: &AwaitBlock<'_>,
+    state: &mut AnalysisState<'_, '_>,
+    _path: &[NodeKind<'_>],
+) {
     // validate_block_not_empty(node.pending, context);
     validate_block_not_empty(node.pending.as_ref(), state);
 
@@ -86,6 +91,14 @@ pub fn visit_await_block(node: &AwaitBlock<'_>, state: &mut AnalysisState<'_, '_
             }
         }
     }
+
+    // Initialize metadata for this block
+    // Expression metadata will be populated when visiting the awaited expression
+    let _meta = state
+        .analysis
+        .await_block_meta
+        .entry(node.span.into())
+        .or_insert_with(AwaitBlockMeta::default);
 
     // mark_subtree_dynamic(context.path);
     // TODO: implement mark_subtree_dynamic
