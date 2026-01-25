@@ -43,6 +43,74 @@ pub struct ReactiveStatement {
     pub dependencies: Vec<BindingId>,
 }
 
+// ============================================================================
+// Block Metadata (populated during analysis)
+// ============================================================================
+
+/// Expression metadata for tracking reactivity.
+/// Reference: `phases/nodes.js` ExpressionMetadata class
+#[derive(Debug, Default)]
+pub struct ExpressionMeta {
+    /// True if the expression references state directly, or _might_ (via member/call expressions)
+    pub has_state: bool,
+    /// True if the expression involves a call expression
+    pub has_call: bool,
+    /// True if the expression contains `await`
+    pub has_await: bool,
+    /// True if the expression includes a member expression
+    pub has_member_expression: bool,
+    /// True if the expression includes an assignment or an update
+    pub has_assignment: bool,
+    /// Bindings that are referenced eagerly (not inside functions)
+    pub dependencies: FxHashSet<BindingId>,
+    /// All bindings that are referenced
+    pub references: FxHashSet<BindingId>,
+}
+
+/// Metadata for EachBlock, populated during analysis.
+/// Reference: `phases/scope.js` EachBlock visitor
+#[derive(Debug, Default)]
+pub struct EachBlockMeta {
+    /// Expression metadata for the iterated expression
+    pub expression: ExpressionMeta,
+    /// Whether this is a keyed each block
+    pub keyed: bool,
+    /// Whether this block contains a bind:group directive
+    pub contains_group_binding: bool,
+    /// Whether this block is controlled (e.g., by a parent)
+    pub is_controlled: bool,
+    /// Transitive dependencies for legacy mode mutation tracking
+    pub transitive_deps: FxHashSet<BindingId>,
+}
+
+/// Metadata for IfBlock, populated during analysis.
+#[derive(Debug, Default)]
+pub struct IfBlockMeta {
+    /// Expression metadata for the test expression
+    pub expression: ExpressionMeta,
+}
+
+/// Metadata for AwaitBlock, populated during analysis.
+#[derive(Debug, Default)]
+pub struct AwaitBlockMeta {
+    /// Expression metadata for the awaited expression
+    pub expression: ExpressionMeta,
+}
+
+/// Metadata for KeyBlock, populated during analysis.
+#[derive(Debug, Default)]
+pub struct KeyBlockMeta {
+    /// Expression metadata for the key expression
+    pub expression: ExpressionMeta,
+}
+
+/// Metadata for SnippetBlock, populated during analysis.
+#[derive(Debug, Default)]
+pub struct SnippetBlockMeta {
+    /// Whether this snippet can be hoisted to module scope
+    pub can_hoist: bool,
+}
+
 /// CSS analysis result.
 #[derive(Debug)]
 pub struct CssAnalysis {
@@ -139,6 +207,21 @@ pub struct ComponentAnalysis<'s> {
     pub errors: Vec<AnalysisError>,
     /// Analysis warnings collected during analysis
     pub warnings: Vec<AnalysisWarning>,
+
+    // ========================================================================
+    // Block Metadata (keyed by node span)
+    // ========================================================================
+
+    /// Metadata for EachBlock nodes
+    pub each_block_meta: FxHashMap<Span, EachBlockMeta>,
+    /// Metadata for IfBlock nodes
+    pub if_block_meta: FxHashMap<Span, IfBlockMeta>,
+    /// Metadata for AwaitBlock nodes
+    pub await_block_meta: FxHashMap<Span, AwaitBlockMeta>,
+    /// Metadata for KeyBlock nodes
+    pub key_block_meta: FxHashMap<Span, KeyBlockMeta>,
+    /// Metadata for SnippetBlock nodes
+    pub snippet_block_meta: FxHashMap<Span, SnippetBlockMeta>,
 }
 
 /// An exported binding.
@@ -187,6 +270,11 @@ impl<'s> ComponentAnalysis<'s> {
             snippets: FxHashSet::default(),
             errors: Vec::new(),
             warnings: Vec::new(),
+            each_block_meta: FxHashMap::default(),
+            if_block_meta: FxHashMap::default(),
+            await_block_meta: FxHashMap::default(),
+            key_block_meta: FxHashMap::default(),
+            snippet_block_meta: FxHashMap::default(),
         }
     }
 
