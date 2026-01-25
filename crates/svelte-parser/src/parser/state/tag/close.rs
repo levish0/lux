@@ -7,85 +7,125 @@ use svelte_ast::span::Span;
 use crate::error::ErrorKind;
 use crate::parser::{AwaitPhase, ParseError, Parser, StackFrame};
 
-use super::skip_to_closing_brace;
-
 /// `{/...}` — close block
+/// Reference: tag.js close() function (lines 545-613)
 pub fn close(parser: &mut Parser) -> Result<(), ParseError> {
-    let current_type = match parser.current() {
-        Some(StackFrame::IfBlock { .. }) => "if",
-        Some(StackFrame::EachBlock { .. }) => "each",
-        Some(StackFrame::AwaitBlock { .. }) => "await",
-        Some(StackFrame::KeyBlock { .. }) => "key",
-        Some(StackFrame::SnippetBlock { .. }) => "snippet",
-        _ => {
-            if !parser.loose {
+    let start = parser.index - 1; // position after {/
+
+    // Reference pattern: check current block type and try to match
+    // If not matched, pop current and recurse
+    loop {
+        let matched = match parser.current() {
+            Some(StackFrame::IfBlock { .. }) => {
+                let m = parser.eat_required_with_loose("if", false)?;
+                if m {
+                    // Matched: do full IfBlock close logic
+                    parser.allow_whitespace();
+                    parser.eat_required("}")?;
+                    close_if_matched(parser);
+                    return Ok(());
+                }
+                false
+            }
+            Some(StackFrame::EachBlock { .. }) => {
+                let m = parser.eat_required_with_loose("each", false)?;
+                if m {
+                    parser.allow_whitespace();
+                    parser.eat_required("}")?;
+                    close_each_matched(parser);
+                    return Ok(());
+                }
+                false
+            }
+            Some(StackFrame::AwaitBlock { .. }) => {
+                let m = parser.eat_required_with_loose("await", false)?;
+                if m {
+                    parser.allow_whitespace();
+                    parser.eat_required("}")?;
+                    close_await_matched(parser);
+                    return Ok(());
+                }
+                false
+            }
+            Some(StackFrame::KeyBlock { .. }) => {
+                let m = parser.eat_required_with_loose("key", false)?;
+                if m {
+                    parser.allow_whitespace();
+                    parser.eat_required("}")?;
+                    close_key_matched(parser);
+                    return Ok(());
+                }
+                false
+            }
+            Some(StackFrame::SnippetBlock { .. }) => {
+                let m = parser.eat_required_with_loose("snippet", false)?;
+                if m {
+                    parser.allow_whitespace();
+                    parser.eat_required("}")?;
+                    close_snippet_matched(parser);
+                    return Ok(());
+                }
+                false
+            }
+            // Element types: in loose mode, set matched = false
+            Some(StackFrame::RegularElement { .. })
+            | Some(StackFrame::Component { .. })
+            | Some(StackFrame::SvelteElement { .. })
+            | Some(StackFrame::SvelteComponent { .. })
+            | Some(StackFrame::SvelteSelf { .. })
+            | Some(StackFrame::SvelteHead { .. })
+            | Some(StackFrame::SvelteBody { .. })
+            | Some(StackFrame::SvelteWindow { .. })
+            | Some(StackFrame::SvelteDocument { .. })
+            | Some(StackFrame::SvelteFragment { .. })
+            | Some(StackFrame::SvelteOptions { .. })
+            | Some(StackFrame::TitleElement { .. })
+            | Some(StackFrame::SlotElement { .. })
+            | Some(StackFrame::SvelteBoundary { .. }) => {
+                if parser.loose {
+                    false
+                } else {
+                    return Err(parser.error(
+                        ErrorKind::BlockUnexpectedClose,
+                        parser.index,
+                        "Unexpected block close".to_string(),
+                    ));
+                }
+            }
+            None => {
                 return Err(parser.error(
                     ErrorKind::BlockUnexpectedClose,
                     parser.index,
                     "Unexpected block close".to_string(),
                 ));
             }
-            skip_to_closing_brace(parser);
-            return Ok(());
-        }
-    };
+        };
 
-    match current_type {
-        "if" => close_if(parser)?,
-        "each" => close_each(parser)?,
-        "await" => close_await(parser)?,
-        "key" => close_key(parser)?,
-        "snippet" => close_snippet(parser)?,
-        _ => skip_to_closing_brace(parser),
+        // If not matched, pop current frame and recurse
+        // Reference: block.end = start - 1; parser.pop(); close(parser);
+        if !matched {
+            let end = start - 1; // end before the {/
+            let fragment_nodes = parser.fragments.pop().unwrap_or_default();
+            let frame = parser.stack.pop();
+
+            if let Some(frame) = frame {
+                // Convert frame to node and append to parent
+                if let Some(node) = parser.frame_to_node_loose(frame, end, fragment_nodes) {
+                    parser.append(node);
+                }
+            }
+            // Continue loop to try close again with new current
+            continue;
+        }
+
+        break;
     }
 
     Ok(())
 }
 
-fn close_if(parser: &mut Parser) -> Result<(), ParseError> {
-    let matched = parser.eat_required_with_loose("if", false)?;
-    if !matched {
-        // Loose mode: mismatched close, pop and retry
-        let fragment_nodes = parser.fragments.pop().unwrap_or_default();
-        let frame = parser.stack.pop();
-        if let Some(StackFrame::IfBlock {
-            start,
-            test,
-            consequent,
-            elseif,
-        }) = frame
-        {
-            let (cons, alt) = if let Some(cons_nodes) = consequent {
-                (
-                    Fragment { nodes: cons_nodes },
-                    Some(Fragment {
-                        nodes: fragment_nodes,
-                    }),
-                )
-            } else {
-                (
-                    Fragment {
-                        nodes: fragment_nodes,
-                    },
-                    None,
-                )
-            };
-            parser.append(FragmentNode::IfBlock(IfBlock {
-                span: Span::new(start, parser.index),
-                elseif,
-                test,
-                consequent: cons,
-                alternate: alt,
-                metadata: ExpressionNodeMetadata::default(),
-            }));
-        }
-        close(parser)?;
-        return Ok(());
-    }
-
-    parser.allow_whitespace();
-    parser.eat_required("}")?;
-
+/// Close IfBlock when "if" keyword matched
+fn close_if_matched(parser: &mut Parser) {
     // Unwind elseif chain from inside out
     let mut alternate: Option<Fragment> = None;
 
@@ -147,21 +187,10 @@ fn close_if(parser: &mut Parser) -> Result<(), ParseError> {
             break;
         }
     }
-
-    Ok(())
 }
 
-fn close_each(parser: &mut Parser) -> Result<(), ParseError> {
-    let matched = parser.eat_required_with_loose("each", false)?;
-    if !matched {
-        parser.fragments.pop();
-        parser.stack.pop();
-        close(parser)?;
-        return Ok(());
-    }
-    parser.allow_whitespace();
-    parser.eat_required("}")?;
-
+/// Close EachBlock when "each" keyword matched
+fn close_each_matched(parser: &mut Parser) {
     let fragment_nodes = parser.fragments.pop().unwrap_or_default();
     let frame = parser.stack.pop();
 
@@ -200,21 +229,10 @@ fn close_each(parser: &mut Parser) -> Result<(), ParseError> {
             key,
         }));
     }
-
-    Ok(())
 }
 
-fn close_await(parser: &mut Parser) -> Result<(), ParseError> {
-    let matched = parser.eat_required_with_loose("await", false)?;
-    if !matched {
-        parser.fragments.pop();
-        parser.stack.pop();
-        close(parser)?;
-        return Ok(());
-    }
-    parser.allow_whitespace();
-    parser.eat_required("}")?;
-
+/// Close AwaitBlock when "await" keyword matched
+fn close_await_matched(parser: &mut Parser) {
     let fragment_nodes = parser.fragments.pop().unwrap_or_default();
     let frame = parser.stack.pop();
 
@@ -263,21 +281,10 @@ fn close_await(parser: &mut Parser) -> Result<(), ParseError> {
             metadata: ExpressionNodeMetadata::default(),
         }));
     }
-
-    Ok(())
 }
 
-fn close_key<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
-    let matched = parser.eat_required_with_loose("key", false)?;
-    if !matched {
-        parser.fragments.pop();
-        parser.stack.pop();
-        close(parser)?;
-        return Ok(());
-    }
-    parser.allow_whitespace();
-    parser.eat_required("}")?;
-
+/// Close KeyBlock when "key" keyword matched
+fn close_key_matched(parser: &mut Parser) {
     let fragment_nodes = parser.fragments.pop().unwrap_or_default();
     let frame = parser.stack.pop();
 
@@ -291,21 +298,10 @@ fn close_key<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
             metadata: ExpressionNodeMetadata::default(),
         }));
     }
-
-    Ok(())
 }
 
-fn close_snippet<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
-    let matched = parser.eat_required_with_loose("snippet", false)?;
-    if !matched {
-        parser.fragments.pop();
-        parser.stack.pop();
-        close(parser)?;
-        return Ok(());
-    }
-    parser.allow_whitespace();
-    parser.eat_required("}")?;
-
+/// Close SnippetBlock when "snippet" keyword matched
+fn close_snippet_matched(parser: &mut Parser) {
     let fragment_nodes = parser.fragments.pop().unwrap_or_default();
     let frame = parser.stack.pop();
 
@@ -313,6 +309,7 @@ fn close_snippet<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
         start,
         expression,
         parameters,
+        rest,
         type_params,
     }) = frame
     {
@@ -320,6 +317,7 @@ fn close_snippet<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
             span: Span::new(start, parser.index),
             expression,
             parameters,
+            rest,
             type_params,
             body: Fragment {
                 nodes: fragment_nodes,
@@ -327,6 +325,4 @@ fn close_snippet<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
             metadata: SnippetBlockMetadata::default(),
         }));
     }
-
-    Ok(())
 }

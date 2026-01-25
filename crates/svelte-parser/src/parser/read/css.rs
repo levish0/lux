@@ -428,31 +428,37 @@ fn read_value(parser: &mut Parser<'_>) -> Result<String, ParseError> {
     let mut value = String::new();
     let mut escaped = false;
     let mut in_url = false;
-    let mut quote_mark: Option<u8> = None;
+    let mut quote_mark: Option<char> = None;
 
     while parser.index < parser.template.len() {
-        let ch = parser.template.as_bytes()[parser.index];
+        // Get the current character (handling multi-byte UTF-8)
+        let remaining = &parser.template[parser.index..];
+        let ch = match remaining.chars().next() {
+            Some(c) => c,
+            None => break,
+        };
+        let ch_len = ch.len_utf8();
 
         if escaped {
             value.push('\\');
-            value.push(ch as char);
+            value.push(ch);
             escaped = false;
-        } else if ch == b'\\' {
+        } else if ch == '\\' {
             escaped = true;
         } else if Some(ch) == quote_mark {
             quote_mark = None;
-        } else if ch == b')' {
+        } else if ch == ')' {
             in_url = false;
-        } else if quote_mark.is_none() && (ch == b'"' || ch == b'\'') {
+        } else if quote_mark.is_none() && (ch == '"' || ch == '\'') {
             quote_mark = Some(ch);
-        } else if ch == b'(' && value.ends_with("url") {
+        } else if ch == '(' && value.ends_with("url") {
             in_url = true;
-        } else if (ch == b';' || ch == b'{' || ch == b'}') && !in_url && quote_mark.is_none() {
+        } else if (ch == ';' || ch == '{' || ch == '}') && !in_url && quote_mark.is_none() {
             return Ok(value.trim().to_string());
         }
 
-        value.push(ch as char);
-        parser.index += 1;
+        value.push(ch);
+        parser.index += ch_len;
     }
 
     Err(parser.error(
@@ -468,36 +474,42 @@ fn read_attribute_value(parser: &mut Parser<'_>) -> Result<String, ParseError> {
     let mut escaped = false;
 
     let quote_mark = if parser.eat("\"") {
-        Some(b'"')
+        Some('"')
     } else if parser.eat("'") {
-        Some(b'\'')
+        Some('\'')
     } else {
         None
     };
 
     while parser.index < parser.template.len() {
-        let ch = parser.template.as_bytes()[parser.index];
+        // Get the current character (handling multi-byte UTF-8)
+        let remaining = &parser.template[parser.index..];
+        let ch = match remaining.chars().next() {
+            Some(c) => c,
+            None => break,
+        };
+        let ch_len = ch.len_utf8();
 
         if escaped {
             value.push('\\');
-            value.push(ch as char);
+            value.push(ch);
             escaped = false;
-        } else if ch == b'\\' {
+        } else if ch == '\\' {
             escaped = true;
         } else if let Some(q) = quote_mark {
             if ch == q {
-                parser.index += 1; // consume closing quote
+                parser.index += ch_len; // consume closing quote
                 return Ok(value.trim().to_string());
             } else {
-                value.push(ch as char);
+                value.push(ch);
             }
-        } else if ch.is_ascii_whitespace() || ch == b']' {
+        } else if ch.is_ascii_whitespace() || ch == ']' {
             return Ok(value.trim().to_string());
         } else {
-            value.push(ch as char);
+            value.push(ch);
         }
 
-        parser.index += 1;
+        parser.index += ch_len;
     }
 
     Err(parser.error(

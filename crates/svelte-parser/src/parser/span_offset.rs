@@ -1,4 +1,4 @@
-use oxc_ast::ast::{BindingPattern, Expression, FormalParameter, Program};
+use oxc_ast::ast::{BindingPattern, Expression, FormalParameter, FormalParameterRest, Program};
 use oxc_ast_visit::VisitMut;
 use oxc_span::Span;
 
@@ -29,6 +29,12 @@ pub fn shift_binding_pattern_spans(pattern: &mut BindingPattern<'_>, offset: u32
 pub fn shift_formal_parameter_spans(param: &mut FormalParameter<'_>, offset: u32) {
     let mut shifter = SpanShifter { offset };
     shifter.visit_formal_parameter(param);
+}
+
+/// Shift all spans in a FormalParameterRest by `offset` bytes.
+pub fn shift_formal_parameter_rest_spans(rest: &mut FormalParameterRest<'_>, offset: u32) {
+    let mut shifter = SpanShifter { offset };
+    shifter.visit_formal_parameter_rest(rest);
 }
 
 /// Shift all spans in a Program by `offset` bytes.

@@ -1,12 +1,12 @@
 use std::cell::Cell;
 
-use oxc_ast::ast::{Expression, FormalParameter};
+use oxc_ast::ast::{Expression, FormalParameter, FormalParameterRest};
 use oxc_span::{GetSpan, SourceType};
 
 use crate::error::ErrorKind;
 use crate::parser::read::context::read_pattern;
 use crate::parser::read::expression::{loose_identifier, read_expression};
-use crate::parser::span_offset::{shift_expression_spans, shift_formal_parameter_spans};
+use crate::parser::span_offset::{shift_expression_spans, shift_formal_parameter_spans, shift_formal_parameter_rest_spans};
 use crate::parser::{AwaitPhase, ParseError, Parser, StackFrame};
 
 use super::{is_identifier_byte, is_whitespace_byte, skip_string_bytes, skip_to_closing_brace};
@@ -98,7 +98,7 @@ pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
             None
         };
 
-        parser.eat_required("}")?;
+        parser.eat_required_with_loose("}", false)?;
 
         parser.stack.push(StackFrame::EachBlock {
             start,
@@ -144,7 +144,7 @@ pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
             phase = AwaitPhase::Pending;
         }
 
-        parser.eat_required("}")?;
+        parser.eat_required_with_loose("}", false)?;
 
         parser.stack.push(StackFrame::AwaitBlock {
             start,
@@ -217,7 +217,7 @@ pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
 
         // Parse parameters: (param1, param2, ...)
         let params_start = parser.index;
-        let parameters = if parser.eat("(") {
+        let (parameters, rest) = if parser.eat("(") {
             // Find the matching )
             let mut paren_depth = 1u32;
             while parser.index < parser.template.len() {
@@ -240,7 +240,7 @@ pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
             let params_source = &parser.template[params_start..params_end];
             parse_snippet_params(parser, params_start, params_source)
         } else {
-            Vec::new()
+            (Vec::new(), None)
         };
 
         parser.allow_whitespace();
@@ -250,6 +250,7 @@ pub fn open(parser: &mut Parser) -> Result<(), ParseError> {
             start,
             expression,
             parameters,
+            rest,
             type_params,
         });
         parser.fragments.push(Vec::new());
@@ -535,11 +536,12 @@ fn find_then_catch_keyword(template: &str, start: usize) -> Option<usize> {
 // ─── Snippet Parameter Parsing ──────────────────────────────────────
 
 /// Parse snippet parameters by wrapping in an arrow function and parsing with OXC.
+/// Returns (items, rest) tuple.
 fn parse_snippet_params<'a>(
     parser: &mut Parser<'a>,
     params_start: usize,
     params_source: &str,
-) -> Vec<FormalParameter<'a>> {
+) -> (Vec<FormalParameter<'a>>, Option<oxc_allocator::Box<'a, FormalParameterRest<'a>>>) {
     // Parse `<params> => {}` without padding, then shift spans.
     let snippet = format!("{} => {{}}", params_source);
     let snippet_str = parser.allocator.alloc_str(&snippet);
@@ -561,13 +563,13 @@ fn parse_snippet_params<'a>(
                 format!("Snippet params parse error: {}", first_err),
             );
         }
-        return Vec::new();
+        return (Vec::new(), None);
     }
 
     let program = result.program;
     let body = program.body;
     if body.len() != 1 {
-        return Vec::new();
+        return (Vec::new(), None);
     }
 
     let stmt = body.into_iter().next().unwrap();
@@ -578,20 +580,27 @@ fn parse_snippet_params<'a>(
                 Expression::ArrowFunctionExpression(arrow) => {
                     let arrow = arrow.unbox();
                     let offset = params_start as u32;
-                    arrow
-                        .params
-                        .unbox()
+                    let formal_params = arrow.params.unbox();
+
+                    let items: Vec<FormalParameter<'a>> = formal_params
                         .items
                         .into_iter()
                         .map(|mut param| {
                             shift_formal_parameter_spans(&mut param, offset);
                             param
                         })
-                        .collect()
+                        .collect();
+
+                    let rest = formal_params.rest.map(|mut r| {
+                        shift_formal_parameter_rest_spans(&mut r, offset);
+                        r
+                    });
+
+                    (items, rest)
                 }
-                _ => Vec::new(),
+                _ => (Vec::new(), None),
             }
         }
-        _ => Vec::new(),
+        _ => (Vec::new(), None),
     }
 }

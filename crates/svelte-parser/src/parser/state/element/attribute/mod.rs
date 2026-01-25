@@ -215,15 +215,8 @@ pub fn read_attributes<'a>(parser: &mut Parser<'a>) -> Vec<AttributeNode<'a>> {
             }
             attributes.push(attr);
         } else {
-            // Could not read an attribute; skip a character to avoid infinite loop
-            if parser.index < parser.template.len()
-                && !parser.match_str(">")
-                && !parser.match_str("/>")
-            {
-                parser.index += 1;
-            } else {
-                break;
-            }
+            // Reference: loop exits when read_attribute returns null
+            break;
         }
     }
 

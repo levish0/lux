@@ -111,8 +111,8 @@ fn add_loc(value: &mut serde_json::Value, loc_source: &LocSource) {
     }
 }
 
-/// Serialize an OXC ESTree node to a `serde_json::Value`, adding `loc` fields
-/// and unwrapping ParenthesizedExpression nodes.
+/// Serialize an OXC ESTree node to a `serde_json::Value`, adding `loc` fields,
+/// unwrapping ParenthesizedExpression nodes, and fixing regex literal values.
 pub fn oxc_node_to_value<T: ESTree>(node: &T) -> serde_json::Value {
     let mut serializer = CompactTSSerializer::default();
     node.serialize(&mut serializer);

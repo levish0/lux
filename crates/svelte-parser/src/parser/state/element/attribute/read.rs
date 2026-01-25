@@ -80,7 +80,7 @@ pub fn read_attribute<'a>(parser: &mut Parser<'a>) -> Option<AttributeNode<'a>> 
         // Shorthand: {name}
         let (id_name, id_start, id_end) = parser.read_identifier();
         if id_name.is_empty() {
-            // Reference: element.js lines 551-562
+            // Reference: element.js lines 549-562
             if parser.loose
                 && (parser.match_str("#")
                     || parser.match_str("/")
@@ -91,9 +91,8 @@ pub fn read_attribute<'a>(parser: &mut Parser<'a>) -> Option<AttributeNode<'a>> 
                 parser.index = start;
                 return None;
             } else if parser.loose && parser.match_str("}") {
-                // Likely in the middle of typing, just created the shorthand — allow
-                parser.eat_required("}").ok();
-                return None;
+                // Likely in the middle of typing, just created the shorthand — continue
+                // Reference: does NOT return here, continues to create attribute with empty name
             } else {
                 // Reference: e.attribute_empty_shorthand(start)
                 if !parser.loose {
@@ -112,6 +111,7 @@ pub fn read_attribute<'a>(parser: &mut Parser<'a>) -> Option<AttributeNode<'a>> 
         parser.eat_required("}").ok();
 
         // Create identifier expression for the shorthand
+        // Reference: even if id_name is empty, we still create the attribute
         let expression = make_identifier(parser, id_name, id_start, id_end);
 
         let expr_tag = ExpressionTag {

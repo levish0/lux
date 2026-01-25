@@ -1,11 +1,11 @@
-use oxc_ast::ast::{BindingPattern, Expression, FormalParameter};
-use serde::Serialize;
+use oxc_ast::ast::{BindingPattern, Expression, FormalParameter, FormalParameterRest};
 use serde::ser::SerializeMap;
+use serde::Serialize;
 
 use crate::metadata::{ExpressionNodeMetadata, SnippetBlockMetadata};
 use crate::root::Fragment;
 use crate::span::Span;
-use crate::utils::estree::{OxcOptionSerialize, OxcSerialize, OxcVecSerialize};
+use crate::utils::estree::{OxcOptionSerialize, OxcSerialize};
 
 /*
  * interface IfBlock extends BaseNode {
@@ -158,6 +158,7 @@ pub struct SnippetBlock<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
     pub parameters: Vec<FormalParameter<'a>>,
+    pub rest: Option<oxc_allocator::Box<'a, FormalParameterRest<'a>>>,
     pub type_params: Option<&'a str>,
     pub body: Fragment<'a>,
     pub metadata: SnippetBlockMetadata,
@@ -170,8 +171,41 @@ impl Serialize for SnippetBlock<'_> {
         map.serialize_entry("start", &self.span.start)?;
         map.serialize_entry("end", &self.span.end)?;
         map.serialize_entry("expression", &OxcSerialize(&self.expression))?;
-        map.serialize_entry("parameters", &OxcVecSerialize(&self.parameters))?;
+        if let Some(tp) = &self.type_params {
+            map.serialize_entry("typeParams", tp)?;
+        }
+        // Serialize parameters: items + rest (if present)
+        map.serialize_entry("parameters", &SnippetParametersSerialize {
+            items: &self.parameters,
+            rest: &self.rest,
+        })?;
         map.serialize_entry("body", &self.body)?;
         map.end()
+    }
+}
+
+/// Helper to serialize snippet parameters (items + optional rest) as a single array
+struct SnippetParametersSerialize<'a, 'b> {
+    items: &'b Vec<FormalParameter<'a>>,
+    rest: &'b Option<oxc_allocator::Box<'a, FormalParameterRest<'a>>>,
+}
+
+impl Serialize for SnippetParametersSerialize<'_, '_> {
+    fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        use serde::ser::SerializeSeq;
+        use crate::utils::estree::OxcSerialize;
+
+        let len = self.items.len() + if self.rest.is_some() { 1 } else { 0 };
+        let mut seq = s.serialize_seq(Some(len))?;
+
+        for param in self.items.iter() {
+            seq.serialize_element(&OxcSerialize(param))?;
+        }
+
+        if let Some(rest) = &self.rest {
+            seq.serialize_element(&OxcSerialize(rest.as_ref()))?;
+        }
+
+        seq.end()
     }
 }

@@ -492,7 +492,7 @@ fn frame_to_node<'a>(
 }
 
 /// Create a dummy NullLiteral expression (fallback for missing `this` in loose mode).
-fn make_null_literal(allocator: &'_ Allocator) -> oxc_ast::ast::Expression<'_> {
+pub fn make_null_literal(allocator: &'_ Allocator) -> oxc_ast::ast::Expression<'_> {
     oxc_ast::ast::Expression::NullLiteral(oxc_allocator::Box::new_in(
         oxc_ast::ast::NullLiteral {
             span: oxc_span::Span::new(0, 0),
@@ -666,7 +666,13 @@ fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
                     "A component can only have one `<style>` element".to_string(),
                 );
             }
-            let stylesheet = read_style(parser, start, attributes)?;
+
+            // Reference: find prev_comment (element.js:317-331)
+            // Look for a Comment node adjacent to the style tag start
+            let prev_comment = find_prev_comment(parser, start);
+
+            let mut stylesheet = read_style(parser, start, attributes)?;
+            stylesheet.content.comment = prev_comment;
             parser.css = Some(stylesheet);
         }
 
@@ -1183,4 +1189,54 @@ fn make_stack_frame<'a>(
             attributes,
         },
     }
+}
+
+/// Find the preceding comment node adjacent to the style tag.
+/// Reference: element.js lines 317-331
+fn find_prev_comment<'a>(parser: &Parser<'a>, style_start: usize) -> Option<Comment<'a>> {
+    // Get the current top-level fragment nodes
+    // For top-level style, fragments[0] is the root fragment being built
+    let nodes = parser.fragments.first()?;
+
+    if nodes.is_empty() {
+        return None;
+    }
+
+    // Iterate from the end to find the prev_comment
+    for (i, node) in nodes.iter().enumerate().rev() {
+        // Reference: if (i === current.fragment.nodes.length - 1 && node.end !== start) break;
+        if i == nodes.len() - 1 {
+            let node_end = match node {
+                FragmentNode::Text(t) => t.span.end,
+                FragmentNode::Comment(c) => c.span.end,
+                _ => return None,
+            };
+            if node_end != style_start {
+                break;
+            }
+        }
+
+        match node {
+            FragmentNode::Comment(c) => {
+                // Found the comment - clone it
+                return Some(Comment {
+                    span: c.span.clone(),
+                    data: c.data,
+                });
+            }
+            FragmentNode::Text(t) => {
+                // If it's text with non-whitespace content, stop
+                if !t.data.trim().is_empty() {
+                    break;
+                }
+                // Otherwise continue searching
+            }
+            _ => {
+                // Any other node type - stop
+                break;
+            }
+        }
+    }
+
+    None
 }

@@ -8,13 +8,14 @@ pub mod utils;
 use crate::error::ErrorKind;
 use line_span::LineSpans;
 use oxc_allocator::Allocator;
-use oxc_ast::ast::{BindingPattern, Expression, FormalParameter};
+use oxc_ast::ast::{BindingPattern, Expression, FormalParameter, FormalParameterRest};
 use std::collections::HashSet;
 use svelte_ast::css::StyleSheet;
 use svelte_ast::node::{AttributeNode, FragmentNode};
 use svelte_ast::root::{Fragment, Root, Script, SvelteOptions};
 use svelte_ast::span::{Position, SourceLocation, Span};
 use svelte_ast::text::JsComment;
+use crate::parser::state::element::make_null_literal;
 
 /// Stack frame representing a nested element or block being parsed.
 /// In JS reference, the stack holds mutable AST nodes directly.
@@ -140,6 +141,7 @@ pub enum StackFrame<'a> {
         start: usize,
         expression: Expression<'a>,
         parameters: Vec<FormalParameter<'a>>,
+        rest: Option<oxc_allocator::Box<'a, FormalParameterRest<'a>>>,
         type_params: Option<&'a str>,
     },
 }
@@ -274,10 +276,22 @@ impl<'a> Parser<'a> {
             }
         }
 
-        // Check for unclosed blocks/elements
+        // Handle unclosed blocks/elements
         if !parser.stack.is_empty() {
-            let current = parser.stack.last().unwrap();
-            if !parser.loose {
+            if parser.loose {
+                // Loose mode: force close all unclosed items
+                let end = parser.template.len();
+                while let Some(frame) = parser.stack.pop() {
+                    let child_nodes = parser.fragments.pop().unwrap_or_default();
+                    let node = parser.frame_to_node_loose(frame, end, child_nodes);
+                    if let Some(node) = node {
+                        if let Some(parent_fragment) = parser.fragments.last_mut() {
+                            parent_fragment.push(node);
+                        }
+                    }
+                }
+            } else {
+                let current = parser.stack.last().unwrap();
                 match current {
                     StackFrame::RegularElement { name, start, .. } => {
                         parser.error(
@@ -635,6 +649,166 @@ impl<'a> Parser<'a> {
     pub fn append(&mut self, node: FragmentNode<'a>) {
         if let Some(frag) = self.fragments.last_mut() {
             frag.push(node);
+        }
+    }
+
+    /// Convert a StackFrame to a FragmentNode in loose mode.
+    /// Used for force-closing unclosed elements/blocks at end of parsing.
+    fn frame_to_node_loose(
+        &self,
+        frame: StackFrame<'a>,
+        end: usize,
+        nodes: Vec<FragmentNode<'a>>,
+    ) -> Option<FragmentNode<'a>> {
+        use svelte_ast::blocks::*;
+        use svelte_ast::elements::*;
+        use svelte_ast::metadata::*;
+
+        let fragment = Fragment { nodes };
+        match frame {
+            StackFrame::RegularElement { start, name, name_loc, attributes } => {
+                Some(FragmentNode::RegularElement(RegularElement {
+                    span: Span::new(start, end),
+                    name, name_loc, attributes, fragment,
+                }))
+            }
+            StackFrame::Component { start, name, name_loc, attributes } => {
+                Some(FragmentNode::Component(Component {
+                    span: Span::new(start, end),
+                    name, name_loc, attributes, fragment,
+                }))
+            }
+            StackFrame::SvelteElement { start, name, name_loc, tag, attributes } => {
+                let tag = tag.unwrap_or_else(|| make_null_literal(self.allocator));
+                Some(FragmentNode::SvelteElement(SvelteElement {
+                    span: Span::new(start, end),
+                    name, name_loc, tag, attributes, fragment,
+                }))
+            }
+            StackFrame::SvelteComponent { start, name, name_loc, expression, attributes } => {
+                let expression = expression.unwrap_or_else(|| make_null_literal(self.allocator));
+                Some(FragmentNode::SvelteComponent(SvelteComponent {
+                    span: Span::new(start, end),
+                    name, name_loc, expression, attributes, fragment,
+                }))
+            }
+            StackFrame::SvelteSelf { start, name, name_loc, attributes } => {
+                Some(FragmentNode::SvelteSelf(SvelteSelf {
+                    span: Span::new(start, end),
+                    name, name_loc, attributes, fragment,
+                }))
+            }
+            StackFrame::SvelteHead { start, name, name_loc, attributes } => {
+                Some(FragmentNode::SvelteHead(SvelteHead {
+                    span: Span::new(start, end),
+                    name, name_loc, attributes, fragment,
+                }))
+            }
+            StackFrame::SvelteBody { start, name, name_loc, attributes } => {
+                Some(FragmentNode::SvelteBody(SvelteBody {
+                    span: Span::new(start, end),
+                    name, name_loc, attributes, fragment,
+                }))
+            }
+            StackFrame::SvelteWindow { start, name, name_loc, attributes } => {
+                Some(FragmentNode::SvelteWindow(SvelteWindow {
+                    span: Span::new(start, end),
+                    name, name_loc, attributes, fragment,
+                }))
+            }
+            StackFrame::SvelteDocument { start, name, name_loc, attributes } => {
+                Some(FragmentNode::SvelteDocument(SvelteDocument {
+                    span: Span::new(start, end),
+                    name, name_loc, attributes, fragment,
+                }))
+            }
+            StackFrame::SvelteFragment { start, name, name_loc, attributes } => {
+                Some(FragmentNode::SvelteFragment(SvelteFragment {
+                    span: Span::new(start, end),
+                    name, name_loc, attributes, fragment,
+                }))
+            }
+            StackFrame::SvelteOptions { start, name, name_loc, attributes } => {
+                Some(FragmentNode::SvelteOptionsRaw(SvelteOptionsRaw {
+                    span: Span::new(start, end),
+                    name, name_loc, attributes, fragment,
+                }))
+            }
+            StackFrame::TitleElement { start, name, name_loc, attributes } => {
+                Some(FragmentNode::TitleElement(TitleElement {
+                    span: Span::new(start, end),
+                    name, name_loc, attributes, fragment,
+                }))
+            }
+            StackFrame::SlotElement { start, name, name_loc, attributes } => {
+                Some(FragmentNode::SlotElement(SlotElement {
+                    span: Span::new(start, end),
+                    name, name_loc, attributes, fragment,
+                }))
+            }
+            StackFrame::SvelteBoundary { start, name, name_loc, attributes } => {
+                Some(FragmentNode::SvelteBoundary(SvelteBoundary {
+                    span: Span::new(start, end),
+                    name, name_loc, attributes, fragment,
+                }))
+            }
+            StackFrame::IfBlock { start, elseif, test, consequent } => {
+                let (cons, alt) = if let Some(cons_nodes) = consequent {
+                    (Fragment { nodes: cons_nodes }, Some(fragment))
+                } else {
+                    (fragment, None)
+                };
+                Some(FragmentNode::IfBlock(IfBlock {
+                    span: Span::new(start, end),
+                    elseif, test,
+                    consequent: cons,
+                    alternate: alt,
+                    metadata: ExpressionNodeMetadata::default(),
+                }))
+            }
+            StackFrame::EachBlock { start, expression, context, index, key, body } => {
+                let (body_frag, fallback) = if let Some(body_nodes) = body {
+                    (Fragment { nodes: body_nodes }, Some(fragment))
+                } else {
+                    (fragment, None)
+                };
+                Some(FragmentNode::EachBlock(EachBlock {
+                    span: Span::new(start, end),
+                    expression, context, index, key,
+                    body: body_frag,
+                    fallback,
+                }))
+            }
+            StackFrame::AwaitBlock { start, expression, value, error, pending, then, phase } => {
+                let (pending_frag, then_frag, catch_frag) = match phase {
+                    AwaitPhase::Pending => (Some(fragment), then.map(|n| Fragment { nodes: n }), None),
+                    AwaitPhase::Then => (pending.map(|n| Fragment { nodes: n }), Some(fragment), None),
+                    AwaitPhase::Catch => (pending.map(|n| Fragment { nodes: n }), then.map(|n| Fragment { nodes: n }), Some(fragment)),
+                };
+                Some(FragmentNode::AwaitBlock(AwaitBlock {
+                    span: Span::new(start, end),
+                    expression, value, error,
+                    pending: pending_frag,
+                    then: then_frag,
+                    catch: catch_frag,
+                    metadata: ExpressionNodeMetadata::default(),
+                }))
+            }
+            StackFrame::KeyBlock { start, expression } => {
+                Some(FragmentNode::KeyBlock(KeyBlock {
+                    span: Span::new(start, end),
+                    expression, fragment,
+                    metadata: ExpressionNodeMetadata::default(),
+                }))
+            }
+            StackFrame::SnippetBlock { start, expression, parameters, rest, type_params } => {
+                Some(FragmentNode::SnippetBlock(SnippetBlock {
+                    span: Span::new(start, end),
+                    expression, parameters, rest, type_params,
+                    body: fragment,
+                    metadata: SnippetBlockMetadata::default(),
+                }))
+            }
         }
     }
 
