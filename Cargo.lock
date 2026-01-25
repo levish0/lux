@@ -137,6 +137,7 @@ name = "lux-analyzer"
 version = "0.1.0"
 dependencies = [
  "lux-ast",
+ "lux-utils",
  "oxc_allocator",
  "oxc_ast",
  "oxc_ast_visit",
@@ -186,6 +187,13 @@ dependencies = [
  "rayon",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "lux-utils"
+version = "0.1.0"
+dependencies = [
+ "phf",
 ]
 
 [[package]]

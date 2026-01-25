@@ -1,0 +1,12 @@
+[package]
+name = "lux-utils"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "lux-utils"
+
+[dependencies]
+phf = {workspace = true}
