@@ -8,7 +8,7 @@
 //! - Validates CSS selectors
 
 use lux_ast::css::{
-    CssAtrule, CssRule, PseudoClassSelector, SimpleSelector, StyleSheet, StyleSheetChild,
+    CssAtrule, CssRule, SimpleSelector, StyleSheet, StyleSheetChild,
 };
 
 use super::analysis::CssAnalysis;
@@ -73,9 +73,9 @@ fn analyze_rule(rule: &CssRule, analysis: &mut CssAnalysis, in_global_block: boo
 fn analyze_atrule(atrule: &CssAtrule, analysis: &mut CssAnalysis, in_global_block: bool) {
     // Check for @keyframes
     if atrule.name == "keyframes" || atrule.name == "-webkit-keyframes" {
-        if let Some(prelude) = &atrule.prelude {
-            let keyframe_name = prelude.trim();
+        let keyframe_name = atrule.prelude.trim();
 
+        if !keyframe_name.is_empty() {
             // -global- prefix means it's a global keyframe
             if keyframe_name.starts_with("-global-") {
                 analysis.has_global = true;

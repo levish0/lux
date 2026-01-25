@@ -70,9 +70,10 @@ pub fn analyze_component<'s, 'a>(source: &'s str, root: &'a Root<'a>, options: A
     analysis.custom_element = options.custom_element;
     analysis.inject_styles = options.custom_element; // TODO: also check css option
 
-    // Compute CSS hash if present
-    if root.css.is_some() {
-        let css_content = ""; // TODO: get actual CSS content
+    // Analyze CSS if present
+    if let Some(stylesheet) = &root.css {
+        let css_content = stylesheet.content.styles;
+        analysis.css = css::analyze_css(stylesheet);
         analysis.css.hash = compute_css_hash(&name, css_content, &options.filename);
     }
 
