@@ -42,4 +42,4 @@ jobs:
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Run compare tests
-        run: cargo test --package svelte-parser --test compare -- --nocapture
+        run: cargo test --package lux-parser --test compare -- --nocapture
