@@ -20,8 +20,39 @@ pub fn read_pattern<'a>(parser: &mut Parser<'a>) -> Option<BindingPattern<'a>> {
     // 1. Try identifier first (matching reference: `const id = parser.read_identifier()`)
     let (name, id_start, id_end) = parser.read_identifier();
     if !name.is_empty() {
+        // Check for type annotation (TS): identifier followed by `:`
+        parser.allow_whitespace();
+        if parser.match_str(":") {
+            // Has type annotation - use OXC to parse the full pattern with annotation
+            // Find the end of annotation (before `=` or `,` or `)` or `}`)
+            let annotation_end = find_annotation_end(parser.template, parser.index);
+            parser.index = annotation_end;
+
+            // Parse with OXC: `let <id>: <type> = 1;`
+            let pattern_string = &parser.template[id_start..annotation_end];
+            let let_prefix_len = 4u32; // "let "
+            let snippet = format!("let {} = 1;", pattern_string);
+            let snippet_str = parser.allocator.alloc_str(&snippet);
+
+            let source_type = if parser.ts {
+                SourceType::ts()
+            } else {
+                SourceType::mjs()
+            };
+
+            let result = oxc_parser::Parser::new(parser.allocator, snippet_str, source_type).parse();
+
+            if result.errors.is_empty() {
+                if let Some(mut pattern) = extract_pattern(result.program) {
+                    let offset = id_start as u32 - let_prefix_len;
+                    shift_binding_pattern_spans(&mut pattern, offset);
+                    return Some(pattern);
+                }
+            }
+            // Fallback: return simple identifier without annotation
+        }
+
         // Simple identifier pattern — construct BindingPattern directly
-        // TODO: read_type_annotation after identifier (for TS)
         return Some(BindingPattern::BindingIdentifier(
             oxc_allocator::Box::new_in(
                 BindingIdentifier {
@@ -122,4 +153,29 @@ fn extract_pattern(program: oxc_ast::ast::Program) -> Option<BindingPattern> {
         }
         _ => None,
     }
+}
+
+/// Find where a type annotation ends. Stops at `=`, `,`, `)`, `}`, or end of template.
+/// Handles nested generics like `Array<string>` or `Map<string, number>`.
+fn find_annotation_end(template: &str, start: usize) -> usize {
+    let bytes = template.as_bytes();
+    let mut i = start;
+    let mut depth = 0; // for < > nesting
+
+    while i < bytes.len() {
+        match bytes[i] {
+            b'<' => depth += 1,
+            b'>' => {
+                if depth > 0 {
+                    depth -= 1;
+                }
+            }
+            b'=' | b',' | b')' | b'}' if depth == 0 => {
+                return i;
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    i
 }
