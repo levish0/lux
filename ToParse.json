@@ -1,45 +1,45 @@
 {
   "type": "Root",
   "start": 0,
-  "end": 134,
+  "end": 108,
   "fragment": {
     "type": "Fragment",
     "nodes": [
       {
         "type": "Text",
-        "start": 60,
-        "end": 62,
+        "start": 53,
+        "end": 55,
         "raw": "\n\n",
         "data": "\n\n"
       },
       {
         "type": "EachBlock",
-        "start": 62,
-        "end": 134,
+        "start": 55,
+        "end": 108,
         "expression": {
           "decorators": [],
-          "end": 76,
-          "name": "letters",
+          "end": 67,
+          "name": "items",
           "optional": false,
-          "start": 69,
+          "start": 62,
           "type": "Identifier",
           "typeAnnotation": null
         },
         "context": {
           "decorators": [],
-          "end": 94,
-          "name": "letter",
+          "end": 83,
+          "name": "item",
           "optional": false,
-          "start": 80,
+          "start": 71,
           "type": "Identifier",
           "typeAnnotation": {
-            "end": 94,
-            "start": 86,
+            "end": 83,
+            "start": 75,
             "type": "TSTypeAnnotation",
             "typeAnnotation": {
-              "end": 94,
-              "start": 88,
-              "type": "TSStringKeyword"
+              "end": 82,
+              "start": 76,
+              "type": "TSNumberKeyword"
             }
           }
         },
@@ -48,26 +48,26 @@
           "nodes": [
             {
               "type": "Text",
-              "start": 98,
-              "end": 100,
-              "raw": "\n\t",
-              "data": "\n\t"
+              "start": 84,
+              "end": 87,
+              "raw": "\n  ",
+              "data": "\n  "
             },
             {
               "type": "RegularElement",
-              "start": 100,
-              "end": 126,
-              "name": "span",
+              "start": 87,
+              "end": 100,
+              "name": "p",
               "name_loc": {
                 "start": {
                   "line": 6,
-                  "column": 2,
-                  "character": 101
+                  "column": 3,
+                  "character": 88
                 },
                 "end": {
                   "line": 6,
-                  "column": 6,
-                  "character": 105
+                  "column": 4,
+                  "character": 89
                 }
               },
               "attributes": [],
@@ -76,35 +76,14 @@
                 "nodes": [
                   {
                     "type": "ExpressionTag",
-                    "start": 106,
-                    "end": 109,
+                    "start": 90,
+                    "end": 96,
                     "expression": {
                       "decorators": [],
-                      "end": 108,
-                      "name": "i",
+                      "end": 95,
+                      "name": "item",
                       "optional": false,
-                      "start": 107,
-                      "type": "Identifier",
-                      "typeAnnotation": null
-                    }
-                  },
-                  {
-                    "type": "Text",
-                    "start": 109,
-                    "end": 111,
-                    "raw": ": ",
-                    "data": ": "
-                  },
-                  {
-                    "type": "ExpressionTag",
-                    "start": 111,
-                    "end": 119,
-                    "expression": {
-                      "decorators": [],
-                      "end": 118,
-                      "name": "letter",
-                      "optional": false,
-                      "start": 112,
+                      "start": 91,
                       "type": "Identifier",
                       "typeAnnotation": null
                     }
@@ -114,15 +93,15 @@
             },
             {
               "type": "Text",
-              "start": 126,
-              "end": 127,
+              "start": 100,
+              "end": 101,
               "raw": "\n",
               "data": "\n"
             }
           ]
         },
         "fallback": null,
-        "index": "i",
+        "index": null,
         "key": null
       }
     ]
@@ -132,7 +111,7 @@
   "instance": {
     "type": "Script",
     "start": 0,
-    "end": 60,
+    "end": 53,
     "context": "default",
     "content": {
       "body": [
@@ -140,59 +119,59 @@
           "declarations": [
             {
               "definite": false,
-              "end": 49,
+              "end": 42,
               "id": {
                 "decorators": [],
-                "end": 31,
-                "name": "letters",
+                "end": 30,
+                "name": "items",
                 "optional": false,
-                "start": 24,
+                "start": 25,
                 "type": "Identifier",
                 "typeAnnotation": null
               },
               "init": {
                 "elements": [
                   {
-                    "end": 38,
-                    "raw": "'a'",
-                    "start": 35,
+                    "end": 35,
+                    "raw": "1",
+                    "start": 34,
                     "type": "Literal",
-                    "value": "a"
+                    "value": 1
                   },
                   {
-                    "end": 43,
-                    "raw": "'b'",
+                    "end": 38,
+                    "raw": "2",
+                    "start": 37,
+                    "type": "Literal",
+                    "value": 2
+                  },
+                  {
+                    "end": 41,
+                    "raw": "3",
                     "start": 40,
                     "type": "Literal",
-                    "value": "b"
-                  },
-                  {
-                    "end": 48,
-                    "raw": "'c'",
-                    "start": 45,
-                    "type": "Literal",
-                    "value": "c"
+                    "value": 3
                   }
                 ],
-                "end": 49,
-                "start": 34,
+                "end": 42,
+                "start": 33,
                 "type": "ArrayExpression"
               },
-              "start": 24,
+              "start": 25,
               "type": "VariableDeclarator"
             }
           ],
           "declare": false,
-          "end": 50,
+          "end": 43,
           "kind": "let",
-          "start": 20,
+          "start": 21,
           "type": "VariableDeclaration"
         }
       ],
-      "end": 51,
+      "end": 44,
       "hashbang": null,
       "sourceType": "module",
-      "start": 20,
+      "start": 21,
       "type": "Program"
     },
     "attributes": [

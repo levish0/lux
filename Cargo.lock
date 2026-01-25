@@ -133,6 +133,62 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29fc123b2f6600099ca18248f69e3ee02b09c4188c0d98e9a690d90dec3e408a"
 
 [[package]]
+name = "lux-analyzer"
+version = "0.1.0"
+dependencies = [
+ "lux-ast",
+ "oxc_allocator",
+ "oxc_ast",
+ "oxc_ast_visit",
+ "oxc_span",
+ "oxc_syntax",
+ "rustc-hash",
+]
+
+[[package]]
+name = "lux-ast"
+version = "0.1.0"
+dependencies = [
+ "line-span",
+ "oxc_allocator",
+ "oxc_ast",
+ "oxc_ast_visit",
+ "oxc_estree",
+ "oxc_span",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "lux-parser"
+version = "0.1.0"
+dependencies = [
+ "line-span",
+ "lux-ast",
+ "oxc_allocator",
+ "oxc_ast",
+ "oxc_ast_visit",
+ "oxc_diagnostics",
+ "oxc_estree",
+ "oxc_parser",
+ "oxc_span",
+ "oxc_syntax",
+ "phf",
+ "regex",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "lux-transformer"
+version = "0.1.0"
+dependencies = [
+ "rayon",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "memchr"
 version = "2.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -587,57 +643,6 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
-
-[[package]]
-name = "svelte-analyzer"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "svelte-ast"
-version = "0.1.0"
-dependencies = [
- "line-span",
- "oxc_allocator",
- "oxc_ast",
- "oxc_ast_visit",
- "oxc_estree",
- "oxc_span",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "svelte-parser"
-version = "0.1.0"
-dependencies = [
- "line-span",
- "oxc_allocator",
- "oxc_ast",
- "oxc_ast_visit",
- "oxc_diagnostics",
- "oxc_estree",
- "oxc_parser",
- "oxc_span",
- "oxc_syntax",
- "phf",
- "regex",
- "serde",
- "serde_json",
- "svelte-ast",
-]
-
-[[package]]
-name = "svelte-transformer"
-version = "0.1.0"
-dependencies = [
- "rayon",
- "serde",
- "serde_json",
-]
 
 [[package]]
 name = "syn"

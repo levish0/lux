@@ -6,17 +6,17 @@ resolver = "2"
 version = "0.1.0"
 authors = ["Levi Laine <shiueo.csh@gmail.com>"]
 license = "MIT"
-repository = "https://github.com/levish0/svelte-rs"
+repository = "https://github.com/levish0/lux"
 description = "Svelte 5+ compiler implemented in Rust. Aims for 100% compatibility with the official Svelte compiler."
 edition = "2024"
 rust-version = "1.92.0"
 
 [workspace.dependencies]
 # Internal crates
-svelte-ast = { path = "crates/svelte-ast" }
-svelte-parser = { path = "crates/svelte-parser" }
-svelte-analyzer = {path = "crates/svelte-analyzer"}
-svelte-transformer = { path = "crates/svelte-transformer" }
+lux-ast = { path = "crates/lux-ast" }
+lux-parser = { path = "crates/lux-parser" }
+lux-analyzer = {path = "crates/lux-analyzer"}
+lux-transformer = { path = "crates/lux-transformer" }
 
 # External dependencies
 serde = { version = "1.0.228", features = ["derive"] }
@@ -33,3 +33,4 @@ rayon = "1.11.0"
 phf = { version = "0.13.1", features = ["macros"] }
 regex = "1.12.2"
 line-span = "0.1.5"
+rustc-hash = "2.1.1"
