@@ -1,4 +1,4 @@
-use oxc_ast::ast::{BindingPattern, Expression, FormalParameter, FormalParameterRest};
+use oxc_ast::ast::{Expression, FormalParameter, FormalParameterRest};
 use serde::ser::SerializeMap;
 use serde::Serialize;
 
@@ -55,7 +55,7 @@ impl Serialize for IfBlock<'_> {
 pub struct EachBlock<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
-    pub context: Option<BindingPattern<'a>>,
+    pub context: Option<FormalParameter<'a>>,
     pub body: Fragment<'a>,
     pub fallback: Option<Fragment<'a>>,
     pub index: Option<&'a str>,
@@ -93,8 +93,8 @@ impl Serialize for EachBlock<'_> {
 pub struct AwaitBlock<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
-    pub value: Option<BindingPattern<'a>>,
-    pub error: Option<BindingPattern<'a>>,
+    pub value: Option<FormalParameter<'a>>,
+    pub error: Option<FormalParameter<'a>>,
     pub pending: Option<Fragment<'a>>,
     pub then: Option<Fragment<'a>>,
     pub catch: Option<Fragment<'a>>,

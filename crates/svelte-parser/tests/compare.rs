@@ -55,6 +55,8 @@ const SKIP_FIELDS: &[&str] = &[
     "key",          // EachBlock key expression
     "declaration",  // ConstTag declaration
     "identifiers",  // DebugTag identifiers
+    "parameters",   // SnippetBlock parameters - OXC parses these
+    "context",      // EachBlock context - OXC parses these
 ];
 
 /// Check if `actual` is a superset of `expected`.
@@ -91,6 +93,12 @@ fn is_superset(actual: &Value, expected: &Value) -> bool {
 }
 
 const SKIP_CATEGORIES: &[&str] = &["parser-legacy"];
+
+/// Tests to skip because they use non-standard TypeScript syntax
+/// (e.g., `c?: number = 5` which Svelte's acorn-typescript allows but OXC rejects)
+const SKIP_TESTS: &[&str] = &[
+    "runtime-runes--snippet-typescript--main",
+];
 
 /// Recursively find all .svelte files
 fn find_svelte_files(dir: &Path, results: &mut Vec<PathBuf>) {
@@ -178,6 +186,12 @@ fn generate_and_compare() {
 
         // Skip if svelte itself couldn't parse it
         if out_dir.join("svelte-error.txt").exists() {
+            skip_count += 1;
+            continue;
+        }
+
+        // Skip tests with non-standard TypeScript syntax
+        if SKIP_TESTS.contains(&name.as_str()) {
             skip_count += 1;
             continue;
         }

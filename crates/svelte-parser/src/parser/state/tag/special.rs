@@ -73,11 +73,11 @@ pub fn special(parser: &mut Parser) -> Result<(), ParseError> {
     if parser.eat("const") {
         parser.require_whitespace()?;
 
-        let id = read_pattern(parser);
+        let formal_param = read_pattern(parser);
         parser.allow_whitespace();
 
         // If pattern failed, skip rest (reference would have thrown)
-        let Some(id) = id else {
+        let Some(formal_param) = formal_param else {
             skip_to_closing_brace(parser);
             return Ok(());
         };
@@ -90,6 +90,10 @@ pub fn special(parser: &mut Parser) -> Result<(), ParseError> {
 
         parser.eat_required("}")?;
 
+        // Extract pattern and type_annotation from FormalParameter
+        let id = formal_param.pattern;
+        let type_annotation = formal_param.type_annotation;
+
         // Build VariableDeclaration
         let id_span = binding_pattern_span(&id);
         let init_end = expression_end(&init);
@@ -100,7 +104,7 @@ pub fn special(parser: &mut Parser) -> Result<(), ParseError> {
             id,
             init: Some(init),
             definite: false,
-            type_annotation: None,
+            type_annotation,
         };
 
         let mut declarations = oxc_allocator::Vec::new_in(parser.allocator);

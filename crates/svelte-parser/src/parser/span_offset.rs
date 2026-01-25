@@ -20,6 +20,7 @@ pub fn shift_expression_spans(expr: &mut Expression<'_>, offset: u32) {
 }
 
 /// Shift all spans in a BindingPattern by `offset` bytes.
+#[allow(dead_code)]
 pub fn shift_binding_pattern_spans(pattern: &mut BindingPattern<'_>, offset: u32) {
     let mut shifter = SpanShifter { offset };
     shifter.visit_binding_pattern(pattern);

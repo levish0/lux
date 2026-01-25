@@ -8,7 +8,7 @@ pub mod utils;
 use crate::error::ErrorKind;
 use line_span::LineSpans;
 use oxc_allocator::Allocator;
-use oxc_ast::ast::{BindingPattern, Expression, FormalParameter, FormalParameterRest};
+use oxc_ast::ast::{Expression, FormalParameter, FormalParameterRest};
 use std::collections::HashSet;
 use svelte_ast::css::StyleSheet;
 use svelte_ast::node::{AttributeNode, FragmentNode};
@@ -118,7 +118,7 @@ pub enum StackFrame<'a> {
     EachBlock {
         start: usize,
         expression: Expression<'a>,
-        context: Option<BindingPattern<'a>>,
+        context: Option<FormalParameter<'a>>,
         index: Option<&'a str>,
         key: Option<Expression<'a>>,
         /// Set when `:else` (fallback) is encountered
@@ -127,8 +127,8 @@ pub enum StackFrame<'a> {
     AwaitBlock {
         start: usize,
         expression: Expression<'a>,
-        value: Option<BindingPattern<'a>>,
-        error: Option<BindingPattern<'a>>,
+        value: Option<FormalParameter<'a>>,
+        error: Option<FormalParameter<'a>>,
         pending: Option<Vec<FragmentNode<'a>>>,
         then: Option<Vec<FragmentNode<'a>>>,
         phase: AwaitPhase,
@@ -385,6 +385,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Mutable access to current stack frame.
+    #[allow(dead_code)]
     pub fn current_mut(&mut self) -> Option<&mut StackFrame<'a>> {
         self.stack.last_mut()
     }
@@ -813,11 +814,13 @@ impl<'a> Parser<'a> {
     }
 
     /// Get the current byte, or None if at end.
+    #[allow(dead_code)]
     pub fn current_byte(&self) -> Option<u8> {
         self.template.as_bytes().get(self.index).copied()
     }
 
     /// Get remaining template from current position.
+    #[allow(dead_code)]
     pub fn remaining(&self) -> &'a str {
         &self.template[self.index..]
     }

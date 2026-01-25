@@ -1,68 +1,34 @@
-use std::cell::Cell;
-
-use oxc_ast::ast::{BindingIdentifier, BindingPattern};
+use oxc_ast::ast::{Expression, FormalParameter};
 use oxc_span::SourceType;
 
 use crate::error::ErrorKind;
 use crate::parser::Parser;
 use crate::parser::bracket::match_bracket;
-use crate::parser::span_offset::shift_binding_pattern_spans;
+use crate::parser::span_offset::shift_formal_parameter_spans;
 
-/// Read a destructuring pattern at the current parser position.
-/// Port of reference `read/context.js`.
+/// Read a pattern (with optional type annotation) at the current parser position.
+/// Returns FormalParameter which contains both the pattern and type annotation.
 ///
-/// 1. Tries `read_identifier()` first (simple variable name).
-/// 2. If not, checks for `{` or `[` and uses `match_bracket` to find extent.
-/// 3. Wraps as `let <pattern> = 1;` and parses with OXC to get BindingPattern.
-pub fn read_pattern<'a>(parser: &mut Parser<'a>) -> Option<BindingPattern<'a>> {
+/// Parses by wrapping as `(pattern) => {}` and extracting the FormalParameter.
+pub fn read_pattern<'a>(parser: &mut Parser<'a>) -> Option<FormalParameter<'a>> {
     let start = parser.index;
 
-    // 1. Try identifier first (matching reference: `const id = parser.read_identifier()`)
-    let (name, id_start, id_end) = parser.read_identifier();
+    // 1. Try identifier first
+    let (name, id_start, _id_end) = parser.read_identifier();
     if !name.is_empty() {
         // Check for type annotation (TS): identifier followed by `:`
         parser.allow_whitespace();
-        if parser.match_str(":") {
-            // Has type annotation - use OXC to parse the full pattern with annotation
-            // Find the end of annotation (before `=` or `,` or `)` or `}`)
-            let annotation_end = find_annotation_end(parser.template, parser.index);
-            parser.index = annotation_end;
+        let pattern_end = if parser.match_str(":") {
+            // Has type annotation - find the end
+            find_annotation_end(parser.template, parser.index)
+        } else {
+            parser.index
+        };
+        parser.index = pattern_end;
 
-            // Parse with OXC: `let <id>: <type> = 1;`
-            let pattern_string = &parser.template[id_start..annotation_end];
-            let let_prefix_len = 4u32; // "let "
-            let snippet = format!("let {} = 1;", pattern_string);
-            let snippet_str = parser.allocator.alloc_str(&snippet);
-
-            let source_type = if parser.ts {
-                SourceType::ts()
-            } else {
-                SourceType::mjs()
-            };
-
-            let result = oxc_parser::Parser::new(parser.allocator, snippet_str, source_type).parse();
-
-            if result.errors.is_empty() {
-                if let Some(mut pattern) = extract_pattern(result.program) {
-                    let offset = id_start as u32 - let_prefix_len;
-                    shift_binding_pattern_spans(&mut pattern, offset);
-                    return Some(pattern);
-                }
-            }
-            // Fallback: return simple identifier without annotation
-        }
-
-        // Simple identifier pattern — construct BindingPattern directly
-        return Some(BindingPattern::BindingIdentifier(
-            oxc_allocator::Box::new_in(
-                BindingIdentifier {
-                    span: oxc_span::Span::new(id_start as u32, id_end as u32),
-                    name: oxc_span::Atom::from(name),
-                    symbol_id: Cell::new(None),
-                },
-                parser.allocator,
-            ),
-        ));
+        // Parse with OXC: `(pattern) => {}`
+        let pattern_string = &parser.template[id_start..pattern_end];
+        return parse_as_formal_parameter(parser, pattern_string, id_start);
     }
 
     // 2. Check for destructuring pattern
@@ -94,12 +60,29 @@ pub fn read_pattern<'a>(parser: &mut Parser<'a>) -> Option<BindingPattern<'a>> {
         }
     };
 
+    // Check for type annotation after bracket
     parser.index = bracket_end;
-    let pattern_string = &parser.template[start..bracket_end];
+    parser.allow_whitespace();
+    let pattern_end = if parser.match_str(":") {
+        find_annotation_end(parser.template, parser.index)
+    } else {
+        bracket_end
+    };
+    parser.index = pattern_end;
 
-    // 4. Parse with OXC using `let <pattern> = 1;` (no padding needed).
-    let let_prefix_len = 4u32; // "let "
-    let snippet = format!("let {} = 1;", pattern_string);
+    let pattern_string = &parser.template[start..pattern_end];
+    parse_as_formal_parameter(parser, pattern_string, start)
+}
+
+/// Parse a pattern string as `(pattern) => {}` and extract the FormalParameter.
+fn parse_as_formal_parameter<'a>(
+    parser: &mut Parser<'a>,
+    pattern_string: &str,
+    original_start: usize,
+) -> Option<FormalParameter<'a>> {
+    // Wrap as arrow function: `(pattern) => {}`
+    let paren_prefix_len = 1u32; // "("
+    let snippet = format!("({}) => {{}}", pattern_string);
     let snippet_str = parser.allocator.alloc_str(&snippet);
 
     let source_type = if parser.ts {
@@ -115,26 +98,26 @@ pub fn read_pattern<'a>(parser: &mut Parser<'a>) -> Option<BindingPattern<'a>> {
             let first_err = &result.errors[0];
             parser.error(
                 ErrorKind::JsParseError,
-                start,
+                original_start,
                 format!("Pattern parse error: {}", first_err),
             );
         }
         return None;
     }
 
-    // 5. Extract BindingPattern and shift spans to match original positions.
+    // Extract FormalParameter from arrow function
     let program = result.program;
-    let mut pattern = extract_pattern(program)?;
+    let mut param = extract_formal_parameter(program)?;
 
-    // Pattern starts at byte 4 ("let ") in the snippet, but at `start` in the original.
-    let offset = start as u32 - let_prefix_len;
-    shift_binding_pattern_spans(&mut pattern, offset);
+    // Shift spans: pattern starts at byte 1 ("(") in snippet, but at `original_start` in original
+    let offset = original_start as u32 - paren_prefix_len;
+    shift_formal_parameter_spans(&mut param, offset);
 
-    Some(pattern)
+    Some(param)
 }
 
-/// Extract the BindingPattern from a parsed `let <pattern> = 1;`
-fn extract_pattern(program: oxc_ast::ast::Program) -> Option<BindingPattern> {
+/// Extract the first FormalParameter from a parsed `(pattern) => {}`
+fn extract_formal_parameter(program: oxc_ast::ast::Program) -> Option<FormalParameter> {
     let body = program.body;
     if body.len() != 1 {
         return None;
@@ -142,14 +125,19 @@ fn extract_pattern(program: oxc_ast::ast::Program) -> Option<BindingPattern> {
 
     let stmt = body.into_iter().next()?;
     match stmt {
-        oxc_ast::ast::Statement::VariableDeclaration(decl) => {
-            let decl = decl.unbox();
-            let declarations = decl.declarations;
-            if declarations.len() != 1 {
-                return None;
+        oxc_ast::ast::Statement::ExpressionStatement(expr_stmt) => {
+            let inner = expr_stmt.unbox();
+            match inner.expression {
+                Expression::ArrowFunctionExpression(arrow) => {
+                    let arrow = arrow.unbox();
+                    let params = arrow.params.unbox();
+                    if params.items.is_empty() {
+                        return None;
+                    }
+                    params.items.into_iter().next()
+                }
+                _ => None,
             }
-            let declarator = declarations.into_iter().next()?;
-            Some(declarator.id)
         }
         _ => None,
     }
