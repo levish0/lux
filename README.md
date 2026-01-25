@@ -1,6 +1,6 @@
 # lux
 
-Svelte 5+ compiler implemented in Rust. Aims for 100% compatibility with the official Svelte compiler.
+Svelte compiler implemented in Rust. Aims for 100% compatibility with the official Svelte compiler.
 ## Architecture
 
 Pipeline: **Parse → Analyze → Transform**

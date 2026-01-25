@@ -14,9 +14,11 @@
 //! 2. **Analysis** (`analyze`): Walks the AST with the scope information to perform
 //!    semantic analysis, validation, and metadata collection.
 
+pub mod analyze;
 pub mod scope;
 pub mod visitor;
 
+pub use analyze::{analyze_component, AnalyzeOptions, ComponentAnalysis};
 pub use scope::{
     create_scopes, Binding, BindingId, BindingKind, DeclarationKind, Scope, ScopeCreationResult,
     ScopeId, ScopeTree,

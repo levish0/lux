@@ -10,3 +10,4 @@ description = "lux-utils"
 
 [dependencies]
 phf = {workspace = true}
+strsim = {workspace = true}

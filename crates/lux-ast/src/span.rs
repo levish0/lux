@@ -17,6 +17,12 @@ impl Span {
     }
 }
 
+impl From<Span> for oxc_span::Span {
+    fn from(span: Span) -> Self {
+        oxc_span::Span::new(span.start as u32, span.end as u32)
+    }
+}
+
 /// A position in source code with line, column, and character offset.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub struct Position {
