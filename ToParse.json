@@ -27,12 +27,21 @@
         },
         "context": {
           "decorators": [],
-          "end": 86,
+          "end": 94,
           "name": "letter",
           "optional": false,
           "start": 80,
           "type": "Identifier",
-          "typeAnnotation": null
+          "typeAnnotation": {
+            "end": 94,
+            "start": 86,
+            "type": "TSTypeAnnotation",
+            "typeAnnotation": {
+              "end": 94,
+              "start": 88,
+              "type": "TSStringKeyword"
+            }
+          }
         },
         "body": {
           "type": "Fragment",

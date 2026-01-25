@@ -1,4 +1,4 @@
-//! Performance comparison: Rust parser vs Node.js Svelte parser
+//! Performance comparison: lux parser vs svelte(node) Svelte parser
 //!
 //! Run with: cargo test --release -p svelte-parser --test performance -- --nocapture
 
@@ -18,7 +18,7 @@ fn fixtures_dir() -> PathBuf {
     tests_dir().join("fixtures")
 }
 
-/// Run Node.js Svelte parser and return duration
+/// Run svelte(node) Svelte parser and return duration
 fn run_node_parser(file_path: &std::path::Path, iterations: u32) -> Option<Duration> {
     let tests = tests_dir();
 
@@ -75,7 +75,7 @@ fn run_node_parser(file_path: &std::path::Path, iterations: u32) -> Option<Durat
     match output {
         Ok(out) => {
             if !out.status.success() {
-                eprintln!("Node.js error: {}", String::from_utf8_lossy(&out.stderr));
+                eprintln!("svelte(node) error: {}", String::from_utf8_lossy(&out.stderr));
                 return None;
             }
             let stdout = String::from_utf8_lossy(&out.stdout);
@@ -87,13 +87,13 @@ fn run_node_parser(file_path: &std::path::Path, iterations: u32) -> Option<Durat
             }
         }
         Err(e) => {
-            eprintln!("Failed to run Node.js: {}", e);
+            eprintln!("Failed to run svelte(node): {}", e);
             None
         }
     }
 }
 
-/// Run Rust parser and return duration
+/// Run lux parser and return duration
 fn run_rust_parser(source: &str, iterations: u32) -> Duration {
     // Warmup with fresh allocators
     for _ in 0..3 {
@@ -148,29 +148,29 @@ fn performance_comparison() {
     println!("── Single Parse ──");
 
     let rust_single = run_rust_parser(&source, 1);
-    println!("  Rust:    {}", format_duration(rust_single));
+    println!("  lux:    {}", format_duration(rust_single));
 
     if let Some(node_single) = run_node_parser(&fixture, 1) {
-        println!("  Node.js: {}", format_duration(node_single));
+        println!("  svelte(node): {}", format_duration(node_single));
 
         let speedup = node_single.as_secs_f64() / rust_single.as_secs_f64();
         if speedup > 1.0 {
-            println!("  → Rust is {:.3}x faster\n", speedup);
+            println!("  → lux is {:.3}x faster\n", speedup);
         } else {
-            println!("  → Node.js is {:.3}x faster\n", 1.0 / speedup);
+            println!("  → svelte(node) is {:.3}x faster\n", 1.0 / speedup);
         }
     } else {
-        println!("  Node.js: (skipped - not available)\n");
+        println!("  svelte(node): (skipped - not available)\n");
     }
 
-    // Bulk parse comparison (100 iterations)
-    let iterations = 100;
+    // Bulk parse comparison (10 iterations)
+    let iterations = 10;
     println!("── {} Iterations ──", iterations);
 
     let rust_bulk = run_rust_parser(&source, iterations);
     let rust_per_parse = rust_bulk.as_secs_f64() * 1000.0 / iterations as f64;
     println!(
-        "  Rust:    {} total ({:.6}ms per parse)",
+        "  lux:    {} total ({:.6}ms per parse)",
         format_duration(rust_bulk),
         rust_per_parse
     );
@@ -178,26 +178,26 @@ fn performance_comparison() {
     if let Some(node_bulk) = run_node_parser(&fixture, iterations) {
         let node_per_parse = node_bulk.as_secs_f64() * 1000.0 / iterations as f64;
         println!(
-            "  Node.js: {} total ({:.6}ms per parse)",
+            "  svelte(node): {} total ({:.6}ms per parse)",
             format_duration(node_bulk),
             node_per_parse
         );
 
         let speedup = node_bulk.as_secs_f64() / rust_bulk.as_secs_f64();
         if speedup > 1.0 {
-            println!("  → Rust is {:.3}x faster\n", speedup);
+            println!("  → lux is {:.3}x faster\n", speedup);
         } else {
-            println!("  → Node.js is {:.3}x faster\n", 1.0 / speedup);
+            println!("  → svelte(node) is {:.3}x faster\n", 1.0 / speedup);
         }
     } else {
-        println!("  Node.js: (skipped - not available)\n");
+        println!("  svelte(node): (skipped - not available)\n");
     }
 
     // Throughput
     println!("── Throughput ──");
     let rust_throughput_mb =
         (source_bytes as f64 * iterations as f64) / rust_bulk.as_secs_f64() / 1_000_000.0;
-    println!("  Rust:    {:.2} MB/s", rust_throughput_mb);
+    println!("  lux:    {:.2} MB/s", rust_throughput_mb);
 
     println!("\n✓ Performance test completed");
 }

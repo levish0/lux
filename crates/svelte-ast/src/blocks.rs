@@ -1,6 +1,6 @@
 use oxc_ast::ast::{Expression, FormalParameter, FormalParameterRest};
-use serde::ser::SerializeMap;
 use serde::Serialize;
+use serde::ser::SerializeMap;
 
 use crate::metadata::{ExpressionNodeMetadata, SnippetBlockMetadata};
 use crate::root::Fragment;
@@ -175,10 +175,13 @@ impl Serialize for SnippetBlock<'_> {
             map.serialize_entry("typeParams", tp)?;
         }
         // Serialize parameters: items + rest (if present)
-        map.serialize_entry("parameters", &SnippetParametersSerialize {
-            items: &self.parameters,
-            rest: &self.rest,
-        })?;
+        map.serialize_entry(
+            "parameters",
+            &SnippetParametersSerialize {
+                items: &self.parameters,
+                rest: &self.rest,
+            },
+        )?;
         map.serialize_entry("body", &self.body)?;
         map.end()
     }
@@ -192,8 +195,8 @@ struct SnippetParametersSerialize<'a, 'b> {
 
 impl Serialize for SnippetParametersSerialize<'_, '_> {
     fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        use serde::ser::SerializeSeq;
         use crate::utils::estree::OxcSerialize;
+        use serde::ser::SerializeSeq;
 
         let len = self.items.len() + if self.rest.is_some() { 1 } else { 0 };
         let mut seq = s.serialize_seq(Some(len))?;

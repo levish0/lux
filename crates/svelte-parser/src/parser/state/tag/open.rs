@@ -6,7 +6,9 @@ use oxc_span::{GetSpan, SourceType};
 use crate::error::ErrorKind;
 use crate::parser::read::context::read_pattern;
 use crate::parser::read::expression::{loose_identifier, read_expression};
-use crate::parser::span_offset::{shift_expression_spans, shift_formal_parameter_spans, shift_formal_parameter_rest_spans};
+use crate::parser::span_offset::{
+    shift_expression_spans, shift_formal_parameter_rest_spans, shift_formal_parameter_spans,
+};
 use crate::parser::{AwaitPhase, ParseError, Parser, StackFrame};
 
 use super::{is_identifier_byte, is_whitespace_byte, skip_string_bytes, skip_to_closing_brace};
@@ -541,7 +543,10 @@ fn parse_snippet_params<'a>(
     parser: &mut Parser<'a>,
     params_start: usize,
     params_source: &str,
-) -> (Vec<FormalParameter<'a>>, Option<oxc_allocator::Box<'a, FormalParameterRest<'a>>>) {
+) -> (
+    Vec<FormalParameter<'a>>,
+    Option<oxc_allocator::Box<'a, FormalParameterRest<'a>>>,
+) {
     // Parse `<params> => {}` without padding, then shift spans.
     let snippet = format!("{} => {{}}", params_source);
     let snippet_str = parser.allocator.alloc_str(&snippet);

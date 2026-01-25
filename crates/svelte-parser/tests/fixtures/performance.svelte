@@ -287,20 +287,20 @@
 </svelte:head>
 
 <div
-    class="chat-container {className}"
-    class:dark={theme === "dark"}
-    class:light={theme === "light"}
-    data-testid="chat-container"
-    {...restProps}
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
 >
     <!-- Sidebar -->
     <aside class="sidebar" class:collapsed={!showUserList}>
         <header class="sidebar-header">
             <h2>Channels</h2>
             <button
-                type="button"
-                onclick={() => (showUserList = !showUserList)}
-                aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
             >
                 {#if showUserList}
                     <span>←</span>
@@ -312,11 +312,11 @@
 
         <div class="search-container">
             <input
-                id="search-input"
-                type="search"
-                placeholder="Search users..."
-                bind:value={searchQuery}
-                aria-label="Search users and channels"
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
             />
         </div>
 
@@ -325,12 +325,12 @@
                 {@const unread = unreadCounts[channel.id] || 0}
                 {@const isSelected = selectedChannel?.id === channel.id}
                 <button
-                    type="button"
-                    class="channel-item"
-                    class:selected={isSelected}
-                    class:has-unread={unread > 0}
-                    onclick={() => handleChannelClick(channel)}
-                    aria-current={isSelected ? "page" : undefined}
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
                 >
                     <span class="channel-icon">
                         {#if channel.type === "voice"}
@@ -344,8 +344,8 @@
                     <span class="channel-name">{channel.name}</span>
                     {#if unread > 0}
                         <span
-                            class="unread-badge"
-                            aria-label="{unread} unread messages"
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
                         >
                             {unread > 99 ? "99+" : unread}
                         </span>
@@ -363,21 +363,21 @@
                     {#each onlineUsers as user (user.id)}
                         <li>
                             <button
-                                type="button"
-                                class="user-item"
-                                onclick={() => onUserClick?.(user)}
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
                             >
                                 <img
-                                    src={user.avatar}
-                                    alt=""
-                                    class="avatar"
-                                    width="32"
-                                    height="32"
-                                    loading="lazy"
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
                                 />
                                 <span class="user-name">{user.name}</span>
                                 <span
-                                    class="status-indicator {getStatusColor(
+                                        class="status-indicator {getStatusColor(
                                         user.status,
                                     )}"
                                 />
@@ -394,18 +394,18 @@
                         {#each awayUsers as user (user.id)}
                             <li>
                                 <button
-                                    type="button"
-                                    class="user-item"
-                                    onclick={() => onUserClick?.(user)}
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
                                 >
                                     <img
-                                        src={user.avatar}
-                                        alt=""
-                                        class="avatar"
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
                                     />
                                     <span class="user-name">{user.name}</span>
                                     <span
-                                        class="status-indicator {getStatusColor(
+                                            class="status-indicator {getStatusColor(
                                             user.status,
                                         )}"
                                     />
@@ -423,18 +423,18 @@
                         {#each offlineUsers as user (user.id)}
                             <li>
                                 <button
-                                    type="button"
-                                    class="user-item"
-                                    onclick={() => onUserClick?.(user)}
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
                                 >
                                     <img
-                                        src={user.avatar}
-                                        alt=""
-                                        class="avatar"
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
                                     />
                                     <span class="user-name">{user.name}</span>
                                     <span
-                                        class="status-indicator {getStatusColor(
+                                            class="status-indicator {getStatusColor(
                                             user.status,
                                         )}"
                                     />
@@ -455,7 +455,7 @@
                 <p class="channel-description">{selectedChannel.description}</p>
                 <div class="header-actions">
                     <span class="member-count"
-                        >{selectedChannel.members.length} members</span
+                    >{selectedChannel.members.length} members</span
                     >
                     {#if pinnedMessages.length > 0}
                         <button type="button" class="pinned-btn">
@@ -466,10 +466,10 @@
             </header>
 
             <div
-                class="messages-container"
-                bind:this={scrollContainer}
-                role="log"
-                aria-live="polite"
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
             >
                 {#each [...messageGroups] as [dateKey, messages] (dateKey)}
                     <div class="date-separator">
@@ -481,25 +481,25 @@
                         {@const showAvatar =
                             index === 0 ||
                             messages[index - 1]?.author.id !==
-                                message.author.id}
+                            message.author.id}
 
                         <article
-                            class="message"
-                            class:own={isOwn}
-                            class:pinned={message.pinned}
-                            class:edited={message.edited}
-                            bind:this={
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
                                 messageRefs.set(message.id, this) && undefined
                             }
-                            data-message-id={message.id}
+                                data-message-id={message.id}
                         >
                             {#if showAvatar}
                                 <img
-                                    src={message.author.avatar}
-                                    alt="{message.author.name}'s avatar"
-                                    class="message-avatar"
-                                    width="40"
-                                    height="40"
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
                                 />
                             {:else}
                                 <div class="avatar-placeholder" />
@@ -509,16 +509,16 @@
                                 {#if showAvatar}
                                     <header class="message-header">
                                         <span class="author-name"
-                                            >{message.author.name}</span
+                                        >{message.author.name}</span
                                         >
                                         <time
-                                            datetime={message.timestamp.toISOString()}
+                                                datetime={message.timestamp.toISOString()}
                                         >
                                             {formatTimestamp(message.timestamp)}
                                         </time>
                                         {#if message.edited}
                                             <span class="edited-indicator"
-                                                >(edited)</span
+                                            >(edited)</span
                                             >
                                         {/if}
                                     </header>
@@ -531,44 +531,44 @@
                                         {#each message.attachments as attachment (attachment.id)}
                                             {#if attachment.type === "image"}
                                                 <img
-                                                    src={attachment.url}
-                                                    alt={attachment.name}
-                                                    class="attachment-image"
-                                                    loading="lazy"
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
                                                 />
                                             {:else if attachment.type === "video"}
                                                 <video
-                                                    src={attachment.url}
-                                                    controls
-                                                    class="attachment-video"
-                                                    preload="metadata"
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
                                                 >
                                                     <track kind="captions" />
                                                 </video>
                                             {:else if attachment.type === "audio"}
                                                 <audio
-                                                    src={attachment.url}
-                                                    controls
-                                                    class="attachment-audio"
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
                                                 >
                                                     <track kind="captions" />
                                                 </audio>
                                             {:else}
                                                 <a
-                                                    href={attachment.url}
-                                                    class="attachment-file"
-                                                    download={attachment.name}
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
                                                 >
                                                     <span class="file-icon"
-                                                        >📎</span
+                                                    >📎</span
                                                     >
                                                     <span class="file-name"
-                                                        >{attachment.name}</span
+                                                    >{attachment.name}</span
                                                     >
                                                     <span class="file-size"
-                                                        >{formatFileSize(
-                                                            attachment.size,
-                                                        )}</span
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
                                                     >
                                                 </a>
                                             {/if}
@@ -580,26 +580,26 @@
                                     <div class="reactions">
                                         {#each message.reactions as reaction (reaction.emoji)}
                                             <button
-                                                type="button"
-                                                class="reaction"
-                                                class:reacted={reaction.users.some(
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
                                                     (u) =>
                                                         u.id === currentUser.id,
                                                 )}
-                                                onclick={() =>
+                                                    onclick={() =>
                                                     handleReaction(
                                                         message.id,
                                                         reaction.emoji,
                                                     )}
-                                                title={reaction.users
+                                                    title={reaction.users
                                                     .map((u) => u.name)
                                                     .join(", ")}
                                             >
                                                 <span class="emoji"
-                                                    >{reaction.emoji}</span
+                                                >{reaction.emoji}</span
                                                 >
                                                 <span class="count"
-                                                    >{reaction.count}</span
+                                                >{reaction.count}</span
                                                 >
                                             </button>
                                         {/each}
@@ -618,17 +618,17 @@
                                             {#each message.thread as reply (reply.id)}
                                                 <div class="reply">
                                                     <img
-                                                        src={reply.author
+                                                            src={reply.author
                                                             .avatar}
-                                                        alt=""
-                                                        class="reply-avatar"
+                                                            alt=""
+                                                            class="reply-avatar"
                                                     />
                                                     <span class="reply-author"
-                                                        >{reply.author
-                                                            .name}</span
+                                                    >{reply.author
+                                                        .name}</span
                                                     >
                                                     <span class="reply-content"
-                                                        >{reply.content}</span
+                                                    >{reply.content}</span
                                                     >
                                                 </div>
                                             {/each}
@@ -646,7 +646,7 @@
                             <span>{typingUsers[0].name} is typing...</span>
                         {:else if typingUsers.length === 2}
                             <span
-                                >{typingUsers[0].name} and {typingUsers[1].name} are
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
                                 typing...</span
                             >
                         {:else}
@@ -658,39 +658,39 @@
 
             <footer class="message-input-container">
                 <form
-                    onsubmit={(e) => {
+                        onsubmit={(e) => {
                         e.preventDefault();
                         handleSendMessage();
                     }}
                 >
                     <div class="input-wrapper">
                         <button
-                            type="button"
-                            class="emoji-btn"
-                            onclick={() => (showEmojiPicker = !showEmojiPicker)}
-                            aria-label="Open emoji picker"
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
                         >
                             😀
                         </button>
 
                         <input
-                            type="text"
-                            placeholder="Message #{selectedChannel.name}"
-                            bind:value={messageInput}
-                            oninput={() => {
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
                                 isTyping = true;
                                 dispatch("typing", {
                                     userId: currentUser.id,
                                     channelId: selectedChannel!.id,
                                 });
                             }}
-                            aria-label="Message input"
+                                aria-label="Message input"
                         />
 
                         <button
-                            type="submit"
-                            disabled={!messageInput.trim()}
-                            aria-label="Send message"
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
                         >
                             Send
                         </button>
@@ -699,14 +699,14254 @@
 
                 {#if showEmojiPicker}
                     <div
-                        class="emoji-picker"
-                        role="dialog"
-                        aria-label="Emoji picker"
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
                     >
                         {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
                             <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
                                 type="button"
-                                onclick={() => {
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
+                                    messageInput += emoji;
+                                    showEmojiPicker = false;
+                                }}
+                            >
+                                {emoji}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </footer>
+        {:else}
+            <div class="no-channel-selected">
+                <h2>Welcome!</h2>
+                <p>Select a channel from the sidebar to start chatting.</p>
+
+                {#if hasUnread}
+                    <p class="unread-notice">
+                        You have unread messages in some channels.
+                    </p>
+                {/if}
+            </div>
+        {/if}
+    </main>
+</div>
+<div
+        class="chat-container {className}"
+        class:dark={theme === "dark"}
+        class:light={theme === "light"}
+        data-testid="chat-container"
+        {...restProps}
+>
+    <!-- Sidebar -->
+    <aside class="sidebar" class:collapsed={!showUserList}>
+        <header class="sidebar-header">
+            <h2>Channels</h2>
+            <button
+                    type="button"
+                    onclick={() => (showUserList = !showUserList)}
+                    aria-label={showUserList ? "Hide sidebar" : "Show sidebar"}
+            >
+                {#if showUserList}
+                    <span>←</span>
+                {:else}
+                    <span>→</span>
+                {/if}
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search users..."
+                    bind:value={searchQuery}
+                    aria-label="Search users and channels"
+            />
+        </div>
+
+        <nav class="channel-list" aria-label="Channels">
+            {#each sortedChannels as channel (channel.id)}
+                {@const unread = unreadCounts[channel.id] || 0}
+                {@const isSelected = selectedChannel?.id === channel.id}
+                <button
+                        type="button"
+                        class="channel-item"
+                        class:selected={isSelected}
+                        class:has-unread={unread > 0}
+                        onclick={() => handleChannelClick(channel)}
+                        aria-current={isSelected ? "page" : undefined}
+                >
+                    <span class="channel-icon">
+                        {#if channel.type === "voice"}
+                            🔊
+                        {:else if channel.type === "announcement"}
+                            📢
+                        {:else}
+                            #
+                        {/if}
+                    </span>
+                    <span class="channel-name">{channel.name}</span>
+                    {#if unread > 0}
+                        <span
+                                class="unread-badge"
+                                aria-label="{unread} unread messages"
+                        >
+                            {unread > 99 ? "99+" : unread}
+                        </span>
+                    {/if}
+                </button>
+            {:else}
+                <p class="empty-state">No channels available</p>
+            {/each}
+        </nav>
+
+        <div class="user-sections">
+            <section class="user-section">
+                <h3>Online — {onlineUsers.length}</h3>
+                <ul class="user-list">
+                    {#each onlineUsers as user (user.id)}
+                        <li>
+                            <button
+                                    type="button"
+                                    class="user-item"
+                                    onclick={() => onUserClick?.(user)}
+                            >
+                                <img
+                                        src={user.avatar}
+                                        alt=""
+                                        class="avatar"
+                                        width="32"
+                                        height="32"
+                                        loading="lazy"
+                                />
+                                <span class="user-name">{user.name}</span>
+                                <span
+                                        class="status-indicator {getStatusColor(
+                                        user.status,
+                                    )}"
+                                />
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </section>
+
+            {#if awayUsers.length > 0}
+                <section class="user-section">
+                    <h3>Away — {awayUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each awayUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+
+            {#if offlineUsers.length > 0}
+                <section class="user-section">
+                    <h3>Offline — {offlineUsers.length}</h3>
+                    <ul class="user-list">
+                        {#each offlineUsers as user (user.id)}
+                            <li>
+                                <button
+                                        type="button"
+                                        class="user-item"
+                                        onclick={() => onUserClick?.(user)}
+                                >
+                                    <img
+                                            src={user.avatar}
+                                            alt=""
+                                            class="avatar"
+                                    />
+                                    <span class="user-name">{user.name}</span>
+                                    <span
+                                            class="status-indicator {getStatusColor(
+                                            user.status,
+                                        )}"
+                                    />
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/if}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {#if selectedChannel}
+            <header class="channel-header">
+                <h1>#{selectedChannel.name}</h1>
+                <p class="channel-description">{selectedChannel.description}</p>
+                <div class="header-actions">
+                    <span class="member-count"
+                    >{selectedChannel.members.length} members</span
+                    >
+                    {#if pinnedMessages.length > 0}
+                        <button type="button" class="pinned-btn">
+                            📌 {pinnedMessages.length} pinned
+                        </button>
+                    {/if}
+                </div>
+            </header>
+
+            <div
+                    class="messages-container"
+                    bind:this={scrollContainer}
+                    role="log"
+                    aria-live="polite"
+            >
+                {#each [...messageGroups] as [dateKey, messages] (dateKey)}
+                    <div class="date-separator">
+                        <span>{formatDate(new Date(dateKey))}</span>
+                    </div>
+
+                    {#each messages as message, index (message.id)}
+                        {@const isOwn = message.author.id === currentUser.id}
+                        {@const showAvatar =
+                            index === 0 ||
+                            messages[index - 1]?.author.id !==
+                            message.author.id}
+
+                        <article
+                                class="message"
+                                class:own={isOwn}
+                                class:pinned={message.pinned}
+                                class:edited={message.edited}
+                                bind:this={
+                                messageRefs.set(message.id, this) && undefined
+                            }
+                                data-message-id={message.id}
+                        >
+                            {#if showAvatar}
+                                <img
+                                        src={message.author.avatar}
+                                        alt="{message.author.name}'s avatar"
+                                        class="message-avatar"
+                                        width="40"
+                                        height="40"
+                                />
+                            {:else}
+                                <div class="avatar-placeholder" />
+                            {/if}
+
+                            <div class="message-content">
+                                {#if showAvatar}
+                                    <header class="message-header">
+                                        <span class="author-name"
+                                        >{message.author.name}</span
+                                        >
+                                        <time
+                                                datetime={message.timestamp.toISOString()}
+                                        >
+                                            {formatTimestamp(message.timestamp)}
+                                        </time>
+                                        {#if message.edited}
+                                            <span class="edited-indicator"
+                                            >(edited)</span
+                                            >
+                                        {/if}
+                                    </header>
+                                {/if}
+
+                                <p class="message-text">{message.content}</p>
+
+                                {#if message.attachments.length > 0}
+                                    <div class="attachments">
+                                        {#each message.attachments as attachment (attachment.id)}
+                                            {#if attachment.type === "image"}
+                                                <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="attachment-image"
+                                                        loading="lazy"
+                                                />
+                                            {:else if attachment.type === "video"}
+                                                <video
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-video"
+                                                        preload="metadata"
+                                                >
+                                                    <track kind="captions" />
+                                                </video>
+                                            {:else if attachment.type === "audio"}
+                                                <audio
+                                                        src={attachment.url}
+                                                        controls
+                                                        class="attachment-audio"
+                                                >
+                                                    <track kind="captions" />
+                                                </audio>
+                                            {:else}
+                                                <a
+                                                        href={attachment.url}
+                                                        class="attachment-file"
+                                                        download={attachment.name}
+                                                >
+                                                    <span class="file-icon"
+                                                    >📎</span
+                                                    >
+                                                    <span class="file-name"
+                                                    >{attachment.name}</span
+                                                    >
+                                                    <span class="file-size"
+                                                    >{formatFileSize(
+                                                        attachment.size,
+                                                    )}</span
+                                                    >
+                                                </a>
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.reactions.length > 0}
+                                    <div class="reactions">
+                                        {#each message.reactions as reaction (reaction.emoji)}
+                                            <button
+                                                    type="button"
+                                                    class="reaction"
+                                                    class:reacted={reaction.users.some(
+                                                    (u) =>
+                                                        u.id === currentUser.id,
+                                                )}
+                                                    onclick={() =>
+                                                    handleReaction(
+                                                        message.id,
+                                                        reaction.emoji,
+                                                    )}
+                                                    title={reaction.users
+                                                    .map((u) => u.name)
+                                                    .join(", ")}
+                                            >
+                                                <span class="emoji"
+                                                >{reaction.emoji}</span
+                                                >
+                                                <span class="count"
+                                                >{reaction.count}</span
+                                                >
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+
+                                {#if message.thread && message.thread.length > 0}
+                                    <details class="thread">
+                                        <summary>
+                                            {message.thread.length}
+                                            {message.thread.length === 1
+                                                ? "reply"
+                                                : "replies"}
+                                        </summary>
+                                        <div class="thread-messages">
+                                            {#each message.thread as reply (reply.id)}
+                                                <div class="reply">
+                                                    <img
+                                                            src={reply.author
+                                                            .avatar}
+                                                            alt=""
+                                                            class="reply-avatar"
+                                                    />
+                                                    <span class="reply-author"
+                                                    >{reply.author
+                                                        .name}</span
+                                                    >
+                                                    <span class="reply-content"
+                                                    >{reply.content}</span
+                                                    >
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </details>
+                                {/if}
+                            </div>
+                        </article>
+                    {/each}
+                {/each}
+
+                {#if typingUsers.length > 0}
+                    <div class="typing-indicator" aria-live="polite">
+                        {#if typingUsers.length === 1}
+                            <span>{typingUsers[0].name} is typing...</span>
+                        {:else if typingUsers.length === 2}
+                            <span
+                            >{typingUsers[0].name} and {typingUsers[1].name} are
+                                typing...</span
+                            >
+                        {:else}
+                            <span>Several people are typing...</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+
+            <footer class="message-input-container">
+                <form
+                        onsubmit={(e) => {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }}
+                >
+                    <div class="input-wrapper">
+                        <button
+                                type="button"
+                                class="emoji-btn"
+                                onclick={() => (showEmojiPicker = !showEmojiPicker)}
+                                aria-label="Open emoji picker"
+                        >
+                            😀
+                        </button>
+
+                        <input
+                                type="text"
+                                placeholder="Message #{selectedChannel.name}"
+                                bind:value={messageInput}
+                                oninput={() => {
+                                isTyping = true;
+                                dispatch("typing", {
+                                    userId: currentUser.id,
+                                    channelId: selectedChannel!.id,
+                                });
+                            }}
+                                aria-label="Message input"
+                        />
+
+                        <button
+                                type="submit"
+                                disabled={!messageInput.trim()}
+                                aria-label="Send message"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </form>
+
+                {#if showEmojiPicker}
+                    <div
+                            class="emoji-picker"
+                            role="dialog"
+                            aria-label="Emoji picker"
+                    >
+                        {#each ["😀", "😂", "❤️", "👍", "👎", "🎉", "🔥", "💯", "🤔", "😢", "😡", "🙏"] as emoji}
+                            <button
+                                    type="button"
+                                    onclick={() => {
                                     messageInput += emoji;
                                     showEmojiPicker = false;
                                 }}

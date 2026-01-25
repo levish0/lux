@@ -20,7 +20,7 @@ fn main() {
 
     let allocator = Allocator::default();
     let start_time = Instant::now();
-    let root = match parse(&source, &allocator, ParseOptions::default()) {
+    let root = match parse(&source, &allocator, ParseOptions { loose: true }) {
         Ok(root) => root,
         Err(errors) => {
             eprintln!("Parse errors:");

@@ -47,16 +47,20 @@ fn generate_svelte_ast(tests_dir: &Path) {
 /// Fields to skip during comparison (positions/comments computed differently from reference).
 /// Also skip OXC-parsed content due to OXC vs acorn ESTree differences.
 const SKIP_FIELDS: &[&str] = &[
-    "start", "end", "loc", "leadingComments", "trailingComments",
+    "start",
+    "end",
+    "loc",
+    "leadingComments",
+    "trailingComments",
     // OXC-parsed JS/TS content (different ESTree output than acorn)
-    "content",      // Script.content - entire JS/TS AST
-    "expression",   // expression tags, blocks - OXC parses these
-    "test",         // IfBlock test expression
-    "key",          // EachBlock key expression
-    "declaration",  // ConstTag declaration
-    "identifiers",  // DebugTag identifiers
-    "parameters",   // SnippetBlock parameters - OXC parses these
-    "context",      // EachBlock context - OXC parses these
+    "content",     // Script.content - entire JS/TS AST
+    "expression",  // expression tags, blocks - OXC parses these
+    "test",        // IfBlock test expression
+    "key",         // EachBlock key expression
+    "declaration", // ConstTag declaration
+    "identifiers", // DebugTag identifiers
+    "parameters",  // SnippetBlock parameters - OXC parses these
+    "context",     // EachBlock context - OXC parses these
 ];
 
 /// Check if `actual` is a superset of `expected`.
@@ -96,9 +100,7 @@ const SKIP_CATEGORIES: &[&str] = &["parser-legacy"];
 
 /// Tests to skip because they use non-standard TypeScript syntax
 /// (e.g., `c?: number = 5` which Svelte's acorn-typescript allows but OXC rejects)
-const SKIP_TESTS: &[&str] = &[
-    "runtime-runes--snippet-typescript--main",
-];
+const SKIP_TESTS: &[&str] = &["runtime-runes--snippet-typescript--main"];
 
 /// Recursively find all .svelte files
 fn find_svelte_files(dir: &Path, results: &mut Vec<PathBuf>) {
