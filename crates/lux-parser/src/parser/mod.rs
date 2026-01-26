@@ -343,6 +343,7 @@ impl<'a> Parser<'a> {
             options,
             fragment: Fragment {
                 nodes: fragment_nodes,
+                metadata: Default::default(),
             },
             css: self.css,
             instance: self.instance,
@@ -665,7 +666,7 @@ impl<'a> Parser<'a> {
         use lux_ast::elements::*;
         use lux_ast::metadata::*;
 
-        let fragment = Fragment { nodes };
+        let fragment = Fragment { nodes, metadata: Default::default() };
         match frame {
             StackFrame::RegularElement {
                 start,
@@ -678,6 +679,7 @@ impl<'a> Parser<'a> {
                 name_loc,
                 attributes,
                 fragment,
+                metadata: RegularElementMetadata::default(),
             })),
             StackFrame::Component {
                 start,
@@ -690,6 +692,7 @@ impl<'a> Parser<'a> {
                 name_loc,
                 attributes,
                 fragment,
+                metadata: ComponentMetadata::default(),
             })),
             StackFrame::SvelteElement {
                 start,
@@ -852,7 +855,7 @@ impl<'a> Parser<'a> {
                 consequent,
             } => {
                 let (cons, alt) = if let Some(cons_nodes) = consequent {
-                    (Fragment { nodes: cons_nodes }, Some(fragment))
+                    (Fragment { nodes: cons_nodes, metadata: Default::default() }, Some(fragment))
                 } else {
                     (fragment, None)
                 };
@@ -874,7 +877,7 @@ impl<'a> Parser<'a> {
                 body,
             } => {
                 let (body_frag, fallback) = if let Some(body_nodes) = body {
-                    (Fragment { nodes: body_nodes }, Some(fragment))
+                    (Fragment { nodes: body_nodes, metadata: Default::default() }, Some(fragment))
                 } else {
                     (fragment, None)
                 };
@@ -886,6 +889,7 @@ impl<'a> Parser<'a> {
                     key,
                     body: body_frag,
                     fallback,
+                    metadata: EachBlockMetadata::default(),
                 }))
             }
             StackFrame::AwaitBlock {
@@ -899,14 +903,14 @@ impl<'a> Parser<'a> {
             } => {
                 let (pending_frag, then_frag, catch_frag) = match phase {
                     AwaitPhase::Pending => {
-                        (Some(fragment), then.map(|n| Fragment { nodes: n }), None)
+                        (Some(fragment), then.map(|n| Fragment { nodes: n, metadata: Default::default() }), None)
                     }
                     AwaitPhase::Then => {
-                        (pending.map(|n| Fragment { nodes: n }), Some(fragment), None)
+                        (pending.map(|n| Fragment { nodes: n, metadata: Default::default() }), Some(fragment), None)
                     }
                     AwaitPhase::Catch => (
-                        pending.map(|n| Fragment { nodes: n }),
-                        then.map(|n| Fragment { nodes: n }),
+                        pending.map(|n| Fragment { nodes: n, metadata: Default::default() }),
+                        then.map(|n| Fragment { nodes: n, metadata: Default::default() }),
                         Some(fragment),
                     ),
                 };

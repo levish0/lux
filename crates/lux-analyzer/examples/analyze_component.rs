@@ -31,7 +31,7 @@ fn main() {
     // Parse the Svelte component
     let allocator = Allocator::default();
     let parse_start = Instant::now();
-    let root = match parse(&source, &allocator, ParseOptions::default()) {
+    let mut root = match parse(&source, &allocator, ParseOptions::default()) {
         Ok(root) => root,
         Err(errors) => {
             eprintln!("Parse errors:");
@@ -51,7 +51,7 @@ fn main() {
         runes: None, // Auto-detect
         ..Default::default()
     };
-    let analysis = analyze_component(&source, &root, analyze_options);
+    let analysis = analyze_component(&source, &mut root, analyze_options);
     let analyze_duration = analyze_start.elapsed();
     println!("Analyzed in {:?}", analyze_duration);
     println!();

@@ -118,29 +118,29 @@ impl<'s, 'a, 'b> AnalysisVisitor<'s, 'a, 'b> {
 }
 
 impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
-    fn visit_root(&mut self, node: &Root<'a>) {
+    fn visit_root(&mut self, node: &mut Root<'a>) {
         self.path.push(NodeKind::Root);
 
         // Visit module script
-        if let Some(ref module) = node.module {
+        if let Some(ref mut module) = node.module {
             self.state.ast_type = AstType::Module;
             self.visit_script(module);
         }
 
         // Visit instance script
-        if let Some(ref instance) = node.instance {
+        if let Some(ref mut instance) = node.instance {
             self.state.ast_type = AstType::Instance;
             self.visit_script(instance);
         }
 
         // Visit template
         self.state.ast_type = AstType::Template;
-        self.visit_fragment(&node.fragment);
+        self.visit_fragment(&mut node.fragment);
 
         self.path.pop();
     }
 
-    fn visit_script(&mut self, node: &Script<'a>) {
+    fn visit_script(&mut self, node: &mut Script<'a>) {
         self.path.push(NodeKind::Script);
 
         // Visit JS program
@@ -150,13 +150,13 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_fragment(&mut self, node: &Fragment<'a>) {
+    fn visit_fragment(&mut self, node: &mut Fragment<'a>) {
         self.path.push(NodeKind::Fragment);
         visitor::walk_fragment(self, node);
         self.path.pop();
     }
 
-    fn visit_expression_tag(&mut self, node: &ExpressionTag<'a>) {
+    fn visit_expression_tag(&mut self, node: &mut ExpressionTag<'a>) {
         self.path.push(NodeKind::Expression);
 
         // Call the ExpressionTag visitor for validation
@@ -182,7 +182,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_html_tag(&mut self, node: &HtmlTag<'a>) {
+    fn visit_html_tag(&mut self, node: &mut HtmlTag<'a>) {
         // Call the HtmlTag visitor for validation
         visit_html_tag(node, &mut self.state, &self.path);
 
@@ -190,7 +190,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.visit_js_expression(&node.expression);
     }
 
-    fn visit_debug_tag(&mut self, node: &DebugTag<'a>) {
+    fn visit_debug_tag(&mut self, node: &mut DebugTag<'a>) {
         // Call the DebugTag visitor for validation
         visit_debug_tag(node, &mut self.state, &self.path);
 
@@ -200,7 +200,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         }
     }
 
-    fn visit_render_tag(&mut self, node: &RenderTag<'a>) {
+    fn visit_render_tag(&mut self, node: &mut RenderTag<'a>) {
         // Call the RenderTag visitor for validation
         visit_render_tag(node, &mut self.state, &self.path);
 
@@ -208,7 +208,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.visit_js_expression(&node.expression);
     }
 
-    fn visit_const_tag(&mut self, node: &ConstTag<'a>) {
+    fn visit_const_tag(&mut self, node: &mut ConstTag<'a>) {
         // Call the ConstTag visitor for validation
         visit_const_tag(node, &mut self.state, &self.path);
 
@@ -217,7 +217,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         js_visitor.visit_variable_declaration(&node.declaration);
     }
 
-    fn visit_if_block(&mut self, node: &IfBlock<'a>) {
+    fn visit_if_block(&mut self, node: &mut IfBlock<'a>) {
         self.path.push(NodeKind::IfBlock);
 
         // Call the IfBlock visitor for validation
@@ -227,18 +227,18 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.visit_js_expression(&node.test);
 
         // Visit consequent and alternate
-        self.visit_fragment(&node.consequent);
-        if let Some(ref alternate) = node.alternate {
+        self.visit_fragment(&mut node.consequent);
+        if let Some(ref mut alternate) = node.alternate {
             self.visit_fragment(alternate);
         }
 
         self.path.pop();
     }
 
-    fn visit_each_block(&mut self, node: &EachBlock<'a>) {
+    fn visit_each_block(&mut self, node: &mut EachBlock<'a>) {
         self.path.push(NodeKind::EachBlock);
 
-        // Call the EachBlock visitor for validation
+        // Call the EachBlock visitor for validation and set metadata
         visit_each_block(node, &mut self.state, &self.path);
 
         // Visit the expression being iterated
@@ -250,15 +250,15 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         }
 
         // Visit body and fallback
-        self.visit_fragment(&node.body);
-        if let Some(ref fallback) = node.fallback {
+        self.visit_fragment(&mut node.body);
+        if let Some(ref mut fallback) = node.fallback {
             self.visit_fragment(fallback);
         }
 
         self.path.pop();
     }
 
-    fn visit_await_block(&mut self, node: &AwaitBlock<'a>) {
+    fn visit_await_block(&mut self, node: &mut AwaitBlock<'a>) {
         self.path.push(NodeKind::AwaitBlock);
 
         // Call the AwaitBlock visitor for validation
@@ -268,20 +268,20 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.visit_js_expression(&node.expression);
 
         // Visit pending, then, and catch fragments
-        if let Some(ref pending) = node.pending {
+        if let Some(ref mut pending) = node.pending {
             self.visit_fragment(pending);
         }
-        if let Some(ref then) = node.then {
+        if let Some(ref mut then) = node.then {
             self.visit_fragment(then);
         }
-        if let Some(ref catch) = node.catch {
+        if let Some(ref mut catch) = node.catch {
             self.visit_fragment(catch);
         }
 
         self.path.pop();
     }
 
-    fn visit_key_block(&mut self, node: &KeyBlock<'a>) {
+    fn visit_key_block(&mut self, node: &mut KeyBlock<'a>) {
         self.path.push(NodeKind::KeyBlock);
 
         // Call the KeyBlock visitor for validation
@@ -291,12 +291,12 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.visit_js_expression(&node.expression);
 
         // Visit the fragment
-        self.visit_fragment(&node.fragment);
+        self.visit_fragment(&mut node.fragment);
 
         self.path.pop();
     }
 
-    fn visit_snippet_block(&mut self, node: &lux_ast::blocks::SnippetBlock<'a>) {
+    fn visit_snippet_block(&mut self, node: &mut lux_ast::blocks::SnippetBlock<'a>) {
         self.path.push(NodeKind::SnippetBlock);
 
         // Call the SnippetBlock visitor for validation
@@ -306,27 +306,27 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_regular_element(&mut self, node: &RegularElement<'a>) {
+    fn visit_regular_element(&mut self, node: &mut RegularElement<'a>) {
         self.path.push(NodeKind::RegularElement(node.name));
 
-        // Call the RegularElement visitor for validation and metadata
+        // Call the RegularElement visitor for validation and set metadata
         visit_regular_element(node, &mut self.state, &self.path);
 
         visitor::walk_regular_element(self, node);
         self.path.pop();
     }
 
-    fn visit_component(&mut self, node: &Component<'a>) {
+    fn visit_component(&mut self, node: &mut Component<'a>) {
         self.path.push(NodeKind::Component(node.name));
 
-        // Call the Component visitor for validation and metadata
+        // Call the Component visitor for validation and set metadata
         visit_component(node, &mut self.state, &self.path);
 
         visitor::walk_component(self, node);
         self.path.pop();
     }
 
-    fn visit_svelte_element(&mut self, node: &SvelteElement<'a>) {
+    fn visit_svelte_element(&mut self, node: &mut SvelteElement<'a>) {
         self.path.push(NodeKind::SvelteElement);
 
         // Call the SvelteElement visitor for validation and metadata
@@ -339,7 +339,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_svelte_component(&mut self, node: &SvelteComponent<'a>) {
+    fn visit_svelte_component(&mut self, node: &mut SvelteComponent<'a>) {
         self.path.push(NodeKind::SvelteComponent);
 
         // Call the SvelteComponent visitor for validation
@@ -349,7 +349,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_svelte_self(&mut self, node: &SvelteSelf<'a>) {
+    fn visit_svelte_self(&mut self, node: &mut SvelteSelf<'a>) {
         self.path.push(NodeKind::SvelteSelf);
 
         // Call the SvelteSelf visitor for validation
@@ -359,7 +359,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_slot_element(&mut self, node: &SlotElement<'a>) {
+    fn visit_slot_element(&mut self, node: &mut SlotElement<'a>) {
         self.path.push(NodeKind::SlotElement);
 
         // Call the SlotElement visitor for validation and metadata
@@ -369,7 +369,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_svelte_head(&mut self, node: &SvelteHead<'a>) {
+    fn visit_svelte_head(&mut self, node: &mut SvelteHead<'a>) {
         self.path.push(NodeKind::SvelteHead);
 
         // Call the SvelteHead visitor for validation
@@ -379,7 +379,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_svelte_body(&mut self, node: &SvelteBody<'a>) {
+    fn visit_svelte_body(&mut self, node: &mut SvelteBody<'a>) {
         self.path.push(NodeKind::SvelteBody);
 
         // Call the SvelteBody visitor for validation
@@ -389,7 +389,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_svelte_window(&mut self, node: &SvelteWindow<'a>) {
+    fn visit_svelte_window(&mut self, node: &mut SvelteWindow<'a>) {
         self.path.push(NodeKind::SvelteWindow);
 
         // Call the SvelteWindow visitor for validation
@@ -399,7 +399,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_svelte_document(&mut self, node: &SvelteDocument<'a>) {
+    fn visit_svelte_document(&mut self, node: &mut SvelteDocument<'a>) {
         self.path.push(NodeKind::SvelteDocument);
 
         // Call the SvelteDocument visitor for validation
@@ -409,7 +409,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_svelte_fragment(&mut self, node: &SvelteFragment<'a>) {
+    fn visit_svelte_fragment(&mut self, node: &mut SvelteFragment<'a>) {
         self.path.push(NodeKind::SvelteFragment);
 
         // Call the SvelteFragment visitor for validation
@@ -419,7 +419,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_svelte_boundary(&mut self, node: &SvelteBoundary<'a>) {
+    fn visit_svelte_boundary(&mut self, node: &mut SvelteBoundary<'a>) {
         self.path.push(NodeKind::SvelteBoundary);
 
         // Call the SvelteBoundary visitor for validation
@@ -429,7 +429,7 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_title_element(&mut self, node: &TitleElement<'a>) {
+    fn visit_title_element(&mut self, node: &mut TitleElement<'a>) {
         self.path.push(NodeKind::TitleElement);
 
         // Call the TitleElement visitor for validation
@@ -439,12 +439,12 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         self.path.pop();
     }
 
-    fn visit_bind_directive(&mut self, node: &BindDirective<'a>) {
+    fn visit_bind_directive(&mut self, node: &mut BindDirective<'a>) {
         visit_bind_directive(node, &mut self.state, &self.path);
         visitor::walk_bind_directive(self, node);
     }
 
-    fn visit_on_directive(&mut self, node: &OnDirective<'a>) {
+    fn visit_on_directive(&mut self, node: &mut OnDirective<'a>) {
         visit_on_directive(node, &mut self.state, &self.path);
 
         if let Some(ref expr) = node.expression {
@@ -452,42 +452,42 @@ impl<'s, 'a, 'b> SvelteVisitor<'a> for AnalysisVisitor<'s, 'a, 'b> {
         }
     }
 
-    fn visit_class_directive(&mut self, node: &ClassDirective<'a>) {
+    fn visit_class_directive(&mut self, node: &mut ClassDirective<'a>) {
         visit_class_directive(node, &mut self.state, &self.path);
         visitor::walk_class_directive(self, node);
     }
 
-    fn visit_style_directive(&mut self, node: &StyleDirective<'a>) {
+    fn visit_style_directive(&mut self, node: &mut StyleDirective<'a>) {
         visit_style_directive(node, &mut self.state, &self.path);
         visitor::walk_style_directive(self, node);
     }
 
-    fn visit_transition_directive(&mut self, node: &TransitionDirective<'a>) {
+    fn visit_transition_directive(&mut self, node: &mut TransitionDirective<'a>) {
         visit_transition_directive(node, &mut self.state, &self.path);
         visitor::walk_transition_directive(self, node);
     }
 
-    fn visit_animate_directive(&mut self, node: &AnimateDirective<'a>) {
+    fn visit_animate_directive(&mut self, node: &mut AnimateDirective<'a>) {
         visit_animate_directive(node, &mut self.state, &self.path);
         visitor::walk_animate_directive(self, node);
     }
 
-    fn visit_use_directive(&mut self, node: &UseDirective<'a>) {
+    fn visit_use_directive(&mut self, node: &mut UseDirective<'a>) {
         visit_use_directive(node, &mut self.state, &self.path);
         visitor::walk_use_directive(self, node);
     }
 
-    fn visit_let_directive(&mut self, node: &LetDirective<'a>) {
+    fn visit_let_directive(&mut self, node: &mut LetDirective<'a>) {
         visit_let_directive(node, &mut self.state, &self.path);
         visitor::walk_let_directive(self, node);
     }
 
-    fn visit_spread_attribute(&mut self, node: &SpreadAttribute<'a>) {
+    fn visit_spread_attribute(&mut self, node: &mut SpreadAttribute<'a>) {
         visit_spread_attribute(node, &mut self.state, &self.path);
         visitor::walk_spread_attribute(self, node);
     }
 
-    fn visit_text(&mut self, node: &lux_ast::text::Text<'a>) {
+    fn visit_text(&mut self, node: &mut lux_ast::text::Text<'a>) {
         visit_text(node, &mut self.state, &self.path);
     }
 }
@@ -1286,7 +1286,7 @@ fn is_rest_element(pattern: &BindingPattern<'_>, name: &str) -> bool {
 }
 
 /// Runs the analysis visitor on the AST.
-pub fn run_analysis<'s, 'a>(root: &'a Root<'a>, analysis: &mut ComponentAnalysis<'s>) {
+pub fn run_analysis<'s, 'a>(root: &mut Root<'a>, analysis: &mut ComponentAnalysis<'s>) {
     let scope = analysis.scope_tree.root_scope_id();
     let mut visitor = AnalysisVisitor::new(analysis, scope, AstType::Template);
     visitor.visit_root(root);

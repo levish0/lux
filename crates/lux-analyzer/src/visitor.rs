@@ -22,20 +22,21 @@ use lux_ast::text::{Comment, Text};
 ///
 /// Implement this trait to perform operations while traversing a Svelte AST.
 /// Default implementations call the appropriate `walk_*` function to continue traversal.
+/// Uses mutable references to allow modifying node metadata during analysis.
 pub trait SvelteVisitor<'a> {
     // ========================================================================
     // Root & Script
     // ========================================================================
 
-    fn visit_root(&mut self, node: &Root<'a>) {
+    fn visit_root(&mut self, node: &mut Root<'a>) {
         walk_root(self, node);
     }
 
-    fn visit_script(&mut self, node: &Script<'a>) {
+    fn visit_script(&mut self, node: &mut Script<'a>) {
         walk_script(self, node);
     }
 
-    fn visit_fragment(&mut self, node: &Fragment<'a>) {
+    fn visit_fragment(&mut self, node: &mut Fragment<'a>) {
         walk_fragment(self, node);
     }
 
@@ -43,110 +44,110 @@ pub trait SvelteVisitor<'a> {
     // Fragment Nodes
     // ========================================================================
 
-    fn visit_fragment_node(&mut self, node: &FragmentNode<'a>) {
+    fn visit_fragment_node(&mut self, node: &mut FragmentNode<'a>) {
         walk_fragment_node(self, node);
     }
 
-    fn visit_text(&mut self, _node: &Text<'a>) {}
+    fn visit_text(&mut self, _node: &mut Text<'a>) {}
 
-    fn visit_comment(&mut self, _node: &Comment<'a>) {}
+    fn visit_comment(&mut self, _node: &mut Comment<'a>) {}
 
     // Tags
-    fn visit_expression_tag(&mut self, node: &ExpressionTag<'a>) {
+    fn visit_expression_tag(&mut self, node: &mut ExpressionTag<'a>) {
         walk_expression_tag(self, node);
     }
 
-    fn visit_html_tag(&mut self, node: &HtmlTag<'a>) {
+    fn visit_html_tag(&mut self, node: &mut HtmlTag<'a>) {
         walk_html_tag(self, node);
     }
 
-    fn visit_const_tag(&mut self, node: &ConstTag<'a>) {
+    fn visit_const_tag(&mut self, node: &mut ConstTag<'a>) {
         walk_const_tag(self, node);
     }
 
-    fn visit_debug_tag(&mut self, node: &DebugTag<'a>) {
+    fn visit_debug_tag(&mut self, node: &mut DebugTag<'a>) {
         walk_debug_tag(self, node);
     }
 
-    fn visit_render_tag(&mut self, node: &RenderTag<'a>) {
+    fn visit_render_tag(&mut self, node: &mut RenderTag<'a>) {
         walk_render_tag(self, node);
     }
 
-    fn visit_attach_tag(&mut self, node: &AttachTag<'a>) {
+    fn visit_attach_tag(&mut self, node: &mut AttachTag<'a>) {
         walk_attach_tag(self, node);
     }
 
     // Blocks
-    fn visit_if_block(&mut self, node: &IfBlock<'a>) {
+    fn visit_if_block(&mut self, node: &mut IfBlock<'a>) {
         walk_if_block(self, node);
     }
 
-    fn visit_each_block(&mut self, node: &EachBlock<'a>) {
+    fn visit_each_block(&mut self, node: &mut EachBlock<'a>) {
         walk_each_block(self, node);
     }
 
-    fn visit_await_block(&mut self, node: &AwaitBlock<'a>) {
+    fn visit_await_block(&mut self, node: &mut AwaitBlock<'a>) {
         walk_await_block(self, node);
     }
 
-    fn visit_key_block(&mut self, node: &KeyBlock<'a>) {
+    fn visit_key_block(&mut self, node: &mut KeyBlock<'a>) {
         walk_key_block(self, node);
     }
 
-    fn visit_snippet_block(&mut self, node: &SnippetBlock<'a>) {
+    fn visit_snippet_block(&mut self, node: &mut SnippetBlock<'a>) {
         walk_snippet_block(self, node);
     }
 
     // Elements
-    fn visit_regular_element(&mut self, node: &RegularElement<'a>) {
+    fn visit_regular_element(&mut self, node: &mut RegularElement<'a>) {
         walk_regular_element(self, node);
     }
 
-    fn visit_component(&mut self, node: &Component<'a>) {
+    fn visit_component(&mut self, node: &mut Component<'a>) {
         walk_component(self, node);
     }
 
-    fn visit_svelte_element(&mut self, node: &SvelteElement<'a>) {
+    fn visit_svelte_element(&mut self, node: &mut SvelteElement<'a>) {
         walk_svelte_element(self, node);
     }
 
-    fn visit_svelte_component(&mut self, node: &SvelteComponent<'a>) {
+    fn visit_svelte_component(&mut self, node: &mut SvelteComponent<'a>) {
         walk_svelte_component(self, node);
     }
 
-    fn visit_svelte_self(&mut self, node: &SvelteSelf<'a>) {
+    fn visit_svelte_self(&mut self, node: &mut SvelteSelf<'a>) {
         walk_svelte_self(self, node);
     }
 
-    fn visit_slot_element(&mut self, node: &SlotElement<'a>) {
+    fn visit_slot_element(&mut self, node: &mut SlotElement<'a>) {
         walk_slot_element(self, node);
     }
 
-    fn visit_svelte_head(&mut self, node: &SvelteHead<'a>) {
+    fn visit_svelte_head(&mut self, node: &mut SvelteHead<'a>) {
         walk_svelte_head(self, node);
     }
 
-    fn visit_svelte_body(&mut self, node: &SvelteBody<'a>) {
+    fn visit_svelte_body(&mut self, node: &mut SvelteBody<'a>) {
         walk_svelte_body(self, node);
     }
 
-    fn visit_svelte_window(&mut self, node: &SvelteWindow<'a>) {
+    fn visit_svelte_window(&mut self, node: &mut SvelteWindow<'a>) {
         walk_svelte_window(self, node);
     }
 
-    fn visit_svelte_document(&mut self, node: &SvelteDocument<'a>) {
+    fn visit_svelte_document(&mut self, node: &mut SvelteDocument<'a>) {
         walk_svelte_document(self, node);
     }
 
-    fn visit_svelte_fragment(&mut self, node: &SvelteFragment<'a>) {
+    fn visit_svelte_fragment(&mut self, node: &mut SvelteFragment<'a>) {
         walk_svelte_fragment(self, node);
     }
 
-    fn visit_svelte_boundary(&mut self, node: &SvelteBoundary<'a>) {
+    fn visit_svelte_boundary(&mut self, node: &mut SvelteBoundary<'a>) {
         walk_svelte_boundary(self, node);
     }
 
-    fn visit_title_element(&mut self, node: &TitleElement<'a>) {
+    fn visit_title_element(&mut self, node: &mut TitleElement<'a>) {
         walk_title_element(self, node);
     }
 
@@ -154,47 +155,47 @@ pub trait SvelteVisitor<'a> {
     // Attributes & Directives
     // ========================================================================
 
-    fn visit_attribute_node(&mut self, node: &AttributeNode<'a>) {
+    fn visit_attribute_node(&mut self, node: &mut AttributeNode<'a>) {
         walk_attribute_node(self, node);
     }
 
-    fn visit_attribute(&mut self, node: &Attribute<'a>) {
+    fn visit_attribute(&mut self, node: &mut Attribute<'a>) {
         walk_attribute(self, node);
     }
 
-    fn visit_spread_attribute(&mut self, node: &SpreadAttribute<'a>) {
+    fn visit_spread_attribute(&mut self, node: &mut SpreadAttribute<'a>) {
         walk_spread_attribute(self, node);
     }
 
-    fn visit_bind_directive(&mut self, node: &BindDirective<'a>) {
+    fn visit_bind_directive(&mut self, node: &mut BindDirective<'a>) {
         walk_bind_directive(self, node);
     }
 
-    fn visit_class_directive(&mut self, node: &ClassDirective<'a>) {
+    fn visit_class_directive(&mut self, node: &mut ClassDirective<'a>) {
         walk_class_directive(self, node);
     }
 
-    fn visit_style_directive(&mut self, node: &StyleDirective<'a>) {
+    fn visit_style_directive(&mut self, node: &mut StyleDirective<'a>) {
         walk_style_directive(self, node);
     }
 
-    fn visit_on_directive(&mut self, node: &OnDirective<'a>) {
+    fn visit_on_directive(&mut self, node: &mut OnDirective<'a>) {
         walk_on_directive(self, node);
     }
 
-    fn visit_transition_directive(&mut self, node: &TransitionDirective<'a>) {
+    fn visit_transition_directive(&mut self, node: &mut TransitionDirective<'a>) {
         walk_transition_directive(self, node);
     }
 
-    fn visit_animate_directive(&mut self, node: &AnimateDirective<'a>) {
+    fn visit_animate_directive(&mut self, node: &mut AnimateDirective<'a>) {
         walk_animate_directive(self, node);
     }
 
-    fn visit_use_directive(&mut self, node: &UseDirective<'a>) {
+    fn visit_use_directive(&mut self, node: &mut UseDirective<'a>) {
         walk_use_directive(self, node);
     }
 
-    fn visit_let_directive(&mut self, node: &LetDirective<'a>) {
+    fn visit_let_directive(&mut self, node: &mut LetDirective<'a>) {
         walk_let_directive(self, node);
     }
 }
@@ -203,33 +204,33 @@ pub trait SvelteVisitor<'a> {
 // Walk functions
 // ============================================================================
 
-pub fn walk_root<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &Root<'a>) {
-    if let Some(ref module) = node.module {
+pub fn walk_root<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &mut Root<'a>) {
+    if let Some(ref mut module) = node.module {
         visitor.visit_script(module);
     }
-    if let Some(ref instance) = node.instance {
+    if let Some(ref mut instance) = node.instance {
         visitor.visit_script(instance);
     }
-    visitor.visit_fragment(&node.fragment);
+    visitor.visit_fragment(&mut node.fragment);
     // TODO: visit CSS
 }
 
-pub fn walk_script<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &Script<'a>) {
-    for attr in &node.attributes {
+pub fn walk_script<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &mut Script<'a>) {
+    for attr in &mut node.attributes {
         visitor.visit_attribute_node(attr);
     }
     // TODO: visit JS AST via oxc visitor
 }
 
-pub fn walk_fragment<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &Fragment<'a>) {
-    for child in &node.nodes {
+pub fn walk_fragment<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &mut Fragment<'a>) {
+    for child in &mut node.nodes {
         visitor.visit_fragment_node(child);
     }
 }
 
 pub fn walk_fragment_node<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    node: &FragmentNode<'a>,
+    node: &mut FragmentNode<'a>,
 ) {
     match node {
         FragmentNode::Text(n) => visitor.visit_text(n),
@@ -264,7 +265,7 @@ pub fn walk_fragment_node<'a, V: SvelteVisitor<'a> + ?Sized>(
 
 pub fn walk_attribute_node<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    node: &AttributeNode<'a>,
+    node: &mut AttributeNode<'a>,
 ) {
     match node {
         AttributeNode::Attribute(n) => visitor.visit_attribute(n),
@@ -284,79 +285,79 @@ pub fn walk_attribute_node<'a, V: SvelteVisitor<'a> + ?Sized>(
 // Tags
 pub fn walk_expression_tag<'a, V: SvelteVisitor<'a> + ?Sized>(
     _visitor: &mut V,
-    _node: &ExpressionTag<'a>,
+    _node: &mut ExpressionTag<'a>,
 ) {
     // TODO: visit expression via oxc visitor
 }
 
-pub fn walk_html_tag<'a, V: SvelteVisitor<'a> + ?Sized>(_visitor: &mut V, _node: &HtmlTag<'a>) {
+pub fn walk_html_tag<'a, V: SvelteVisitor<'a> + ?Sized>(_visitor: &mut V, _node: &mut HtmlTag<'a>) {
     // TODO: visit expression via oxc visitor
 }
 
-pub fn walk_const_tag<'a, V: SvelteVisitor<'a> + ?Sized>(_visitor: &mut V, _node: &ConstTag<'a>) {
+pub fn walk_const_tag<'a, V: SvelteVisitor<'a> + ?Sized>(_visitor: &mut V, _node: &mut ConstTag<'a>) {
     // TODO: visit declaration via oxc visitor
 }
 
-pub fn walk_debug_tag<'a, V: SvelteVisitor<'a> + ?Sized>(_visitor: &mut V, _node: &DebugTag<'a>) {
+pub fn walk_debug_tag<'a, V: SvelteVisitor<'a> + ?Sized>(_visitor: &mut V, _node: &mut DebugTag<'a>) {
     // TODO: visit identifiers via oxc visitor
 }
 
-pub fn walk_render_tag<'a, V: SvelteVisitor<'a> + ?Sized>(_visitor: &mut V, _node: &RenderTag<'a>) {
+pub fn walk_render_tag<'a, V: SvelteVisitor<'a> + ?Sized>(_visitor: &mut V, _node: &mut RenderTag<'a>) {
     // TODO: visit expression and arguments via oxc visitor
 }
 
-pub fn walk_attach_tag<'a, V: SvelteVisitor<'a> + ?Sized>(_visitor: &mut V, _node: &AttachTag<'a>) {
+pub fn walk_attach_tag<'a, V: SvelteVisitor<'a> + ?Sized>(_visitor: &mut V, _node: &mut AttachTag<'a>) {
     // TODO: visit expression via oxc visitor
 }
 
 // Blocks
-pub fn walk_if_block<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &IfBlock<'a>) {
+pub fn walk_if_block<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &mut IfBlock<'a>) {
     // TODO: visit test expression via oxc visitor
-    visitor.visit_fragment(&node.consequent);
-    if let Some(ref alternate) = node.alternate {
+    visitor.visit_fragment(&mut node.consequent);
+    if let Some(ref mut alternate) = node.alternate {
         visitor.visit_fragment(alternate);
     }
 }
 
-pub fn walk_each_block<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &EachBlock<'a>) {
+pub fn walk_each_block<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &mut EachBlock<'a>) {
     // TODO: visit expression, context, key via oxc visitor
-    visitor.visit_fragment(&node.body);
-    if let Some(ref fallback) = node.fallback {
+    visitor.visit_fragment(&mut node.body);
+    if let Some(ref mut fallback) = node.fallback {
         visitor.visit_fragment(fallback);
     }
 }
 
-pub fn walk_await_block<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &AwaitBlock<'a>) {
+pub fn walk_await_block<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &mut AwaitBlock<'a>) {
     // TODO: visit expression, value, error via oxc visitor
-    if let Some(ref pending) = node.pending {
+    if let Some(ref mut pending) = node.pending {
         visitor.visit_fragment(pending);
     }
-    if let Some(ref then) = node.then {
+    if let Some(ref mut then) = node.then {
         visitor.visit_fragment(then);
     }
-    if let Some(ref catch) = node.catch {
+    if let Some(ref mut catch) = node.catch {
         visitor.visit_fragment(catch);
     }
 }
 
-pub fn walk_key_block<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &KeyBlock<'a>) {
+pub fn walk_key_block<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &mut KeyBlock<'a>) {
     // TODO: visit expression via oxc visitor
-    visitor.visit_fragment(&node.fragment);
+    visitor.visit_fragment(&mut node.fragment);
 }
 
 pub fn walk_snippet_block<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    node: &SnippetBlock<'a>,
+    node: &mut SnippetBlock<'a>,
 ) {
     // TODO: visit expression and parameters via oxc visitor
-    visitor.visit_fragment(&node.body);
+    visitor.visit_fragment(&mut node.body);
 }
 
 // Elements - helper for visiting attributes and fragment
 fn walk_element_like<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    attributes: &[AttributeNode<'a>],
-    fragment: &Fragment<'a>,
+    attributes: &mut [AttributeNode<'a>],
+    fragment: &mut Fragment<'a>,
 ) {
     for attr in attributes {
         visitor.visit_attribute_node(attr);
@@ -366,48 +367,48 @@ fn walk_element_like<'a, V: SvelteVisitor<'a> + ?Sized>(
 
 pub fn walk_regular_element<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    node: &RegularElement<'a>,
+    node: &mut RegularElement<'a>,
 ) {
-    walk_element_like(visitor, &node.attributes, &node.fragment);
+    walk_element_like(visitor, &mut node.attributes, &mut node.fragment);
 }
 
-pub fn walk_component<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &Component<'a>) {
-    walk_element_like(visitor, &node.attributes, &node.fragment);
+pub fn walk_component<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &mut Component<'a>) {
+    walk_element_like(visitor, &mut node.attributes, &mut node.fragment);
 }
 
 pub fn walk_svelte_element<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    node: &SvelteElement<'a>,
+    node: &mut SvelteElement<'a>,
 ) {
     // TODO: visit tag expression via oxc visitor
-    walk_element_like(visitor, &node.attributes, &node.fragment);
+    walk_element_like(visitor, &mut node.attributes, &mut node.fragment);
 }
 
 pub fn walk_svelte_component<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    node: &SvelteComponent<'a>,
+    node: &mut SvelteComponent<'a>,
 ) {
     // TODO: visit this expression via oxc visitor
-    walk_element_like(visitor, &node.attributes, &node.fragment);
+    walk_element_like(visitor, &mut node.attributes, &mut node.fragment);
 }
 
-pub fn walk_svelte_self<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &SvelteSelf<'a>) {
-    walk_element_like(visitor, &node.attributes, &node.fragment);
+pub fn walk_svelte_self<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &mut SvelteSelf<'a>) {
+    walk_element_like(visitor, &mut node.attributes, &mut node.fragment);
 }
 
 pub fn walk_slot_element<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    node: &SlotElement<'a>,
+    node: &mut SlotElement<'a>,
 ) {
-    walk_element_like(visitor, &node.attributes, &node.fragment);
+    walk_element_like(visitor, &mut node.attributes, &mut node.fragment);
 }
 
-pub fn walk_svelte_head<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &SvelteHead<'a>) {
-    visitor.visit_fragment(&node.fragment);
+pub fn walk_svelte_head<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &mut SvelteHead<'a>) {
+    visitor.visit_fragment(&mut node.fragment);
 }
 
-pub fn walk_svelte_body<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &SvelteBody<'a>) {
-    for attr in &node.attributes {
+pub fn walk_svelte_body<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node: &mut SvelteBody<'a>) {
+    for attr in &mut node.attributes {
         visitor.visit_attribute_node(attr);
     }
     // svelte:body has no fragment
@@ -415,9 +416,9 @@ pub fn walk_svelte_body<'a, V: SvelteVisitor<'a> + ?Sized>(visitor: &mut V, node
 
 pub fn walk_svelte_window<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    node: &SvelteWindow<'a>,
+    node: &mut SvelteWindow<'a>,
 ) {
-    for attr in &node.attributes {
+    for attr in &mut node.attributes {
         visitor.visit_attribute_node(attr);
     }
     // svelte:window has no fragment
@@ -425,9 +426,9 @@ pub fn walk_svelte_window<'a, V: SvelteVisitor<'a> + ?Sized>(
 
 pub fn walk_svelte_document<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    node: &SvelteDocument<'a>,
+    node: &mut SvelteDocument<'a>,
 ) {
-    for attr in &node.attributes {
+    for attr in &mut node.attributes {
         visitor.visit_attribute_node(attr);
     }
     // svelte:document has no fragment
@@ -435,89 +436,89 @@ pub fn walk_svelte_document<'a, V: SvelteVisitor<'a> + ?Sized>(
 
 pub fn walk_svelte_fragment<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    node: &SvelteFragment<'a>,
+    node: &mut SvelteFragment<'a>,
 ) {
-    walk_element_like(visitor, &node.attributes, &node.fragment);
+    walk_element_like(visitor, &mut node.attributes, &mut node.fragment);
 }
 
 pub fn walk_svelte_boundary<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    node: &SvelteBoundary<'a>,
+    node: &mut SvelteBoundary<'a>,
 ) {
-    walk_element_like(visitor, &node.attributes, &node.fragment);
+    walk_element_like(visitor, &mut node.attributes, &mut node.fragment);
 }
 
 pub fn walk_title_element<'a, V: SvelteVisitor<'a> + ?Sized>(
     visitor: &mut V,
-    node: &TitleElement<'a>,
+    node: &mut TitleElement<'a>,
 ) {
-    walk_element_like(visitor, &node.attributes, &node.fragment);
+    walk_element_like(visitor, &mut node.attributes, &mut node.fragment);
 }
 
 // Attributes & Directives
-pub fn walk_attribute<'a, V: SvelteVisitor<'a> + ?Sized>(_visitor: &mut V, _node: &Attribute<'a>) {
+pub fn walk_attribute<'a, V: SvelteVisitor<'a> + ?Sized>(_visitor: &mut V, _node: &mut Attribute<'a>) {
     // TODO: visit value expressions if any
 }
 
 pub fn walk_spread_attribute<'a, V: SvelteVisitor<'a> + ?Sized>(
     _visitor: &mut V,
-    _node: &SpreadAttribute<'a>,
+    _node: &mut SpreadAttribute<'a>,
 ) {
     // TODO: visit expression via oxc visitor
 }
 
 pub fn walk_bind_directive<'a, V: SvelteVisitor<'a> + ?Sized>(
     _visitor: &mut V,
-    _node: &BindDirective<'a>,
+    _node: &mut BindDirective<'a>,
 ) {
     // TODO: visit expression via oxc visitor
 }
 
 pub fn walk_class_directive<'a, V: SvelteVisitor<'a> + ?Sized>(
     _visitor: &mut V,
-    _node: &ClassDirective<'a>,
+    _node: &mut ClassDirective<'a>,
 ) {
     // TODO: visit expression via oxc visitor
 }
 
 pub fn walk_style_directive<'a, V: SvelteVisitor<'a> + ?Sized>(
     _visitor: &mut V,
-    _node: &StyleDirective<'a>,
+    _node: &mut StyleDirective<'a>,
 ) {
     // TODO: visit value if any
 }
 
 pub fn walk_on_directive<'a, V: SvelteVisitor<'a> + ?Sized>(
     _visitor: &mut V,
-    _node: &OnDirective<'a>,
+    _node: &mut OnDirective<'a>,
 ) {
     // TODO: visit expression via oxc visitor
 }
 
 pub fn walk_transition_directive<'a, V: SvelteVisitor<'a> + ?Sized>(
     _visitor: &mut V,
-    _node: &TransitionDirective<'a>,
+    _node: &mut TransitionDirective<'a>,
 ) {
     // TODO: visit expression via oxc visitor
 }
 
 pub fn walk_animate_directive<'a, V: SvelteVisitor<'a> + ?Sized>(
     _visitor: &mut V,
-    _node: &AnimateDirective<'a>,
+    _node: &mut AnimateDirective<'a>,
 ) {
     // TODO: visit expression via oxc visitor
 }
 
 pub fn walk_use_directive<'a, V: SvelteVisitor<'a> + ?Sized>(
     _visitor: &mut V,
-    _node: &UseDirective<'a>,
+    _node: &mut UseDirective<'a>,
 ) {
     // TODO: visit expression via oxc visitor
 }
 
 pub fn walk_let_directive<'a, V: SvelteVisitor<'a> + ?Sized>(
     _visitor: &mut V,
-    _node: &LetDirective<'a>,
+    _node: &mut LetDirective<'a>,
 ) {
     // TODO: visit expression via oxc visitor
 }

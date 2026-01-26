@@ -8,7 +8,6 @@ use lux_ast::elements::RegularElement;
 use lux_ast::node::AttributeNode;
 use lux_utils::{is_mathml, is_svg};
 
-use crate::analyze::analysis::RegularElementMeta;
 use crate::analyze::state::AnalysisState;
 use crate::analyze::visitor::NodeKind;
 use crate::analyze::visitors::shared::validate_element;
@@ -17,7 +16,7 @@ use crate::analyze::visitors::shared::validate_element;
 ///
 /// Reference: `packages/svelte/src/compiler/phases/2-analyze/visitors/RegularElement.js`
 pub fn visit_regular_element(
-    node: &RegularElement<'_>,
+    node: &mut RegularElement<'_>,
     state: &mut AnalysisState<'_, '_>,
     path: &[NodeKind<'_>],
 ) {
@@ -30,25 +29,15 @@ pub fn visit_regular_element(
     // node.metadata.has_spread = node.attributes.some(
     //     (attribute) => attribute.type === 'SpreadAttribute'
     // );
-    let has_spread = node.attributes.iter().any(|attr| {
+    node.metadata.has_spread = node.attributes.iter().any(|attr| {
         matches!(attr, AttributeNode::SpreadAttribute(_))
     });
 
     // Determine if this is an SVG element
-    let svg = is_svg_element(node.name, path);
+    node.metadata.svg = is_svg_element(node.name, path);
 
     // Determine if this is a MathML element
-    let mathml = is_mathml(node.name);
-
-    // Store metadata
-    let meta = state
-        .analysis
-        .regular_element_meta
-        .entry(node.span.into())
-        .or_insert_with(RegularElementMeta::default);
-    meta.has_spread = has_spread;
-    meta.svg = svg;
-    meta.mathml = mathml;
+    node.metadata.mathml = is_mathml(node.name);
 
     // Special case: <option> with single ExpressionTag child
     // if (
@@ -60,7 +49,7 @@ pub fn visit_regular_element(
     if node.name == "option" {
         let nodes = &node.fragment.nodes;
         if nodes.len() == 1 {
-            if let lux_ast::node::FragmentNode::ExpressionTag(expr_tag) = &nodes[0] {
+            if let lux_ast::node::FragmentNode::ExpressionTag(_) = &nodes[0] {
                 // Check if there's no value attribute
                 let has_value_attr = node.attributes.iter().any(|attr| {
                     if let AttributeNode::Attribute(a) = attr {
@@ -71,7 +60,7 @@ pub fn visit_regular_element(
                 });
 
                 if !has_value_attr {
-                    meta.synthetic_value_node = Some(expr_tag.span.into());
+                    node.metadata.has_synthetic_value = true;
                 }
             }
         }

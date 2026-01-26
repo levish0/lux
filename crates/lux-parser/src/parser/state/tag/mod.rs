@@ -18,7 +18,7 @@ use crate::parser::{ParseError, Parser};
 /// Matches reference: `state/tag.js`
 ///
 /// Handles `{...}` expressions and blocks (`{#if}`, `{:else}`, `{/if}`, `{@html}`, etc.)
-pub fn tag<'a>(parser: &mut Parser<'a>) -> Result<(), ParseError> {
+pub fn tag(parser: &mut Parser) -> Result<(), ParseError> {
     let start = parser.index;
     parser.index += 1; // skip `{`
 

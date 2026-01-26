@@ -17,6 +17,7 @@ use lux_ast::elements::{
     SvelteDocument, SvelteElement, SvelteFragment, SvelteHead, SvelteOptionsRaw, SvelteSelf,
     SvelteWindow, TitleElement,
 };
+use lux_ast::metadata::{ComponentMetadata, RegularElementMetadata};
 use lux_ast::node::{AttributeNode, FragmentNode};
 use lux_ast::root::{Fragment, ScriptContext};
 use lux_ast::span::Span;
@@ -307,7 +308,7 @@ fn frame_to_node<'a>(
     nodes: Vec<FragmentNode<'a>>,
     allocator: &'a Allocator,
 ) -> Option<FragmentNode<'a>> {
-    let fragment = Fragment { nodes };
+    let fragment = Fragment { nodes, metadata: Default::default() };
     match frame {
         StackFrame::RegularElement {
             start,
@@ -320,6 +321,7 @@ fn frame_to_node<'a>(
             name_loc,
             attributes,
             fragment,
+            metadata: RegularElementMetadata::default(),
         })),
         StackFrame::Component {
             start,
@@ -332,6 +334,7 @@ fn frame_to_node<'a>(
             name_loc,
             attributes,
             fragment,
+            metadata: ComponentMetadata::default(),
         })),
         StackFrame::SvelteElement {
             start,
@@ -737,7 +740,7 @@ fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
             parser.index,
             name_loc.clone(),
             attributes,
-            Fragment { nodes: Vec::new() },
+            Fragment { nodes: Vec::new(), metadata: Default::default() },
             this_expression,
             parser,
         );
@@ -766,6 +769,7 @@ fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
             attributes,
             Fragment {
                 nodes: fragment_nodes,
+                metadata: Default::default(),
             },
             this_expression,
             parser,
@@ -791,6 +795,7 @@ fn open_tag(parser: &mut Parser, start: usize) -> Result<(), ParseError> {
             attributes,
             Fragment {
                 nodes: vec![text_node],
+                metadata: Default::default(),
             },
             this_expression,
             parser,
@@ -1064,6 +1069,7 @@ fn make_element_node<'a>(
             name_loc,
             attributes,
             fragment,
+            metadata: ComponentMetadata::default(),
         }),
         "title" if parent_is_head(&parser.stack) => FragmentNode::TitleElement(TitleElement {
             span,
@@ -1087,6 +1093,7 @@ fn make_element_node<'a>(
             name_loc,
             attributes,
             fragment,
+            metadata: RegularElementMetadata::default(),
         }),
     }
 }

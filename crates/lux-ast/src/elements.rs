@@ -2,6 +2,7 @@ use oxc_ast::ast::Expression;
 use serde::Serialize;
 use serde::ser::SerializeMap;
 
+use crate::metadata::{ComponentMetadata, RegularElementMetadata};
 use crate::node::AttributeNode;
 use crate::root::Fragment;
 use crate::span::{SourceLocation, Span};
@@ -41,6 +42,8 @@ pub struct RegularElement<'a> {
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
+    /// Metadata populated during analysis
+    pub metadata: RegularElementMetadata,
 }
 
 impl_element_serialize!(RegularElement, "RegularElement");
@@ -52,6 +55,8 @@ pub struct Component<'a> {
     pub name_loc: SourceLocation,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
+    /// Metadata populated during analysis
+    pub metadata: ComponentMetadata,
 }
 
 impl_element_serialize!(Component, "Component");

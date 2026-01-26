@@ -36,7 +36,7 @@ pub struct ScopeCreationResult {
 }
 
 /// Creates the scope tree from the AST.
-pub fn create_scopes(root: &Root<'_>) -> ScopeCreationResult {
+pub fn create_scopes(root: &mut Root<'_>) -> ScopeCreationResult {
     use crate::visitor::SvelteVisitor;
 
     let mut creator = svelte::ScopeCreator::new();

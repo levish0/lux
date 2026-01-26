@@ -61,3 +61,59 @@ impl Default for SnippetBlockMetadata {
         Self { can_hoist: false }
     }
 }
+
+// ============================================================================
+// Block Metadata (populated during analysis)
+// ============================================================================
+
+/// Metadata for EachBlock, populated during analysis.
+/// Reference: `phases/scope.js` EachBlock visitor
+#[derive(Debug, Clone, Default)]
+pub struct EachBlockMetadata {
+    /// Expression metadata for the iterated expression
+    pub expression: ExpressionMetadata,
+    /// Whether this is a keyed each block
+    pub keyed: bool,
+    /// Whether this block contains a bind:group directive
+    pub contains_group_binding: bool,
+    /// Whether this block is controlled (e.g., by a parent)
+    pub is_controlled: bool,
+}
+
+// ============================================================================
+// Element Metadata (populated during analysis)
+// ============================================================================
+
+/// Metadata for RegularElement, populated during analysis.
+/// Reference: `packages/svelte/src/compiler/phases/2-analyze/visitors/RegularElement.js`
+#[derive(Debug, Clone, Default)]
+pub struct RegularElementMetadata {
+    /// Whether this element has any spread attributes
+    pub has_spread: bool,
+    /// Whether this is an SVG element
+    pub svg: bool,
+    /// Whether this is a MathML element
+    pub mathml: bool,
+    /// Whether a synthetic value attribute node was created (for <option> elements)
+    pub has_synthetic_value: bool,
+}
+
+/// Metadata for Component, populated during analysis.
+#[derive(Debug, Clone, Default)]
+pub struct ComponentMetadata {
+    /// Whether this component has any spread attributes
+    pub has_spread: bool,
+    /// Whether this component is dynamic
+    pub dynamic: bool,
+}
+
+// ============================================================================
+// Fragment Metadata (populated during analysis)
+// ============================================================================
+
+/// Metadata for Fragment, populated during analysis.
+#[derive(Debug, Clone, Default)]
+pub struct FragmentMetadata {
+    /// Whether this fragment is dynamic (requires reactive updates)
+    pub dynamic: bool,
+}

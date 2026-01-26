@@ -1,5 +1,5 @@
 use lux_ast::blocks::{AwaitBlock, EachBlock, IfBlock, KeyBlock, SnippetBlock};
-use lux_ast::metadata::{ExpressionNodeMetadata, SnippetBlockMetadata};
+use lux_ast::metadata::{EachBlockMetadata, ExpressionNodeMetadata, SnippetBlockMetadata};
 use lux_ast::node::FragmentNode;
 use lux_ast::root::Fragment;
 use lux_ast::span::Span;
@@ -145,14 +145,15 @@ fn close_if_matched(parser: &mut Parser) {
         let (cons_frag, alt_frag) = if let Some(cons_nodes) = consequent {
             if alternate.is_some() {
                 // {:else if} — alternate provided by child, no fragment to pop
-                (Fragment { nodes: cons_nodes }, alternate.take())
+                (Fragment { nodes: cons_nodes, metadata: Default::default() }, alternate.take())
             } else {
                 // {:else} — fragment_nodes is the alternate content
                 let fragment_nodes = parser.fragments.pop().unwrap_or_default();
                 (
-                    Fragment { nodes: cons_nodes },
+                    Fragment { nodes: cons_nodes, metadata: Default::default() },
                     Some(Fragment {
                         nodes: fragment_nodes,
+                        metadata: Default::default(),
                     }),
                 )
             }
@@ -162,6 +163,7 @@ fn close_if_matched(parser: &mut Parser) {
             (
                 Fragment {
                     nodes: fragment_nodes,
+                    metadata: Default::default(),
                 },
                 alternate.take(),
             )
@@ -181,6 +183,7 @@ fn close_if_matched(parser: &mut Parser) {
             parser.fragments.pop();
             alternate = Some(Fragment {
                 nodes: vec![FragmentNode::IfBlock(if_block)],
+                metadata: Default::default(),
             });
         } else {
             parser.append(FragmentNode::IfBlock(if_block));
@@ -205,15 +208,17 @@ fn close_each_matched(parser: &mut Parser) {
     {
         let (body_frag, fallback) = if let Some(body_nodes) = body {
             (
-                Fragment { nodes: body_nodes },
+                Fragment { nodes: body_nodes, metadata: Default::default() },
                 Some(Fragment {
                     nodes: fragment_nodes,
+                    metadata: Default::default(),
                 }),
             )
         } else {
             (
                 Fragment {
                     nodes: fragment_nodes,
+                    metadata: Default::default(),
                 },
                 None,
             )
@@ -227,6 +232,7 @@ fn close_each_matched(parser: &mut Parser) {
             fallback,
             index,
             key,
+            metadata: EachBlockMetadata::default(),
         }));
     }
 }
@@ -250,22 +256,25 @@ fn close_await_matched(parser: &mut Parser) {
             AwaitPhase::Pending => (
                 Some(Fragment {
                     nodes: fragment_nodes,
+                    metadata: Default::default(),
                 }),
-                then.map(|n| Fragment { nodes: n }),
+                then.map(|n| Fragment { nodes: n, metadata: Default::default() }),
                 None,
             ),
             AwaitPhase::Then => (
-                pending.map(|n| Fragment { nodes: n }),
+                pending.map(|n| Fragment { nodes: n, metadata: Default::default() }),
                 Some(Fragment {
                     nodes: fragment_nodes,
+                    metadata: Default::default(),
                 }),
                 None,
             ),
             AwaitPhase::Catch => (
-                pending.map(|n| Fragment { nodes: n }),
-                then.map(|n| Fragment { nodes: n }),
+                pending.map(|n| Fragment { nodes: n, metadata: Default::default() }),
+                then.map(|n| Fragment { nodes: n, metadata: Default::default() }),
                 Some(Fragment {
                     nodes: fragment_nodes,
+                    metadata: Default::default(),
                 }),
             ),
         };
@@ -294,6 +303,7 @@ fn close_key_matched(parser: &mut Parser) {
             expression,
             fragment: Fragment {
                 nodes: fragment_nodes,
+                metadata: Default::default(),
             },
             metadata: ExpressionNodeMetadata::default(),
         }));
@@ -321,6 +331,7 @@ fn close_snippet_matched(parser: &mut Parser) {
             type_params,
             body: Fragment {
                 nodes: fragment_nodes,
+                metadata: Default::default(),
             },
             metadata: SnippetBlockMetadata::default(),
         }));

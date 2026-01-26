@@ -218,24 +218,24 @@ impl ScopeCreator {
 }
 
 impl<'a> SvelteVisitor<'a> for ScopeCreator {
-    fn visit_root(&mut self, node: &Root<'a>) {
-        if let Some(ref module) = node.module {
+    fn visit_root(&mut self, node: &mut Root<'a>) {
+        if let Some(ref mut module) = node.module {
             self.allow_reactive_declarations = false;
             self.visit_script(module);
         }
 
-        if let Some(ref instance) = node.instance {
+        if let Some(ref mut instance) = node.instance {
             self.allow_reactive_declarations = true;
             self.visit_script(instance);
         }
 
         self.allow_reactive_declarations = false;
         let parent = self.enter_scope(false);
-        self.visit_fragment(&node.fragment);
+        self.visit_fragment(&mut node.fragment);
         self.exit_scope(parent);
     }
 
-    fn visit_script(&mut self, node: &Script<'a>) {
+    fn visit_script(&mut self, node: &mut Script<'a>) {
         let parent = self.enter_scope(false);
 
         let mut js_visitor = JsVisitor::new(self);
@@ -244,13 +244,13 @@ impl<'a> SvelteVisitor<'a> for ScopeCreator {
         self.exit_scope(parent);
     }
 
-    fn visit_fragment(&mut self, node: &Fragment<'a>) {
+    fn visit_fragment(&mut self, node: &mut Fragment<'a>) {
         let parent = self.enter_scope(true);
         visitor::walk_fragment(self, node);
         self.exit_scope(parent);
     }
 
-    fn visit_each_block(&mut self, node: &EachBlock<'a>) {
+    fn visit_each_block(&mut self, node: &mut EachBlock<'a>) {
         let parent = self.enter_scope(false);
 
         if let Some(ref context) = node.context {
@@ -266,20 +266,20 @@ impl<'a> SvelteVisitor<'a> for ScopeCreator {
             self.declare(index, Span::new(0, 0), kind, DeclarationKind::Const);
         }
 
-        self.visit_fragment(&node.body);
-        if let Some(ref fallback) = node.fallback {
+        self.visit_fragment(&mut node.body);
+        if let Some(ref mut fallback) = node.fallback {
             self.visit_fragment(fallback);
         }
 
         self.exit_scope(parent);
     }
 
-    fn visit_await_block(&mut self, node: &AwaitBlock<'a>) {
-        if let Some(ref pending) = node.pending {
+    fn visit_await_block(&mut self, node: &mut AwaitBlock<'a>) {
+        if let Some(ref mut pending) = node.pending {
             self.visit_fragment(pending);
         }
 
-        if let Some(ref then) = node.then {
+        if let Some(ref mut then) = node.then {
             let parent = self.enter_scope(false);
             if let Some(ref value) = node.value {
                 self.declare_binding_pattern(&value.pattern, BindingKind::Template, DeclarationKind::Const);
@@ -288,7 +288,7 @@ impl<'a> SvelteVisitor<'a> for ScopeCreator {
             self.exit_scope(parent);
         }
 
-        if let Some(ref catch) = node.catch {
+        if let Some(ref mut catch) = node.catch {
             let parent = self.enter_scope(false);
             if let Some(ref error) = node.error {
                 self.declare_binding_pattern(&error.pattern, BindingKind::Template, DeclarationKind::Const);
@@ -298,7 +298,7 @@ impl<'a> SvelteVisitor<'a> for ScopeCreator {
         }
     }
 
-    fn visit_snippet_block(&mut self, node: &SnippetBlock<'a>) {
+    fn visit_snippet_block(&mut self, node: &mut SnippetBlock<'a>) {
         if let oxc_ast::ast::Expression::Identifier(ref id) = node.expression {
             self.declare(&id.name, id.span, BindingKind::Normal, DeclarationKind::Function);
         }
@@ -309,60 +309,60 @@ impl<'a> SvelteVisitor<'a> for ScopeCreator {
             self.declare_binding_pattern(&param.pattern, BindingKind::Snippet, DeclarationKind::Let);
         }
 
-        self.visit_fragment(&node.body);
+        self.visit_fragment(&mut node.body);
         self.exit_scope(parent);
     }
 
-    fn visit_regular_element(&mut self, node: &RegularElement<'a>) {
+    fn visit_regular_element(&mut self, node: &mut RegularElement<'a>) {
         let parent = self.enter_scope(false);
         visitor::walk_regular_element(self, node);
         self.exit_scope(parent);
     }
 
-    fn visit_component(&mut self, node: &Component<'a>) {
+    fn visit_component(&mut self, node: &mut Component<'a>) {
         let parent = self.enter_scope(false);
         visitor::walk_component(self, node);
         self.exit_scope(parent);
     }
 
-    fn visit_svelte_element(&mut self, node: &SvelteElement<'a>) {
+    fn visit_svelte_element(&mut self, node: &mut SvelteElement<'a>) {
         let parent = self.enter_scope(false);
         visitor::walk_svelte_element(self, node);
         self.exit_scope(parent);
     }
 
-    fn visit_svelte_component(&mut self, node: &SvelteComponent<'a>) {
+    fn visit_svelte_component(&mut self, node: &mut SvelteComponent<'a>) {
         let parent = self.enter_scope(false);
         visitor::walk_svelte_component(self, node);
         self.exit_scope(parent);
     }
 
-    fn visit_svelte_self(&mut self, node: &SvelteSelf<'a>) {
+    fn visit_svelte_self(&mut self, node: &mut SvelteSelf<'a>) {
         let parent = self.enter_scope(false);
         visitor::walk_svelte_self(self, node);
         self.exit_scope(parent);
     }
 
-    fn visit_slot_element(&mut self, node: &SlotElement<'a>) {
+    fn visit_slot_element(&mut self, node: &mut SlotElement<'a>) {
         let parent = self.enter_scope(false);
         visitor::walk_slot_element(self, node);
         self.exit_scope(parent);
     }
 
-    fn visit_svelte_fragment(&mut self, node: &SvelteFragment<'a>) {
+    fn visit_svelte_fragment(&mut self, node: &mut SvelteFragment<'a>) {
         let parent = self.enter_scope(false);
         visitor::walk_svelte_fragment(self, node);
         self.exit_scope(parent);
     }
 
-    fn visit_bind_directive(&mut self, node: &lux_ast::attributes::BindDirective<'a>) {
+    fn visit_bind_directive(&mut self, node: &mut lux_ast::attributes::BindDirective<'a>) {
         if !matches!(node.expression, oxc_ast::ast::Expression::SequenceExpression(_)) {
             self.record_bind_update(&node.expression);
         }
         visitor::walk_bind_directive(self, node);
     }
 
-    fn visit_let_directive(&mut self, node: &lux_ast::attributes::LetDirective<'a>) {
+    fn visit_let_directive(&mut self, node: &mut lux_ast::attributes::LetDirective<'a>) {
         if let Some(ref expression) = node.expression {
             if let oxc_ast::ast::Expression::Identifier(id) = expression {
                 self.declare(&id.name, id.span, BindingKind::Template, DeclarationKind::Const);

@@ -49,7 +49,7 @@ pub struct AnalyzeOptions {
 /// 1. Creates the scope tree (first pass)
 /// 2. Walks the AST to collect metadata and validate (second pass)
 /// 3. Returns the complete analysis result
-pub fn analyze_component<'s, 'a>(source: &'s str, root: &'a Root<'a>, options: AnalyzeOptions) -> ComponentAnalysis<'s> {
+pub fn analyze_component<'s, 'a>(source: &'s str, root: &mut Root<'a>, options: AnalyzeOptions) -> ComponentAnalysis<'s> {
     // First pass: create scopes
     let scope_result = create_scopes(root);
     let scope_tree = scope_result.scopes;

@@ -5,7 +5,6 @@
 use lux_ast::elements::Component;
 use lux_ast::node::AttributeNode;
 
-use crate::analyze::analysis::ComponentMeta;
 use crate::analyze::state::AnalysisState;
 use crate::analyze::visitor::NodeKind;
 use crate::analyze::visitors::shared::mark_subtree_dynamic;
@@ -14,7 +13,7 @@ use crate::analyze::visitors::shared::mark_subtree_dynamic;
 ///
 /// Reference: `packages/svelte/src/compiler/phases/2-analyze/visitors/Component.js`
 pub fn visit_component(
-    node: &Component<'_>,
+    node: &mut Component<'_>,
     state: &mut AnalysisState<'_, '_>,
     path: &[NodeKind<'_>],
 ) {
@@ -34,17 +33,9 @@ pub fn visit_component(
     let _has_dot = node.name.contains('.');
 
     // node.metadata.has_spread
-    let has_spread = node.attributes.iter().any(|attr| {
+    node.metadata.has_spread = node.attributes.iter().any(|attr| {
         matches!(attr, AttributeNode::SpreadAttribute(_))
     });
-
-    // Store metadata
-    let meta = state
-        .analysis
-        .component_meta
-        .entry(node.span.into())
-        .or_insert_with(ComponentMeta::default);
-    meta.has_spread = has_spread;
 
     // visit_component (shared) does a lot of work:
     // - Validates attributes (only Attribute, SpreadAttribute, LetDirective, OnDirective, BindDirective allowed)

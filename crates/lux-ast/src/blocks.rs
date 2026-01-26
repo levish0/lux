@@ -2,7 +2,7 @@ use oxc_ast::ast::{Expression, FormalParameter, FormalParameterRest};
 use serde::Serialize;
 use serde::ser::SerializeMap;
 
-use crate::metadata::{ExpressionNodeMetadata, SnippetBlockMetadata};
+use crate::metadata::{EachBlockMetadata, ExpressionNodeMetadata, SnippetBlockMetadata};
 use crate::root::Fragment;
 use crate::span::Span;
 use crate::utils::estree::{OxcOptionSerialize, OxcSerialize};
@@ -60,6 +60,8 @@ pub struct EachBlock<'a> {
     pub fallback: Option<Fragment<'a>>,
     pub index: Option<&'a str>,
     pub key: Option<Expression<'a>>,
+    /// Metadata populated during analysis
+    pub metadata: EachBlockMetadata,
 }
 
 impl Serialize for EachBlock<'_> {

@@ -67,22 +67,6 @@ pub struct ExpressionMeta {
     pub references: FxHashSet<BindingId>,
 }
 
-/// Metadata for EachBlock, populated during analysis.
-/// Reference: `phases/scope.js` EachBlock visitor
-#[derive(Debug, Default)]
-pub struct EachBlockMeta {
-    /// Expression metadata for the iterated expression
-    pub expression: ExpressionMeta,
-    /// Whether this is a keyed each block
-    pub keyed: bool,
-    /// Whether this block contains a bind:group directive
-    pub contains_group_binding: bool,
-    /// Whether this block is controlled (e.g., by a parent)
-    pub is_controlled: bool,
-    /// Transitive dependencies for legacy mode mutation tracking
-    pub transitive_deps: FxHashSet<BindingId>,
-}
-
 /// Metadata for IfBlock, populated during analysis.
 #[derive(Debug, Default)]
 pub struct IfBlockMeta {
@@ -109,27 +93,6 @@ pub struct KeyBlockMeta {
 pub struct SnippetBlockMeta {
     /// Whether this snippet can be hoisted to module scope
     pub can_hoist: bool,
-}
-
-/// Metadata for RegularElement, populated during analysis.
-/// Reference: `packages/svelte/src/compiler/phases/2-analyze/visitors/RegularElement.js`
-#[derive(Debug, Default)]
-pub struct RegularElementMeta {
-    /// Whether this element has any spread attributes
-    pub has_spread: bool,
-    /// Whether this is an SVG element
-    pub svg: bool,
-    /// Whether this is a MathML element
-    pub mathml: bool,
-    /// For <option> elements with single ExpressionTag child, stores the synthetic value node span
-    pub synthetic_value_node: Option<Span>,
-}
-
-/// Metadata for Component, populated during analysis.
-#[derive(Debug, Default)]
-pub struct ComponentMeta {
-    /// Whether this component has any spread attributes
-    pub has_spread: bool,
 }
 
 /// CSS analysis result.
@@ -231,10 +194,10 @@ pub struct ComponentAnalysis<'s> {
 
     // ========================================================================
     // Block Metadata (keyed by node span)
+    // Note: EachBlock, RegularElement, Component, Fragment metadata are now
+    // stored directly on the AST nodes (node.metadata field).
     // ========================================================================
 
-    /// Metadata for EachBlock nodes
-    pub each_block_meta: FxHashMap<Span, EachBlockMeta>,
     /// Metadata for IfBlock nodes
     pub if_block_meta: FxHashMap<Span, IfBlockMeta>,
     /// Metadata for AwaitBlock nodes
@@ -245,29 +208,12 @@ pub struct ComponentAnalysis<'s> {
     pub snippet_block_meta: FxHashMap<Span, SnippetBlockMeta>,
 
     // ========================================================================
-    // Element Metadata (keyed by node span)
-    // ========================================================================
-
-    /// Metadata for RegularElement nodes
-    pub regular_element_meta: FxHashMap<Span, RegularElementMeta>,
-    /// Metadata for Component nodes
-    pub component_meta: FxHashMap<Span, ComponentMeta>,
-
-    // ========================================================================
-    // Fragment Metadata
-    // ========================================================================
-
-    /// Fragments that are marked as dynamic (by parent element/block span).
-    /// Used by mark_subtree_dynamic to track which subtrees need dynamic handling.
-    /// Reference: Fragment.metadata.dynamic in the JS implementation
-    pub dynamic_fragments: FxHashSet<Span>,
-
-    // ========================================================================
     // Expression Metadata
     // ========================================================================
 
     /// Metadata for template expressions, keyed by expression span.
     /// Reference: ExpressionTag, ConstTag, etc. have metadata.expression
+    /// Note: This uses BindingId which is analyzer-only, so it stays as HashMap.
     pub expression_meta: FxHashMap<Span, ExpressionMeta>,
 }
 
@@ -317,14 +263,10 @@ impl<'s> ComponentAnalysis<'s> {
             snippets: FxHashSet::default(),
             errors: Vec::new(),
             warnings: Vec::new(),
-            each_block_meta: FxHashMap::default(),
             if_block_meta: FxHashMap::default(),
             await_block_meta: FxHashMap::default(),
             key_block_meta: FxHashMap::default(),
             snippet_block_meta: FxHashMap::default(),
-            regular_element_meta: FxHashMap::default(),
-            component_meta: FxHashMap::default(),
-            dynamic_fragments: FxHashSet::default(),
             expression_meta: FxHashMap::default(),
         }
     }
@@ -342,17 +284,6 @@ impl<'s> ComponentAnalysis<'s> {
     /// Returns true if there are any errors.
     pub fn has_errors(&self) -> bool {
         !self.errors.is_empty()
-    }
-
-    /// Returns true if the fragment at the given span is marked as dynamic.
-    /// Used by transform phase to determine if a fragment needs dynamic handling.
-    pub fn is_fragment_dynamic(&self, span: Span) -> bool {
-        self.dynamic_fragments.contains(&span)
-    }
-
-    /// Marks a fragment as dynamic.
-    pub fn mark_fragment_dynamic(&mut self, span: Span) {
-        self.dynamic_fragments.insert(span);
     }
 
     /// Gets or creates expression metadata for a given span.

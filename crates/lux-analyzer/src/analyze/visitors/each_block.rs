@@ -26,7 +26,6 @@
 use lux_ast::blocks::EachBlock;
 use oxc_ast::ast::{BindingPattern, Expression};
 
-use crate::analyze::analysis::EachBlockMeta;
 use crate::analyze::errors;
 use crate::analyze::state::AnalysisState;
 use crate::analyze::visitor::NodeKind;
@@ -36,7 +35,7 @@ use crate::analyze::visitors::shared::{validate_block_not_empty, validate_openin
 ///
 /// Reference: `packages/svelte/src/compiler/phases/2-analyze/visitors/EachBlock.js`
 pub fn visit_each_block(
-    node: &EachBlock<'_>,
+    node: &mut EachBlock<'_>,
     state: &mut AnalysisState<'_, '_>,
     _path: &[NodeKind<'_>],
 ) {
@@ -94,14 +93,8 @@ pub fn visit_each_block(
         }
     }
 
-    // Store metadata in analysis
-    // node.metadata.keyed = is_keyed;
-    let meta = state
-        .analysis
-        .each_block_meta
-        .entry(node.span.into())
-        .or_insert_with(EachBlockMeta::default);
-    meta.keyed = is_keyed;
+    // Store metadata directly on the node
+    node.metadata.keyed = is_keyed;
 
     // Legacy mode handling:
     // if (!context.state.analysis.runes) {

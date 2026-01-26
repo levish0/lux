@@ -3,6 +3,7 @@ use serde::Serialize;
 use serde::ser::SerializeMap;
 
 use crate::css::StyleSheet;
+use crate::metadata::FragmentMetadata;
 use crate::node::{AttributeNode, FragmentNode};
 use crate::span::Span;
 use crate::text::JsComment;
@@ -102,6 +103,8 @@ impl Serialize for ScriptContext {
 #[derive(Debug)]
 pub struct Fragment<'a> {
     pub nodes: Vec<FragmentNode<'a>>,
+    /// Metadata populated during analysis
+    pub metadata: FragmentMetadata,
 }
 
 impl Serialize for Fragment<'_> {
