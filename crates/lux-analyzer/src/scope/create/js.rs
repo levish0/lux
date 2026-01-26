@@ -9,7 +9,7 @@ use super::svelte::ScopeCreator;
 use crate::scope::{BindingKind, DeclarationKind};
 
 /// Visitor for JavaScript AST nodes within scripts.
-pub(crate) struct JsVisitor<'b> {
+pub struct JsVisitor<'b> {
     pub creator: &'b mut ScopeCreator,
     pub in_function: bool,
 }
