@@ -22,7 +22,7 @@ lux-utils = { path="crates/lux-utils" }
 # External dependencies
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
-oxc_parser = "0.110.0"
+oxc_parser = "0.111.0"
 oxc_allocator = "0.110.0"
 oxc_ast = { version = "0.110.0", features = ["serialize"] }
 oxc_span = { version = "0.110.0", features = ["serialize"] }
