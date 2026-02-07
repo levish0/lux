@@ -3,6 +3,7 @@ mod comment;
 mod component;
 mod element_body;
 mod regular;
+mod script_style;
 mod slot;
 mod svelte_body;
 mod svelte_boundary;
@@ -26,7 +27,7 @@ use winnow::token::{literal, take_while};
 use crate::input::Input;
 use attribute::is_tag_name_char;
 
-pub fn parse_element<'a>(input: &mut Input<'a>) -> Result<FragmentNode<'a>> {
+pub fn parse_element<'a>(input: &mut Input<'a>) -> Result<Option<FragmentNode<'a>>> {
     let start = input.current_token_start();
 
     literal("<").parse_next(input)?;
@@ -34,7 +35,7 @@ pub fn parse_element<'a>(input: &mut Input<'a>) -> Result<FragmentNode<'a>> {
     let remaining: &str = &input.input;
 
     if remaining.starts_with("!--") {
-        return comment::parse_comment(input, start);
+        return comment::parse_comment(input, start).map(Some);
     }
 
     if remaining.starts_with('/') {
@@ -43,7 +44,14 @@ pub fn parse_element<'a>(input: &mut Input<'a>) -> Result<FragmentNode<'a>> {
 
     let name: &str = take_while(1.., is_tag_name_char).parse_next(input)?;
 
-    dispatch_element(input, start, name)
+    // Top-level <script> / <style>: read content into ParserState, not fragment.
+    // Svelte element.js §4.3 steps 9-11: script/style at root level are stored on Root.
+    if (name == "script" || name == "style") && input.state.depth == 0 {
+        script_style::parse_script_or_style(input, start, name)?;
+        return Ok(None);
+    }
+
+    dispatch_element(input, start, name).map(Some)
 }
 
 fn dispatch_element<'a>(

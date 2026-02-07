@@ -1,8 +1,6 @@
 use lux_ast::template::root::{Fragment, FragmentNode};
 use winnow::Result;
-use winnow::combinator::{dispatch, peek, repeat};
 use winnow::prelude::*;
-use winnow::token::any;
 
 use crate::input::Input;
 use crate::parser::state::element::parse_element;
@@ -11,15 +9,29 @@ use crate::parser::state::text::parse_text;
 
 /// Parse a top-level fragment (until EOF).
 pub fn parse_fragment<'a>(input: &mut Input<'a>) -> Result<Fragment<'a>> {
-    let nodes: Vec<FragmentNode<'a>> = repeat(
-        0..,
-        dispatch! {peek(any);
-            '<' => parse_element,
-            '{' => parse_tag,
-            _ => parse_text.map(FragmentNode::Text),
-        },
-    )
-    .parse_next(input)?;
+    let mut nodes = Vec::new();
+
+    loop {
+        let remaining: &str = &input.input;
+        if remaining.is_empty() {
+            break;
+        }
+
+        match remaining.as_bytes()[0] {
+            b'<' => {
+                if let Some(node) = parse_element(input)? {
+                    nodes.push(node);
+                }
+                // None = script/style consumed into ParserState
+            }
+            b'{' => {
+                nodes.push(parse_tag.parse_next(input)?);
+            }
+            _ => {
+                nodes.push(parse_text.map(FragmentNode::Text).parse_next(input)?);
+            }
+        }
+    }
 
     Ok(Fragment {
         nodes,
@@ -70,12 +82,19 @@ fn parse_inner_fragment<'a>(
             break;
         }
 
-        let node = match remaining.as_bytes()[0] {
-            b'<' => parse_element.parse_next(input)?,
-            b'{' => parse_tag.parse_next(input)?,
-            _ => parse_text.map(FragmentNode::Text).parse_next(input)?,
-        };
-        nodes.push(node);
+        match remaining.as_bytes()[0] {
+            b'<' => {
+                if let Some(node) = parse_element(input)? {
+                    nodes.push(node);
+                }
+            }
+            b'{' => {
+                nodes.push(parse_tag.parse_next(input)?);
+            }
+            _ => {
+                nodes.push(parse_text.map(FragmentNode::Text).parse_next(input)?);
+            }
+        }
     }
 
     Ok(Fragment {

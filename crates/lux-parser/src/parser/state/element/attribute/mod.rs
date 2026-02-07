@@ -1,6 +1,7 @@
 mod brace;
 mod directive;
 mod named;
+pub mod static_attr;
 mod value;
 
 use lux_ast::template::attribute::AttributeNode;
