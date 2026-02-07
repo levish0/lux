@@ -7,6 +7,15 @@ use crate::parser::state::element::parse_element;
 use crate::parser::state::tag::parse_tag;
 use crate::parser::state::text::parse_text;
 
+fn peek_tag_name(s: &str) -> Option<&str> {
+    let after = s.strip_prefix('<')?;
+    let end = after.find(|c: char| !c.is_ascii_alphanumeric() && c != '-' && c != '_' && c != ':' && c != '.')?;
+    if end == 0 {
+        return None;
+    }
+    Some(&after[..end])
+}
+
 /// Parse a top-level fragment (until EOF).
 pub fn parse_fragment<'a>(input: &mut Input<'a>) -> Result<Fragment<'a>> {
     let mut nodes = Vec::new();
@@ -65,14 +74,19 @@ fn parse_inner_fragment<'a>(
 
         // Check for HTML closing tag
         if let Some(tag_name) = closing_tag {
-            if let Some(after_slash) = remaining.strip_prefix("</") {
-                let name_len = after_slash
-                    .find(|c: char| {
-                        !c.is_ascii_alphanumeric() && c != '-' && c != '_' && c != ':' && c != '.'
-                    })
-                    .unwrap_or(after_slash.len());
-                if &after_slash[..name_len] == tag_name {
-                    break;
+            if remaining.starts_with("</") {
+                // Any closing tag ends this fragment.
+                // If it matches our tag_name, element_body will consume it.
+                // If it doesn't match, this element was auto-closed by an ancestor's closing tag.
+                break;
+            }
+
+            // Check for opening tag that auto-closes the current element
+            if remaining.starts_with('<') && !remaining.starts_with("<!") {
+                if let Some(next_name) = peek_tag_name(remaining) {
+                    if lux_utils::closing_tag::closing_tag_omitted(tag_name, Some(next_name)) {
+                        break;
+                    }
                 }
             }
         }

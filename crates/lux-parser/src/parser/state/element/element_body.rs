@@ -32,14 +32,25 @@ pub fn parse_element_body<'a>(input: &mut Input<'a>, name: &str) -> Result<(Frag
         input.state.depth += 1;
         let f = parse_fragment_until(input, name)?;
         input.state.depth -= 1;
-        literal("</").parse_next(input)?;
-        skip_whitespace(input);
-        let close_name: &str = take_while(1.., is_tag_name_char).parse_next(input)?;
-        if close_name != name {
-            return Err(ContextError::new());
+
+        // Graceful closing: consume </name> only if it matches
+        let remaining: &str = &input.input;
+        if remaining.starts_with("</") {
+            let after_slash = &remaining[2..].trim_start();
+            let name_end = after_slash
+                .find(|c: char| !is_tag_name_char(c))
+                .unwrap_or(after_slash.len());
+            if &after_slash[..name_end] == name {
+                // Normal close: consume </name>
+                literal("</").parse_next(input)?;
+                skip_whitespace(input);
+                let _: &str = take_while(1.., is_tag_name_char).parse_next(input)?;
+                skip_whitespace(input);
+                literal(">").parse_next(input)?;
+            }
+            // else: ancestor's closing tag → don't consume (auto-closed)
         }
-        skip_whitespace(input);
-        literal(">").parse_next(input)?;
+        // else: sibling opening tag caused auto-close → don't consume
         f
     };
 
