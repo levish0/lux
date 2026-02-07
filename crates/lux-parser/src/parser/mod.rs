@@ -17,7 +17,7 @@ pub struct ParseResult<'a> {
 }
 
 pub fn parse<'a>(template: &'a str, allocator: &'a Allocator, ts: bool) -> ParseResult<'a> {
-    let state = ParserState::new(allocator, ts);
+    let state = ParserState::new(allocator, template, ts);
     let mut input = Stateful {
         input: LocatingSlice::new(template),
         state,

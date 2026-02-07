@@ -32,7 +32,7 @@ mod tests {
     fn make_input<'a>(allocator: &'a Allocator, template: &'a str) -> Input<'a> {
         Stateful {
             input: LocatingSlice::new(template),
-            state: ParserState::new(allocator, false),
+            state: ParserState::new(allocator, template, false),
         }
     }
 

@@ -8,6 +8,7 @@ pub type Input<'a> = Stateful<InputSource<'a>, ParserState<'a>>;
 
 pub struct ParserState<'a> {
     pub allocator: &'a Allocator,
+    pub template: &'a str,
     pub ts: bool,
     pub errors: Vec<ParseError>,
 }
@@ -22,9 +23,10 @@ impl<'a> std::fmt::Debug for ParserState<'a> {
 }
 
 impl<'a> ParserState<'a> {
-    pub fn new(allocator: &'a Allocator, ts: bool) -> Self {
+    pub fn new(allocator: &'a Allocator, template: &'a str, ts: bool) -> Self {
         Self {
             allocator,
+            template,
             ts,
             errors: Vec::new(),
         }

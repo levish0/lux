@@ -53,7 +53,7 @@ pub struct ConstTag<'a> {
 #[derive(Debug)]
 pub struct ConstDeclaration<'a> {
     pub span: Span,
-    pub id: oxc_ast::ast::BindingPattern<'a>,
+    pub id: Expression<'a>,
     pub init: Expression<'a>,
 }
 

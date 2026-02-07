@@ -29,41 +29,48 @@ pub fn parse_fragment<'a>(input: &mut Input<'a>) -> Result<Fragment<'a>> {
 }
 
 /// Parse a fragment inside an element, stopping when `</tag_name>` is encountered.
-pub fn parse_fragment_until<'a>(
+pub fn parse_fragment_until<'a>(input: &mut Input<'a>, closing_tag: &str) -> Result<Fragment<'a>> {
+    parse_inner_fragment(input, Some(closing_tag))
+}
+
+/// Parse a fragment inside a block, stopping at `{:` or `{/`.
+pub fn parse_block_fragment<'a>(input: &mut Input<'a>) -> Result<Fragment<'a>> {
+    parse_inner_fragment(input, None)
+}
+
+fn parse_inner_fragment<'a>(
     input: &mut Input<'a>,
-    closing_tag: &str,
+    closing_tag: Option<&str>,
 ) -> Result<Fragment<'a>> {
     let mut nodes = Vec::new();
 
     loop {
         let remaining: &str = &input.input;
 
-        // Check for EOF
         if remaining.is_empty() {
             break;
         }
 
-        // Check for closing tag
-        if let Some(after_slash) = remaining.strip_prefix("</") {
-            // Peek at the tag name
-            let name_len = after_slash
-                .find(|c: char| !c.is_ascii_alphanumeric() && c != '-' && c != '_' && c != ':')
-                .unwrap_or(after_slash.len());
-            let peeked_name = &after_slash[..name_len];
-
-            if peeked_name == closing_tag {
-                break;
+        // Check for HTML closing tag
+        if let Some(tag_name) = closing_tag {
+            if let Some(after_slash) = remaining.strip_prefix("</") {
+                let name_len = after_slash
+                    .find(|c: char| {
+                        !c.is_ascii_alphanumeric() && c != '-' && c != '_' && c != ':' && c != '.'
+                    })
+                    .unwrap_or(after_slash.len());
+                if &after_slash[..name_len] == tag_name {
+                    break;
+                }
             }
         }
 
-        // Check for block continuation/closing `{:` or `{/`
-        if remaining.starts_with("{:") || remaining.starts_with("{/") {
+        // Check for block delimiter: {: or {/ (but not {/* or {//)
+        if is_block_delimiter(remaining) {
             break;
         }
 
-        // Parse next node
-        let next = remaining.as_bytes()[0];
-        let node = match next {
+        let node = match remaining.as_bytes()[0] {
             b'<' => parse_element.parse_next(input)?,
             b'{' => parse_tag.parse_next(input)?,
             _ => parse_text.map(FragmentNode::Text).parse_next(input)?,
@@ -76,4 +83,14 @@ pub fn parse_fragment_until<'a>(
         transparent: true,
         dynamic: false,
     })
+}
+
+fn is_block_delimiter(s: &str) -> bool {
+    if let Some(rest) = s.strip_prefix('{') {
+        let rest = rest.trim_start();
+        rest.starts_with(':')
+            || (rest.starts_with('/') && !rest.starts_with("/*") && !rest.starts_with("//"))
+    } else {
+        false
+    }
 }

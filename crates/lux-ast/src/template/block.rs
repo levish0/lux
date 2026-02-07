@@ -1,4 +1,4 @@
-use oxc_ast::ast::{BindingPattern, Expression, IdentifierReference};
+use oxc_ast::ast::{Expression, IdentifierReference};
 
 use crate::common::Span;
 use crate::metadata::{EachBlockMetadata, ExpressionMetadata, SnippetBlockMetadata};
@@ -18,7 +18,7 @@ pub struct IfBlock<'a> {
 pub struct EachBlock<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
-    pub context: Option<BindingPattern<'a>>,
+    pub context: Option<Expression<'a>>,
     pub body: Fragment<'a>,
     pub fallback: Option<Fragment<'a>>,
     pub index: Option<&'a str>,
@@ -30,8 +30,8 @@ pub struct EachBlock<'a> {
 pub struct AwaitBlock<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
-    pub value: Option<BindingPattern<'a>>,
-    pub error: Option<BindingPattern<'a>>,
+    pub value: Option<Expression<'a>>,
+    pub error: Option<Expression<'a>>,
     pub pending: Option<Fragment<'a>>,
     pub then: Option<Fragment<'a>>,
     pub catch: Option<Fragment<'a>>,
@@ -50,7 +50,7 @@ pub struct KeyBlock<'a> {
 pub struct SnippetBlock<'a> {
     pub span: Span,
     pub expression: IdentifierReference<'a>,
-    pub parameters: Vec<BindingPattern<'a>>,
+    pub parameters: Vec<Expression<'a>>,
     pub body: Fragment<'a>,
     pub metadata: Option<SnippetBlockMetadata>,
 }
