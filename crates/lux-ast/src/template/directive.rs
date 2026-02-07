@@ -1,4 +1,3 @@
-use oxc_allocator::Vec;
 use oxc_ast::ast::Expression;
 
 use crate::common::Span;
@@ -26,7 +25,7 @@ pub struct StyleDirective<'a> {
     pub span: Span,
     pub name: &'a str,
     pub value: StyleDirectiveValue<'a>,
-    pub modifiers: Vec<'a, StyleModifier>,
+    pub modifiers: Vec<StyleModifier>,
     pub metadata: Option<ExpressionMetadata>,
 }
 
@@ -34,7 +33,7 @@ pub struct StyleDirective<'a> {
 pub enum StyleDirectiveValue<'a> {
     True,
     ExpressionTag(ExpressionTag<'a>),
-    Sequence(Vec<'a, TextOrExpressionTag<'a>>),
+    Sequence(Vec<TextOrExpressionTag<'a>>),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -47,7 +46,7 @@ pub struct OnDirective<'a> {
     pub span: Span,
     pub name: &'a str,
     pub expression: Option<Expression<'a>>,
-    pub modifiers: Vec<'a, EventModifier>,
+    pub modifiers: Vec<EventModifier>,
     pub metadata: Option<ExpressionMetadata>,
 }
 
@@ -69,7 +68,7 @@ pub struct TransitionDirective<'a> {
     pub span: Span,
     pub name: &'a str,
     pub expression: Option<Expression<'a>>,
-    pub modifiers: Vec<'a, TransitionModifier>,
+    pub modifiers: Vec<TransitionModifier>,
     pub intro: bool,
     pub outro: bool,
     pub metadata: Option<ExpressionMetadata>,

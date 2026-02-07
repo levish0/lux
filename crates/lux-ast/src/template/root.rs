@@ -1,4 +1,3 @@
-use oxc_allocator::Vec;
 use oxc_ast::ast::{ArrowFunctionExpression, ObjectExpression, Program};
 
 use crate::common::Span;
@@ -6,7 +5,7 @@ use crate::css::StyleSheet;
 use crate::template::attribute::Attribute;
 use crate::template::block::{AwaitBlock, EachBlock, IfBlock, KeyBlock, SnippetBlock};
 use crate::template::element::{
-    Component, RegularElement, SlotElement, SvelteBoundary, SvelteBody, SvelteComponent,
+    Component, RegularElement, SlotElement, SvelteBody, SvelteBoundary, SvelteComponent,
     SvelteDocument, SvelteElement, SvelteFragment, SvelteHead, SvelteOptionsRaw, SvelteSelf,
     SvelteWindow, TitleElement,
 };
@@ -22,16 +21,14 @@ pub struct Root<'a> {
     pub css: Option<StyleSheet<'a>>,
     pub instance: Option<Script<'a>>,
     pub module: Option<Script<'a>>,
-    pub comments: Vec<'a, JsComment<'a>>,
+    pub comments: Vec<JsComment<'a>>,
     pub ts: bool,
 }
 
 #[derive(Debug)]
 pub struct Fragment<'a> {
-    pub nodes: Vec<'a, FragmentNode<'a>>,
-    /// Whether this fragment is transparent (analysis phase).
+    pub nodes: Vec<FragmentNode<'a>>,
     pub transparent: bool,
-    /// Whether this fragment has dynamic content (analysis phase).
     pub dynamic: bool,
 }
 
@@ -74,7 +71,7 @@ pub struct Script<'a> {
     pub span: Span,
     pub context: ScriptContext,
     pub content: Program<'a>,
-    pub attributes: Vec<'a, Attribute<'a>>,
+    pub attributes: Vec<Attribute<'a>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -93,7 +90,7 @@ pub struct SvelteOptions<'a> {
     pub namespace: Option<Namespace>,
     pub css: Option<CssOption>,
     pub custom_element: Option<CustomElementOptions<'a>>,
-    pub attributes: Vec<'a, Attribute<'a>>,
+    pub attributes: Vec<Attribute<'a>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

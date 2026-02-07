@@ -1,4 +1,3 @@
-use oxc_allocator::Vec;
 use oxc_ast::ast::Expression;
 
 use crate::common::Span;
@@ -40,7 +39,7 @@ pub enum AttributeValue<'a> {
     /// Single expression (e.g., `{expr}`).
     ExpressionTag(ExpressionTag<'a>),
     /// Quoted sequence (e.g., `"text{expr}text"`).
-    Sequence(Vec<'a, TextOrExpressionTag<'a>>),
+    Sequence(Vec<TextOrExpressionTag<'a>>),
 }
 
 #[derive(Debug)]

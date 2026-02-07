@@ -1,4 +1,3 @@
-use oxc_allocator::Vec;
 use oxc_ast::ast::{Expression, IdentifierReference};
 
 use crate::common::Span;
@@ -61,7 +60,7 @@ pub struct ConstDeclaration<'a> {
 #[derive(Debug)]
 pub struct DebugTag<'a> {
     pub span: Span,
-    pub identifiers: Vec<'a, IdentifierReference<'a>>,
+    pub identifiers: Vec<IdentifierReference<'a>>,
 }
 
 #[derive(Debug)]

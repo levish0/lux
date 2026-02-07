@@ -1,17 +1,15 @@
-use oxc_allocator::Vec;
-
 use crate::common::Span;
 
 #[derive(Debug)]
 pub struct SelectorList<'a> {
     pub span: Span,
-    pub children: Vec<'a, ComplexSelector<'a>>,
+    pub children: Vec<ComplexSelector<'a>>,
 }
 
 #[derive(Debug)]
 pub struct ComplexSelector<'a> {
     pub span: Span,
-    pub children: Vec<'a, RelativeSelector<'a>>,
+    pub children: Vec<RelativeSelector<'a>>,
     // metadata (analysis phase)
     pub is_global: bool,
     pub used: bool,
@@ -21,7 +19,7 @@ pub struct ComplexSelector<'a> {
 pub struct RelativeSelector<'a> {
     pub span: Span,
     pub combinator: Option<Combinator>,
-    pub selectors: Vec<'a, SimpleSelector<'a>>,
+    pub selectors: Vec<SimpleSelector<'a>>,
     // metadata (analysis phase)
     pub is_global: bool,
     pub is_global_like: bool,

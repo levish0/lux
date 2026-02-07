@@ -1,4 +1,3 @@
-use oxc_allocator::Vec;
 use oxc_ast::ast::{BindingPattern, Expression, IdentifierReference};
 
 use crate::common::Span;
@@ -51,7 +50,7 @@ pub struct KeyBlock<'a> {
 pub struct SnippetBlock<'a> {
     pub span: Span,
     pub expression: IdentifierReference<'a>,
-    pub parameters: Vec<'a, BindingPattern<'a>>,
+    pub parameters: Vec<BindingPattern<'a>>,
     pub body: Fragment<'a>,
     pub metadata: Option<SnippetBlockMetadata>,
 }
