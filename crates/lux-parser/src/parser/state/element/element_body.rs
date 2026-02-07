@@ -29,7 +29,9 @@ pub fn parse_element_body<'a>(input: &mut Input<'a>, name: &str) -> Result<(Frag
             dynamic: false,
         }
     } else {
+        input.state.depth += 1;
         let f = parse_fragment_until(input, name)?;
+        input.state.depth -= 1;
         literal("</").parse_next(input)?;
         skip_whitespace(input);
         let close_name: &str = take_while(1.., is_tag_name_char).parse_next(input)?;

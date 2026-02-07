@@ -76,9 +76,10 @@ fn read_static_value<'a>(input: &mut Input<'a>) -> Result<AttributeValue<'a>> {
         input.next_slice(1); // closing '
         ('\'', val)
     } else {
-        let val: &str =
-            take_while(1.., |c: char| !c.is_ascii_whitespace() && c != '>' && c != '/')
-                .parse_next(input)?;
+        let val: &str = take_while(1.., |c: char| {
+            !c.is_ascii_whitespace() && c != '>' && c != '/'
+        })
+        .parse_next(input)?;
         (' ', val)
     };
 

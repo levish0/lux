@@ -9,11 +9,7 @@ use crate::parser::read::style::read_style;
 use crate::parser::state::element::attribute::static_attr::read_static_attributes;
 use crate::parser::utils::helpers::skip_whitespace;
 
-pub fn parse_script_or_style<'a>(
-    input: &mut Input<'a>,
-    start: usize,
-    name: &'a str,
-) -> Result<()> {
+pub fn parse_script_or_style<'a>(input: &mut Input<'a>, start: usize, name: &'a str) -> Result<()> {
     let attributes = read_static_attributes(input)?;
 
     skip_whitespace(input);

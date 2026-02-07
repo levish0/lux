@@ -5,16 +5,7 @@ mod element_body;
 mod regular;
 mod script_style;
 mod slot;
-mod svelte_body;
-mod svelte_boundary;
-mod svelte_component;
-mod svelte_document;
-mod svelte_element;
-mod svelte_fragment;
-mod svelte_head;
-mod svelte_options;
-mod svelte_self;
-mod svelte_window;
+mod svelte;
 mod title;
 
 use lux_ast::template::root::FragmentNode;
@@ -44,8 +35,6 @@ pub fn parse_element<'a>(input: &mut Input<'a>) -> Result<Option<FragmentNode<'a
 
     let name: &str = take_while(1.., is_tag_name_char).parse_next(input)?;
 
-    // Top-level <script> / <style>: read content into ParserState, not fragment.
-    // Svelte element.js §4.3 steps 9-11: script/style at root level are stored on Root.
     if (name == "script" || name == "style") && input.state.depth == 0 {
         script_style::parse_script_or_style(input, start, name)?;
         return Ok(None);
@@ -61,16 +50,16 @@ fn dispatch_element<'a>(
 ) -> Result<FragmentNode<'a>> {
     if let Some(svelte_kind) = name.strip_prefix("svelte:") {
         return match svelte_kind {
-            "component" => svelte_component::parse_svelte_component(input, start, name),
-            "element" => svelte_element::parse_svelte_element(input, start, name),
-            "self" => svelte_self::parse_svelte_self(input, start, name),
-            "head" => svelte_head::parse_svelte_head(input, start, name),
-            "body" => svelte_body::parse_svelte_body(input, start, name),
-            "window" => svelte_window::parse_svelte_window(input, start, name),
-            "document" => svelte_document::parse_svelte_document(input, start, name),
-            "fragment" => svelte_fragment::parse_svelte_fragment(input, start, name),
-            "boundary" => svelte_boundary::parse_svelte_boundary(input, start, name),
-            "options" => svelte_options::parse_svelte_options(input, start, name),
+            "component" => svelte::svelte_component::parse_svelte_component(input, start, name),
+            "element" => svelte::svelte_element::parse_svelte_element(input, start, name),
+            "self" => svelte::svelte_self::parse_svelte_self(input, start, name),
+            "head" => svelte::svelte_head::parse_svelte_head(input, start, name),
+            "body" => svelte::svelte_body::parse_svelte_body(input, start, name),
+            "window" => svelte::svelte_window::parse_svelte_window(input, start, name),
+            "document" => svelte::svelte_document::parse_svelte_document(input, start, name),
+            "fragment" => svelte::svelte_fragment::parse_svelte_fragment(input, start, name),
+            "boundary" => svelte::svelte_boundary::parse_svelte_boundary(input, start, name),
+            "options" => svelte::svelte_options::parse_svelte_options(input, start, name),
             _ => Err(ContextError::new()),
         };
     }

@@ -1,11 +1,13 @@
+use crate::input::Input;
+use crate::parser::utils::span_offset::shift_expression_spans;
 use oxc_ast::ast::Expression;
 use oxc_parser::Parser as OxcParser;
 use oxc_span::{GetSpan, SourceType};
 use winnow::Result;
 use winnow::error::ContextError;
 use winnow::prelude::*;
-
-use crate::input::Input;
+use winnow::stream::Location as StreamLocation;
+use winnow::token::take;
 
 fn make_source_type(ts: bool) -> SourceType {
     if ts {
@@ -19,6 +21,7 @@ fn make_source_type(ts: bool) -> SourceType {
 /// OXC parses the remaining input and stops at the expression boundary,
 /// similar to Acorn's `parseExpressionAt`.
 pub fn read_expression<'a>(input: &mut Input<'a>) -> Result<Expression<'a>> {
+    let offset = input.current_token_start() as u32;
     let allocator = input.state.allocator;
     let ts = input.state.ts;
     let remaining: &str = &input.input;
@@ -31,9 +34,10 @@ pub fn read_expression<'a>(input: &mut Input<'a>) -> Result<Expression<'a>> {
     let result = OxcParser::new(allocator, remaining, source_type).parse_expression();
 
     match result {
-        Ok(expr) => {
+        Ok(mut expr) => {
             let end = expr.span().end as usize;
-            let _ = winnow::token::take(end).parse_next(input)?;
+            let _ = take(end).parse_next(input)?;
+            shift_expression_spans(&mut expr, offset);
             Ok(expr)
         }
         Err(_) => Err(ContextError::new()),
@@ -52,6 +56,7 @@ pub fn read_expression_until<'a>(
     input: &mut Input<'a>,
     extra_stops: &[u8],
 ) -> Result<Expression<'a>> {
+    let offset = input.current_token_start() as u32;
     let allocator = input.state.allocator;
     let ts = input.state.ts;
 
@@ -68,8 +73,9 @@ pub fn read_expression_until<'a>(
     let result = OxcParser::new(allocator, expr_str, source_type).parse_expression();
 
     match result {
-        Ok(expr) => {
-            let _ = winnow::token::take(expr_str.len()).parse_next(input)?;
+        Ok(mut expr) => {
+            let _ = take(expr_str.len()).parse_next(input)?;
+            shift_expression_spans(&mut expr, offset);
             Ok(expr)
         }
         Err(_) => Err(ContextError::new()),
@@ -83,47 +89,46 @@ pub fn read_expression_until<'a>(
 /// 2. If OK: check for TS `as` consumption and unwrap if needed.
 /// 3. If Err (JS mode, `as` confuses OXC): find ` as ` boundary, retry.
 pub fn read_each_expression<'a>(input: &mut Input<'a>) -> Result<Expression<'a>> {
+    let offset = input.current_token_start() as u32;
     let allocator = input.state.allocator;
     let ts = input.state.ts;
     let remaining: &str = &input.input;
 
     let source_type = make_source_type(ts);
 
-    // Primary: let OXC determine the expression boundary via grammar.
     let result = OxcParser::new(allocator, remaining, source_type).parse_expression();
 
     match result {
         Ok(expr) => {
             if ts {
-                // In TS mode, OXC may have consumed ` as ` as TSAsExpression.
-                // Check and unwrap if the outermost node is TSAsExpression.
                 if let Expression::TSAsExpression(ts_as) = &expr {
                     let inner_end = ts_as.expression.span().end as usize;
-                    let _ = winnow::token::take(inner_end).parse_next(input)?;
-                    // Re-parse just the inner expression to get a clean AST node.
+                    let _ = take(inner_end).parse_next(input)?;
                     let inner_str = &remaining[..inner_end];
-                    let inner = OxcParser::new(allocator, inner_str, source_type)
+                    let mut inner = OxcParser::new(allocator, inner_str, source_type)
                         .parse_expression()
                         .map_err(|_| ContextError::new())?;
+                    shift_expression_spans(&mut inner, offset);
                     return Ok(inner);
                 }
             }
             let end = expr.span().end as usize;
-            let _ = winnow::token::take(end).parse_next(input)?;
+            let _ = take(end).parse_next(input)?;
+            let mut expr = expr;
+            shift_expression_spans(&mut expr, offset);
             Ok(expr)
         }
         Err(_) => {
-            // OXC failed — likely JS mode where `as` confuses the parser.
-            // Find ` as ` or `}` boundary, then parse up to it.
             let boundary = find_each_expression_end(remaining).ok_or_else(ContextError::new)?;
             let expr_str = remaining[..boundary].trim_end();
             if expr_str.is_empty() {
                 return Err(ContextError::new());
             }
-            let expr = OxcParser::new(allocator, expr_str, source_type)
+            let mut expr = OxcParser::new(allocator, expr_str, source_type)
                 .parse_expression()
                 .map_err(|_| ContextError::new())?;
-            let _ = winnow::token::take(expr_str.len()).parse_next(input)?;
+            let _ = take(expr_str.len()).parse_next(input)?;
+            shift_expression_spans(&mut expr, offset);
             Ok(expr)
         }
     }
