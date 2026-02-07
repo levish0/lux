@@ -6,6 +6,7 @@ pub mod elements;
 pub mod events;
 pub mod fuzzymatch;
 pub mod hash;
+pub mod html_entities;
 pub mod html_tree;
 pub mod patterns;
 pub mod reserved;

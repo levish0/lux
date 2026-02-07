@@ -1,6 +1,9 @@
+use std::borrow::Cow;
+
 use lux_ast::common::Span;
 use lux_ast::template::attribute::AttributeValue;
 use lux_ast::template::tag::{ExpressionTag, Text, TextOrExpressionTag};
+use lux_utils::html_entities::decode_character_references;
 use winnow::Result;
 use winnow::prelude::*;
 use winnow::stream::Location as StreamLocation;
@@ -9,6 +12,19 @@ use winnow::token::{any, literal, take_while};
 use crate::input::Input;
 use crate::parser::read::expression::read_expression;
 use crate::parser::utils::helpers::skip_whitespace;
+
+fn decode_attr_text<'a>(
+    raw: &'a str,
+    span: Span,
+    allocator: &'a oxc_allocator::Allocator,
+) -> Text<'a> {
+    let decoded = decode_character_references(raw, true);
+    let data = match decoded {
+        Cow::Borrowed(_) => raw,
+        Cow::Owned(s) => &*allocator.alloc_str(&s),
+    };
+    Text { span, data, raw }
+}
 
 pub fn parse_attribute_value<'a>(input: &mut Input<'a>) -> Result<AttributeValue<'a>> {
     let remaining: &str = &input.input;
@@ -75,11 +91,8 @@ fn parse_unquoted_value<'a>(input: &mut Input<'a>) -> Result<AttributeValue<'a>>
 
     let end = input.previous_token_end();
     let start = end - value.len();
-    let text = Text {
-        span: Span::new(start as u32, end as u32),
-        data: value,
-        raw: value,
-    };
+    let span = Span::new(start as u32, end as u32);
+    let text = decode_attr_text(value, span, input.state.allocator);
     Ok(AttributeValue::Sequence(vec![TextOrExpressionTag::Text(
         text,
     )]))
@@ -87,6 +100,7 @@ fn parse_unquoted_value<'a>(input: &mut Input<'a>) -> Result<AttributeValue<'a>>
 
 fn read_sequence<'a>(input: &mut Input<'a>, quote: u8) -> Result<Vec<TextOrExpressionTag<'a>>> {
     let template = input.state.template;
+    let allocator = input.state.allocator;
     let mut chunks: Vec<TextOrExpressionTag<'a>> = Vec::new();
     let mut text_start: Option<usize> = None;
 
@@ -102,11 +116,10 @@ fn read_sequence<'a>(input: &mut Input<'a>, quote: u8) -> Result<Vec<TextOrExpre
             if let Some(ts) = text_start.take() {
                 let end = input.current_token_start();
                 let text_slice = &template[ts..end];
-                chunks.push(TextOrExpressionTag::Text(Text {
-                    span: Span::new(ts as u32, end as u32),
-                    data: text_slice,
-                    raw: text_slice,
-                }));
+                let span = Span::new(ts as u32, end as u32);
+                chunks.push(TextOrExpressionTag::Text(decode_attr_text(
+                    text_slice, span, allocator,
+                )));
             }
             break;
         }
@@ -115,11 +128,10 @@ fn read_sequence<'a>(input: &mut Input<'a>, quote: u8) -> Result<Vec<TextOrExpre
             if let Some(ts) = text_start.take() {
                 let end = input.current_token_start();
                 let text_slice = &template[ts..end];
-                chunks.push(TextOrExpressionTag::Text(Text {
-                    span: Span::new(ts as u32, end as u32),
-                    data: text_slice,
-                    raw: text_slice,
-                }));
+                let span = Span::new(ts as u32, end as u32);
+                chunks.push(TextOrExpressionTag::Text(decode_attr_text(
+                    text_slice, span, allocator,
+                )));
             }
 
             let expr_start = input.current_token_start();

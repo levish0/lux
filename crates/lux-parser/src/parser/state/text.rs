@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use lux_ast::common::Span;
 use lux_ast::template::tag::Text;
 use winnow::Result;
@@ -14,9 +16,15 @@ pub fn parse_text<'a>(input: &mut Input<'a>) -> Result<Text<'a>> {
 
     let end = input.previous_token_end();
 
+    let decoded = lux_utils::html_entities::decode_character_references(raw, false);
+    let data = match decoded {
+        Cow::Borrowed(_) => raw,
+        Cow::Owned(s) => &*input.state.allocator.alloc_str(&s),
+    };
+
     Ok(Text {
         span: Span::new(start as u32, end as u32),
-        data: raw,
+        data,
         raw,
     })
 }
