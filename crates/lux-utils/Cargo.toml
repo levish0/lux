@@ -4,10 +4,11 @@ version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "Shared utilities for the Lux Svelte compiler"
 edition.workspace = true
 rust-version.workspace = true
-description = "lux-utils"
 
 [dependencies]
-phf = {workspace = true}
-strsim = {workspace = true}
+phf = { workspace = true }
+rustc-hash = { workspace = true }
+strsim = { workspace = true }

@@ -4,11 +4,14 @@ version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "Code generator for the Lux Svelte compiler"
 edition.workspace = true
 rust-version.workspace = true
-description = "svelte-transformer"
 
 [dependencies]
-serde = { workspace = true }
-serde_json = { workspace = true }
-rayon={workspace = true}
+lux-ast = { workspace = true }
+lux-utils = { workspace = true }
+lux-analyzer = { workspace = true }
+oxc_ast = { workspace = true }
+oxc_span = { workspace = true }
+rustc-hash = { workspace = true }

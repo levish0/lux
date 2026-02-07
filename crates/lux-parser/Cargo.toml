@@ -4,22 +4,21 @@ version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "winnow-based parser for the Lux Svelte compiler"
 edition.workspace = true
 rust-version.workspace = true
-description = "svelte-parser"
 
 [dependencies]
-phf = {workspace = true}
 lux-ast = { workspace = true }
-serde_json = { workspace = true }
-serde = { workspace = true }
+lux-utils = { workspace = true }
+winnow = { workspace = true }
 oxc_parser = { workspace = true }
 oxc_allocator = { workspace = true }
 oxc_ast = { workspace = true }
 oxc_span = { workspace = true }
 oxc_syntax = { workspace = true }
 oxc_diagnostics = { workspace = true }
-oxc_estree = { workspace = true }
-oxc_ast_visit = { workspace = true }
-regex = {workspace = true}
-line-span={workspace = true}
+phf = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }

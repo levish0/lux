@@ -4,16 +4,16 @@ version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "AST type definitions for the Lux Svelte compiler"
 edition.workspace = true
 rust-version.workspace = true
-description = "svelte-ast"
 
 [dependencies]
-serde = { workspace = true }
-serde_json = { workspace = true }
+lux-utils = { workspace = true }
 oxc_ast = { workspace = true }
 oxc_allocator = { workspace = true }
 oxc_span = { workspace = true }
-oxc_ast_visit = { workspace = true }
+oxc_syntax = { workspace = true }
 oxc_estree = { workspace = true }
-line-span = {workspace = true}
+serde = { workspace = true }
+rustc-hash = { workspace = true }
