@@ -21,7 +21,7 @@ fn decode_attr_text<'a>(
     let decoded = decode_character_references(raw, true);
     let data = match decoded {
         Cow::Borrowed(_) => raw,
-        Cow::Owned(s) => &*allocator.alloc_str(&s),
+        Cow::Owned(s) => allocator.alloc_str(&s),
     };
     Text { span, data, raw }
 }
@@ -46,8 +46,8 @@ fn parse_quoted_value<'a>(input: &mut Input<'a>, quote: u8) -> Result<AttributeV
     let _: char = any.parse_next(input)?;
 
     // Single expression without surrounding text → ExpressionTag
-    if chunks.len() == 1 {
-        if matches!(chunks.first(), Some(TextOrExpressionTag::ExpressionTag(_))) {
+    if chunks.len() == 1
+        && matches!(chunks.first(), Some(TextOrExpressionTag::ExpressionTag(_))) {
             let chunk = chunks.into_iter().next().unwrap();
             match chunk {
                 TextOrExpressionTag::ExpressionTag(et) => {
@@ -56,7 +56,6 @@ fn parse_quoted_value<'a>(input: &mut Input<'a>, quote: u8) -> Result<AttributeV
                 _ => unreachable!(),
             }
         }
-    }
 
     Ok(AttributeValue::Sequence(chunks))
 }

@@ -82,13 +82,11 @@ fn parse_inner_fragment<'a>(
             }
 
             // Check for opening tag that auto-closes the current element
-            if remaining.starts_with('<') && !remaining.starts_with("<!") {
-                if let Some(next_name) = peek_tag_name(remaining) {
-                    if lux_utils::closing_tag::closing_tag_omitted(tag_name, Some(next_name)) {
+            if remaining.starts_with('<') && !remaining.starts_with("<!")
+                && let Some(next_name) = peek_tag_name(remaining)
+                    && lux_utils::closing_tag::closing_tag_omitted(tag_name, Some(next_name)) {
                         break;
                     }
-                }
-            }
         }
 
         // Check for block delimiter: {: or {/ (but not {/* or {//)

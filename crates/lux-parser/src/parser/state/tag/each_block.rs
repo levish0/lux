@@ -28,7 +28,7 @@ pub fn parse_each_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragm
     // Optional `as context`
     let context = if opt(literal("as")).parse_next(input)?.is_some() {
         require_whitespace(input)?;
-        Some(read_expression_until(input, &[b',', b'('])?)
+        Some(read_expression_until(input, b",(")?)
     } else {
         None
     };
@@ -51,7 +51,7 @@ pub fn parse_each_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragm
     // Optional `(key)`
     let key = if opt(literal("(")).parse_next(input)?.is_some() {
         skip_whitespace(input);
-        let key_expr = read_expression_until(input, &[b')'])?;
+        let key_expr = read_expression_until(input, b")")?;
         skip_whitespace(input);
         literal(")").parse_next(input)?;
         skip_whitespace(input);

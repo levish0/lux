@@ -72,7 +72,7 @@ fn parse_snippet_params<'a>(input: &mut Input<'a>) -> Result<Vec<Expression<'a>>
             break;
         }
 
-        let expr = read_expression_until(input, &[b',', b')'])?;
+        let expr = read_expression_until(input, b",)")?;
         params.push(expr);
 
         skip_whitespace(input);

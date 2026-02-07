@@ -144,7 +144,7 @@ fn read_textarea_content<'a>(input: &mut Input<'a>) -> Result<Vec<FragmentNode<'
                     lux_utils::html_entities::decode_character_references(raw, false);
                 let data = match decoded {
                     Cow::Borrowed(_) => raw,
-                    Cow::Owned(s) => &*allocator.alloc_str(&s),
+                    Cow::Owned(s) => allocator.alloc_str(&s),
                 };
                 nodes.push(FragmentNode::Text(Text {
                     span: Span::new(ts as u32, end as u32),
@@ -164,7 +164,7 @@ fn read_textarea_content<'a>(input: &mut Input<'a>) -> Result<Vec<FragmentNode<'
                     lux_utils::html_entities::decode_character_references(raw, false);
                 let data = match decoded {
                     Cow::Borrowed(_) => raw,
-                    Cow::Owned(s) => &*allocator.alloc_str(&s),
+                    Cow::Owned(s) => allocator.alloc_str(&s),
                 };
                 nodes.push(FragmentNode::Text(Text {
                     span: Span::new(ts as u32, end as u32),

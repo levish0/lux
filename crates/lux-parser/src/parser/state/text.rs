@@ -19,7 +19,7 @@ pub fn parse_text<'a>(input: &mut Input<'a>) -> Result<Text<'a>> {
     let decoded = lux_utils::html_entities::decode_character_references(raw, false);
     let data = match decoded {
         Cow::Borrowed(_) => raw,
-        Cow::Owned(s) => &*input.state.allocator.alloc_str(&s),
+        Cow::Owned(s) => input.state.allocator.alloc_str(&s),
     };
 
     Ok(Text {

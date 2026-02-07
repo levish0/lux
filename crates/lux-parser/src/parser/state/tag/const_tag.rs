@@ -19,7 +19,7 @@ pub fn parse_const_tag<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragme
     let decl_start = input.current_token_start();
 
     // Read id (left side of =), stopping at `=`
-    let id = read_expression_until(input, &[b'='])?;
+    let id = read_expression_until(input, b"=")?;
     skip_whitespace(input);
 
     literal("=").parse_next(input)?;
