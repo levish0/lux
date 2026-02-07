@@ -100,17 +100,16 @@ pub fn read_each_expression<'a>(input: &mut Input<'a>) -> Result<Expression<'a>>
 
     match result {
         Ok(expr) => {
-            if ts
-                && let Expression::TSAsExpression(ts_as) = &expr {
-                    let inner_end = ts_as.expression.span().end as usize;
-                    let _ = take(inner_end).parse_next(input)?;
-                    let inner_str = &remaining[..inner_end];
-                    let mut inner = OxcParser::new(allocator, inner_str, source_type)
-                        .parse_expression()
-                        .map_err(|_| ContextError::new())?;
-                    shift_expression_spans(&mut inner, offset);
-                    return Ok(inner);
-                }
+            if ts && let Expression::TSAsExpression(ts_as) = &expr {
+                let inner_end = ts_as.expression.span().end as usize;
+                let _ = take(inner_end).parse_next(input)?;
+                let inner_str = &remaining[..inner_end];
+                let mut inner = OxcParser::new(allocator, inner_str, source_type)
+                    .parse_expression()
+                    .map_err(|_| ContextError::new())?;
+                shift_expression_spans(&mut inner, offset);
+                return Ok(inner);
+            }
             let end = expr.span().end as usize;
             let _ = take(end).parse_next(input)?;
             let mut expr = expr;

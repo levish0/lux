@@ -46,16 +46,15 @@ fn parse_quoted_value<'a>(input: &mut Input<'a>, quote: u8) -> Result<AttributeV
     let _: char = any.parse_next(input)?;
 
     // Single expression without surrounding text → ExpressionTag
-    if chunks.len() == 1
-        && matches!(chunks.first(), Some(TextOrExpressionTag::ExpressionTag(_))) {
-            let chunk = chunks.into_iter().next().unwrap();
-            match chunk {
-                TextOrExpressionTag::ExpressionTag(et) => {
-                    return Ok(AttributeValue::ExpressionTag(et));
-                }
-                _ => unreachable!(),
+    if chunks.len() == 1 && matches!(chunks.first(), Some(TextOrExpressionTag::ExpressionTag(_))) {
+        let chunk = chunks.into_iter().next().unwrap();
+        match chunk {
+            TextOrExpressionTag::ExpressionTag(et) => {
+                return Ok(AttributeValue::ExpressionTag(et));
             }
+            _ => unreachable!(),
         }
+    }
 
     Ok(AttributeValue::Sequence(chunks))
 }

@@ -51,30 +51,38 @@ fn parse_selector<'a>(
         let start = p.index;
 
         if p.eat("&") {
-            relative_selector.selectors.push(SimpleSelector::NestingSelector(NestingSelector {
-                span: p.span(start, p.index),
-            }));
+            relative_selector
+                .selectors
+                .push(SimpleSelector::NestingSelector(NestingSelector {
+                    span: p.span(start, p.index),
+                }));
         } else if p.eat("*") {
             let mut name = "*";
             if p.eat("|") {
                 name = p.read_identifier()?;
             }
-            relative_selector.selectors.push(SimpleSelector::TypeSelector(TypeSelector {
-                span: p.span(start, p.index),
-                name,
-            }));
+            relative_selector
+                .selectors
+                .push(SimpleSelector::TypeSelector(TypeSelector {
+                    span: p.span(start, p.index),
+                    name,
+                }));
         } else if p.eat("#") {
             let name = p.read_identifier()?;
-            relative_selector.selectors.push(SimpleSelector::IdSelector(IdSelector {
-                span: p.span(start, p.index),
-                name,
-            }));
+            relative_selector
+                .selectors
+                .push(SimpleSelector::IdSelector(IdSelector {
+                    span: p.span(start, p.index),
+                    name,
+                }));
         } else if p.eat(".") {
             let name = p.read_identifier()?;
-            relative_selector.selectors.push(SimpleSelector::ClassSelector(ClassSelector {
-                span: p.span(start, p.index),
-                name,
-            }));
+            relative_selector
+                .selectors
+                .push(SimpleSelector::ClassSelector(ClassSelector {
+                    span: p.span(start, p.index),
+                    name,
+                }));
         } else if p.eat("::") {
             let name = p.read_identifier()?;
             let end = p.index;
@@ -85,10 +93,12 @@ fn parse_selector<'a>(
             }
             relative_selector
                 .selectors
-                .push(SimpleSelector::PseudoElementSelector(PseudoElementSelector {
-                    span: p.span(start, end),
-                    name,
-                }));
+                .push(SimpleSelector::PseudoElementSelector(
+                    PseudoElementSelector {
+                        span: p.span(start, end),
+                        name,
+                    },
+                ));
         } else if p.eat(":") {
             let name = p.read_identifier()?;
             let args = if p.eat("(") {
@@ -151,10 +161,12 @@ fn parse_selector<'a>(
             if p.eat("|") {
                 name = p.read_identifier()?;
             }
-            relative_selector.selectors.push(SimpleSelector::TypeSelector(TypeSelector {
-                span: p.span(start, p.index),
-                name,
-            }));
+            relative_selector
+                .selectors
+                .push(SimpleSelector::TypeSelector(TypeSelector {
+                    span: p.span(start, p.index),
+                    name,
+                }));
         }
 
         let index = p.index;
@@ -168,7 +180,10 @@ fn parse_selector<'a>(
 
         if done {
             p.index = index;
-            relative_selector.span = p.span(relative_selector.span.start as usize - p.offset as usize, index);
+            relative_selector.span = p.span(
+                relative_selector.span.start as usize - p.offset as usize,
+                index,
+            );
             children.push(relative_selector);
 
             return Ok(ComplexSelector {
@@ -208,7 +223,10 @@ fn parse_selector<'a>(
     Err(ContextError::new())
 }
 
-fn new_relative_selector(combinator: Option<Combinator>, start: usize) -> RelativeSelector<'static> {
+fn new_relative_selector(
+    combinator: Option<Combinator>,
+    start: usize,
+) -> RelativeSelector<'static> {
     RelativeSelector {
         span: lux_ast::common::Span::new(start as u32, 0),
         combinator,

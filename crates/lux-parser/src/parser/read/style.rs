@@ -26,11 +26,12 @@ pub fn read_style<'a>(
 
     let end = input.previous_token_end();
 
-    // CSS parsing is deferred — store raw content for now.
+    let children = super::css::parse_stylesheet(content, content_start as u32).unwrap_or_default();
+
     Ok(StyleSheet {
         span: Span::new(start as u32, end as u32),
         attributes,
-        children: Vec::new(),
+        children,
         content_start: content_start as u32,
         content_end: content_end as u32,
         content_styles: content,

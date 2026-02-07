@@ -65,15 +65,15 @@ impl<'a> CssParser<'a> {
     pub fn skip_ws_and_comments(&mut self) {
         self.skip_whitespace();
         while self.matches("/*") || self.matches("<!--") {
-            if self.eat("/*") {
-                if let Some(end) = self.source[self.index..].find("*/") {
-                    self.index += end + 2;
-                }
+            if self.eat("/*")
+                && let Some(end) = self.source[self.index..].find("*/")
+            {
+                self.index += end + 2;
             }
-            if self.eat("<!--") {
-                if let Some(end) = self.source[self.index..].find("-->") {
-                    self.index += end + 3;
-                }
+            if self.eat("<!--")
+                && let Some(end) = self.source[self.index..].find("-->")
+            {
+                self.index += end + 3;
             }
             self.skip_whitespace();
         }
@@ -118,11 +118,7 @@ impl<'a> CssParser<'a> {
                     // Escaped non-hex character
                     self.index += 1;
                 }
-            } else if b >= 160
-                || b.is_ascii_alphanumeric()
-                || b == b'_'
-                || b == b'-'
-            {
+            } else if b >= 160 || b.is_ascii_alphanumeric() || b == b'_' || b == b'-' {
                 self.index += 1;
             } else {
                 // Check for multi-byte chars with codepoint >= 160

@@ -73,11 +73,12 @@ fn detect_script_context(attributes: &[Attribute<'_>]) -> ScriptContext {
         // <script context="module"> — legacy syntax
         if attr.name == "context"
             && let AttributeValue::Sequence(seq) = &attr.value
-                && seq.len() == 1
-                    && let Some(TextOrExpressionTag::Text(text)) = seq.first()
-                        && text.data == "module" {
-                            return ScriptContext::Module;
-                        }
+            && seq.len() == 1
+            && let Some(TextOrExpressionTag::Text(text)) = seq.first()
+            && text.data == "module"
+        {
+            return ScriptContext::Module;
+        }
     }
     ScriptContext::Default
 }
