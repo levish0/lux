@@ -1,4 +1,5 @@
 use oxc_allocator::Allocator;
+use std::io::Write;
 
 fn main() {
     let path = std::env::args()
@@ -13,13 +14,22 @@ fn main() {
     let allocator = Allocator::default();
     let result = lux_parser::parse(&source, &allocator, true);
 
+    let output_path = std::path::Path::new(&path).with_extension("parsed.txt");
+
+    let mut out = std::fs::File::create(&output_path).unwrap_or_else(|e| {
+        eprintln!("Failed to create {}: {e}", output_path.display());
+        std::process::exit(1);
+    });
+
     if !result.errors.is_empty() {
-        eprintln!("=== Errors ({}) ===", result.errors.len());
+        writeln!(out, "=== Errors ({}) ===", result.errors.len()).unwrap();
         for err in &result.errors {
-            eprintln!("  {:?}", err);
+            writeln!(out, "  {:?}", err).unwrap();
         }
-        eprintln!();
+        writeln!(out).unwrap();
     }
 
-    println!("{:#?}", result.root);
+    writeln!(out, "{:#?}", result.root).unwrap();
+
+    println!("Output written to {}", output_path.display());
 }
