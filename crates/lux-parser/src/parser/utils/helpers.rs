@@ -17,20 +17,3 @@ pub fn require_whitespace(input: &mut Input<'_>) -> winnow::Result<()> {
         .parse_next(input)
 }
 
-/// Peek at the next byte without consuming.
-pub fn peek_byte(input: &Input<'_>) -> Option<u8> {
-    let s: &str = &(*input.input);
-    s.as_bytes().first().copied()
-}
-
-/// Check if input starts with a given string.
-pub fn peek_str(input: &Input<'_>, s: &str) -> bool {
-    let remaining: &str = &(*input.input);
-    remaining.starts_with(s)
-}
-
-/// Get remaining input as &str.
-pub fn remaining_input<'a>(input: &Input<'a>) -> &'a str {
-    let s: &str = &(*input.input);
-    s
-}

@@ -12,7 +12,7 @@ use winnow::token::{any, literal, take_while};
 
 use crate::input::Input;
 use crate::parser::state::fragment::parse_fragment_until;
-use crate::parser::utils::helpers::{peek_str, skip_whitespace};
+use crate::parser::utils::helpers::skip_whitespace;
 
 /// Parse an opening tag and its children.
 /// Assumes `<` has already been consumed.
@@ -73,23 +73,14 @@ fn parse_attributes<'a>(input: &mut Input<'a>) -> Result<Vec<AttributeNode<'a>>>
     loop {
         skip_whitespace(input);
 
-        if peek_str(input, ">") || peek_str(input, "/>") {
-            break;
-        }
-
-        let remaining: &str = &(*input.input);
-        if remaining.is_empty() {
-            break;
-        }
-
         let attr_start = input.current_token_start();
-        let name_result: core::result::Result<&str, ContextError> =
-            take_while(1.., is_attr_name_char).parse_next(input);
-
-        let name = match name_result {
-            Ok(n) => n,
-            Err(_) => break,
-        };
+        let name: &str =
+            match take_while::<_, Input<'_>, ContextError>(1.., is_attr_name_char)
+                .parse_next(input)
+            {
+                Ok(n) => n,
+                Err(_) => break,
+            };
 
         skip_whitespace(input);
 
@@ -114,7 +105,7 @@ fn parse_attributes<'a>(input: &mut Input<'a>) -> Result<Vec<AttributeNode<'a>>>
 }
 
 fn parse_attribute_value<'a>(input: &mut Input<'a>) -> Result<AttributeValue<'a>> {
-    let remaining: &str = &(*input.input);
+    let remaining: &str = &input.input;
     let first = remaining.as_bytes().first().copied();
 
     match first {

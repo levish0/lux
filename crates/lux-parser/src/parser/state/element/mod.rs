@@ -16,7 +16,7 @@ pub fn parse_element<'a>(input: &mut Input<'a>) -> Result<FragmentNode<'a>> {
 
     literal("<").parse_next(input)?;
 
-    let remaining: &str = &(*input.input);
+    let remaining: &str = &input.input;
 
     if remaining.starts_with("!--") {
         return comment::parse_comment(input, start);

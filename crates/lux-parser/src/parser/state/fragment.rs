@@ -36,7 +36,7 @@ pub fn parse_fragment_until<'a>(
     let mut nodes = Vec::new();
 
     loop {
-        let remaining: &str = &(*input.input);
+        let remaining: &str = &input.input;
 
         // Check for EOF
         if remaining.is_empty() {
@@ -44,9 +44,8 @@ pub fn parse_fragment_until<'a>(
         }
 
         // Check for closing tag
-        if remaining.starts_with("</") {
+        if let Some(after_slash) = remaining.strip_prefix("</") {
             // Peek at the tag name
-            let after_slash = &remaining[2..];
             let name_len = after_slash
                 .find(|c: char| !c.is_ascii_alphanumeric() && c != '-' && c != '_' && c != ':')
                 .unwrap_or(after_slash.len());

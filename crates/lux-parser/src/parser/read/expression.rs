@@ -16,7 +16,7 @@ pub fn read_expression<'a>(input: &mut Input<'a>) -> Result<Expression<'a>> {
     let allocator = input.state.allocator;
     let ts = input.state.ts;
 
-    let remaining: &str = &(*input.input);
+    let remaining: &str = &input.input;
     let end_offset = find_expression_end(remaining)
         .ok_or_else(ContextError::new)?;
 
