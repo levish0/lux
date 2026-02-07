@@ -1,7 +1,6 @@
 /// Attribute properties (boolean, DOM props, aliases).
 ///
 /// Reference: `utils.js` lines 147-260
-
 use phf::{phf_map, phf_set};
 
 pub static BOOLEAN_ATTRIBUTES: phf::Set<&str> = phf_set! {

@@ -1,7 +1,6 @@
 /// DOM event handling (delegation, passive, capture).
 ///
 /// Reference: `utils.js` lines 109-269
-
 use phf::phf_set;
 
 /// Events that can be delegated to the document root (performance optimization).
@@ -30,9 +29,7 @@ pub fn is_passive_event(name: &str) -> bool {
 ///
 /// Excludes `gotpointercapture` and `lostpointercapture` which are real events.
 pub fn is_capture_event(name: &str) -> bool {
-    name.ends_with("capture")
-        && name != "gotpointercapture"
-        && name != "lostpointercapture"
+    name.ends_with("capture") && name != "gotpointercapture" && name != "lostpointercapture"
 }
 
 #[cfg(test)]

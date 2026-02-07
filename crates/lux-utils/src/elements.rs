@@ -1,7 +1,6 @@
 /// Element classification (void, SVG, MathML, etc.).
 ///
 /// Reference: `utils.js` lines 16-428
-
 use phf::phf_set;
 
 pub static VOID_ELEMENTS: phf::Set<&str> = phf_set! {

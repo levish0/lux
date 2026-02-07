@@ -1,7 +1,6 @@
 /// JavaScript reserved words.
 ///
 /// Reference: `utils.js` lines 43-100
-
 use phf::phf_set;
 
 pub static RESERVED_WORDS: phf::Set<&str> = phf_set! {

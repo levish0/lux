@@ -1,22 +1,23 @@
-use strsim::normalized_levenshtein;
+use strsim::jaro_winkler;
 
 /// Fuzzy string matching for error suggestions ("Did you mean ...?").
 ///
-/// Uses `strsim` crate for string similarity computation.
+/// Uses `strsim::jaro_winkler` for string similarity — handles transpositions
+/// well and gives prefix-matching bonus, ideal for typo correction.
 /// This intentionally differs from Svelte's custom n-gram implementation
 /// since it's only used for error messages, not compiled output.
 
 /// Find the best fuzzy match for `name` among `candidates`.
 ///
-/// Returns `Some(match)` if the best match has normalized Levenshtein
-/// similarity >= 0.7, `None` otherwise.
+/// Returns `Some(match)` if the best match has Jaro-Winkler
+/// similarity >= 0.8, `None` otherwise.
 pub fn fuzzymatch<'a>(name: &str, candidates: &[&'a str]) -> Option<&'a str> {
-    let threshold = 0.7;
+    let threshold = 0.8;
     let mut best_score = 0.0f64;
     let mut best_match = None;
 
     for &candidate in candidates {
-        let score = normalized_levenshtein(name, candidate);
+        let score = jaro_winkler(name, candidate);
         if score > best_score {
             best_score = score;
             best_match = Some(candidate);
@@ -62,6 +63,6 @@ mod tests {
     fn test_typo_correction() {
         let candidates = ["class", "style", "onclick", "disabled"];
         assert_eq!(fuzzymatch("clas", &candidates), Some("class"));
-        assert_eq!(fuzzymatch("styl", &candidates), Some("style"));
+        assert_eq!(fuzzymatch("styel", &candidates), Some("style"));
     }
 }

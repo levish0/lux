@@ -166,8 +166,13 @@ pub fn get_binding_property(name: &str) -> Option<BindingProperty> {
         }),
 
         // --- Dimensions (any element) ---
-        "clientWidth" | "clientHeight" | "offsetWidth" | "offsetHeight"
-        | "contentRect" | "contentBoxSize" | "borderBoxSize"
+        "clientWidth"
+        | "clientHeight"
+        | "offsetWidth"
+        | "offsetHeight"
+        | "contentRect"
+        | "contentBoxSize"
+        | "borderBoxSize"
         | "devicePixelContentBoxSize" => Some(BindingProperty {
             event: None,
             bidirectional: false,

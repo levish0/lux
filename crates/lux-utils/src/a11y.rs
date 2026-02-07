@@ -1,7 +1,6 @@
 /// Accessibility constants (ARIA roles, attributes).
 ///
 /// Reference: `2-analyze/visitors/shared/a11y/constants.js`
-
 use phf::{phf_map, phf_set};
 
 /// All valid ARIA attributes (without the `aria-` prefix).

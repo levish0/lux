@@ -57,9 +57,9 @@ pub fn is_tag_valid_with_parent(child: &str, parent: &str) -> Option<&'static st
         "p" => match child {
             "address" | "article" | "aside" | "blockquote" | "center" | "details" | "dialog"
             | "dir" | "div" | "dl" | "fieldset" | "figcaption" | "figure" | "footer" | "form"
-            | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "header" | "hgroup" | "hr"
-            | "listing" | "main" | "menu" | "nav" | "ol" | "p" | "plaintext" | "pre"
-            | "search" | "section" | "summary" | "table" | "ul" | "xmp" => {
+            | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "header" | "hgroup" | "hr" | "listing"
+            | "main" | "menu" | "nav" | "ol" | "p" | "plaintext" | "pre" | "search" | "section"
+            | "summary" | "table" | "ul" | "xmp" => {
                 return Some("this element cannot be child of <p>");
             }
             _ => {}

@@ -14,10 +14,33 @@ pub fn closing_tag_omitted(current: &str, next: Option<&str>) -> bool {
         "p" => matches!(
             next,
             Some(
-                "address" | "article" | "aside" | "blockquote" | "div" | "dl"
-                    | "fieldset" | "footer" | "form" | "h1" | "h2" | "h3" | "h4"
-                    | "h5" | "h6" | "header" | "hgroup" | "hr" | "main" | "menu"
-                    | "nav" | "ol" | "p" | "pre" | "section" | "table" | "ul"
+                "address"
+                    | "article"
+                    | "aside"
+                    | "blockquote"
+                    | "div"
+                    | "dl"
+                    | "fieldset"
+                    | "footer"
+                    | "form"
+                    | "h1"
+                    | "h2"
+                    | "h3"
+                    | "h4"
+                    | "h5"
+                    | "h6"
+                    | "header"
+                    | "hgroup"
+                    | "hr"
+                    | "main"
+                    | "menu"
+                    | "nav"
+                    | "ol"
+                    | "p"
+                    | "pre"
+                    | "section"
+                    | "table"
+                    | "ul"
             ) | None
         ),
         "rt" | "rp" => matches!(next, Some("rt" | "rp") | None),

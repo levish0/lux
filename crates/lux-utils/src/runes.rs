@@ -1,7 +1,6 @@
 /// Svelte 5 rune definitions.
 ///
 /// Reference: `utils.js` lines 430-473
-
 use phf::phf_set;
 
 pub static RUNES: phf::Set<&str> = phf_set! {
