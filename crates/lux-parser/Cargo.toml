@@ -20,6 +20,7 @@ oxc_span = { workspace = true }
 oxc_syntax = { workspace = true }
 oxc_diagnostics = { workspace = true }
 phf = { workspace = true }
+rustc-hash = {workspace = true}
 
 [dev-dependencies]
 serde_json = { workspace = true }

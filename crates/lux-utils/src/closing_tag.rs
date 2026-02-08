@@ -1,6 +1,6 @@
-/// HTML implicit closing tag rules.
-///
-/// Reference: `html-tree-validation.js`
+//! HTML implicit closing tag rules.
+//!
+//! Reference: `html-tree-validation.js`
 
 /// Check if `current` element's closing tag is omitted when `next` sibling appears.
 ///

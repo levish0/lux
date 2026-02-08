@@ -1,8 +1,8 @@
-/// CSS scoping hash generation.
-///
-/// Algorithm: DJB2 variant matching Svelte's `hash()` in `utils.js`.
-/// Iterates UTF-16 code units in reverse, XORing with the running hash.
-/// Output is an unsigned 32-bit integer formatted as base-36.
+//! CSS scoping hash generation.
+//!
+//! Algorithm: DJB2 variant matching Svelte's `hash()` in `utils.js`.
+//! Iterates UTF-16 code units in reverse, XORing with the running hash.
+//! Output is an unsigned 32-bit integer formatted as base-36.
 
 /// Generate a hash string for CSS scoping.
 ///

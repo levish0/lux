@@ -58,7 +58,6 @@ fn read_static_attribute<'a>(input: &mut Input<'a>) -> Result<Attribute<'a>> {
         span: Span::new(start as u32, end as u32),
         name,
         value,
-        metadata: None,
     })
 }
 

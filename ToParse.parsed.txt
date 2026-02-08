@@ -1,7 +1,7 @@
 Root {
     span: Span {
         start: 0,
-        end: 160,
+        end: 150,
     },
     options: None,
     fragment: Fragment {
@@ -9,34 +9,34 @@ Root {
             Text(
                 Text {
                     span: Span {
-                        start: 97,
-                        end: 101,
+                        start: 91,
+                        end: 93,
                     },
-                    data: "\r\n\r\n",
-                    raw: "\r\n\r\n",
+                    data: "\n\n",
+                    raw: "\n\n",
                 },
             ),
             RegularElement(
                 RegularElement {
                     span: Span {
-                        start: 101,
-                        end: 160,
+                        start: 93,
+                        end: 150,
                     },
                     name: "button",
                     attributes: [
                         OnDirective(
                             OnDirective {
                                 span: Span {
-                                    start: 109,
-                                    end: 129,
+                                    start: 101,
+                                    end: 121,
                                 },
                                 name: "click",
                                 expression: Some(
                                     Identifier(
                                         IdentifierReference {
                                             span: Span {
-                                                start: 119,
-                                                end: 128,
+                                                start: 111,
+                                                end: 120,
                                             },
                                             name: "increment",
                                             reference_id: Cell {
@@ -55,24 +55,24 @@ Root {
                             Text(
                                 Text {
                                     span: Span {
-                                        start: 130,
-                                        end: 142,
+                                        start: 122,
+                                        end: 133,
                                     },
-                                    data: "\r\n  clicks: ",
-                                    raw: "\r\n  clicks: ",
+                                    data: "\n  clicks: ",
+                                    raw: "\n  clicks: ",
                                 },
                             ),
                             ExpressionTag(
                                 ExpressionTag {
                                     span: Span {
-                                        start: 142,
-                                        end: 149,
+                                        start: 133,
+                                        end: 140,
                                     },
                                     expression: Identifier(
                                         IdentifierReference {
                                             span: Span {
-                                                start: 143,
-                                                end: 148,
+                                                start: 134,
+                                                end: 139,
                                             },
                                             name: "count",
                                             reference_id: Cell {
@@ -86,11 +86,11 @@ Root {
                             Text(
                                 Text {
                                     span: Span {
-                                        start: 149,
-                                        end: 151,
+                                        start: 140,
+                                        end: 141,
                                     },
-                                    data: "\r\n",
-                                    raw: "\r\n",
+                                    data: "\n",
+                                    raw: "\n",
                                 },
                             ),
                         ],
@@ -109,15 +109,15 @@ Root {
         Script {
             span: Span {
                 start: 0,
-                end: 97,
+                end: 91,
             },
             context: Default,
             content: Program {
                 span: Span {
                     start: 0,
-                    end: 88,
+                    end: 82,
                 },
-                source_text: "                  \r\n  let count = 0;\r\n\r\n  function increment() {\r\n    count += 1;\r\n  }\r\n",
+                source_text: "                  \n  let count = 0;\n\n  function increment() {\n    count += 1;\n  }\n",
                 comments: Vec(
                     [],
                 ),
@@ -130,21 +130,21 @@ Root {
                         VariableDeclaration(
                             VariableDeclaration {
                                 span: Span {
-                                    start: 22,
-                                    end: 36,
+                                    start: 21,
+                                    end: 35,
                                 },
                                 declarations: Vec(
                                     [
                                         VariableDeclarator {
                                             span: Span {
-                                                start: 26,
-                                                end: 35,
+                                                start: 25,
+                                                end: 34,
                                             },
                                             id: BindingIdentifier(
                                                 BindingIdentifier {
                                                     span: Span {
-                                                        start: 26,
-                                                        end: 31,
+                                                        start: 25,
+                                                        end: 30,
                                                     },
                                                     name: "count",
                                                     symbol_id: Cell {
@@ -157,8 +157,8 @@ Root {
                                                 NumericLiteral(
                                                     NumericLiteral {
                                                         span: Span {
-                                                            start: 34,
-                                                            end: 35,
+                                                            start: 33,
+                                                            end: 34,
                                                         },
                                                         value: 0.0,
                                                         raw: Some(
@@ -180,14 +180,14 @@ Root {
                         FunctionDeclaration(
                             Function {
                                 span: Span {
-                                    start: 42,
-                                    end: 86,
+                                    start: 39,
+                                    end: 81,
                                 },
                                 id: Some(
                                     BindingIdentifier {
                                         span: Span {
-                                            start: 51,
-                                            end: 60,
+                                            start: 48,
+                                            end: 57,
                                         },
                                         name: "increment",
                                         symbol_id: Cell {
@@ -199,8 +199,8 @@ Root {
                                 this_param: None,
                                 params: FormalParameters {
                                     span: Span {
-                                        start: 60,
-                                        end: 62,
+                                        start: 57,
+                                        end: 59,
                                     },
                                     items: Vec(
                                         [],
@@ -212,8 +212,8 @@ Root {
                                 body: Some(
                                     FunctionBody {
                                         span: Span {
-                                            start: 63,
-                                            end: 86,
+                                            start: 60,
+                                            end: 81,
                                         },
                                         directives: Vec(
                                             [],
@@ -223,20 +223,20 @@ Root {
                                                 ExpressionStatement(
                                                     ExpressionStatement {
                                                         span: Span {
-                                                            start: 70,
-                                                            end: 81,
+                                                            start: 66,
+                                                            end: 77,
                                                         },
                                                         expression: AssignmentExpression(
                                                             AssignmentExpression {
                                                                 span: Span {
-                                                                    start: 70,
-                                                                    end: 80,
+                                                                    start: 66,
+                                                                    end: 76,
                                                                 },
                                                                 left: AssignmentTargetIdentifier(
                                                                     IdentifierReference {
                                                                         span: Span {
-                                                                            start: 70,
-                                                                            end: 75,
+                                                                            start: 66,
+                                                                            end: 71,
                                                                         },
                                                                         name: "count",
                                                                         reference_id: Cell {
@@ -247,8 +247,8 @@ Root {
                                                                 right: NumericLiteral(
                                                                     NumericLiteral {
                                                                         span: Span {
-                                                                            start: 79,
-                                                                            end: 80,
+                                                                            start: 75,
+                                                                            end: 76,
                                                                         },
                                                                         value: 1.0,
                                                                         raw: Some(

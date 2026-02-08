@@ -1,7 +1,6 @@
 use oxc_ast::ast::{Expression, IdentifierReference};
 
 use crate::common::Span;
-use crate::metadata::ExpressionMetadata;
 
 #[derive(Debug)]
 pub struct Text<'a> {
@@ -33,21 +32,18 @@ pub enum JsCommentKind {
 pub struct ExpressionTag<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
-    pub metadata: Option<ExpressionMetadata>,
 }
 
 #[derive(Debug)]
 pub struct HtmlTag<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
-    pub metadata: Option<ExpressionMetadata>,
 }
 
 #[derive(Debug)]
 pub struct ConstTag<'a> {
     pub span: Span,
     pub declaration: ConstDeclaration<'a>,
-    pub metadata: Option<ExpressionMetadata>,
 }
 
 #[derive(Debug)]
@@ -67,14 +63,12 @@ pub struct DebugTag<'a> {
 pub struct RenderTag<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
-    pub metadata: Option<crate::metadata::RenderTagMetadata>,
 }
 
 #[derive(Debug)]
 pub struct AttachTag<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
-    pub metadata: Option<ExpressionMetadata>,
 }
 
 /// Either Text or ExpressionTag — used in attribute value sequences.

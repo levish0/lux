@@ -1,7 +1,6 @@
 use oxc_ast::ast::Expression;
 
 use crate::common::Span;
-use crate::metadata::{AttributeMetadata, ExpressionMetadata};
 use crate::template::directive::{
     AnimateDirective, BindDirective, ClassDirective, LetDirective, OnDirective, StyleDirective,
     TransitionDirective, UseDirective,
@@ -29,7 +28,6 @@ pub struct Attribute<'a> {
     pub span: Span,
     pub name: &'a str,
     pub value: AttributeValue<'a>,
-    pub metadata: Option<AttributeMetadata>,
 }
 
 #[derive(Debug)]
@@ -46,5 +44,4 @@ pub enum AttributeValue<'a> {
 pub struct SpreadAttribute<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
-    pub metadata: Option<ExpressionMetadata>,
 }

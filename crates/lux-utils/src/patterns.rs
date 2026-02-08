@@ -1,9 +1,9 @@
-/// Shared patterns for validation and parsing.
-///
-/// Reference: `compiler/phases/patterns.js`
-///
-/// Most patterns are implemented as inline functions for performance,
-/// avoiding regex overhead where possible.
+//! Shared patterns for validation and parsing.
+//!
+//! Reference: `compiler/phases/patterns.js`
+//!
+//! Most patterns are implemented as inline functions for performance,
+//! avoiding regex overhead where possible.
 
 pub fn is_valid_identifier(name: &str) -> bool {
     let mut chars = name.chars();

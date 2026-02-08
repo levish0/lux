@@ -39,6 +39,5 @@ pub fn parse_const_tag<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragme
             id,
             init,
         },
-        metadata: None,
     }))
 }

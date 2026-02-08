@@ -36,7 +36,6 @@ pub fn parse_if_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragmen
         test,
         consequent,
         alternate,
-        metadata: None,
     }))
 }
 
@@ -70,7 +69,6 @@ fn parse_if_alternate<'a>(input: &mut Input<'a>) -> Result<Option<Fragment<'a>>>
             test,
             consequent,
             alternate,
-            metadata: None,
         });
 
         Ok(Some(Fragment {

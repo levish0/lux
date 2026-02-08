@@ -16,4 +16,3 @@ oxc_span = { workspace = true }
 oxc_syntax = { workspace = true }
 oxc_estree = { workspace = true }
 serde = { workspace = true }
-rustc-hash = { workspace = true }

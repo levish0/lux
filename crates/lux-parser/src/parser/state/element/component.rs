@@ -52,6 +52,5 @@ pub fn parse_component<'a>(
         name,
         attributes,
         fragment,
-        metadata: None,
     }))
 }

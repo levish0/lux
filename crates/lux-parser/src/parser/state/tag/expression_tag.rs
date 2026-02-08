@@ -22,6 +22,5 @@ pub fn parse_expression_tag<'a>(input: &mut Input<'a>, start: usize) -> Result<F
     Ok(FragmentNode::ExpressionTag(ExpressionTag {
         span: Span::new(start as u32, end as u32),
         expression,
-        metadata: None,
     }))
 }

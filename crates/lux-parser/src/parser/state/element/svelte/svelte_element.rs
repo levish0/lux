@@ -22,6 +22,5 @@ pub fn parse_svelte_element<'a>(
         tag,
         attributes,
         fragment,
-        metadata: None,
     }))
 }

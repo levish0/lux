@@ -30,6 +30,5 @@ pub fn parse_key_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragme
         span: Span::new(start as u32, end as u32),
         expression,
         fragment,
-        metadata: None,
     }))
 }

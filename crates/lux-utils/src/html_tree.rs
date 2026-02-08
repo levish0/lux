@@ -1,6 +1,6 @@
-/// HTML nesting validation.
-///
-/// Reference: `html-tree-validation.js`
+//! HTML nesting validation.
+//!
+//! Reference: `html-tree-validation.js`
 
 /// Validate that `child` tag is allowed as a direct child of `parent` tag.
 ///

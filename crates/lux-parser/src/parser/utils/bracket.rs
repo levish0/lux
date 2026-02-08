@@ -1,7 +1,7 @@
-/// Bracket matching for expression boundary detection.
-///
-/// Tracks (), [], {}, strings, template literals, comments, and regex
-/// to find the matching close bracket.
+//! Bracket matching for expression boundary detection.
+//!
+//! Tracks (), [], {}, strings, template literals, comments, and regex
+//! to find the matching close bracket.
 
 /// Find the position of the matching close bracket.
 ///
@@ -12,6 +12,7 @@ pub fn find_matching_bracket(input: &str, start: usize, open: char) -> Option<us
         '{' => '}',
         '(' => ')',
         '[' => ']',
+        '<' => '>',
         _ => return None,
     };
 

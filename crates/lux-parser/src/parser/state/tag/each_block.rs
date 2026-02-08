@@ -85,6 +85,5 @@ pub fn parse_each_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragm
         fallback,
         index,
         key,
-        metadata: None,
     }))
 }

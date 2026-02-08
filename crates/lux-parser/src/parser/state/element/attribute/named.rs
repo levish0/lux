@@ -55,7 +55,6 @@ pub fn parse_named_attribute<'a>(input: &mut Input<'a>) -> Result<AttributeNode<
         span: Span::new(attr_start as u32, attr_end as u32),
         name,
         value,
-        metadata: None,
     }))
 }
 

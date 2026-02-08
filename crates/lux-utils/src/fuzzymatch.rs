@@ -1,11 +1,11 @@
-use strsim::jaro_winkler;
+//! Fuzzy string matching for error suggestions ("Did you mean ...?").
+//!
+//! Uses `strsim::jaro_winkler` for string similarity — handles transpositions
+//! well and gives prefix-matching bonus, ideal for typo correction.
+//! This intentionally differs from Svelte's custom n-gram implementation
+//! since it's only used for error messages, not compiled output.
 
-/// Fuzzy string matching for error suggestions ("Did you mean ...?").
-///
-/// Uses `strsim::jaro_winkler` for string similarity — handles transpositions
-/// well and gives prefix-matching bonus, ideal for typo correction.
-/// This intentionally differs from Svelte's custom n-gram implementation
-/// since it's only used for error messages, not compiled output.
+use strsim::jaro_winkler;
 
 /// Find the best fuzzy match for `name` among `candidates`.
 ///

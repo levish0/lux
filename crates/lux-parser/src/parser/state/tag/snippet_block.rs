@@ -35,6 +35,20 @@ pub fn parse_snippet_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fr
 
     skip_whitespace(input);
 
+    // Optional type parameters: <T, U>
+    let type_params = if input.state.ts {
+        let remaining: &str = &input.input;
+        if remaining.starts_with('<') {
+            read_type_params(input)?
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    skip_whitespace(input);
+
     // Optional parameters: (a, b, c)
     let parameters = if opt(literal("(")).parse_next(input)?.is_some() {
         let params = parse_snippet_params(input)?;
@@ -55,10 +69,30 @@ pub fn parse_snippet_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fr
     Ok(FragmentNode::SnippetBlock(SnippetBlock {
         span: Span::new(start as u32, end as u32),
         expression,
+        type_params,
         parameters,
         body,
-        metadata: None,
     }))
+}
+
+fn read_type_params<'a>(input: &mut Input<'a>) -> Result<Option<&'a str>> {
+    use crate::parser::utils::bracket::find_matching_bracket;
+
+    let template = input.state.template;
+    let pos = input.current_token_start();
+
+    // Find matching '>'
+    if let Some(end) = find_matching_bracket(template, pos + 1, '<') {
+        let params = &template[pos..=end];
+        // Advance input past the angle brackets
+        let advance = end + 1 - pos;
+        for _ in 0..advance {
+            let _: char = winnow::token::any.parse_next(input)?;
+        }
+        Ok(Some(params))
+    } else {
+        Ok(None)
+    }
 }
 
 fn parse_snippet_params<'a>(input: &mut Input<'a>) -> Result<Vec<Expression<'a>>> {

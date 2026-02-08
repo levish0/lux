@@ -55,8 +55,8 @@ pub fn parse_element_body<'a>(input: &mut Input<'a>, name: &str) -> Result<(Frag
 
         // Graceful closing: consume </name> only if it matches
         let remaining: &str = &input.input;
-        if remaining.starts_with("</") {
-            let after_slash = &remaining[2..].trim_start();
+        if let Some(stripped) = remaining.strip_prefix("</") {
+            let after_slash = stripped.trim_start();
             let name_end = after_slash
                 .find(|c: char| !is_tag_name_char(c))
                 .unwrap_or(after_slash.len());
@@ -182,7 +182,6 @@ fn read_textarea_content<'a>(input: &mut Input<'a>) -> Result<Vec<FragmentNode<'
             nodes.push(FragmentNode::ExpressionTag(ExpressionTag {
                 span: Span::new(expr_start as u32, expr_end as u32),
                 expression,
-                metadata: None,
             }));
         } else {
             if text_start.is_none() {

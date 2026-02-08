@@ -27,7 +27,6 @@ pub fn parse_directive<'a>(
                 span,
                 name,
                 expression,
-                metadata: None,
             }))
         }
         "on" => {
@@ -41,7 +40,6 @@ pub fn parse_directive<'a>(
                 name,
                 expression,
                 modifiers,
-                metadata: None,
             }))
         }
         "class" => {
@@ -50,7 +48,6 @@ pub fn parse_directive<'a>(
                 span,
                 name,
                 expression,
-                metadata: None,
             }))
         }
         "style" => {
@@ -71,7 +68,6 @@ pub fn parse_directive<'a>(
                 name,
                 value: style_value,
                 modifiers,
-                metadata: None,
             }))
         }
         "use" => {
@@ -80,7 +76,6 @@ pub fn parse_directive<'a>(
                 span,
                 name,
                 expression,
-                metadata: None,
             }))
         }
         "let" => {
@@ -97,7 +92,6 @@ pub fn parse_directive<'a>(
                 span,
                 name,
                 expression,
-                metadata: None,
             }))
         }
         "in" => build_transition(name, value, modifiers_str, span, true, false),
@@ -127,7 +121,6 @@ fn build_transition<'a>(
         modifiers,
         intro,
         outro,
-        metadata: None,
     }))
 }
 

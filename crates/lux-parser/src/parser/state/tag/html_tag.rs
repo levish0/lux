@@ -25,6 +25,5 @@ pub fn parse_html_tag<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragmen
     Ok(FragmentNode::HtmlTag(HtmlTag {
         span: Span::new(start as u32, end as u32),
         expression,
-        metadata: None,
     }))
 }

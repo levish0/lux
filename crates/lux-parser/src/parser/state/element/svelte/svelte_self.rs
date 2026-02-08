@@ -20,6 +20,5 @@ pub fn parse_svelte_self<'a>(
         name,
         attributes,
         fragment,
-        metadata: None,
     }))
 }

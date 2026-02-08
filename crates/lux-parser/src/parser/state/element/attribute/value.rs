@@ -71,7 +71,6 @@ fn parse_expression_value<'a>(input: &mut Input<'a>) -> Result<AttributeValue<'a
     Ok(AttributeValue::ExpressionTag(ExpressionTag {
         span: Span::new(start as u32, end as u32),
         expression,
-        metadata: None,
     }))
 }
 
@@ -143,7 +142,6 @@ fn read_sequence<'a>(input: &mut Input<'a>, quote: u8) -> Result<Vec<TextOrExpre
             chunks.push(TextOrExpressionTag::ExpressionTag(ExpressionTag {
                 span: Span::new(expr_start as u32, expr_end as u32),
                 expression,
-                metadata: None,
             }));
         } else {
             if text_start.is_none() {

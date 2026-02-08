@@ -25,6 +25,5 @@ pub fn parse_render_tag<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragm
     Ok(FragmentNode::RenderTag(RenderTag {
         span: Span::new(start as u32, end as u32),
         expression,
-        metadata: None,
     }))
 }

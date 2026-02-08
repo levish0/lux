@@ -1,7 +1,6 @@
 use oxc_ast::ast::Expression;
 
 use crate::common::Span;
-use crate::metadata::{ComponentMetadata, RegularElementMetadata, SvelteElementMetadata};
 use crate::template::attribute::AttributeNode;
 use crate::template::root::Fragment;
 
@@ -11,7 +10,6 @@ pub struct RegularElement<'a> {
     pub name: &'a str,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
-    pub metadata: Option<RegularElementMetadata>,
 }
 
 #[derive(Debug)]
@@ -20,7 +18,6 @@ pub struct Component<'a> {
     pub name: &'a str,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
-    pub metadata: Option<ComponentMetadata>,
 }
 
 #[derive(Debug)]
@@ -30,7 +27,6 @@ pub struct SvelteComponent<'a> {
     pub expression: Expression<'a>,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
-    pub metadata: Option<ComponentMetadata>,
 }
 
 #[derive(Debug)]
@@ -40,7 +36,6 @@ pub struct SvelteElement<'a> {
     pub tag: Expression<'a>,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
-    pub metadata: Option<SvelteElementMetadata>,
 }
 
 #[derive(Debug)]
@@ -49,7 +44,6 @@ pub struct SvelteSelf<'a> {
     pub name: &'a str,
     pub attributes: Vec<AttributeNode<'a>>,
     pub fragment: Fragment<'a>,
-    pub metadata: Option<ComponentMetadata>,
 }
 
 // --- Simple svelte elements (same shape) ---

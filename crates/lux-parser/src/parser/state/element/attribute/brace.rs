@@ -39,7 +39,6 @@ fn parse_spread<'a>(input: &mut Input<'a>, start: usize) -> Result<AttributeNode
     Ok(AttributeNode::SpreadAttribute(SpreadAttribute {
         span: Span::new(start as u32, end as u32),
         expression,
-        metadata: None,
     }))
 }
 
@@ -54,7 +53,6 @@ fn parse_attach<'a>(input: &mut Input<'a>, start: usize) -> Result<AttributeNode
     Ok(AttributeNode::AttachTag(AttachTag {
         span: Span::new(start as u32, end as u32),
         expression,
-        metadata: None,
     }))
 }
 
@@ -68,14 +66,12 @@ fn parse_shorthand<'a>(input: &mut Input<'a>, start: usize) -> Result<AttributeN
     let value = AttributeValue::ExpressionTag(ExpressionTag {
         span: Span::new(start as u32, end as u32),
         expression,
-        metadata: None,
     });
 
     Ok(AttributeNode::Attribute(Attribute {
         span: Span::new(start as u32, end as u32),
         name,
         value,
-        metadata: None,
     }))
 }
 

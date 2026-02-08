@@ -98,6 +98,5 @@ pub fn parse_await_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Frag
         pending,
         then,
         catch,
-        metadata: None,
     }))
 }

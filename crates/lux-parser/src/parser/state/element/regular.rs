@@ -20,6 +20,5 @@ pub fn parse_regular_element<'a>(
         name,
         attributes,
         fragment,
-        metadata: None,
     }))
 }
