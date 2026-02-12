@@ -37,7 +37,7 @@ pub fn parse_debug_tag<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragme
     }))
 }
 
-fn extract_identifiers<'a>(expr: Expression<'a>) -> Vec<IdentifierReference<'a>> {
+fn extract_identifiers(expr: Expression) -> Vec<IdentifierReference> {
     match expr {
         Expression::Identifier(id) => vec![id.unbox()],
         Expression::SequenceExpression(seq) => {
