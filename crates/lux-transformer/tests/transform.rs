@@ -288,6 +288,36 @@ fn transform_generates_svelte_self_runtime_render_path() {
     assert!(result.js.contains("__lux_render"));
 }
 
+#[test]
+fn transform_generates_slot_element_runtime_fallback_path() {
+    let source = "<slot><p>fallback</p></slot>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("<slot"));
+    assert!(result.js.contains("__lux_slot_fn"));
+    assert!(result.js.contains("<p"));
+}
+
+#[test]
+fn transform_component_props_include_default_slots_object() {
+    let source = "<Child>hi</Child>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("children: function()"));
+    assert!(result.js.contains("$$slots"));
+    assert!(result.js.contains("default: function()"));
+}
+
 fn assert_component_js_payload(js: &str) {
     assert!(
         js.contains("const __lux_template = "),

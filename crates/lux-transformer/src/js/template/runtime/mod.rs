@@ -15,8 +15,8 @@ use self::blocks::{
     render_each_block_expression, render_if_block_expression, render_snippet_block_declaration,
 };
 use self::elements::{
-    render_component_expression, render_regular_element_expression, render_svelte_component_expression,
-    render_svelte_element_expression, render_svelte_self_expression,
+    render_component_expression, render_regular_element_expression, render_slot_element_expression,
+    render_svelte_component_expression, render_svelte_element_expression, render_svelte_self_expression,
 };
 use self::expr::{
     call_iife, call_static_method, escape_html_expression, string_expr, stringify_expression,
@@ -136,13 +136,7 @@ fn render_node_expression<'a>(
             &element.fragment,
             scope,
         ),
-        FragmentNode::SlotElement(element) => render_regular_element_expression(
-            ast,
-            element.name,
-            &element.attributes,
-            &element.fragment,
-            scope,
-        ),
+        FragmentNode::SlotElement(element) => render_slot_element_expression(ast, element, scope),
 
         FragmentNode::ExpressionTag(tag) => escape_html_expression(
             ast,

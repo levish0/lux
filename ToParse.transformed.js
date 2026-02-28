@@ -1,7 +1,7 @@
-const __lux_template = "\n\n<input>\n";
-const __lux_css = null;
-const __lux_css_hash = null;
-const __lux_css_scope = null;
+const __lux_template = "\n\n<section class=\"hero\" id=\"top\">\n    <div class=\"hero-grid container\">\n        <div class=\"hero-copy\">\n            \n            <h1>\n                Drop-in behavior target.<br>\n                <span>Native parser speed.</span>\n            </h1>\n            <p class=\"hero-desc\">\n                Lux keeps the Svelte compiler pipeline explicit: parse, analyze, and transform run as\n                separate Rust crates so we can optimize each stage without losing compatibility focus.\n            </p>\n\n            \n\n            <p class=\"hero-note\"></p>\n        </div>\n\n        \n    </div>\n</section>\n\n\n";
+const __lux_css = ".hero.svelte-qcfe1q { padding: 3rem 0 4rem; }\n.hero-grid.svelte-qcfe1q { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: start; }\n.hero-copy.svelte-qcfe1q { padding-top: 1.25rem; }\n.hero-badge { margin-bottom: 1.1rem; border-color: color-mix(in srgb, var(--primary) 35%, var(--border)); font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.65rem; }\nh1.svelte-qcfe1q { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 700; font-size: clamp(1.95rem, 4.2vw, 2.75rem); line-height: 1.1; letter-spacing: -0.04em; margin-bottom: 1rem; }\nh1.svelte-qcfe1q span:where(.svelte-qcfe1q) { color: var(--primary); }\n.hero-desc.svelte-qcfe1q { color: var(--muted-foreground); line-height: 1.75; max-width: 58ch; margin-bottom: 1.35rem; }\n.install-tabs-shell { max-width: 100%; gap: 0.75rem; }\n.install-tab-list { width: fit-content; }\n.hero-note.svelte-qcfe1q { margin-top: 0.8rem; font-size: 0.82rem; color: var(--muted-foreground); }\n.bench-card { padding-bottom: 0.25rem; background: color-mix(in srgb, var(--card) 88%, transparent); }\n.bench-header { gap: 1rem; }\n.bench-header-row.svelte-qcfe1q { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }\n.bench-title { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.98rem; }\n.bench-subtitle { margin-top: 0.4rem; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.72rem; }\n.method-trigger { display: inline-flex; align-items: center; gap: 0.35rem; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.35rem 0.5rem; font-size: 0.72rem; color: var(--muted-foreground); background: transparent; }\n.method-trigger:hover { color: var(--foreground); border-color: color-mix(in srgb, var(--foreground) 18%, var(--border)); }\n.method-dialog { max-width: 720px; }\n.method-metrics.svelte-qcfe1q { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.75rem; margin-bottom: 1rem; }\n.method-metrics.svelte-qcfe1q div:where(.svelte-qcfe1q) { padding: 0.75rem; border-radius: 0.65rem; border: 1px solid color-mix(in srgb, var(--border) 80%, transparent); background: color-mix(in srgb, var(--muted) 40%, transparent); }\n.method-metrics.svelte-qcfe1q span:where(.svelte-qcfe1q) { display: block; font-size: 0.72rem; color: var(--muted-foreground); margin-bottom: 0.3rem; }\n.method-metrics.svelte-qcfe1q strong:where(.svelte-qcfe1q) { font-size: 0.8rem; line-height: 1.35; }\n.bench-tabs-shell { gap: 0.6rem; }\n.bench-tab-list { width: fit-content; }\n.bench-body { display: flex; flex-direction: column; gap: 0.75rem; }\n.bench-row.svelte-qcfe1q { display: grid; grid-template-columns: 150px 1fr 88px; align-items: center; gap: 0.75rem; }\n.bench-tool.svelte-qcfe1q { font-size: 0.75rem; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--muted-foreground); text-align: right; }\n.bench-track.svelte-qcfe1q { height: 1.55rem; border-radius: 0.45rem; background: color-mix(in srgb, var(--background) 88%, var(--card)); overflow: hidden; position: relative; }\n.bench-fill.svelte-qcfe1q { height: 100%; transition: width 0.35s ease; }\n.bench-fill-baseline.svelte-qcfe1q { background: linear-gradient(\n                90deg,\n                color-mix(in srgb, var(--muted-foreground) 70%, transparent),\n                color-mix(in srgb, var(--muted-foreground) 45%, transparent)\n        ); }\n.bench-fill-fast.svelte-qcfe1q { background: linear-gradient(\n                90deg,\n                color-mix(in srgb, var(--primary) 95%, transparent),\n                color-mix(in srgb, var(--primary) 70%, #5858ff)\n        ); box-shadow: 0 0 14px color-mix(in srgb, var(--primary) 35%, transparent); }\n.bench-time.svelte-qcfe1q { font-size: 0.81rem; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align: right; }\n.bench-time-fast.svelte-qcfe1q { color: var(--primary); font-weight: 600; }\n.bench-summary.svelte-qcfe1q { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-top: 0.2rem; }\n.speed-pill.svelte-qcfe1q { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.6rem; border-radius: 999px; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.8rem; border: 1px solid color-mix(in srgb, var(--primary) 40%, var(--border)); background: color-mix(in srgb, var(--primary) 12%, transparent); }\n.bench-summary.svelte-qcfe1q p:where(.svelte-qcfe1q) { font-size: 0.8rem; color: var(--muted-foreground); }\n.bench-meta.svelte-qcfe1q { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; color: var(--muted-foreground); font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }\n.dot.svelte-qcfe1q { opacity: 0.5; }\n@media (max-width: 980px) { .hero-grid.svelte-qcfe1q { grid-template-columns: 1fr; } .bench-row.svelte-qcfe1q { grid-template-columns: 92px 1fr 72px; gap: 0.45rem; } .bench-tool.svelte-qcfe1q { text-align: left; font-size: 0.66rem; } .bench-time.svelte-qcfe1q { font-size: 0.68rem; } .bench-summary.svelte-qcfe1q { flex-direction: column; align-items: flex-start; } .method-metrics.svelte-qcfe1q { grid-template-columns: 1fr; } }\n@media (max-width: 760px) { .hero.svelte-qcfe1q { padding-top: 2rem; } }";
+const __lux_css_hash = "qcfe1q";
+const __lux_css_scope = "svelte-qcfe1q";
 const __lux_has_dynamic = true;
 export { __lux_template as template, __lux_css as css, __lux_css_hash as cssHash, __lux_css_scope as cssScope, __lux_has_dynamic as hasDynamic };
 export default {
@@ -10,13 +10,874 @@ export default {
 	cssHash: __lux_css_hash,
 	cssScope: __lux_css_scope,
 	hasDynamic: __lux_has_dynamic,
-	render: function(_props = {}) {
+	render: function __lux_render(_props = {}) {
+		_props.__lux_self == null && (_props.__lux_self = __lux_render);
 		return function() {
 			let __lux_chunks = [];
 			__lux_chunks.push("\n\n");
-			__lux_chunks.push("<input" + (" value=\"" + String(function({ v, value }) {
-				return () => value, (v) => value = v.toLowerCase();
-			}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + ">");
+			__lux_chunks.push("<section" + (" class=\"" + ("" + "hero") + "\"") + (" id=\"" + ("" + "top") + "\"") + ">" + function() {
+				let __lux_chunks = [];
+				__lux_chunks.push("\n    ");
+				__lux_chunks.push("<div" + (" class=\"" + ("" + "hero-grid container") + "\"") + ">" + function() {
+					let __lux_chunks = [];
+					__lux_chunks.push("\n        ");
+					__lux_chunks.push("<div" + (" class=\"" + ("" + "hero-copy") + "\"") + ">" + function() {
+						let __lux_chunks = [];
+						__lux_chunks.push("\n            ");
+						__lux_chunks.push(String(function() {
+							const __lux_component = function({ Badge }) {
+								return Badge;
+							}(_props);
+							const __lux_component_props = {
+								variant: "" + "outline",
+								class: "" + "hero-badge",
+								children: function() {
+									return function() {
+										let __lux_chunks = [];
+										__lux_chunks.push("A Blazing-Fast Compiler for Svelte 5");
+										return __lux_chunks.join("");
+									}();
+								}
+							};
+							return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+						}() ?? ""));
+						__lux_chunks.push("\n            ");
+						__lux_chunks.push("<h1" + ">" + function() {
+							let __lux_chunks = [];
+							__lux_chunks.push("\n                Drop-in behavior target.");
+							__lux_chunks.push("<br" + ">");
+							__lux_chunks.push("\n                ");
+							__lux_chunks.push("<span" + ">" + function() {
+								let __lux_chunks = [];
+								__lux_chunks.push("Native parser speed.");
+								return __lux_chunks.join("");
+							}() + "</span>");
+							__lux_chunks.push("\n            ");
+							return __lux_chunks.join("");
+						}() + "</h1>");
+						__lux_chunks.push("\n            ");
+						__lux_chunks.push("<p" + (" class=\"" + ("" + "hero-desc") + "\"") + ">" + function() {
+							let __lux_chunks = [];
+							__lux_chunks.push("\n                Lux keeps the Svelte compiler pipeline explicit: parse, analyze, and transform run as\n                separate Rust crates so we can optimize each stage without losing compatibility focus.\n            ");
+							return __lux_chunks.join("");
+						}() + "</p>");
+						__lux_chunks.push("\n\n            ");
+						__lux_chunks.push(String(function() {
+							const __lux_component = function({ Tabs.Root }) {
+								return Tabs.Root;
+							}(_props);
+							const __lux_component_props = {
+								value: function({ commandPreset }) {
+									return commandPreset;
+								}(_props),
+								class: "" + "install-tabs-shell",
+								children: function() {
+									return function() {
+										let __lux_chunks = [];
+										__lux_chunks.push("\n                ");
+										__lux_chunks.push(String(function() {
+											const __lux_component = function({ Tabs.List }) {
+												return Tabs.List;
+											}(_props);
+											const __lux_component_props = {
+												class: "" + "install-tab-list",
+												children: function() {
+													return function() {
+														let __lux_chunks = [];
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push(Array.from(function({ commandPresets }) {
+															return commandPresets;
+														}(_props) ?? []).map(function(item) {
+															return function() {
+																let __lux_chunks = [];
+																__lux_chunks.push("\n                        ");
+																__lux_chunks.push(String(function() {
+																	const __lux_component = function({ Tabs.Trigger }) {
+																		return Tabs.Trigger;
+																	}(_props);
+																	const __lux_component_props = {
+																		value: item.value,
+																		children: function() {
+																			return function() {
+																				let __lux_chunks = [];
+																				__lux_chunks.push(String(item.label ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+																				return __lux_chunks.join("");
+																			}();
+																		}
+																	};
+																	return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																}() ?? ""));
+																__lux_chunks.push("\n                    ");
+																return __lux_chunks.join("");
+															}();
+														}).join(""));
+														__lux_chunks.push("\n                ");
+														return __lux_chunks.join("");
+													}();
+												}
+											};
+											return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+										}() ?? ""));
+										__lux_chunks.push("\n\n                ");
+										__lux_chunks.push(Array.from(function({ commandPresets }) {
+											return commandPresets;
+										}(_props) ?? []).map(function(item) {
+											return function() {
+												let __lux_chunks = [];
+												__lux_chunks.push("\n                    ");
+												__lux_chunks.push(String(function() {
+													const __lux_component = function({ Tabs.Content }) {
+														return Tabs.Content;
+													}(_props);
+													const __lux_component_props = {
+														value: item.value,
+														children: function() {
+															return function() {
+																let __lux_chunks = [];
+																__lux_chunks.push("\n                        ");
+																__lux_chunks.push(String(function() {
+																	const __lux_component = function({ Snippet }) {
+																		return Snippet;
+																	}(_props);
+																	const __lux_component_props = { text: item.command };
+																	return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																}() ?? ""));
+																__lux_chunks.push("\n                    ");
+																return __lux_chunks.join("");
+															}();
+														}
+													};
+													return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+												}() ?? ""));
+												__lux_chunks.push("\n                ");
+												return __lux_chunks.join("");
+											}();
+										}).join(""));
+										__lux_chunks.push("\n            ");
+										return __lux_chunks.join("");
+									}();
+								}
+							};
+							return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+						}() ?? ""));
+						__lux_chunks.push("\n\n            ");
+						__lux_chunks.push("<p" + (" class=\"" + ("" + "hero-note") + "\"") + ">" + function() {
+							let __lux_chunks = [];
+							__lux_chunks.push(String(function({ activeInstall }) {
+								return activeInstall.note;
+							}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+							return __lux_chunks.join("");
+						}() + "</p>");
+						__lux_chunks.push("\n        ");
+						return __lux_chunks.join("");
+					}() + "</div>");
+					__lux_chunks.push("\n\n        ");
+					__lux_chunks.push(String(function() {
+						const __lux_component = function({ Card.Root }) {
+							return Card.Root;
+						}(_props);
+						const __lux_component_props = {
+							class: "" + "bench-card",
+							id: "" + "benchmark",
+							children: function() {
+								return function() {
+									let __lux_chunks = [];
+									__lux_chunks.push("\n            ");
+									__lux_chunks.push(String(function() {
+										const __lux_component = function({ Card.Header }) {
+											return Card.Header;
+										}(_props);
+										const __lux_component_props = {
+											class: "" + "bench-header",
+											children: function() {
+												return function() {
+													let __lux_chunks = [];
+													__lux_chunks.push("\n                ");
+													__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-header-row") + "\"") + ">" + function() {
+														let __lux_chunks = [];
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push("<div" + ">" + function() {
+															let __lux_chunks = [];
+															__lux_chunks.push("\n                        ");
+															__lux_chunks.push(String(function() {
+																const __lux_component = function({ Card.Title }) {
+																	return Card.Title;
+																}(_props);
+																const __lux_component_props = {
+																	class: "" + "bench-title",
+																	children: function() {
+																		return function() {
+																			let __lux_chunks = [];
+																			__lux_chunks.push("Parser benchmark snapshot");
+																			return __lux_chunks.join("");
+																		}();
+																	}
+																};
+																return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+															}() ?? ""));
+															__lux_chunks.push("\n                        ");
+															__lux_chunks.push(String(function() {
+																const __lux_component = function({ Card.Description }) {
+																	return Card.Description;
+																}(_props);
+																const __lux_component_props = {
+																	class: "" + "bench-subtitle",
+																	children: function() {
+																		return function() {
+																			let __lux_chunks = [];
+																			__lux_chunks.push("Source: `benchmarks/criterion/lux-parser/parser`.");
+																			return __lux_chunks.join("");
+																		}();
+																	}
+																};
+																return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+															}() ?? ""));
+															__lux_chunks.push("\n                    ");
+															return __lux_chunks.join("");
+														}() + "</div>");
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push(String(function() {
+															const __lux_component = function({ Dialog.Root }) {
+																return Dialog.Root;
+															}(_props);
+															const __lux_component_props = { children: function() {
+																return function() {
+																	let __lux_chunks = [];
+																	__lux_chunks.push("\n                        ");
+																	__lux_chunks.push(String(function() {
+																		const __lux_component = function({ Dialog.Trigger }) {
+																			return Dialog.Trigger;
+																		}(_props);
+																		const __lux_component_props = {
+																			class: "" + "method-trigger",
+																			children: function() {
+																				return function() {
+																					let __lux_chunks = [];
+																					__lux_chunks.push("\n                            ");
+																					__lux_chunks.push(String(function() {
+																						const __lux_component = function({ Icon }) {
+																							return Icon;
+																						}(_props);
+																						const __lux_component_props = {
+																							src: function({ InformationCircle }) {
+																								return InformationCircle;
+																							}(_props),
+																							solid: true,
+																							class: "" + "size-3.5"
+																						};
+																						return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																					}() ?? ""));
+																					__lux_chunks.push("\n                            ");
+																					__lux_chunks.push("<span" + ">" + function() {
+																						let __lux_chunks = [];
+																						__lux_chunks.push("Method");
+																						return __lux_chunks.join("");
+																					}() + "</span>");
+																					__lux_chunks.push("\n                        ");
+																					return __lux_chunks.join("");
+																				}();
+																			}
+																		};
+																		return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																	}() ?? ""));
+																	__lux_chunks.push("\n                        ");
+																	__lux_chunks.push(String(function() {
+																		const __lux_component = function({ Dialog.Content }) {
+																			return Dialog.Content;
+																		}(_props);
+																		const __lux_component_props = {
+																			class: "" + "method-dialog",
+																			children: function() {
+																				return function() {
+																					let __lux_chunks = [];
+																					__lux_chunks.push("\n                            ");
+																					__lux_chunks.push(String(function() {
+																						const __lux_component = function({ Dialog.Header }) {
+																							return Dialog.Header;
+																						}(_props);
+																						const __lux_component_props = { children: function() {
+																							return function() {
+																								let __lux_chunks = [];
+																								__lux_chunks.push("\n                                ");
+																								__lux_chunks.push(String(function() {
+																									const __lux_component = function({ Dialog.Title }) {
+																										return Dialog.Title;
+																									}(_props);
+																									const __lux_component_props = { children: function() {
+																										return function() {
+																											let __lux_chunks = [];
+																											__lux_chunks.push("Benchmark Methodology");
+																											return __lux_chunks.join("");
+																										}();
+																									} };
+																									return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																								}() ?? ""));
+																								__lux_chunks.push("\n                                ");
+																								__lux_chunks.push(String(function() {
+																									const __lux_component = function({ Dialog.Description }) {
+																										return Dialog.Description;
+																									}(_props);
+																									const __lux_component_props = { children: function() {
+																										return function() {
+																											let __lux_chunks = [];
+																											__lux_chunks.push("\n                                    Criterion result files committed in this repo were used directly.\n                                ");
+																											return __lux_chunks.join("");
+																										}();
+																									} };
+																									return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																								}() ?? ""));
+																								__lux_chunks.push("\n                            ");
+																								return __lux_chunks.join("");
+																							}();
+																						} };
+																						return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																					}() ?? ""));
+																					__lux_chunks.push("\n                            ");
+																					__lux_chunks.push("<div" + (" class=\"" + ("" + "method-metrics") + "\"") + ">" + function() {
+																						let __lux_chunks = [];
+																						__lux_chunks.push("\n                                ");
+																						__lux_chunks.push("<div" + ">" + function() {
+																							let __lux_chunks = [];
+																							__lux_chunks.push("\n                                    ");
+																							__lux_chunks.push("<span" + ">" + function() {
+																								let __lux_chunks = [];
+																								__lux_chunks.push("Input file");
+																								return __lux_chunks.join("");
+																							}() + "</span>");
+																							__lux_chunks.push("\n                                    ");
+																							__lux_chunks.push("<strong" + ">" + function() {
+																								let __lux_chunks = [];
+																								__lux_chunks.push("benchmarks/assets/benchmark.svelte");
+																								return __lux_chunks.join("");
+																							}() + "</strong>");
+																							__lux_chunks.push("\n                                ");
+																							return __lux_chunks.join("");
+																						}() + "</div>");
+																						__lux_chunks.push("\n                                ");
+																						__lux_chunks.push("<div" + ">" + function() {
+																							let __lux_chunks = [];
+																							__lux_chunks.push("\n                                    ");
+																							__lux_chunks.push("<span" + ">" + function() {
+																								let __lux_chunks = [];
+																								__lux_chunks.push("File size");
+																								return __lux_chunks.join("");
+																							}() + "</span>");
+																							__lux_chunks.push("\n                                    ");
+																							__lux_chunks.push("<strong" + ">" + function() {
+																								let __lux_chunks = [];
+																								__lux_chunks.push("2,234 bytes / 62 lines");
+																								return __lux_chunks.join("");
+																							}() + "</strong>");
+																							__lux_chunks.push("\n                                ");
+																							return __lux_chunks.join("");
+																						}() + "</div>");
+																						__lux_chunks.push("\n                                ");
+																						__lux_chunks.push("<div" + ">" + function() {
+																							let __lux_chunks = [];
+																							__lux_chunks.push("\n                                    ");
+																							__lux_chunks.push("<span" + ">" + function() {
+																								let __lux_chunks = [];
+																								__lux_chunks.push("CI speed range");
+																								return __lux_chunks.join("");
+																							}() + "</span>");
+																							__lux_chunks.push("\n                                    ");
+																							__lux_chunks.push("<strong" + ">" + function() {
+																								let __lux_chunks = [];
+																								__lux_chunks.push("124.7x - 192.4x");
+																								return __lux_chunks.join("");
+																							}() + "</strong>");
+																							__lux_chunks.push("\n                                ");
+																							return __lux_chunks.join("");
+																						}() + "</div>");
+																						__lux_chunks.push("\n                            ");
+																						return __lux_chunks.join("");
+																					}() + "</div>");
+																					__lux_chunks.push("\n                            ");
+																					__lux_chunks.push(String(function() {
+																						const __lux_component = function({ Table.Root }) {
+																							return Table.Root;
+																						}(_props);
+																						const __lux_component_props = {
+																							class: "" + "method-table",
+																							children: function() {
+																								return function() {
+																									let __lux_chunks = [];
+																									__lux_chunks.push("\n                                ");
+																									__lux_chunks.push(String(function() {
+																										const __lux_component = function({ Table.Header }) {
+																											return Table.Header;
+																										}(_props);
+																										const __lux_component_props = { children: function() {
+																											return function() {
+																												let __lux_chunks = [];
+																												__lux_chunks.push("\n                                    ");
+																												__lux_chunks.push(String(function() {
+																													const __lux_component = function({ Table.Row }) {
+																														return Table.Row;
+																													}(_props);
+																													const __lux_component_props = { children: function() {
+																														return function() {
+																															let __lux_chunks = [];
+																															__lux_chunks.push("\n                                        ");
+																															__lux_chunks.push(String(function() {
+																																const __lux_component = function({ Table.Head }) {
+																																	return Table.Head;
+																																}(_props);
+																																const __lux_component_props = { children: function() {
+																																	return function() {
+																																		let __lux_chunks = [];
+																																		__lux_chunks.push("Metric");
+																																		return __lux_chunks.join("");
+																																	}();
+																																} };
+																																return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																															}() ?? ""));
+																															__lux_chunks.push("\n                                        ");
+																															__lux_chunks.push(String(function() {
+																																const __lux_component = function({ Table.Head }) {
+																																	return Table.Head;
+																																}(_props);
+																																const __lux_component_props = { children: function() {
+																																	return function() {
+																																		let __lux_chunks = [];
+																																		__lux_chunks.push("Svelte");
+																																		return __lux_chunks.join("");
+																																	}();
+																																} };
+																																return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																															}() ?? ""));
+																															__lux_chunks.push("\n                                        ");
+																															__lux_chunks.push(String(function() {
+																																const __lux_component = function({ Table.Head }) {
+																																	return Table.Head;
+																																}(_props);
+																																const __lux_component_props = { children: function() {
+																																	return function() {
+																																		let __lux_chunks = [];
+																																		__lux_chunks.push("Lux");
+																																		return __lux_chunks.join("");
+																																	}();
+																																} };
+																																return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																															}() ?? ""));
+																															__lux_chunks.push("\n                                        ");
+																															__lux_chunks.push(String(function() {
+																																const __lux_component = function({ Table.Head }) {
+																																	return Table.Head;
+																																}(_props);
+																																const __lux_component_props = { children: function() {
+																																	return function() {
+																																		let __lux_chunks = [];
+																																		__lux_chunks.push("Speedup");
+																																		return __lux_chunks.join("");
+																																	}();
+																																} };
+																																return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																															}() ?? ""));
+																															__lux_chunks.push("\n                                    ");
+																															return __lux_chunks.join("");
+																														}();
+																													} };
+																													return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																												}() ?? ""));
+																												__lux_chunks.push("\n                                ");
+																												return __lux_chunks.join("");
+																											}();
+																										} };
+																										return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																									}() ?? ""));
+																									__lux_chunks.push("\n                                ");
+																									__lux_chunks.push(String(function() {
+																										const __lux_component = function({ Table.Body }) {
+																											return Table.Body;
+																										}(_props);
+																										const __lux_component_props = { children: function() {
+																											return function() {
+																												let __lux_chunks = [];
+																												__lux_chunks.push("\n                                    ");
+																												__lux_chunks.push(Array.from(function({ benchmarkRows }) {
+																													return benchmarkRows;
+																												}(_props) ?? []).map(function(row) {
+																													return function() {
+																														let __lux_chunks = [];
+																														__lux_chunks.push("\n                                        ");
+																														__lux_chunks.push(String(function() {
+																															const __lux_component = function({ Table.Row }) {
+																																return Table.Row;
+																															}(_props);
+																															const __lux_component_props = { children: function() {
+																																return function() {
+																																	let __lux_chunks = [];
+																																	__lux_chunks.push("\n                                            ");
+																																	__lux_chunks.push(String(function() {
+																																		const __lux_component = function({ Table.Cell }) {
+																																			return Table.Cell;
+																																		}(_props);
+																																		const __lux_component_props = { children: function() {
+																																			return function() {
+																																				let __lux_chunks = [];
+																																				__lux_chunks.push(String(row.name ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+																																				return __lux_chunks.join("");
+																																			}();
+																																		} };
+																																		return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																																	}() ?? ""));
+																																	__lux_chunks.push("\n                                            ");
+																																	__lux_chunks.push(String(function() {
+																																		const __lux_component = function({ Table.Cell }) {
+																																			return Table.Cell;
+																																		}(_props);
+																																		const __lux_component_props = { children: function() {
+																																			return function() {
+																																				let __lux_chunks = [];
+																																				__lux_chunks.push(String(function({ formatMs }) {
+																																					return formatMs(row.svelte);
+																																				}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+																																				return __lux_chunks.join("");
+																																			}();
+																																		} };
+																																		return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																																	}() ?? ""));
+																																	__lux_chunks.push("\n                                            ");
+																																	__lux_chunks.push(String(function() {
+																																		const __lux_component = function({ Table.Cell }) {
+																																			return Table.Cell;
+																																		}(_props);
+																																		const __lux_component_props = { children: function() {
+																																			return function() {
+																																				let __lux_chunks = [];
+																																				__lux_chunks.push(String(function({ formatMs }) {
+																																					return formatMs(row.lux);
+																																				}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+																																				return __lux_chunks.join("");
+																																			}();
+																																		} };
+																																		return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																																	}() ?? ""));
+																																	__lux_chunks.push("\n                                            ");
+																																	__lux_chunks.push(String(function() {
+																																		const __lux_component = function({ Table.Cell }) {
+																																			return Table.Cell;
+																																		}(_props);
+																																		const __lux_component_props = {
+																																			class: "" + "text-primary",
+																																			children: function() {
+																																				return function() {
+																																					let __lux_chunks = [];
+																																					__lux_chunks.push(String(row.speedup.toFixed(1) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+																																					__lux_chunks.push("x");
+																																					return __lux_chunks.join("");
+																																				}();
+																																			}
+																																		};
+																																		return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																																	}() ?? ""));
+																																	__lux_chunks.push("\n                                        ");
+																																	return __lux_chunks.join("");
+																																}();
+																															} };
+																															return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																														}() ?? ""));
+																														__lux_chunks.push("\n                                    ");
+																														return __lux_chunks.join("");
+																													}();
+																												}).join(""));
+																												__lux_chunks.push("\n                                ");
+																												return __lux_chunks.join("");
+																											}();
+																										} };
+																										return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																									}() ?? ""));
+																									__lux_chunks.push("\n                            ");
+																									return __lux_chunks.join("");
+																								}();
+																							}
+																						};
+																						return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																					}() ?? ""));
+																					__lux_chunks.push("\n                        ");
+																					return __lux_chunks.join("");
+																				}();
+																			}
+																		};
+																		return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																	}() ?? ""));
+																	__lux_chunks.push("\n                    ");
+																	return __lux_chunks.join("");
+																}();
+															} };
+															return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+														}() ?? ""));
+														__lux_chunks.push("\n                ");
+														return __lux_chunks.join("");
+													}() + "</div>");
+													__lux_chunks.push("\n\n                ");
+													__lux_chunks.push(String(function() {
+														const __lux_component = function({ Tabs.Root }) {
+															return Tabs.Root;
+														}(_props);
+														const __lux_component_props = {
+															value: function({ benchScenario }) {
+																return benchScenario;
+															}(_props),
+															class: "" + "bench-tabs-shell",
+															children: function() {
+																return function() {
+																	let __lux_chunks = [];
+																	__lux_chunks.push("\n                    ");
+																	__lux_chunks.push(String(function() {
+																		const __lux_component = function({ Tabs.List }) {
+																			return Tabs.List;
+																		}(_props);
+																		const __lux_component_props = {
+																			class: "" + "bench-tab-list",
+																			children: function() {
+																				return function() {
+																					let __lux_chunks = [];
+																					__lux_chunks.push("\n                        ");
+																					__lux_chunks.push(String(function() {
+																						const __lux_component = function({ Tabs.Trigger }) {
+																							return Tabs.Trigger;
+																						}(_props);
+																						const __lux_component_props = {
+																							value: "" + "mean",
+																							children: function() {
+																								return function() {
+																									let __lux_chunks = [];
+																									__lux_chunks.push("Mean");
+																									return __lux_chunks.join("");
+																								}();
+																							}
+																						};
+																						return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																					}() ?? ""));
+																					__lux_chunks.push("\n                        ");
+																					__lux_chunks.push(String(function() {
+																						const __lux_component = function({ Tabs.Trigger }) {
+																							return Tabs.Trigger;
+																						}(_props);
+																						const __lux_component_props = {
+																							value: "" + "median",
+																							children: function() {
+																								return function() {
+																									let __lux_chunks = [];
+																									__lux_chunks.push("Median");
+																									return __lux_chunks.join("");
+																								}();
+																							}
+																						};
+																						return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																					}() ?? ""));
+																					__lux_chunks.push("\n                        ");
+																					__lux_chunks.push(String(function() {
+																						const __lux_component = function({ Tabs.Trigger }) {
+																							return Tabs.Trigger;
+																						}(_props);
+																						const __lux_component_props = {
+																							value: "" + "ci",
+																							children: function() {
+																								return function() {
+																									let __lux_chunks = [];
+																									__lux_chunks.push("95% CI Floor");
+																									return __lux_chunks.join("");
+																								}();
+																							}
+																						};
+																						return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																					}() ?? ""));
+																					__lux_chunks.push("\n                    ");
+																					return __lux_chunks.join("");
+																				}();
+																			}
+																		};
+																		return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+																	}() ?? ""));
+																	__lux_chunks.push("\n                ");
+																	return __lux_chunks.join("");
+																}();
+															}
+														};
+														return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+													}() ?? ""));
+													__lux_chunks.push("\n            ");
+													return __lux_chunks.join("");
+												}();
+											}
+										};
+										return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+									}() ?? ""));
+									__lux_chunks.push("\n\n            ");
+									__lux_chunks.push(String(function() {
+										const __lux_component = function({ Card.Content }) {
+											return Card.Content;
+										}(_props);
+										const __lux_component_props = {
+											class: "" + "bench-body",
+											children: function() {
+												return function() {
+													let __lux_chunks = [];
+													__lux_chunks.push("\n                ");
+													const maxValue = function({ activeBenchmark }) {
+														return Math.max(activeBenchmark.svelte, activeBenchmark.lux);
+													}(_props);
+													__lux_chunks.push("\n                ");
+													__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-row") + "\"") + ">" + function() {
+														let __lux_chunks = [];
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-tool") + "\"") + ">" + function() {
+															let __lux_chunks = [];
+															__lux_chunks.push("svelte parser path");
+															return __lux_chunks.join("");
+														}() + "</div>");
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-track") + "\"") + ">" + function() {
+															let __lux_chunks = [];
+															__lux_chunks.push("\n                        ");
+															__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-fill bench-fill-baseline") + "\"") + (" style=\"" + String(function({ activeBenchmark, barWidth }) {
+																return `width: ${barWidth(activeBenchmark.svelte, maxValue)}`;
+															}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + ">" + function() {
+																let __lux_chunks = [];
+																return __lux_chunks.join("");
+															}() + "</div>");
+															__lux_chunks.push("\n                    ");
+															return __lux_chunks.join("");
+														}() + "</div>");
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-time") + "\"") + ">" + function() {
+															let __lux_chunks = [];
+															__lux_chunks.push(String(function({ activeBenchmark, formatMs }) {
+																return formatMs(activeBenchmark.svelte);
+															}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+															return __lux_chunks.join("");
+														}() + "</div>");
+														__lux_chunks.push("\n                ");
+														return __lux_chunks.join("");
+													}() + "</div>");
+													__lux_chunks.push("\n\n                ");
+													__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-row") + "\"") + ">" + function() {
+														let __lux_chunks = [];
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-tool") + "\"") + ">" + function() {
+															let __lux_chunks = [];
+															__lux_chunks.push("lux-parser");
+															return __lux_chunks.join("");
+														}() + "</div>");
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-track") + "\"") + ">" + function() {
+															let __lux_chunks = [];
+															__lux_chunks.push("\n                        ");
+															__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-fill bench-fill-fast") + "\"") + (" style=\"" + String(function({ activeBenchmark, barWidth }) {
+																return `width: ${barWidth(activeBenchmark.lux, maxValue)}`;
+															}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + ">" + function() {
+																let __lux_chunks = [];
+																return __lux_chunks.join("");
+															}() + "</div>");
+															__lux_chunks.push("\n                    ");
+															return __lux_chunks.join("");
+														}() + "</div>");
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-time bench-time-fast") + "\"") + ">" + function() {
+															let __lux_chunks = [];
+															__lux_chunks.push(String(function({ activeBenchmark, formatMs }) {
+																return formatMs(activeBenchmark.lux);
+															}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+															return __lux_chunks.join("");
+														}() + "</div>");
+														__lux_chunks.push("\n                ");
+														return __lux_chunks.join("");
+													}() + "</div>");
+													__lux_chunks.push("\n\n                ");
+													__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-summary") + "\"") + ">" + function() {
+														let __lux_chunks = [];
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push("<div" + (" class=\"" + ("" + "speed-pill") + "\"") + ">" + function() {
+															let __lux_chunks = [];
+															__lux_chunks.push("\n                        ");
+															__lux_chunks.push(String(function() {
+																const __lux_component = function({ Icon }) {
+																	return Icon;
+																}(_props);
+																const __lux_component_props = {
+																	src: function({ Bolt }) {
+																		return Bolt;
+																	}(_props),
+																	solid: true,
+																	class: "" + "size-4"
+																};
+																return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+															}() ?? ""));
+															__lux_chunks.push("\n                        ");
+															__lux_chunks.push("<strong" + ">" + function() {
+																let __lux_chunks = [];
+																__lux_chunks.push(String(function({ activeBenchmark }) {
+																	return activeBenchmark.speedup.toFixed(1);
+																}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+																__lux_chunks.push("x faster");
+																return __lux_chunks.join("");
+															}() + "</strong>");
+															__lux_chunks.push("\n                    ");
+															return __lux_chunks.join("");
+														}() + "</div>");
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push("<p" + ">" + function() {
+															let __lux_chunks = [];
+															__lux_chunks.push(String(function({ activeBenchmark }) {
+																return activeBenchmark.detail;
+															}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+															return __lux_chunks.join("");
+														}() + "</p>");
+														__lux_chunks.push("\n                ");
+														return __lux_chunks.join("");
+													}() + "</div>");
+													__lux_chunks.push("\n\n                ");
+													__lux_chunks.push("<div" + (" class=\"" + ("" + "bench-meta") + "\"") + ">" + function() {
+														let __lux_chunks = [];
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push("<span" + ">" + function() {
+															let __lux_chunks = [];
+															__lux_chunks.push(String(function({ activeBenchmark }) {
+																return activeBenchmark.label;
+															}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+															return __lux_chunks.join("");
+														}() + "</span>");
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push("<span" + (" class=\"" + ("" + "dot") + "\"") + (" aria-hidden=\"" + ("" + "true") + "\"") + ">" + function() {
+															let __lux_chunks = [];
+															__lux_chunks.push(".");
+															return __lux_chunks.join("");
+														}() + "</span>");
+														__lux_chunks.push("\n                    ");
+														__lux_chunks.push("<span" + ">" + function() {
+															let __lux_chunks = [];
+															__lux_chunks.push(String(function({ activeBenchmark }) {
+																return activeBenchmark.runs;
+															}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+															return __lux_chunks.join("");
+														}() + "</span>");
+														__lux_chunks.push("\n                ");
+														return __lux_chunks.join("");
+													}() + "</div>");
+													__lux_chunks.push("\n            ");
+													return __lux_chunks.join("");
+												}();
+											}
+										};
+										return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+									}() ?? ""));
+									__lux_chunks.push("\n        ");
+									return __lux_chunks.join("");
+								}();
+							}
+						};
+						return __lux_component && typeof __lux_component.render === "function" ? __lux_component.render(__lux_component_props) : typeof __lux_component === "function" ? __lux_component(__lux_component_props) : "";
+					}() ?? ""));
+					__lux_chunks.push("\n    ");
+					return __lux_chunks.join("");
+				}() + "</div>");
+				__lux_chunks.push("\n");
+				return __lux_chunks.join("");
+			}() + "</section>");
+			__lux_chunks.push("\n\n");
 			__lux_chunks.push("\n");
 			return __lux_chunks.join("");
 		}();

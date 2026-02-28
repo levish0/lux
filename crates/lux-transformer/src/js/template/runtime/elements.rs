@@ -1,5 +1,5 @@
 use lux_ast::template::attribute::{AttributeNode, AttributeValue};
-use lux_ast::template::element::{Component, SvelteComponent, SvelteElement, SvelteSelf};
+use lux_ast::template::element::{Component, SlotElement, SvelteComponent, SvelteElement, SvelteSelf};
 use lux_ast::template::root::Fragment;
 use lux_ast::template::tag::TextOrExpressionTag;
 use lux_utils::elements::is_void;
@@ -35,6 +35,97 @@ pub(super) fn render_regular_element_expression<'a>(
     }
 
     out
+}
+
+pub(super) fn render_slot_element_expression<'a>(
+    ast: AstBuilder<'a>,
+    element: &SlotElement<'_>,
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    let slot_name = slot_name_expression(ast, &element.attributes, scope);
+    let slot_props = build_slot_props_expression(ast, &element.attributes, scope);
+    let fallback = render_fragment_expression(ast, &element.fragment, scope);
+
+    let mut statements = ast.vec();
+    statements.push(const_statement(ast, "__lux_slot_name", slot_name));
+    statements.push(const_statement(
+        ast,
+        "__lux_slots",
+        ast.member_expression_static(
+            SPAN,
+            ast.expression_identifier(SPAN, ast.ident("_props")),
+            ast.identifier_name(SPAN, ast.ident("$$slots")),
+            false,
+        )
+        .into(),
+    ));
+    let slot_name_ident = ast.expression_identifier(SPAN, ast.ident("__lux_slot_name"));
+    let slots_ident = ast.expression_identifier(SPAN, ast.ident("__lux_slots"));
+    let named_lookup = ast.expression_logical(
+        SPAN,
+        slots_ident.clone_in(ast.allocator),
+        LogicalOperator::And,
+        ast.member_expression_computed(
+            SPAN,
+            slots_ident.clone_in(ast.allocator),
+            slot_name_ident.clone_in(ast.allocator),
+            false,
+        )
+        .into(),
+    );
+    let default_lookup = ast.expression_logical(
+        SPAN,
+        named_lookup.clone_in(ast.allocator),
+        LogicalOperator::Coalesce,
+        ast.member_expression_static(
+            SPAN,
+            ast.expression_identifier(SPAN, ast.ident("_props")),
+            ast.identifier_name(SPAN, ast.ident("children")),
+            false,
+        )
+        .into(),
+    );
+    let selected_slot_fn = ast.expression_conditional(
+        SPAN,
+        ast.expression_binary(
+            SPAN,
+            slot_name_ident.clone_in(ast.allocator),
+            BinaryOperator::StrictEquality,
+            string_expr(ast, "default"),
+        ),
+        default_lookup,
+        named_lookup,
+    );
+    statements.push(const_statement(ast, "__lux_slot_fn", selected_slot_fn));
+    statements.push(const_statement(ast, "__lux_slot_props", slot_props));
+
+    let slot_fn_ident = ast.expression_identifier(SPAN, ast.ident("__lux_slot_fn"));
+    let rendered = ast.expression_conditional(
+        SPAN,
+        ast.expression_binary(
+            SPAN,
+            ast.expression_unary(
+                SPAN,
+                oxc_ast::ast::UnaryOperator::Typeof,
+                slot_fn_ident.clone_in(ast.allocator),
+            ),
+            BinaryOperator::StrictEquality,
+            string_expr(ast, "function"),
+        ),
+        stringify_expression(
+            ast,
+            ast.expression_call(
+                SPAN,
+                slot_fn_ident,
+                NONE,
+                ast.vec1(ast.expression_identifier(SPAN, ast.ident("__lux_slot_props")).into()),
+                false,
+            ),
+        ),
+        fallback,
+    );
+    statements.push(ast.statement_return(SPAN, Some(rendered)));
+    call_iife(ast, statements)
 }
 
 pub(super) fn render_svelte_element_expression<'a>(
@@ -213,28 +304,20 @@ fn build_component_props_expression<'a>(
     }
 
     if !fragment.nodes.is_empty() && !component_has_children_prop(attributes) {
-        let child_expression = render_fragment_expression(ast, fragment, scope);
-        let params =
-            ast.alloc_formal_parameters(SPAN, FormalParameterKind::FormalParameter, ast.vec(), NONE);
-        let body = ast.alloc_function_body(
-            SPAN,
-            ast.vec(),
-            ast.vec1(ast.statement_return(SPAN, Some(child_expression))),
-        );
-        let child_function = ast.expression_function(
-            SPAN,
-            FunctionType::FunctionExpression,
-            None,
-            false,
-            false,
-            false,
-            NONE,
-            NONE,
-            params,
-            NONE,
-            Some(body),
-        );
-        properties.push(object_init_property(ast, "children", child_function));
+        let child_function = build_slot_function(ast, fragment, scope);
+        properties.push(object_init_property(
+            ast,
+            "children",
+            child_function.clone_in(ast.allocator),
+        ));
+        properties.push(object_init_property(
+            ast,
+            "$$slots",
+            ast.expression_object(
+                SPAN,
+                ast.vec1(object_init_property(ast, "default", child_function)),
+            ),
+        ));
     }
 
     ast.expression_object(SPAN, properties)
@@ -273,6 +356,91 @@ fn attribute_value_to_component_prop_expression<'a>(
             out
         }
     }
+}
+
+fn slot_name_expression<'a>(
+    ast: AstBuilder<'a>,
+    attributes: &[AttributeNode<'_>],
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    for attribute in attributes {
+        if let AttributeNode::Attribute(attribute) = attribute {
+            if attribute.name == "name" {
+                return attribute_value_to_component_prop_expression(ast, &attribute.value, scope);
+            }
+        }
+    }
+    string_expr(ast, "default")
+}
+
+fn build_slot_props_expression<'a>(
+    ast: AstBuilder<'a>,
+    attributes: &[AttributeNode<'_>],
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    let mut properties = ast.vec();
+
+    for attribute in attributes {
+        match attribute {
+            AttributeNode::Attribute(attribute) => {
+                if attribute.name != "name" {
+                    properties.push(object_init_property(
+                        ast,
+                        attribute.name,
+                        attribute_value_to_component_prop_expression(ast, &attribute.value, scope),
+                    ));
+                }
+            }
+            AttributeNode::SpreadAttribute(attribute) => {
+                let expression =
+                    resolve_expression(ast, attribute.expression.clone_in(ast.allocator), scope);
+                properties.push(ast.object_property_kind_spread_property(SPAN, expression));
+            }
+            AttributeNode::BindDirective(attribute) => {
+                let expression =
+                    resolve_expression(ast, attribute.expression.clone_in(ast.allocator), scope);
+                properties.push(object_init_property(ast, attribute.name, expression));
+            }
+            AttributeNode::ClassDirective(_)
+            | AttributeNode::StyleDirective(_)
+            | AttributeNode::OnDirective(_)
+            | AttributeNode::TransitionDirective(_)
+            | AttributeNode::AnimateDirective(_)
+            | AttributeNode::UseDirective(_)
+            | AttributeNode::LetDirective(_)
+            | AttributeNode::AttachTag(_) => {}
+        }
+    }
+
+    ast.expression_object(SPAN, properties)
+}
+
+fn build_slot_function<'a>(
+    ast: AstBuilder<'a>,
+    fragment: &Fragment<'_>,
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    let child_expression = render_fragment_expression(ast, fragment, scope);
+    let params =
+        ast.alloc_formal_parameters(SPAN, FormalParameterKind::FormalParameter, ast.vec(), NONE);
+    let body = ast.alloc_function_body(
+        SPAN,
+        ast.vec(),
+        ast.vec1(ast.statement_return(SPAN, Some(child_expression))),
+    );
+    ast.expression_function(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        NONE,
+        NONE,
+        params,
+        NONE,
+        Some(body),
+    )
 }
 
 fn object_init_property<'a>(

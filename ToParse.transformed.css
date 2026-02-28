@@ -1,4 +1,48 @@
-h1.svelte-ew55e7 { font-size: 2rem; font-weight: 700; transition: color 0.2s; }
-div.svelte-ew55e7 { display: grid; grid-template-columns: repeat(7, 1fr); grid-gap: 5px; max-width: 400px; }
-button.svelte-ew55e7 { aspect-ratio: 1; border-radius: 50%; background: var(--color, #fff); transform: translate(-2px,-2px); filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.2)); transition: all 0.1s; color: black; font-weight: 700; font-size: 2rem; }
-button[aria-current=true].svelte-ew55e7 { transform: none; filter: none; box-shadow: inset 3px 3px 4px rgba(0,0,0,0.2); }
+.hero.svelte-qcfe1q { padding: 3rem 0 4rem; }
+.hero-grid.svelte-qcfe1q { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
+.hero-copy.svelte-qcfe1q { padding-top: 1.25rem; }
+.hero-badge { margin-bottom: 1.1rem; border-color: color-mix(in srgb, var(--primary) 35%, var(--border)); font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.65rem; }
+h1.svelte-qcfe1q { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 700; font-size: clamp(1.95rem, 4.2vw, 2.75rem); line-height: 1.1; letter-spacing: -0.04em; margin-bottom: 1rem; }
+h1.svelte-qcfe1q span:where(.svelte-qcfe1q) { color: var(--primary); }
+.hero-desc.svelte-qcfe1q { color: var(--muted-foreground); line-height: 1.75; max-width: 58ch; margin-bottom: 1.35rem; }
+.install-tabs-shell { max-width: 100%; gap: 0.75rem; }
+.install-tab-list { width: fit-content; }
+.hero-note.svelte-qcfe1q { margin-top: 0.8rem; font-size: 0.82rem; color: var(--muted-foreground); }
+.bench-card { padding-bottom: 0.25rem; background: color-mix(in srgb, var(--card) 88%, transparent); }
+.bench-header { gap: 1rem; }
+.bench-header-row.svelte-qcfe1q { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+.bench-title { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.98rem; }
+.bench-subtitle { margin-top: 0.4rem; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.72rem; }
+.method-trigger { display: inline-flex; align-items: center; gap: 0.35rem; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.35rem 0.5rem; font-size: 0.72rem; color: var(--muted-foreground); background: transparent; }
+.method-trigger:hover { color: var(--foreground); border-color: color-mix(in srgb, var(--foreground) 18%, var(--border)); }
+.method-dialog { max-width: 720px; }
+.method-metrics.svelte-qcfe1q { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.75rem; margin-bottom: 1rem; }
+.method-metrics.svelte-qcfe1q div:where(.svelte-qcfe1q) { padding: 0.75rem; border-radius: 0.65rem; border: 1px solid color-mix(in srgb, var(--border) 80%, transparent); background: color-mix(in srgb, var(--muted) 40%, transparent); }
+.method-metrics.svelte-qcfe1q span:where(.svelte-qcfe1q) { display: block; font-size: 0.72rem; color: var(--muted-foreground); margin-bottom: 0.3rem; }
+.method-metrics.svelte-qcfe1q strong:where(.svelte-qcfe1q) { font-size: 0.8rem; line-height: 1.35; }
+.bench-tabs-shell { gap: 0.6rem; }
+.bench-tab-list { width: fit-content; }
+.bench-body { display: flex; flex-direction: column; gap: 0.75rem; }
+.bench-row.svelte-qcfe1q { display: grid; grid-template-columns: 150px 1fr 88px; align-items: center; gap: 0.75rem; }
+.bench-tool.svelte-qcfe1q { font-size: 0.75rem; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--muted-foreground); text-align: right; }
+.bench-track.svelte-qcfe1q { height: 1.55rem; border-radius: 0.45rem; background: color-mix(in srgb, var(--background) 88%, var(--card)); overflow: hidden; position: relative; }
+.bench-fill.svelte-qcfe1q { height: 100%; transition: width 0.35s ease; }
+.bench-fill-baseline.svelte-qcfe1q { background: linear-gradient(
+                90deg,
+                color-mix(in srgb, var(--muted-foreground) 70%, transparent),
+                color-mix(in srgb, var(--muted-foreground) 45%, transparent)
+        ); }
+.bench-fill-fast.svelte-qcfe1q { background: linear-gradient(
+                90deg,
+                color-mix(in srgb, var(--primary) 95%, transparent),
+                color-mix(in srgb, var(--primary) 70%, #5858ff)
+        ); box-shadow: 0 0 14px color-mix(in srgb, var(--primary) 35%, transparent); }
+.bench-time.svelte-qcfe1q { font-size: 0.81rem; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align: right; }
+.bench-time-fast.svelte-qcfe1q { color: var(--primary); font-weight: 600; }
+.bench-summary.svelte-qcfe1q { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-top: 0.2rem; }
+.speed-pill.svelte-qcfe1q { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.6rem; border-radius: 999px; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.8rem; border: 1px solid color-mix(in srgb, var(--primary) 40%, var(--border)); background: color-mix(in srgb, var(--primary) 12%, transparent); }
+.bench-summary.svelte-qcfe1q p:where(.svelte-qcfe1q) { font-size: 0.8rem; color: var(--muted-foreground); }
+.bench-meta.svelte-qcfe1q { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; color: var(--muted-foreground); font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.dot.svelte-qcfe1q { opacity: 0.5; }
+@media (max-width: 980px) { .hero-grid.svelte-qcfe1q { grid-template-columns: 1fr; } .bench-row.svelte-qcfe1q { grid-template-columns: 92px 1fr 72px; gap: 0.45rem; } .bench-tool.svelte-qcfe1q { text-align: left; font-size: 0.66rem; } .bench-time.svelte-qcfe1q { font-size: 0.68rem; } .bench-summary.svelte-qcfe1q { flex-direction: column; align-items: flex-start; } .method-metrics.svelte-qcfe1q { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .hero.svelte-qcfe1q { padding-top: 2rem; } }

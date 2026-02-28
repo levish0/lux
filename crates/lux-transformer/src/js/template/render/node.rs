@@ -28,13 +28,9 @@ pub(super) fn render_node(node: &FragmentNode<'_>, out: &mut String, has_dynamic
             out,
             has_dynamic,
         ),
-        FragmentNode::SlotElement(element) => render_regular_element(
-            element.name,
-            &element.attributes,
-            &element.fragment,
-            out,
-            has_dynamic,
-        ),
+        FragmentNode::SlotElement(_) => {
+            *has_dynamic = true;
+        }
 
         FragmentNode::ExpressionTag(_) => {
             *has_dynamic = true;
