@@ -2,6 +2,7 @@ mod binding;
 mod context;
 mod fragment;
 mod node;
+mod reference;
 
 use lux_ast::analysis::AnalysisTables;
 use lux_ast::template::root::Root;

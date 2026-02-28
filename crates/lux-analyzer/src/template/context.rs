@@ -1,6 +1,6 @@
 use lux_ast::analysis::{
-    AnalysisTables, TemplateBindingAnalysis, TemplateBindingKind, TemplateScopeAnalysis,
-    TemplateScopeId, TemplateScopeKind,
+    AnalysisTables, TemplateBindingAnalysis, TemplateBindingKind, TemplateReferenceAnalysis,
+    TemplateScopeAnalysis, TemplateScopeId, TemplateScopeKind,
 };
 use lux_ast::common::Span;
 
@@ -66,6 +66,22 @@ impl<'a> TemplateAnalyzerContext<'a> {
             kind,
             name: name.to_owned(),
             span,
+        });
+    }
+
+    pub(super) fn add_reference(
+        &mut self,
+        name: &str,
+        span: Span,
+        is_read: bool,
+        is_write: bool,
+    ) {
+        self.tables.template_references.push(TemplateReferenceAnalysis {
+            scope: self.current_scope(),
+            name: name.to_owned(),
+            span,
+            is_read,
+            is_write,
         });
     }
 }

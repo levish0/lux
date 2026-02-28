@@ -4,8 +4,14 @@ use lux_ast::template::block::EachBlock;
 use super::super::binding::collect_pattern_bindings;
 use super::super::context::TemplateAnalyzerContext;
 use super::super::fragment;
+use super::super::reference;
 
 pub(crate) fn analyze(block: &EachBlock<'_>, context: &mut TemplateAnalyzerContext<'_>) {
+    reference::analyze_expression(&block.expression, context);
+    if let Some(key_expression) = &block.key {
+        reference::analyze_expression(key_expression, context);
+    }
+
     let each_scope = context.create_child_scope(TemplateScopeKind::Each, Some(block.span));
 
     if let Some(pattern) = &block.context {

@@ -2,6 +2,7 @@ use lux_ast::template::root::{Fragment, FragmentNode};
 
 use super::context::TemplateAnalyzerContext;
 use super::node;
+use super::reference;
 
 pub(super) fn analyze_fragment(fragment: &Fragment<'_>, context: &mut TemplateAnalyzerContext<'_>) {
     for node in &fragment.nodes {
@@ -11,16 +12,23 @@ pub(super) fn analyze_fragment(fragment: &Fragment<'_>, context: &mut TemplateAn
 
 fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'_>) {
     match node {
-        FragmentNode::Text(_)
-        | FragmentNode::ExpressionTag(_)
-        | FragmentNode::HtmlTag(_)
-        | FragmentNode::ConstTag(_)
-        | FragmentNode::DebugTag(_)
-        | FragmentNode::RenderTag(_)
-        | FragmentNode::AttachTag(_)
-        | FragmentNode::Comment(_) => {}
+        FragmentNode::Text(_) | FragmentNode::ConstTag(_) | FragmentNode::DebugTag(_) | FragmentNode::Comment(_) => {}
+
+        FragmentNode::ExpressionTag(tag) => {
+            reference::analyze_expression(&tag.expression, context);
+        }
+        FragmentNode::HtmlTag(tag) => {
+            reference::analyze_expression(&tag.expression, context);
+        }
+        FragmentNode::RenderTag(tag) => {
+            reference::analyze_expression(&tag.expression, context);
+        }
+        FragmentNode::AttachTag(tag) => {
+            reference::analyze_expression(&tag.expression, context);
+        }
 
         FragmentNode::IfBlock(block) => {
+            reference::analyze_expression(&block.test, context);
             analyze_fragment(&block.consequent, context);
             if let Some(alternate) = &block.alternate {
                 analyze_fragment(alternate, context);
@@ -28,7 +36,10 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::EachBlock(block) => node::each_block::analyze(block, context),
         FragmentNode::AwaitBlock(block) => node::await_block::analyze(block, context),
-        FragmentNode::KeyBlock(block) => analyze_fragment(&block.fragment, context),
+        FragmentNode::KeyBlock(block) => {
+            reference::analyze_expression(&block.expression, context);
+            analyze_fragment(&block.fragment, context);
+        }
         FragmentNode::SnippetBlock(block) => node::snippet_block::analyze(block, context),
 
         FragmentNode::RegularElement(element) => {
@@ -48,6 +59,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
             );
         }
         FragmentNode::SvelteElement(element) => {
+            reference::analyze_expression(&element.tag, context);
             node::element::analyze(
                 element.span,
                 &element.attributes,
@@ -56,6 +68,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
             );
         }
         FragmentNode::SvelteComponent(component) => {
+            reference::analyze_expression(&component.expression, context);
             node::element::analyze(
                 component.span,
                 &component.attributes,

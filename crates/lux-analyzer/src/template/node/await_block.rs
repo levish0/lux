@@ -4,8 +4,11 @@ use lux_ast::template::block::AwaitBlock;
 use super::super::binding::collect_pattern_bindings;
 use super::super::context::TemplateAnalyzerContext;
 use super::super::fragment;
+use super::super::reference;
 
 pub(crate) fn analyze(block: &AwaitBlock<'_>, context: &mut TemplateAnalyzerContext<'_>) {
+    reference::analyze_expression(&block.expression, context);
+
     if let Some(pending) = &block.pending {
         fragment::analyze_fragment(pending, context);
     }
