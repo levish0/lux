@@ -1,6 +1,7 @@
 use lux_ast::analysis::{
-    AnalysisTables, TemplateBindingAnalysis, TemplateBindingKind, TemplateReferenceAnalysis,
-    TemplateScopeAnalysis, TemplateScopeId, TemplateScopeKind,
+    AnalysisDiagnostic, AnalysisDiagnosticCode, AnalysisSeverity, AnalysisTables,
+    TemplateBindingAnalysis, TemplateBindingKind, TemplateReferenceAnalysis, TemplateScopeAnalysis,
+    TemplateScopeId, TemplateScopeKind,
 };
 use lux_ast::common::Span;
 
@@ -79,6 +80,33 @@ impl<'a> TemplateAnalyzerContext<'a> {
                 is_read,
                 is_write,
             });
+    }
+
+    pub(super) fn has_binding_in_scope(
+        &self,
+        scope: TemplateScopeId,
+        kind: TemplateBindingKind,
+        name: &str,
+    ) -> bool {
+        self.tables
+            .template_bindings
+            .iter()
+            .any(|binding| binding.scope == scope && binding.kind == kind && binding.name == name)
+    }
+
+    pub(super) fn add_diagnostic(
+        &mut self,
+        severity: AnalysisSeverity,
+        code: AnalysisDiagnosticCode,
+        message: impl Into<String>,
+        span: Span,
+    ) {
+        self.tables.diagnostics.push(AnalysisDiagnostic {
+            severity,
+            code,
+            message: message.into(),
+            span,
+        });
     }
 }
 
