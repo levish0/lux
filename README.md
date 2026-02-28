@@ -16,11 +16,15 @@ Compare Lux parser/analyzer pipeline against Svelte parser/compiler-analysis:
 
 ```bash
 cargo bench -p lux-parser --bench svelte_compare_parser
-cargo bench -p lux-analyzer --bench svelte_compare
+cargo bench -p lux-analyzer --bench svelte_compare_analyzer
 ```
 
-The benchmark uses `npx node` in `crates/lux-parser/tests/tools/svelte_runner` for Svelte runs.
+The benchmark uses `node` in `crates/lux-parser/tests/tools/svelte_runner` for Svelte runs.
+Default input is `benchmarks/assets/benchmark.svelte`.
 Set `LUX_BENCH_INPUT` to benchmark a different `.svelte` file.
+Reports are written under:
+- `target/criterion/lux-parser`
+- `target/criterion/lux-analyzer`
 
 ## License
 

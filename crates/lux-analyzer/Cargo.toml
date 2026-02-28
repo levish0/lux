@@ -25,5 +25,5 @@ oxc_allocator = { workspace = true }
 criterion = {workspace = true}
 
 [[bench]]
-name = "svelte_compare"
+name = "svelte_compare_analyzer"
 harness = false

@@ -2,7 +2,10 @@ use lux_ast::analysis::{AnalysisDiagnosticCode, AnalysisSeverity};
 use lux_ast::template::attribute::{Attribute, AttributeNode, AttributeValue};
 use lux_ast::template::directive::BindDirective;
 use lux_ast::template::tag::TextOrExpressionTag;
-use lux_metadata::bindings::get_binding_property;
+use lux_metadata::bindings::{
+    is_binding_valid_for_element, is_known_binding, known_binding_names, valid_bindings_for_element,
+};
+use lux_utils::fuzzymatch::fuzzymatch;
 use lux_utils::elements::is_svg;
 use oxc_ast::ast::Expression;
 use oxc_span::GetSpan;
@@ -18,24 +21,6 @@ pub(crate) enum BindDirectiveTarget<'a> {
     SvelteBody,
     Other,
 }
-
-const WINDOW_ONLY_BINDINGS: &[&str] = &[
-    "innerWidth",
-    "innerHeight",
-    "outerWidth",
-    "outerHeight",
-    "scrollX",
-    "scrollY",
-    "online",
-    "devicePixelRatio",
-];
-
-const DOCUMENT_ONLY_BINDINGS: &[&str] = &[
-    "activeElement",
-    "fullscreenElement",
-    "pointerLockElement",
-    "visibilityState",
-];
 
 pub(crate) fn validate_bind_directive_expression(
     directive: &BindDirective<'_>,
@@ -74,7 +59,7 @@ pub(crate) fn validate_bind_directive_target(
         return;
     }
 
-    let Some(property) = get_binding_property(directive.name) else {
+    if !is_known_binding(directive.name) {
         if matches!(
             target,
             BindDirectiveTarget::Regular(_)
@@ -83,43 +68,39 @@ pub(crate) fn validate_bind_directive_target(
                 | BindDirectiveTarget::SvelteDocument
                 | BindDirectiveTarget::SvelteBody
         ) {
+            let message = unknown_bind_message(directive.name, target_name(target));
             context.add_diagnostic(
                 AnalysisSeverity::Error,
                 AnalysisDiagnosticCode::BindDirectiveUnknownName,
-                format!("Unknown bind directive name `{}`", directive.name),
+                message,
                 directive.span,
             );
         }
 
         return;
+    }
+
+    let target_name = match target {
+        BindDirectiveTarget::Regular(element_name) => Some(element_name),
+        BindDirectiveTarget::SvelteWindow => Some("svelte:window"),
+        BindDirectiveTarget::SvelteDocument => Some("svelte:document"),
+        BindDirectiveTarget::SvelteBody => Some("svelte:body"),
+        BindDirectiveTarget::SvelteElement => Some("svelte:element"),
+        BindDirectiveTarget::Other => None,
     };
 
-    let is_window_only = WINDOW_ONLY_BINDINGS.contains(&directive.name);
-    let is_document_only = DOCUMENT_ONLY_BINDINGS.contains(&directive.name);
-
-    let is_valid_target = match target {
-        BindDirectiveTarget::Regular(element_name) => {
-            !is_window_only
-                && !is_document_only
-                && (property.valid_elements.is_empty()
-                    || property.valid_elements.contains(&element_name))
-        }
-        BindDirectiveTarget::SvelteWindow => is_window_only,
-        BindDirectiveTarget::SvelteDocument => is_document_only,
-        BindDirectiveTarget::SvelteBody => {
-            !is_window_only
-                && !is_document_only
-                && (property.valid_elements.is_empty() || property.valid_elements.contains(&"body"))
-        }
-        BindDirectiveTarget::SvelteElement => true,
-        BindDirectiveTarget::Other => true,
+    let is_valid_target = if let Some(target_name) = target_name {
+        is_binding_valid_for_element(directive.name, target_name)
+    } else {
+        true
     };
 
     if !is_valid_target {
+        let message = invalid_target_message(directive.name, target_name);
         context.add_diagnostic(
             AnalysisSeverity::Error,
             AnalysisDiagnosticCode::BindDirectiveInvalidTarget,
-            format!("bind:{} is not valid on this target", directive.name),
+            message,
             directive.span,
         );
     }
@@ -212,10 +193,15 @@ fn validate_input_type_match(
     context: &mut TemplateAnalyzerContext<'_>,
 ) {
     if directive.name == "checked" && type_text_value != Some("checkbox") {
+        let radio_hint = if type_text_value == Some("radio") {
+            " Use `bind:group` for `<input type=\"radio\">`."
+        } else {
+            ""
+        };
         context.add_diagnostic(
             AnalysisSeverity::Error,
             AnalysisDiagnosticCode::BindDirectiveInputTypeMismatch,
-            "bind:checked requires `<input type=\"checkbox\">`",
+            format!("bind:checked requires `<input type=\"checkbox\">`.{radio_hint}"),
             directive.span,
         );
     }
@@ -285,5 +271,46 @@ fn is_valid_bind_expression(expression: &Expression<'_>) -> bool {
         }
         Expression::TSTypeAssertion(expression) => is_valid_bind_expression(&expression.expression),
         _ => false,
+    }
+}
+
+fn target_name(target: BindDirectiveTarget<'_>) -> Option<&str> {
+    match target {
+        BindDirectiveTarget::Regular(element_name) => Some(element_name),
+        BindDirectiveTarget::SvelteWindow => Some("svelte:window"),
+        BindDirectiveTarget::SvelteDocument => Some("svelte:document"),
+        BindDirectiveTarget::SvelteBody => Some("svelte:body"),
+        BindDirectiveTarget::SvelteElement => Some("svelte:element"),
+        BindDirectiveTarget::Other => None,
+    }
+}
+
+fn unknown_bind_message(name: &str, target_name: Option<&str>) -> String {
+    let candidates = target_name
+        .map(valid_bindings_for_element)
+        .unwrap_or_else(|| known_binding_names().to_vec());
+
+    if let Some(suggestion) = fuzzymatch(name, candidates.as_slice()) {
+        format!("Unknown bind directive name `{name}`. Did you mean `{suggestion}`?")
+    } else {
+        format!("Unknown bind directive name `{name}`")
+    }
+}
+
+fn invalid_target_message(name: &str, target_name: Option<&str>) -> String {
+    let Some(target_name) = target_name else {
+        return format!("bind:{name} is not valid on this target");
+    };
+
+    let mut candidates = valid_bindings_for_element(target_name);
+    candidates.sort_unstable();
+
+    if candidates.is_empty() {
+        format!("bind:{name} is not valid on `<{target_name}>`")
+    } else {
+        format!(
+            "bind:{name} is not valid on `<{target_name}>`. Possible bindings: {}",
+            candidates.join(", ")
+        )
     }
 }

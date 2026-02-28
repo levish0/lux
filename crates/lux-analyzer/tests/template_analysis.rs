@@ -275,12 +275,35 @@ fn analyze_reports_bind_unknown_name_on_regular_element() {
 }
 
 #[test]
+fn analyze_reports_bind_unknown_name_with_suggestion() {
+    let tables = analyze_source("<input bind:vale={value} />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveUnknownName
+            && diagnostic.severity == AnalysisSeverity::Error
+            && diagnostic.message.contains("Did you mean `value`")
+    }));
+}
+
+#[test]
 fn analyze_reports_bind_invalid_target_for_window_binding_on_regular_element() {
     let tables = analyze_source("<div bind:innerWidth={width} />");
 
     assert!(tables.diagnostics.iter().any(|diagnostic| {
         diagnostic.code == AnalysisDiagnosticCode::BindDirectiveInvalidTarget
             && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_bind_invalid_target_with_possible_bindings() {
+    let tables = analyze_source("<svelte:window bind:clientWidth={width} />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveInvalidTarget
+            && diagnostic.severity == AnalysisSeverity::Error
+            && diagnostic.message.contains("Possible bindings")
+            && diagnostic.message.contains("innerWidth")
     }));
 }
 
@@ -311,6 +334,17 @@ fn analyze_reports_bind_checked_type_mismatch() {
     assert!(tables.diagnostics.iter().any(|diagnostic| {
         diagnostic.code == AnalysisDiagnosticCode::BindDirectiveInputTypeMismatch
             && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_bind_checked_radio_suggestion() {
+    let tables = analyze_source("<input type=\"radio\" bind:checked={checked} />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveInputTypeMismatch
+            && diagnostic.severity == AnalysisSeverity::Error
+            && diagnostic.message.contains("bind:group")
     }));
 }
 

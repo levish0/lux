@@ -1,6 +1,7 @@
 use criterion::{Criterion, Throughput, criterion_group, criterion_main};
 use oxc_allocator::Allocator;
 use std::fs;
+use std::hint::black_box;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::Duration;
@@ -21,7 +22,7 @@ impl BenchContext {
 
         let input_path = std::env::var("LUX_BENCH_INPUT")
             .map(PathBuf::from)
-            .unwrap_or_else(|_| workspace_root.join("ToParse.svelte"));
+            .unwrap_or_else(|_| workspace_root.join("benchmarks/assets/benchmark.svelte"));
         let source = fs::read_to_string(&input_path)
             .unwrap_or_else(|err| panic!("failed to read {}: {err}", input_path.display()));
 
@@ -37,16 +38,14 @@ impl BenchContext {
 
     fn run_svelte_phase(&self, phase: &str, iterations: u64) -> Duration {
         let script_path = self.runner_dir.join("benchmark_phase.mjs");
-        let output = Command::new(npx_executable())
-            .arg("--yes")
-            .arg("node")
+        let output = Command::new(node_executable())
             .arg(script_path)
             .arg(phase)
             .arg(&self.input_path)
             .arg(iterations.to_string())
             .current_dir(&self.runner_dir)
             .output()
-            .unwrap_or_else(|err| panic!("failed to run npx for phase {phase}: {err}"));
+            .unwrap_or_else(|err| panic!("failed to run node for phase {phase}: {err}"));
 
         assert!(
             output.status.success(),
@@ -71,8 +70,8 @@ fn npm_executable() -> &'static str {
     if cfg!(windows) { "npm.cmd" } else { "npm" }
 }
 
-fn npx_executable() -> &'static str {
-    if cfg!(windows) { "npx.cmd" } else { "npx" }
+fn node_executable() -> &'static str {
+    if cfg!(windows) { "node.exe" } else { "node" }
 }
 
 fn ensure_svelte_runner(runner_dir: &Path) {
@@ -116,11 +115,11 @@ fn bench_parser(c: &mut Criterion) {
         b.iter(|| {
             let allocator = Allocator::default();
             let result = lux_parser::parse(&ctx.source, &allocator, true);
-            criterion::black_box(result.root.fragment.nodes.len());
+            black_box(result.root.fragment.nodes.len());
         });
     });
 
-    group.bench_function("svelte_parse_npx", |b| {
+    group.bench_function("svelte_parse_node", |b| {
         b.iter_custom(|iters| ctx.run_svelte_phase("parse", iters));
     });
 
@@ -137,11 +136,11 @@ fn bench_analyze_pipeline(c: &mut Criterion) {
             let allocator = Allocator::default();
             let parsed = lux_parser::parse(&ctx.source, &allocator, true);
             let tables = lux_analyzer::analyze(&parsed.root);
-            criterion::black_box(tables.diagnostics.len());
+            black_box(tables.diagnostics.len());
         });
     });
 
-    group.bench_function("svelte_compile_generate_false_npx", |b| {
+    group.bench_function("svelte_compile_generate_false_node", |b| {
         b.iter_custom(|iters| ctx.run_svelte_phase("analyze", iters));
     });
 
@@ -153,9 +152,21 @@ fn criterion_benchmark(c: &mut Criterion) {
     bench_analyze_pipeline(c);
 }
 
+fn criterion_config() -> Criterion {
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let workspace_root = manifest_dir
+        .parent()
+        .and_then(Path::parent)
+        .expect("failed to resolve workspace root");
+
+    Criterion::default()
+        .measurement_time(Duration::from_secs(8))
+        .output_directory(&*workspace_root.join("target/criterion/lux-analyzer"))
+}
+
 criterion_group! {
     name = benches;
-    config = Criterion::default().measurement_time(Duration::from_secs(8));
+    config = criterion_config();
     targets = criterion_benchmark
 }
 criterion_main!(benches);
