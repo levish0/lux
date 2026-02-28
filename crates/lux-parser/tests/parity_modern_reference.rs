@@ -6,7 +6,7 @@ use lux_ast::template::root::FragmentNode;
 use lux_parser::parse;
 use oxc_allocator::Allocator;
 use oxc_span::GetSpan;
-use serde_json::{json, Value};
+use serde_json::Value;
 
 #[test]
 #[ignore = "parity tracking against reference parser-modern samples (strict only)"]
@@ -64,15 +64,13 @@ fn parity_against_reference_parser_modern_strict() {
         if expected_lines != actual_lines {
             let _ = fs::remove_dir_all(&out_dir);
             let _ = fs::create_dir_all(&out_dir);
-            let expected_json = json!({ "lines": expected_lines });
-            let actual_json = json!({ "lines": actual_lines });
             let _ = fs::write(
-                out_dir.join("expected.normalized.json"),
-                serde_json::to_string_pretty(&expected_json).unwrap_or_default(),
+                out_dir.join("expected.normalized.txt"),
+                expected_lines.join("\n"),
             );
             let _ = fs::write(
-                out_dir.join("actual.normalized.json"),
-                serde_json::to_string_pretty(&actual_json).unwrap_or_default(),
+                out_dir.join("actual.normalized.txt"),
+                actual_lines.join("\n"),
             );
             mismatches.push(sample_name.to_string());
         } else if out_dir.exists() {
