@@ -5,7 +5,7 @@ use super::super::binding::collect_pattern_bindings;
 use super::super::context::TemplateAnalyzerContext;
 use super::super::fragment;
 
-pub(super) fn analyze(block: &AwaitBlock<'_>, context: &mut TemplateAnalyzerContext<'_>) {
+pub(crate) fn analyze(block: &AwaitBlock<'_>, context: &mut TemplateAnalyzerContext<'_>) {
     if let Some(pending) = &block.pending {
         fragment::analyze_fragment(pending, context);
     }
@@ -29,7 +29,8 @@ pub(super) fn analyze(block: &AwaitBlock<'_>, context: &mut TemplateAnalyzerCont
     }
 
     if let Some(catch_fragment) = &block.catch {
-        let catch_scope = context.create_child_scope(TemplateScopeKind::AwaitCatch, Some(block.span));
+        let catch_scope =
+            context.create_child_scope(TemplateScopeKind::AwaitCatch, Some(block.span));
         if let Some(error_pattern) = &block.error {
             for binding in collect_pattern_bindings(error_pattern) {
                 context.add_binding_in_scope(

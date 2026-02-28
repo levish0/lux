@@ -7,7 +7,7 @@ use super::super::binding::collect_destructuring_expression_bindings;
 use super::super::context::TemplateAnalyzerContext;
 use super::super::fragment;
 
-pub(super) fn analyze<'a>(
+pub(crate) fn analyze<'a>(
     span: Span,
     attributes: &[AttributeNode<'a>],
     children: &Fragment<'a>,

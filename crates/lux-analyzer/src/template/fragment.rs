@@ -32,7 +32,12 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         FragmentNode::SnippetBlock(block) => node::snippet_block::analyze(block, context),
 
         FragmentNode::RegularElement(element) => {
-            node::element::analyze(element.span, &element.attributes, &element.fragment, context);
+            node::element::analyze(
+                element.span,
+                &element.attributes,
+                &element.fragment,
+                context,
+            );
         }
         FragmentNode::Component(component) => {
             node::element::analyze(
@@ -43,7 +48,12 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
             );
         }
         FragmentNode::SvelteElement(element) => {
-            node::element::analyze(element.span, &element.attributes, &element.fragment, context);
+            node::element::analyze(
+                element.span,
+                &element.attributes,
+                &element.fragment,
+                context,
+            );
         }
         FragmentNode::SvelteComponent(component) => {
             node::element::analyze(
@@ -110,13 +120,28 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
             );
         }
         FragmentNode::SlotElement(element) => {
-            node::element::analyze(element.span, &element.attributes, &element.fragment, context);
+            node::element::analyze(
+                element.span,
+                &element.attributes,
+                &element.fragment,
+                context,
+            );
         }
         FragmentNode::TitleElement(element) => {
-            node::element::analyze(element.span, &element.attributes, &element.fragment, context);
+            node::element::analyze(
+                element.span,
+                &element.attributes,
+                &element.fragment,
+                context,
+            );
         }
         FragmentNode::SvelteOptionsRaw(element) => {
-            node::element::analyze(element.span, &element.attributes, &element.fragment, context);
+            node::element::analyze(
+                element.span,
+                &element.attributes,
+                &element.fragment,
+                context,
+            );
         }
     }
 }

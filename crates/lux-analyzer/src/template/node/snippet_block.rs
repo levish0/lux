@@ -5,7 +5,7 @@ use super::super::binding::collect_pattern_bindings;
 use super::super::context::TemplateAnalyzerContext;
 use super::super::fragment;
 
-pub(super) fn analyze(block: &SnippetBlock<'_>, context: &mut TemplateAnalyzerContext<'_>) {
+pub(crate) fn analyze(block: &SnippetBlock<'_>, context: &mut TemplateAnalyzerContext<'_>) {
     context.add_binding(
         TemplateBindingKind::SnippetName,
         block.expression.name.as_str(),

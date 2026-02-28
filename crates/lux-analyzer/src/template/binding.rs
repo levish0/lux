@@ -10,7 +10,9 @@ pub(super) struct CollectedBinding<'a> {
     pub span: Span,
 }
 
-pub(super) fn collect_pattern_bindings<'a>(pattern: &'a BindingPattern<'a>) -> Vec<CollectedBinding<'a>> {
+pub(super) fn collect_pattern_bindings<'a>(
+    pattern: &'a BindingPattern<'a>,
+) -> Vec<CollectedBinding<'a>> {
     pattern
         .get_binding_identifiers()
         .into_iter()
@@ -125,10 +127,17 @@ fn collect_assignment_target_bindings<'a>(
             for property in &object_target.properties {
                 match property {
                     AssignmentTargetProperty::AssignmentTargetPropertyIdentifier(identifier) => {
-                        push_binding(identifier.binding.name.as_str(), identifier.binding.span, bindings);
+                        push_binding(
+                            identifier.binding.name.as_str(),
+                            identifier.binding.span,
+                            bindings,
+                        );
                     }
                     AssignmentTargetProperty::AssignmentTargetPropertyProperty(property) => {
-                        collect_assignment_target_maybe_default_bindings(&property.binding, bindings);
+                        collect_assignment_target_maybe_default_bindings(
+                            &property.binding,
+                            bindings,
+                        );
                     }
                 }
             }
@@ -163,10 +172,17 @@ fn collect_assignment_target_maybe_default_bindings<'a>(
             for property in &object_target.properties {
                 match property {
                     AssignmentTargetProperty::AssignmentTargetPropertyIdentifier(identifier) => {
-                        push_binding(identifier.binding.name.as_str(), identifier.binding.span, bindings);
+                        push_binding(
+                            identifier.binding.name.as_str(),
+                            identifier.binding.span,
+                            bindings,
+                        );
                     }
                     AssignmentTargetProperty::AssignmentTargetPropertyProperty(property) => {
-                        collect_assignment_target_maybe_default_bindings(&property.binding, bindings);
+                        collect_assignment_target_maybe_default_bindings(
+                            &property.binding,
+                            bindings,
+                        );
                     }
                 }
             }

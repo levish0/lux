@@ -1,7 +1,5 @@
 use lux_analyzer::analyze;
-use lux_ast::analysis::{
-    AnalysisTables, TemplateBindingKind, TemplateScopeId, TemplateScopeKind,
-};
+use lux_ast::analysis::{AnalysisTables, TemplateBindingKind, TemplateScopeId, TemplateScopeKind};
 use lux_parser::parse;
 use oxc_allocator::Allocator;
 
@@ -26,16 +24,12 @@ fn analyze_collects_each_context_and_index_bindings() {
     assert_eq!(index_bindings.len(), 1);
     assert_eq!(index_bindings[0].name, "i");
 
-    for binding in tables
-        .template_bindings
-        .iter()
-        .filter(|binding| {
-            matches!(
-                binding.kind,
-                TemplateBindingKind::EachContext | TemplateBindingKind::EachIndex
-            )
-        })
-    {
+    for binding in tables.template_bindings.iter().filter(|binding| {
+        matches!(
+            binding.kind,
+            TemplateBindingKind::EachContext | TemplateBindingKind::EachIndex
+        )
+    }) {
         assert_eq!(
             scope_kind_for(&tables, binding.scope),
             TemplateScopeKind::Each

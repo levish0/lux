@@ -5,7 +5,7 @@ use super::super::binding::collect_pattern_bindings;
 use super::super::context::TemplateAnalyzerContext;
 use super::super::fragment;
 
-pub(super) fn analyze(block: &EachBlock<'_>, context: &mut TemplateAnalyzerContext<'_>) {
+pub(crate) fn analyze(block: &EachBlock<'_>, context: &mut TemplateAnalyzerContext<'_>) {
     let each_scope = context.create_child_scope(TemplateScopeKind::Each, Some(block.span));
 
     if let Some(pattern) = &block.context {
