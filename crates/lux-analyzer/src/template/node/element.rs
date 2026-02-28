@@ -1,7 +1,9 @@
-use lux_ast::analysis::{TemplateBindingKind, TemplateScopeKind};
+use lux_ast::analysis::{
+    AnalysisDiagnosticCode, AnalysisSeverity, TemplateBindingKind, TemplateScopeKind,
+};
 use lux_ast::common::Span;
 use lux_ast::template::attribute::{AttributeNode, AttributeValue};
-use lux_ast::template::root::Fragment;
+use lux_ast::template::root::{Fragment, FragmentNode};
 use lux_ast::template::tag::TextOrExpressionTag;
 
 use super::super::binding::collect_destructuring_expression_bindings;
@@ -10,7 +12,17 @@ use super::super::diagnostics::{self, BindDirectiveTarget};
 use super::super::fragment;
 use super::super::reference;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ElementContainerKind {
+    Regular,
+    Component,
+    SvelteComponent,
+    SvelteSelf,
+    Other,
+}
+
 pub(crate) fn analyze<'a>(
+    container_kind: ElementContainerKind,
     bind_target: BindDirectiveTarget<'a>,
     // Svelte analyze phase rule: only specific element kinds allow `let:`.
     allow_let_directive: bool,
@@ -105,6 +117,8 @@ pub(crate) fn analyze<'a>(
         }
     }
 
+    validate_snippet_children(container_kind, attributes, children, context);
+
     context.enter_scope(element_scope);
     fragment::analyze_fragment(children, context);
     context.exit_scope();
@@ -124,4 +138,62 @@ fn analyze_attribute_value(value: &AttributeValue<'_>, context: &mut TemplateAna
             }
         }
     }
+}
+
+fn validate_snippet_children<'a>(
+    container_kind: ElementContainerKind,
+    attributes: &[AttributeNode<'a>],
+    children: &Fragment<'a>,
+    context: &mut TemplateAnalyzerContext<'_>,
+) {
+    let has_non_snippet_content = children.nodes.iter().any(|node| match node {
+        FragmentNode::SnippetBlock(_) => false,
+        FragmentNode::Text(text) => !text.raw.trim().is_empty(),
+        FragmentNode::Comment(_) => false,
+        _ => true,
+    });
+
+    for node in &children.nodes {
+        let FragmentNode::SnippetBlock(snippet_block) = node else {
+            continue;
+        };
+
+        let snippet_name = snippet_block.expression.name.as_str();
+
+        if container_kind == ElementContainerKind::Component
+            && has_attribute_or_bind_name(attributes, snippet_name)
+        {
+            context.add_diagnostic(
+                AnalysisSeverity::Error,
+                AnalysisDiagnosticCode::SnippetShadowingProp,
+                format!("Snippet `{snippet_name}` shadows a component prop"),
+                snippet_block.expression.span,
+            );
+        }
+
+        if snippet_name == "children"
+            && matches!(
+                container_kind,
+                ElementContainerKind::Component
+                    | ElementContainerKind::SvelteComponent
+                    | ElementContainerKind::SvelteSelf
+            )
+            && has_non_snippet_content
+        {
+            context.add_diagnostic(
+                AnalysisSeverity::Error,
+                AnalysisDiagnosticCode::SnippetChildrenConflict,
+                "Snippet `children` conflicts with non-snippet child content",
+                snippet_block.expression.span,
+            );
+        }
+    }
+}
+
+fn has_attribute_or_bind_name(attributes: &[AttributeNode<'_>], name: &str) -> bool {
+    attributes.iter().any(|attribute| match attribute {
+        AttributeNode::Attribute(attribute) => attribute.name == name,
+        AttributeNode::BindDirective(directive) => directive.name == name,
+        _ => false,
+    })
 }

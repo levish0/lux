@@ -46,6 +46,8 @@ pub enum AnalysisDiagnosticCode {
     BlockEmpty,
     SnippetDuplicateName,
     SnippetInvalidRestParameter,
+    SnippetShadowingProp,
+    SnippetChildrenConflict,
     TemplateAssignmentToConst,
     TemplateAssignmentToImport,
     TemplateAssignmentToBinding,

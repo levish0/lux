@@ -3,6 +3,7 @@ use lux_ast::template::root::{Fragment, FragmentNode};
 use super::context::TemplateAnalyzerContext;
 use super::diagnostics::{self, BindDirectiveTarget};
 use super::node;
+use super::node::element::ElementContainerKind;
 use super::reference;
 
 pub(super) fn analyze_fragment(fragment: &Fragment<'_>, context: &mut TemplateAnalyzerContext<'_>) {
@@ -55,6 +56,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
 
         FragmentNode::RegularElement(element) => {
             node::element::analyze(
+                ElementContainerKind::Regular,
                 BindDirectiveTarget::Regular(element.name),
                 true, // `let:` allowed on regular elements
                 element.span,
@@ -65,6 +67,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::Component(component) => {
             node::element::analyze(
+                ElementContainerKind::Component,
                 BindDirectiveTarget::Other,
                 true, // `let:` allowed on components
                 component.span,
@@ -76,6 +79,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         FragmentNode::SvelteElement(element) => {
             reference::analyze_expression(&element.tag, context);
             node::element::analyze(
+                ElementContainerKind::Other,
                 BindDirectiveTarget::SvelteElement,
                 true, // `let:` allowed on <svelte:element>
                 element.span,
@@ -87,6 +91,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         FragmentNode::SvelteComponent(component) => {
             reference::analyze_expression(&component.expression, context);
             node::element::analyze(
+                ElementContainerKind::SvelteComponent,
                 BindDirectiveTarget::Other,
                 true, // `let:` allowed on <svelte:component>
                 component.span,
@@ -97,6 +102,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteSelf(component) => {
             node::element::analyze(
+                ElementContainerKind::SvelteSelf,
                 BindDirectiveTarget::Other,
                 true, // `let:` allowed on <svelte:self>
                 component.span,
@@ -107,6 +113,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteFragment(component) => {
             node::element::analyze(
+                ElementContainerKind::Other,
                 BindDirectiveTarget::Other,
                 true, // `let:` allowed on <svelte:fragment>
                 component.span,
@@ -117,6 +124,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteHead(component) => {
             node::element::analyze(
+                ElementContainerKind::Other,
                 BindDirectiveTarget::Other,
                 false, // `let:` NOT allowed on <svelte:head>
                 component.span,
@@ -127,6 +135,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteBody(component) => {
             node::element::analyze(
+                ElementContainerKind::Other,
                 BindDirectiveTarget::SvelteBody,
                 false, // `let:` NOT allowed on <svelte:body>
                 component.span,
@@ -137,6 +146,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteWindow(component) => {
             node::element::analyze(
+                ElementContainerKind::Other,
                 BindDirectiveTarget::SvelteWindow,
                 false, // `let:` NOT allowed on <svelte:window>
                 component.span,
@@ -147,6 +157,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteDocument(component) => {
             node::element::analyze(
+                ElementContainerKind::Other,
                 BindDirectiveTarget::SvelteDocument,
                 false, // `let:` NOT allowed on <svelte:document>
                 component.span,
@@ -157,6 +168,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteBoundary(component) => {
             node::element::analyze(
+                ElementContainerKind::Other,
                 BindDirectiveTarget::Other,
                 false, // `let:` NOT allowed on <svelte:boundary>
                 component.span,
@@ -167,6 +179,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SlotElement(element) => {
             node::element::analyze(
+                ElementContainerKind::Other,
                 BindDirectiveTarget::Other,
                 true, // `let:` allowed on <slot>
                 element.span,
@@ -177,6 +190,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::TitleElement(element) => {
             node::element::analyze(
+                ElementContainerKind::Other,
                 BindDirectiveTarget::Other,
                 false, // `let:` NOT allowed on <title>
                 element.span,
@@ -187,6 +201,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteOptionsRaw(element) => {
             node::element::analyze(
+                ElementContainerKind::Other,
                 BindDirectiveTarget::Other,
                 false, // `let:` NOT allowed on <svelte:options>
                 element.span,

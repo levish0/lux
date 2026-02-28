@@ -431,6 +431,26 @@ fn analyze_reports_render_tag_forbidden_call_expression() {
     }));
 }
 
+#[test]
+fn analyze_reports_snippet_shadowing_component_prop() {
+    let tables = analyze_source("<Comp foo=\"value\">{#snippet foo()}{/snippet}</Comp>");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::SnippetShadowingProp
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_snippet_children_conflict() {
+    let tables = analyze_source("<Comp>{#snippet children()}{/snippet}<p>content</p></Comp>");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::SnippetChildrenConflict
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
 fn analyze_source(source: &str) -> AnalysisTables {
     let allocator = Allocator::default();
     let parsed = parse(source, &allocator, false);
