@@ -4,10 +4,7 @@ use oxc_ast::ast::{Argument, Expression};
 
 use crate::template::context::TemplateAnalyzerContext;
 
-pub(crate) fn validate_render_tag(
-    tag: &RenderTag<'_>,
-    context: &mut TemplateAnalyzerContext<'_>,
-) {
+pub(crate) fn validate_render_tag(tag: &RenderTag<'_>, context: &mut TemplateAnalyzerContext<'_>) {
     let Expression::CallExpression(call_expression) = &tag.expression else {
         return;
     };
