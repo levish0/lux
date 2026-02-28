@@ -25,3 +25,8 @@ rustc-hash = {workspace = true}
 
 [dev-dependencies]
 serde_json = { workspace = true }
+criterion = { workspace = true }
+
+[[bench]]
+name = "svelte_compare_parser"
+harness = false

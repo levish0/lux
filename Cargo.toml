@@ -32,10 +32,10 @@ oxc_diagnostics = "0.115.0"
 oxc_estree = { version = "0.115.0", features = ["serialize"] }
 oxc_ast_visit = "0.115.0"
 oxc_semantic = "0.115.0"
-rayon = "1.11.0"
 phf = { version = "0.13.1", features = ["macros"] }
 regex = "1.12.3"
 line-span = "0.1.5"
 strsim = "0.11.1"
 rustc-hash = "2.1.1"
+criterion = "0.8.2"
 winnow = { version = "0.7.14", features = ["simd"] }

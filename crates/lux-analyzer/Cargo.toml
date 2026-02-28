@@ -22,3 +22,8 @@ rustc-hash = { workspace = true }
 [dev-dependencies]
 lux-parser = { workspace = true }
 oxc_allocator = { workspace = true }
+criterion = {workspace = true}
+
+[[bench]]
+name = "svelte_compare"
+harness = false
