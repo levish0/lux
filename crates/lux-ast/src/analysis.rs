@@ -45,6 +45,7 @@ pub enum AnalysisDiagnosticCode {
     EachInvalidContextIdentifier,
     BlockEmpty,
     SnippetDuplicateName,
+    SnippetInvalidRestParameter,
     TemplateAssignmentToConst,
     TemplateAssignmentToImport,
     TemplateAssignmentToBinding,
@@ -58,6 +59,8 @@ pub enum AnalysisDiagnosticCode {
     BindDirectiveContenteditableMissing,
     BindDirectiveContenteditableDynamic,
     LetDirectiveInvalidPlacement,
+    RenderTagInvalidSpreadArgument,
+    RenderTagInvalidCallExpression,
 }
 
 #[derive(Debug, Clone)]

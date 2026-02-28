@@ -7,6 +7,15 @@ pub(crate) fn validate_snippet_block(
     block: &SnippetBlock<'_>,
     context: &mut TemplateAnalyzerContext<'_>,
 ) {
+    for rest_span in &block.rest_parameter_spans {
+        context.add_diagnostic(
+            AnalysisSeverity::Error,
+            AnalysisDiagnosticCode::SnippetInvalidRestParameter,
+            "Snippet parameters cannot use rest syntax",
+            *rest_span,
+        );
+    }
+
     let scope = context.current_scope();
     let name = block.expression.name.as_str();
 

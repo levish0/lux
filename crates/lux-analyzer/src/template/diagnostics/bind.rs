@@ -3,6 +3,7 @@ use lux_ast::template::attribute::{Attribute, AttributeNode, AttributeValue};
 use lux_ast::template::directive::BindDirective;
 use lux_ast::template::tag::TextOrExpressionTag;
 use lux_metadata::bindings::get_binding_property;
+use lux_utils::elements::is_svg;
 use oxc_ast::ast::Expression;
 use oxc_span::GetSpan;
 
@@ -193,6 +194,15 @@ fn validate_regular_element_bind_rules(
                 }
             }
         }
+    }
+
+    if directive.name == "offsetWidth" && is_svg(element_name) {
+        context.add_diagnostic(
+            AnalysisSeverity::Error,
+            AnalysisDiagnosticCode::BindDirectiveInvalidTarget,
+            "bind:offsetWidth is not valid on SVG elements (use bind:clientWidth instead)",
+            directive.span,
+        );
     }
 }
 

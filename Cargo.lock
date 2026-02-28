@@ -117,6 +117,7 @@ dependencies = [
  "lux-ast",
  "lux-metadata",
  "lux-parser",
+ "lux-utils",
  "oxc_allocator",
  "oxc_ast",
  "oxc_ast_visit",

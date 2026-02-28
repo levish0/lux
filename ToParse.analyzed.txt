@@ -13,26 +13,6 @@ AnalysisTables {
     css_rules: {
         SpanKey {
             kind: CssRule,
-            start: 877,
-            end: 956,
-        }: CssRuleAnalysis {
-            parent_rule: None,
-            has_local_selectors: true,
-            has_global_selectors: false,
-            is_global_block: false,
-        },
-        SpanKey {
-            kind: CssRule,
-            start: 1076,
-            end: 1347,
-        }: CssRuleAnalysis {
-            parent_rule: None,
-            has_local_selectors: true,
-            has_global_selectors: false,
-            is_global_block: false,
-        },
-        SpanKey {
-            kind: CssRule,
             start: 1351,
             end: 1474,
         }: CssRuleAnalysis {
@@ -51,12 +31,40 @@ AnalysisTables {
             has_global_selectors: false,
             is_global_block: false,
         },
+        SpanKey {
+            kind: CssRule,
+            start: 877,
+            end: 956,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 1076,
+            end: 1347,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
     },
     complex_selectors: {
         SpanKey {
             kind: ComplexSelector,
             start: 1351,
             end: 1378,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 960,
+            end: 963,
         }: ComplexSelectorAnalysis {
             is_global: false,
             used: false,
@@ -77,16 +85,17 @@ AnalysisTables {
             is_global: false,
             used: false,
         },
-        SpanKey {
-            kind: ComplexSelector,
-            start: 960,
-            end: 963,
-        }: ComplexSelectorAnalysis {
-            is_global: false,
-            used: false,
-        },
     },
     relative_selectors: {
+        SpanKey {
+            kind: RelativeSelector,
+            start: 960,
+            end: 963,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
         SpanKey {
             kind: RelativeSelector,
             start: 1351,
@@ -100,15 +109,6 @@ AnalysisTables {
             kind: RelativeSelector,
             start: 877,
             end: 879,
-        }: RelativeSelectorAnalysis {
-            is_global: false,
-            is_global_like: false,
-            scoped: true,
-        },
-        SpanKey {
-            kind: RelativeSelector,
-            start: 960,
-            end: 963,
         }: RelativeSelectorAnalysis {
             is_global: false,
             is_global_like: false,

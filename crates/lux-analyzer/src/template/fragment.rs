@@ -25,6 +25,7 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
             reference::analyze_expression(&tag.expression, context);
         }
         FragmentNode::RenderTag(tag) => {
+            diagnostics::validate_render_tag(tag, context);
             reference::analyze_expression(&tag.expression, context);
         }
         FragmentNode::AttachTag(tag) => {

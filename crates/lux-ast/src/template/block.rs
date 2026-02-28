@@ -47,5 +47,6 @@ pub struct SnippetBlock<'a> {
     pub expression: IdentifierReference<'a>,
     pub type_params: Option<&'a str>,
     pub parameters: Vec<BindingPattern<'a>>,
+    pub rest_parameter_spans: Vec<Span>,
     pub body: Fragment<'a>,
 }

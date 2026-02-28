@@ -39,13 +39,13 @@ pub fn parse_snippet_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fr
 
     skip_whitespace(input);
 
-    let parameters = if opt(literal("(")).parse_next(input)?.is_some() {
+    let (parameters, rest_parameter_spans) = if opt(literal("(")).parse_next(input)?.is_some() {
         let params = parse_snippet_params(input)?;
         literal(")").parse_next(input)?;
         skip_whitespace(input);
-        params
+        (params.parameters, params.rest_parameter_spans)
     } else {
-        Vec::new()
+        (Vec::new(), Vec::new())
     };
 
     literal("}").parse_next(input)?;
@@ -60,6 +60,7 @@ pub fn parse_snippet_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fr
         expression,
         type_params,
         parameters,
+        rest_parameter_spans,
         body,
     }))
 }

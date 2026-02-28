@@ -366,6 +366,16 @@ fn analyze_reports_dynamic_contenteditable_attribute_for_text_content_binding() 
 }
 
 #[test]
+fn analyze_reports_bind_offset_width_on_svg_element() {
+    let tables = analyze_source("<svg bind:offsetWidth={width} />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveInvalidTarget
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
 fn analyze_reports_block_empty_warning_for_if_and_key_blocks() {
     let tables = analyze_source("{#if cond} {/if}{#key value} {/key}");
 
@@ -387,6 +397,36 @@ fn analyze_reports_invalid_let_directive_placement() {
 
     assert!(tables.diagnostics.iter().any(|diagnostic| {
         diagnostic.code == AnalysisDiagnosticCode::LetDirectiveInvalidPlacement
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_snippet_invalid_rest_parameter() {
+    let tables = analyze_source("{#snippet demo(...args)}{/snippet}");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::SnippetInvalidRestParameter
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_render_tag_spread_argument() {
+    let tables = analyze_source("{@render snippet(...args)}");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::RenderTagInvalidSpreadArgument
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_render_tag_forbidden_call_expression() {
+    let tables = analyze_source("{@render snippet.call(ctx)}");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::RenderTagInvalidCallExpression
             && diagnostic.severity == AnalysisSeverity::Error
     }));
 }

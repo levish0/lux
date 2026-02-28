@@ -162,3 +162,18 @@ fn test_snippet_block() {
         vec!["SnippetBlock"]
     );
 }
+
+#[test]
+fn test_snippet_rest_parameter_span_is_recorded() {
+    let source = "{#snippet demo(...args)}{/snippet}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+
+    let FragmentNode::SnippetBlock(node) = &parsed.root.fragment.nodes[0] else {
+        panic!("expected snippet block");
+    };
+
+    assert_eq!(node.rest_parameter_spans.len(), 1);
+    let span = node.rest_parameter_spans[0];
+    assert_eq!(&source[span.start as usize..span.end as usize], "...args");
+}
