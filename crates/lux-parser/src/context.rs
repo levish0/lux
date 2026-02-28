@@ -27,3 +27,28 @@ where
 pub fn is_top_level(input: &Input<'_>) -> bool {
     input.state.depth == 0
 }
+
+pub fn with_shadowroot_template<'a, T, F>(
+    input: &mut Input<'a>,
+    enabled: bool,
+    parser: F,
+) -> Result<T>
+where
+    F: FnOnce(&mut Input<'a>) -> Result<T>,
+{
+    if enabled {
+        input.state.shadowroot_depth += 1;
+    }
+
+    let result = parser(input);
+
+    if enabled {
+        input.state.shadowroot_depth -= 1;
+    }
+
+    result
+}
+
+pub fn in_shadowroot_template(input: &Input<'_>) -> bool {
+    input.state.shadowroot_depth > 0
+}

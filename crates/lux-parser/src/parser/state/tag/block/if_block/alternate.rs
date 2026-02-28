@@ -13,6 +13,23 @@ use crate::parser::utils::helpers::{
     at_block_continuation, eat_block_continuation, require_whitespace, skip_whitespace,
 };
 
+pub(super) fn set_elseif_span_end(alternate: &mut Option<Fragment<'_>>, end: u32) {
+    let Some(fragment) = alternate else {
+        return;
+    };
+
+    let Some(FragmentNode::IfBlock(block)) = fragment.nodes.get_mut(0) else {
+        return;
+    };
+
+    if !block.elseif {
+        return;
+    }
+
+    block.span.end = end;
+    set_elseif_span_end(&mut block.alternate, end);
+}
+
 pub(super) fn parse_if_alternate<'a>(input: &mut Input<'a>) -> Result<Option<Fragment<'a>>> {
     if !at_block_continuation(input, "else") {
         return Ok(None);

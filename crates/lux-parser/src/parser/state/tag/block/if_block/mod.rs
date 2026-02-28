@@ -26,10 +26,11 @@ pub fn parse_if_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragmen
     literal("}").parse_next(input)?;
 
     let consequent = parse_block_fragment(input)?;
-    let alternate = parse_if_alternate(input)?;
+    let mut alternate = parse_if_alternate(input)?;
 
     eat_block_close(input, "if")?;
     let end = input.previous_token_end();
+    alternate::set_elseif_span_end(&mut alternate, end as u32);
 
     Ok(FragmentNode::IfBlock(IfBlock {
         span: Span::new(start as u32, end as u32),
