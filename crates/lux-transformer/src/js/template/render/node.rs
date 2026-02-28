@@ -1,17 +1,11 @@
-use lux_ast::template::attribute::AttributeNode;
-use lux_ast::template::root::{Fragment, FragmentNode};
-use lux_utils::elements::is_void;
+use lux_ast::template::root::FragmentNode;
 
-use super::attribute::render_static_attribute;
-use super::marker::{push_dynamic_marker, sanitize_comment};
+use crate::js::template::marker::{push_dynamic_marker, sanitize_comment};
 
-pub(super) fn render_fragment(fragment: &Fragment<'_>, out: &mut String, has_dynamic: &mut bool) {
-    for node in &fragment.nodes {
-        render_node(node, out, has_dynamic);
-    }
-}
+use super::element::render_regular_element;
+use super::render_fragment;
 
-fn render_node(node: &FragmentNode<'_>, out: &mut String, has_dynamic: &mut bool) {
+pub(super) fn render_node(node: &FragmentNode<'_>, out: &mut String, has_dynamic: &mut bool) {
     match node {
         FragmentNode::Text(text) => out.push_str(text.raw),
         FragmentNode::Comment(comment) => {
@@ -44,8 +38,12 @@ fn render_node(node: &FragmentNode<'_>, out: &mut String, has_dynamic: &mut bool
 
         FragmentNode::ExpressionTag(_) => push_dynamic_marker("expression", out, has_dynamic),
         FragmentNode::HtmlTag(_) => push_dynamic_marker("html-tag", out, has_dynamic),
-        FragmentNode::ConstTag(_) => push_dynamic_marker("const-tag", out, has_dynamic),
-        FragmentNode::DebugTag(_) => push_dynamic_marker("debug-tag", out, has_dynamic),
+        FragmentNode::ConstTag(_) => {
+            *has_dynamic = true;
+        }
+        FragmentNode::DebugTag(_) => {
+            *has_dynamic = true;
+        }
         FragmentNode::RenderTag(_) => push_dynamic_marker("render-tag", out, has_dynamic),
         FragmentNode::AttachTag(_) => push_dynamic_marker("attach-tag", out, has_dynamic),
         FragmentNode::IfBlock(_) => push_dynamic_marker("if-block", out, has_dynamic),
@@ -60,41 +58,16 @@ fn render_node(node: &FragmentNode<'_>, out: &mut String, has_dynamic: &mut bool
         }
         FragmentNode::SvelteElement(_) => push_dynamic_marker("svelte-element", out, has_dynamic),
         FragmentNode::SvelteSelf(_) => push_dynamic_marker("svelte-self", out, has_dynamic),
-        FragmentNode::SvelteFragment(_) => push_dynamic_marker("svelte-fragment", out, has_dynamic),
-        FragmentNode::SvelteHead(_) => push_dynamic_marker("svelte-head", out, has_dynamic),
-        FragmentNode::SvelteBody(_) => push_dynamic_marker("svelte-body", out, has_dynamic),
-        FragmentNode::SvelteWindow(_) => push_dynamic_marker("svelte-window", out, has_dynamic),
-        FragmentNode::SvelteDocument(_) => push_dynamic_marker("svelte-document", out, has_dynamic),
-        FragmentNode::SvelteBoundary(_) => push_dynamic_marker("svelte-boundary", out, has_dynamic),
-        FragmentNode::SvelteOptionsRaw(_) => {
-            push_dynamic_marker("svelte-options", out, has_dynamic)
+        FragmentNode::SvelteFragment(element) => render_fragment(&element.fragment, out, has_dynamic),
+        FragmentNode::SvelteHead(element) => render_fragment(&element.fragment, out, has_dynamic),
+        FragmentNode::SvelteBody(element) => render_fragment(&element.fragment, out, has_dynamic),
+        FragmentNode::SvelteWindow(element) => render_fragment(&element.fragment, out, has_dynamic),
+        FragmentNode::SvelteDocument(element) => {
+            render_fragment(&element.fragment, out, has_dynamic)
         }
-    }
-}
-
-fn render_regular_element(
-    name: &str,
-    attributes: &[AttributeNode<'_>],
-    children: &Fragment<'_>,
-    out: &mut String,
-    has_dynamic: &mut bool,
-) {
-    out.push('<');
-    out.push_str(name);
-
-    for attribute in attributes {
-        if let Some(serialized) = render_static_attribute(attribute, has_dynamic) {
-            out.push(' ');
-            out.push_str(&serialized);
+        FragmentNode::SvelteBoundary(element) => {
+            render_fragment(&element.fragment, out, has_dynamic)
         }
-    }
-
-    out.push('>');
-
-    if !is_void(name) {
-        render_fragment(children, out, has_dynamic);
-        out.push_str("</");
-        out.push_str(name);
-        out.push('>');
+        FragmentNode::SvelteOptionsRaw(_) => {}
     }
 }

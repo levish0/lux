@@ -11,20 +11,74 @@ export default {
 	cssScope: __lux_css_scope,
 	hasDynamic: __lux_has_dynamic,
 	render: function(_props = {}) {
-		return "" + "\n\n" + ("<h1" + (" style=\"" + ("" + "color: " + String(function({ selected }) {
-			return selected;
-		}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;")) + "\"") + ">" + ("" + "Pick a colour") + "</h1>") + "\n\n" + ("<div" + ">" + ("" + "\n  " + ("<button" + (" style=\"" + ("" + "background: red") + "\"") + (" aria-label=\"" + ("" + "red") + "\"") + (" aria-current=\"" + String(function({ selected }) {
-			return selected === "red";
-		}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + (" onclick=\"" + String(function({ selected }) {
-			return () => selected = "red";
-		}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + ">" + "" + "</button>") + "\n\n  " + ("<button" + (" style=\"" + ("" + "background: orange") + "\"") + (" aria-label=\"" + ("" + "orange") + "\"") + (" aria-current=\"" + String(function({ selected }) {
-			return selected === "orange";
-		}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + (" onclick=\"" + String(function({ selected }) {
-			return () => selected = "orange";
-		}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + ">" + "" + "</button>") + "\n\n  " + ("<button" + (" style=\"" + ("" + "background: yellow") + "\"") + (" aria-label=\"" + ("" + "yellow") + "\"") + (" aria-current=\"" + String(function({ selected }) {
-			return selected === "yellow";
-		}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + (" onclick=\"" + String(function({ selected }) {
-			return () => selected = "yellow";
-		}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + ">" + "" + "</button>") + "\n\n  " + "<!-- TODO add the rest of the colours -->" + "\n  " + ("<button" + ">" + "" + "</button>") + "\n  " + ("<button" + ">" + "" + "</button>") + "\n  " + ("<button" + ">" + "" + "</button>") + "\n  " + ("<button" + ">" + "" + "</button>") + "\n") + "</div>") + "\n\n" + "\n";
+		return function() {
+			let __lux_chunks = [];
+			__lux_chunks.push("\n\n");
+			__lux_chunks.push("<h1" + (" style=\"" + ("" + "color: " + String(function({ selected }) {
+				return selected;
+			}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;")) + "\"") + ">" + function() {
+				let __lux_chunks = [];
+				__lux_chunks.push("Pick a colour");
+				return __lux_chunks.join("");
+			}() + "</h1>");
+			__lux_chunks.push("\n\n");
+			__lux_chunks.push("<div" + ">" + function() {
+				let __lux_chunks = [];
+				__lux_chunks.push("\n  ");
+				__lux_chunks.push("<button" + (" style=\"" + ("" + "background: red") + "\"") + (" aria-label=\"" + ("" + "red") + "\"") + (" aria-current=\"" + String(function({ selected }) {
+					return selected === "red";
+				}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + (" onclick=\"" + String(function({ selected }) {
+					return () => selected = "red";
+				}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + ">" + function() {
+					let __lux_chunks = [];
+					return __lux_chunks.join("");
+				}() + "</button>");
+				__lux_chunks.push("\n\n  ");
+				__lux_chunks.push("<button" + (" style=\"" + ("" + "background: orange") + "\"") + (" aria-label=\"" + ("" + "orange") + "\"") + (" aria-current=\"" + String(function({ selected }) {
+					return selected === "orange";
+				}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + (" onclick=\"" + String(function({ selected }) {
+					return () => selected = "orange";
+				}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + ">" + function() {
+					let __lux_chunks = [];
+					return __lux_chunks.join("");
+				}() + "</button>");
+				__lux_chunks.push("\n\n  ");
+				__lux_chunks.push("<button" + (" style=\"" + ("" + "background: yellow") + "\"") + (" aria-label=\"" + ("" + "yellow") + "\"") + (" aria-current=\"" + String(function({ selected }) {
+					return selected === "yellow";
+				}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + (" onclick=\"" + String(function({ selected }) {
+					return () => selected = "yellow";
+				}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + ">" + function() {
+					let __lux_chunks = [];
+					return __lux_chunks.join("");
+				}() + "</button>");
+				__lux_chunks.push("\n\n  ");
+				__lux_chunks.push("<!-- TODO add the rest of the colours -->");
+				__lux_chunks.push("\n  ");
+				__lux_chunks.push("<button" + ">" + function() {
+					let __lux_chunks = [];
+					return __lux_chunks.join("");
+				}() + "</button>");
+				__lux_chunks.push("\n  ");
+				__lux_chunks.push("<button" + ">" + function() {
+					let __lux_chunks = [];
+					return __lux_chunks.join("");
+				}() + "</button>");
+				__lux_chunks.push("\n  ");
+				__lux_chunks.push("<button" + ">" + function() {
+					let __lux_chunks = [];
+					return __lux_chunks.join("");
+				}() + "</button>");
+				__lux_chunks.push("\n  ");
+				__lux_chunks.push("<button" + ">" + function() {
+					let __lux_chunks = [];
+					return __lux_chunks.join("");
+				}() + "</button>");
+				__lux_chunks.push("\n");
+				return __lux_chunks.join("");
+			}() + "</div>");
+			__lux_chunks.push("\n\n");
+			__lux_chunks.push("\n");
+			return __lux_chunks.join("");
+		}();
 	}
 };

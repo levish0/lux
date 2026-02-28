@@ -7,7 +7,8 @@ use winnow::stream::Location as StreamLocation;
 use winnow::token::literal;
 
 use crate::input::Input;
-use crate::parser::read::expression::{read_expression, read_expression_until};
+use crate::parser::read::expression::read_expression;
+use crate::parser::read::pattern::read_binding_pattern_until;
 use crate::parser::utils::helpers::{require_whitespace, skip_whitespace};
 
 /// Parse `{@const id = expression}`.
@@ -18,8 +19,8 @@ pub fn parse_const_tag<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragme
 
     let decl_start = input.current_token_start();
 
-    // Read id (left side of =), stopping at `=`
-    let id = read_expression_until(input, b"=")?;
+    // Read binding pattern (left side of =), stopping at `=`
+    let id = read_binding_pattern_until(input, b"=")?;
     skip_whitespace(input);
 
     literal("=").parse_next(input)?;

@@ -1,4 +1,4 @@
-use oxc_ast::ast::{Expression, IdentifierReference};
+use oxc_ast::ast::{BindingPattern, Expression, IdentifierReference};
 
 use crate::common::Span;
 
@@ -49,7 +49,7 @@ pub struct ConstTag<'a> {
 #[derive(Debug)]
 pub struct ConstDeclaration<'a> {
     pub span: Span,
-    pub id: Expression<'a>,
+    pub id: BindingPattern<'a>,
     pub init: Expression<'a>,
 }
 

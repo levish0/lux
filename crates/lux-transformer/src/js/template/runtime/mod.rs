@@ -7,17 +7,19 @@ mod scope;
 use lux_ast::template::root::{Fragment, FragmentNode};
 use oxc_allocator::CloneIn;
 use oxc_ast::{AstBuilder, ast::Expression};
+use oxc_span::SPAN;
 
 use self::blocks::{
-    render_await_block_expression, render_each_block_expression, render_if_block_expression,
-    render_snippet_block_declaration,
+    render_await_block_expression, render_const_tag_declaration_statement,
+    render_each_block_expression, render_if_block_expression, render_snippet_block_declaration,
 };
 use self::elements::{
     render_component_expression, render_regular_element_expression, render_svelte_component_expression,
     render_svelte_element_expression,
 };
 use self::expr::{
-    concat_expr, dynamic_marker_expr, escape_html_expression, string_expr, stringify_expression,
+    call_iife, call_static_method, dynamic_marker_expr, escape_html_expression, string_expr,
+    stringify_expression,
 };
 use self::scope::{RuntimeScope, resolve_expression};
 use super::marker::sanitize_comment;
@@ -34,26 +36,78 @@ fn render_fragment_expression<'a>(
     fragment: &Fragment<'_>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
-    let mut out = string_expr(ast, "");
+    let mut statements = ast.vec();
+    let chunks_ident = ast.expression_identifier(SPAN, ast.ident("__lux_chunks"));
+    let chunks_declarator = ast.variable_declarator(
+        SPAN,
+        oxc_ast::ast::VariableDeclarationKind::Let,
+        ast.binding_pattern_binding_identifier(SPAN, ast.ident("__lux_chunks")),
+        oxc_ast::NONE,
+        Some(ast.expression_array(SPAN, ast.vec())),
+        false,
+    );
+    statements.push(
+        ast.declaration_variable(
+            SPAN,
+            oxc_ast::ast::VariableDeclarationKind::Let,
+            ast.vec1(chunks_declarator),
+            false,
+        )
+        .into(),
+    );
+
     let mut current_scope = scope.clone();
 
     for node in &fragment.nodes {
         match node {
-            FragmentNode::SnippetBlock(block) => {
-                out = concat_expr(
+            FragmentNode::ConstTag(tag) => {
+                statements.push(render_const_tag_declaration_statement(
                     ast,
-                    out,
-                    render_snippet_block_declaration(ast, block, &current_scope),
+                    tag,
+                    &current_scope,
+                ));
+                current_scope = current_scope.with_binding_pattern(&tag.declaration.id);
+            }
+            FragmentNode::SnippetBlock(block) => {
+                let rendered = render_snippet_block_declaration(ast, block, &current_scope);
+                statements.push(
+                    ast.statement_expression(
+                        SPAN,
+                        call_static_method(
+                            ast,
+                            chunks_ident.clone_in(ast.allocator),
+                            "push",
+                            ast.vec1(rendered.into()),
+                        ),
+                    ),
                 );
                 current_scope = current_scope.with_name(block.expression.name.as_str());
             }
             _ => {
-                out = concat_expr(ast, out, render_node_expression(ast, node, &current_scope));
+                let rendered = render_node_expression(ast, node, &current_scope);
+                statements.push(
+                    ast.statement_expression(
+                        SPAN,
+                        call_static_method(
+                            ast,
+                            chunks_ident.clone_in(ast.allocator),
+                            "push",
+                            ast.vec1(rendered.into()),
+                        ),
+                    ),
+                );
             }
         }
     }
 
-    out
+    let joined = call_static_method(
+        ast,
+        chunks_ident,
+        "join",
+        ast.vec1(string_expr(ast, "").into()),
+    );
+    statements.push(ast.statement_return(SPAN, Some(joined)));
+    call_iife(ast, statements)
 }
 
 fn render_node_expression<'a>(
@@ -106,7 +160,7 @@ fn render_node_expression<'a>(
         FragmentNode::AwaitBlock(block) => render_await_block_expression(ast, block, scope),
         FragmentNode::KeyBlock(block) => render_fragment_expression(ast, &block.fragment, scope),
 
-        FragmentNode::ConstTag(_) => dynamic_marker_expr(ast, "const-tag"),
+        FragmentNode::ConstTag(_) => string_expr(ast, ""),
         FragmentNode::DebugTag(_) => dynamic_marker_expr(ast, "debug-tag"),
         FragmentNode::RenderTag(tag) => stringify_expression(
             ast,
@@ -130,6 +184,6 @@ fn render_node_expression<'a>(
         FragmentNode::SvelteBoundary(element) => {
             render_fragment_expression(ast, &element.fragment, scope)
         }
-        FragmentNode::SvelteOptionsRaw(_) => dynamic_marker_expr(ast, "svelte-options"),
+        FragmentNode::SvelteOptionsRaw(_) => string_expr(ast, ""),
     }
 }

@@ -1,10 +1,11 @@
 use lux_ast::template::block::{AwaitBlock, EachBlock, IfBlock, SnippetBlock};
+use lux_ast::template::tag::ConstTag;
 use oxc_allocator::CloneIn;
 use oxc_ast::{
     AstBuilder, NONE,
     ast::{
         AssignmentOperator, BinaryOperator, Expression, FormalParameterKind, FunctionType,
-        LogicalOperator, UnaryOperator,
+        LogicalOperator, UnaryOperator, VariableDeclarationKind,
     },
 };
 use oxc_span::SPAN;
@@ -283,4 +284,27 @@ pub(super) fn render_snippet_block_declaration<'a>(
     );
 
     ast.expression_sequence(SPAN, ast.vec_from_array([assignment, string_expr(ast, "")]))
+}
+
+pub(super) fn render_const_tag_declaration_statement<'a>(
+    ast: AstBuilder<'a>,
+    tag: &ConstTag<'_>,
+    scope: &RuntimeScope,
+) -> oxc_ast::ast::Statement<'a> {
+    let init = resolve_expression(ast, tag.declaration.init.clone_in(ast.allocator), scope);
+    let declarator = ast.variable_declarator(
+        SPAN,
+        VariableDeclarationKind::Const,
+        tag.declaration.id.clone_in(ast.allocator),
+        NONE,
+        Some(init),
+        false,
+    );
+    ast.declaration_variable(
+        SPAN,
+        VariableDeclarationKind::Const,
+        ast.vec1(declarator),
+        false,
+    )
+    .into()
 }

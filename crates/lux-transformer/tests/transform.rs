@@ -224,6 +224,36 @@ fn transform_generates_spread_and_directive_runtime_attributes() {
     assert!(result.js.contains("\" style=\\\"color: \" + String("));
 }
 
+#[test]
+fn transform_keeps_svelte_head_static_when_children_are_static() {
+    let source = "<svelte:head><title>t</title></svelte:head>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("const __lux_has_dynamic = false;"));
+    assert!(!result.js.contains("<!--lux:dynamic:svelte-head-->"));
+    assert!(result.js.contains("<title>t</title>"));
+}
+
+#[test]
+fn transform_generates_const_tag_runtime_binding() {
+    let source = "{@const x = value}<p>{x}</p>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("<!--lux:dynamic:const-tag-->"));
+    assert!(result.js.contains("const x = function({ value })"));
+    assert!(result.js.contains("String(x ?? \"\")"));
+}
+
 fn assert_component_js_payload(js: &str) {
     assert!(
         js.contains("const __lux_template = "),
