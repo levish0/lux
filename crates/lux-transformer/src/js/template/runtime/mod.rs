@@ -36,6 +36,15 @@ fn render_fragment_expression<'a>(
     fragment: &Fragment<'_>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
+    let nodes = fragment.nodes.iter().collect::<Vec<_>>();
+    render_fragment_nodes_expression(ast, &nodes, scope)
+}
+
+fn render_fragment_nodes_expression<'a>(
+    ast: AstBuilder<'a>,
+    nodes: &[&FragmentNode<'_>],
+    scope: &RuntimeScope,
+) -> Expression<'a> {
     let mut statements = ast.vec();
     let chunks_ident = ast.expression_identifier(SPAN, ast.ident("__lux_chunks"));
     let chunks_declarator = ast.variable_declarator(
@@ -58,7 +67,7 @@ fn render_fragment_expression<'a>(
 
     let mut current_scope = scope.clone();
 
-    for node in &fragment.nodes {
+    for node in nodes {
         match node {
             FragmentNode::ConstTag(tag) => {
                 statements.push(render_const_tag_declaration_statement(

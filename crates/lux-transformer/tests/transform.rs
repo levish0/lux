@@ -318,6 +318,56 @@ fn transform_component_props_include_default_slots_object() {
     assert!(result.js.contains("default: function()"));
 }
 
+#[test]
+fn transform_component_groups_named_slots() {
+    let source =
+        "<Child>default<p slot=\"title\">t</p><svelte:fragment slot=\"footer\"><i>f</i></svelte:fragment></Child>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("children: function()"));
+    assert!(result.js.contains("$$slots"));
+    assert!(result.js.contains("default: function()"));
+    assert!(result.js.contains("title: function()"));
+    assert!(result.js.contains("footer: function()"));
+    assert!(result.js.contains(" slot=\\\""));
+}
+
+#[test]
+fn transform_component_children_prop_keeps_default_slot_payload() {
+    let source = "<Child children={x}>default</Child>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("children: function({ x })"));
+    assert!(!result.js.contains("children: function()"));
+    assert!(result.js.contains("$$slots"));
+    assert!(result.js.contains("default: function()"));
+}
+
+#[test]
+fn transform_component_named_slot_only_without_children_prop() {
+    let source = "<Child><p slot=\"named\">x</p></Child>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("children: function()"));
+    assert!(result.js.contains("$$slots"));
+    assert!(result.js.contains("named: function()"));
+}
+
 fn assert_component_js_payload(js: &str) {
     assert!(
         js.contains("const __lux_template = "),

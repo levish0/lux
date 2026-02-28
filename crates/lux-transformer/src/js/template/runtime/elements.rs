@@ -1,6 +1,6 @@
 use lux_ast::template::attribute::{AttributeNode, AttributeValue};
 use lux_ast::template::element::{Component, SlotElement, SvelteComponent, SvelteElement, SvelteSelf};
-use lux_ast::template::root::Fragment;
+use lux_ast::template::root::{Fragment, FragmentNode};
 use lux_ast::template::tag::TextOrExpressionTag;
 use lux_utils::elements::is_void;
 use oxc_allocator::CloneIn;
@@ -12,7 +12,7 @@ use oxc_span::SPAN;
 
 use super::attributes::render_attribute_expression;
 use super::expr::{call_iife, concat_expr, const_statement, string_expr, stringify_expression};
-use super::render_fragment_expression;
+use super::{render_fragment_expression, render_fragment_nodes_expression};
 use super::scope::{RuntimeScope, is_valid_js_identifier, resolve_expression};
 
 pub(super) fn render_regular_element_expression<'a>(
@@ -303,20 +303,29 @@ fn build_component_props_expression<'a>(
         }
     }
 
-    if !fragment.nodes.is_empty() && !component_has_children_prop(attributes) {
-        let child_function = build_slot_function(ast, fragment, scope);
-        properties.push(object_init_property(
-            ast,
-            "children",
-            child_function.clone_in(ast.allocator),
-        ));
+    let has_children_prop = component_has_children_prop(attributes);
+    let slot_groups = collect_component_slot_groups(fragment);
+    if !slot_groups.is_empty() {
+        let mut slot_properties = ast.vec();
+
+        for (slot_name, nodes) in slot_groups {
+            let slot_function = build_slot_function_for_nodes(ast, &nodes, scope);
+
+            if slot_name == "default" && !has_children_prop {
+                properties.push(object_init_property(
+                    ast,
+                    "children",
+                    slot_function.clone_in(ast.allocator),
+                ));
+            }
+
+            slot_properties.push(object_init_property(ast, slot_name, slot_function));
+        }
+
         properties.push(object_init_property(
             ast,
             "$$slots",
-            ast.expression_object(
-                SPAN,
-                ast.vec1(object_init_property(ast, "default", child_function)),
-            ),
+            ast.expression_object(SPAN, slot_properties),
         ));
     }
 
@@ -415,12 +424,12 @@ fn build_slot_props_expression<'a>(
     ast.expression_object(SPAN, properties)
 }
 
-fn build_slot_function<'a>(
+fn build_slot_function_for_nodes<'a>(
     ast: AstBuilder<'a>,
-    fragment: &Fragment<'_>,
+    nodes: &[&FragmentNode<'_>],
     scope: &RuntimeScope,
 ) -> Expression<'a> {
-    let child_expression = render_fragment_expression(ast, fragment, scope);
+    let child_expression = render_fragment_nodes_expression(ast, nodes, scope);
     let params =
         ast.alloc_formal_parameters(SPAN, FormalParameterKind::FormalParameter, ast.vec(), NONE);
     let body = ast.alloc_function_body(
@@ -441,6 +450,73 @@ fn build_slot_function<'a>(
         NONE,
         Some(body),
     )
+}
+
+fn collect_component_slot_groups<'n>(fragment: &'n Fragment<'n>) -> Vec<(&'n str, Vec<&'n FragmentNode<'n>>)> {
+    let mut groups: Vec<(&'n str, Vec<&'n FragmentNode<'n>>)> = Vec::new();
+
+    for node in &fragment.nodes {
+        let slot_name = component_child_slot_name(node).unwrap_or("default");
+        if let Some((_, nodes)) = groups
+            .iter_mut()
+            .find(|(name, _)| *name == slot_name)
+        {
+            nodes.push(node);
+        } else {
+            groups.push((slot_name, vec![node]));
+        }
+    }
+
+    groups
+}
+
+fn component_child_slot_name<'a>(node: &'a FragmentNode<'a>) -> Option<&'a str> {
+    let attributes = match node {
+        FragmentNode::RegularElement(element) => Some(element.attributes.as_slice()),
+        FragmentNode::Component(element) => Some(element.attributes.as_slice()),
+        FragmentNode::SvelteComponent(element) => Some(element.attributes.as_slice()),
+        FragmentNode::SvelteSelf(element) => Some(element.attributes.as_slice()),
+        FragmentNode::SvelteElement(element) => Some(element.attributes.as_slice()),
+        FragmentNode::SvelteFragment(element) => Some(element.attributes.as_slice()),
+        FragmentNode::SvelteHead(element) => Some(element.attributes.as_slice()),
+        FragmentNode::SvelteBody(element) => Some(element.attributes.as_slice()),
+        FragmentNode::SvelteWindow(element) => Some(element.attributes.as_slice()),
+        FragmentNode::SvelteDocument(element) => Some(element.attributes.as_slice()),
+        FragmentNode::SvelteBoundary(element) => Some(element.attributes.as_slice()),
+        FragmentNode::SlotElement(element) => Some(element.attributes.as_slice()),
+        FragmentNode::TitleElement(element) => Some(element.attributes.as_slice()),
+        FragmentNode::SvelteOptionsRaw(element) => Some(element.attributes.as_slice()),
+        FragmentNode::Text(_)
+        | FragmentNode::ExpressionTag(_)
+        | FragmentNode::HtmlTag(_)
+        | FragmentNode::ConstTag(_)
+        | FragmentNode::DebugTag(_)
+        | FragmentNode::RenderTag(_)
+        | FragmentNode::AttachTag(_)
+        | FragmentNode::Comment(_)
+        | FragmentNode::IfBlock(_)
+        | FragmentNode::EachBlock(_)
+        | FragmentNode::AwaitBlock(_)
+        | FragmentNode::KeyBlock(_)
+        | FragmentNode::SnippetBlock(_) => None,
+    }?;
+
+    for attribute in attributes {
+        if let AttributeNode::Attribute(attribute) = attribute {
+            if attribute.name != "slot" {
+                continue;
+            }
+            if let AttributeValue::Sequence(chunks) = &attribute.value {
+                if chunks.len() == 1 {
+                    if let TextOrExpressionTag::Text(text) = &chunks[0] {
+                        return Some(text.data);
+                    }
+                }
+            }
+        }
+    }
+
+    None
 }
 
 fn object_init_property<'a>(
