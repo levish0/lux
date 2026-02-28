@@ -1,18 +1,34 @@
 use oxc_ast::ast::Expression;
 use winnow::Result;
 use winnow::combinator::opt;
+use winnow::error::ContextError;
 use winnow::prelude::*;
+use winnow::token::take;
 use winnow::token::{literal, take_while};
 
 use crate::input::Input;
 use crate::parser::read::expression::read_expression_until;
+use crate::parser::utils::scanner::scan_expression_boundary;
 use crate::parser::utils::helpers::{require_whitespace, skip_whitespace};
 
 pub(super) fn parse_each_context<'a>(input: &mut Input<'a>) -> Result<Option<Expression<'a>>> {
     if opt(literal("as")).parse_next(input)?.is_some() {
         require_whitespace(input)?;
-        let expr = read_expression_until(input, b",(")?;
-        Ok(Some(expr))
+        match read_expression_until(input, b",(") {
+            Ok(expr) => Ok(Some(expr)),
+            Err(_) => {
+                // Pattern context (e.g. `{ a = 1 }`) is valid in Svelte `each`,
+                // but not always a valid JS expression. Consume it so parsing can continue.
+                let remaining: &str = &input.input;
+                let end = scan_expression_boundary(remaining, b",(").ok_or_else(ContextError::new)?;
+                let pattern_source = remaining[..end].trim_end();
+                if pattern_source.is_empty() {
+                    return Err(ContextError::new());
+                }
+                let _ = take(pattern_source.len()).parse_next(input)?;
+                Ok(None)
+            }
+        }
     } else {
         Ok(None)
     }

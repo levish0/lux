@@ -1,5 +1,6 @@
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::process::Command;
 
 use lux_ast::template::attribute::AttributeNode;
 use lux_ast::template::root::FragmentNode;
@@ -14,6 +15,9 @@ fn parity_against_reference_parser_modern_strict() {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let samples_dir = manifest_dir.join("tests/fixtures/parser-modern/samples");
     assert!(samples_dir.exists(), "missing {}", samples_dir.display());
+    let runner_dir = ensure_svelte_runner(&manifest_dir);
+    let generated_dir = manifest_dir.join("target/parity-modern-reference");
+    let _ = fs::create_dir_all(&generated_dir);
 
     let mut sample_dirs: Vec<PathBuf> = fs::read_dir(&samples_dir)
         .expect("failed to read samples")
@@ -37,8 +41,7 @@ fn parity_against_reference_parser_modern_strict() {
         }
 
         let input_path = sample_dir.join("input.svelte");
-        let output_path = sample_dir.join("output.json");
-        if !input_path.exists() || !output_path.exists() {
+        if !input_path.exists() {
             continue;
         }
 
@@ -46,10 +49,8 @@ fn parity_against_reference_parser_modern_strict() {
             .unwrap_or_else(|err| panic!("failed to read {}: {err}", input_path.display()));
         let input = normalize_reference_input(&input_raw);
 
-        let expected_raw = fs::read_to_string(&output_path)
-            .unwrap_or_else(|err| panic!("failed to read {}: {err}", output_path.display()));
-        let expected_json: Value = serde_json::from_str(&expected_raw)
-            .unwrap_or_else(|err| panic!("invalid JSON {}: {err}", output_path.display()));
+        let expected_json =
+            parse_reference_with_svelte(&runner_dir, &input_path, &generated_dir, sample_name);
 
         let allocator = Allocator::default();
         let actual = parse(&input, &allocator, false);
@@ -88,6 +89,83 @@ fn parity_against_reference_parser_modern_strict() {
 
 fn normalize_reference_input(input: &str) -> String {
     input.replace('\r', "").trim_end().to_string()
+}
+
+fn npm_executable() -> &'static str {
+    if cfg!(windows) {
+        "npm.cmd"
+    } else {
+        "npm"
+    }
+}
+
+fn node_executable() -> &'static str {
+    if cfg!(windows) {
+        "node.exe"
+    } else {
+        "node"
+    }
+}
+
+fn ensure_svelte_runner(manifest_dir: &Path) -> PathBuf {
+    let runner_dir = manifest_dir.join("tests/tools/svelte_runner");
+    let script_path = runner_dir.join("parse_ast.mjs");
+    assert!(script_path.exists(), "missing {}", script_path.display());
+
+    let svelte_module = runner_dir.join("node_modules/svelte/package.json");
+    if svelte_module.exists() {
+        return runner_dir;
+    }
+
+    let install = Command::new(npm_executable())
+        .arg("install")
+        .arg("--silent")
+        .arg("--no-fund")
+        .arg("--no-audit")
+        .current_dir(&runner_dir)
+        .output()
+        .unwrap_or_else(|err| panic!("failed to run npm install in {}: {err}", runner_dir.display()));
+
+    assert!(
+        install.status.success(),
+        "npm install failed in {}\nstdout:\n{}\nstderr:\n{}",
+        runner_dir.display(),
+        String::from_utf8_lossy(&install.stdout),
+        String::from_utf8_lossy(&install.stderr),
+    );
+
+    runner_dir
+}
+
+fn parse_reference_with_svelte(
+    runner_dir: &Path,
+    input_path: &Path,
+    generated_dir: &Path,
+    sample_name: &str,
+) -> Value {
+    let script_path = runner_dir.join("parse_ast.mjs");
+    let output_path = generated_dir.join(format!("{sample_name}.reference.json"));
+
+    let run = Command::new(node_executable())
+        .arg(&script_path)
+        .arg(input_path)
+        .arg(&output_path)
+        .current_dir(runner_dir)
+        .output()
+        .unwrap_or_else(|err| panic!("failed to run node for {}: {err}", input_path.display()));
+
+    assert!(
+        run.status.success(),
+        "svelte parse failed for {}\nstdout:\n{}\nstderr:\n{}",
+        input_path.display(),
+        String::from_utf8_lossy(&run.stdout),
+        String::from_utf8_lossy(&run.stderr),
+    );
+
+    let expected_raw = fs::read_to_string(&output_path)
+        .unwrap_or_else(|err| panic!("failed to read {}: {err}", output_path.display()));
+    serde_json::from_str(&expected_raw)
+        .unwrap_or_else(|err| panic!("invalid JSON {}: {err}", output_path.display()))
 }
 
 fn emit_reference_root(lines: &mut Vec<String>, root: &Value, source: &str, path: &str) {
@@ -219,11 +297,13 @@ fn emit_reference_node(lines: &mut Vec<String>, node: &Value, source: &str, path
         let attrs: Vec<String> = attributes
             .iter()
             .map(|attr| {
-                format!(
-                    "{}:{}",
-                    attr["type"].as_str().unwrap_or(""),
-                    attr["name"].as_str().unwrap_or("")
-                )
+                let kind = attr["type"].as_str().unwrap_or("");
+                let name = attr["name"].as_str().unwrap_or("");
+                if name.is_empty() {
+                    kind.to_string()
+                } else {
+                    format!("{kind}:{name}")
+                }
             })
             .collect();
         lines.push(format!("{path}:attrs={attrs:?}"));
@@ -485,7 +565,7 @@ fn emit_lux_node(lines: &mut Vec<String>, node: &FragmentNode<'_>, source: &str,
                 "{path}:span={}..{}",
                 node.span.start, node.span.end
             ));
-            lines.push(format!("{path}:name={:?}", node.expression.name.as_str()));
+            lines.push(format!("{path}:expr={:?}", node.expression.name.as_str()));
             emit_lux_fragment(lines, &node.body.nodes, source, &format!("{path}/body"));
         }
         FragmentNode::RegularElement(node) => emit_lux_element(
