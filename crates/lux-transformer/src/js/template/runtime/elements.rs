@@ -1,4 +1,5 @@
 use lux_ast::template::attribute::{AttributeNode, AttributeValue};
+use lux_ast::template::directive::LetDirective;
 use lux_ast::template::element::{Component, SlotElement, SvelteComponent, SvelteElement, SvelteSelf};
 use lux_ast::template::root::{Fragment, FragmentNode};
 use lux_ast::template::tag::TextOrExpressionTag;
@@ -6,7 +7,10 @@ use lux_utils::elements::is_void;
 use oxc_allocator::CloneIn;
 use oxc_ast::{
     AstBuilder, NONE,
-    ast::{BinaryOperator, Expression, FormalParameterKind, FunctionType, LogicalOperator, PropertyKind},
+    ast::{
+        BinaryOperator, Expression, FormalParameterKind, FunctionType, LogicalOperator, PropertyKind,
+        VariableDeclarationKind,
+    },
 };
 use oxc_span::SPAN;
 
@@ -304,14 +308,31 @@ fn build_component_props_expression<'a>(
     }
 
     let has_children_prop = component_has_children_prop(attributes);
+    let default_slot_let_bindings = collect_default_slot_let_bindings(attributes);
     let slot_groups = collect_component_slot_groups(fragment);
     if !slot_groups.is_empty() {
         let mut slot_properties = ast.vec();
 
-        for (slot_name, nodes) in slot_groups {
-            let slot_function = build_slot_function_for_nodes(ast, &nodes, scope);
+        for group in slot_groups {
+            let mut let_bindings = group.let_bindings;
+            if group.slot_name == "default" {
+                for binding in &default_slot_let_bindings {
+                    if !let_bindings
+                        .iter()
+                        .any(|existing| existing.local_name == binding.local_name)
+                    {
+                        let_bindings.push(*binding);
+                    }
+                }
+            }
+            let slot_function = build_slot_function_for_nodes(
+                ast,
+                &group.nodes,
+                &let_bindings,
+                scope,
+            );
 
-            if slot_name == "default" && !has_children_prop {
+            if group.slot_name == "default" && !has_children_prop {
                 properties.push(object_init_property(
                     ast,
                     "children",
@@ -319,7 +340,7 @@ fn build_component_props_expression<'a>(
                 ));
             }
 
-            slot_properties.push(object_init_property(ast, slot_name, slot_function));
+            slot_properties.push(object_init_property(ast, group.slot_name, slot_function));
         }
 
         properties.push(object_init_property(
@@ -338,6 +359,27 @@ fn component_has_children_prop(attributes: &[AttributeNode<'_>]) -> bool {
         AttributeNode::BindDirective(attribute) => attribute.name == "children",
         _ => false,
     })
+}
+
+fn collect_default_slot_let_bindings<'a>(
+    attributes: &'a [AttributeNode<'a>],
+) -> Vec<SlotLetBinding<'a>> {
+    let mut bindings = Vec::new();
+
+    for attribute in attributes {
+        if let AttributeNode::LetDirective(directive) = attribute {
+            if let Some(binding) = slot_let_binding(directive) {
+                if !bindings
+                    .iter()
+                    .any(|existing: &SlotLetBinding<'a>| existing.local_name == binding.local_name)
+                {
+                    bindings.push(binding);
+                }
+            }
+        }
+    }
+
+    bindings
 }
 
 fn attribute_value_to_component_prop_expression<'a>(
@@ -427,15 +469,76 @@ fn build_slot_props_expression<'a>(
 fn build_slot_function_for_nodes<'a>(
     ast: AstBuilder<'a>,
     nodes: &[&FragmentNode<'_>],
+    let_bindings: &[SlotLetBinding<'_>],
     scope: &RuntimeScope,
 ) -> Expression<'a> {
-    let child_expression = render_fragment_nodes_expression(ast, nodes, scope);
-    let params =
-        ast.alloc_formal_parameters(SPAN, FormalParameterKind::FormalParameter, ast.vec(), NONE);
+    let mut slot_scope = scope.clone();
+    let mut body_statements = ast.vec();
+
+    if !let_bindings.is_empty() {
+        let slot_props_ident = ast.expression_identifier(SPAN, ast.ident("__lux_slot_props"));
+
+        for binding in let_bindings {
+            let slot_prop_value = ast.expression_logical(
+                SPAN,
+                slot_props_ident.clone_in(ast.allocator),
+                LogicalOperator::And,
+                ast.member_expression_static(
+                    SPAN,
+                    slot_props_ident.clone_in(ast.allocator),
+                    ast.identifier_name(SPAN, ast.ident(binding.prop_name)),
+                    false,
+                )
+                .into(),
+            );
+            let declarator = ast.variable_declarator(
+                SPAN,
+                VariableDeclarationKind::Const,
+                ast.binding_pattern_binding_identifier(SPAN, ast.ident(binding.local_name)),
+                NONE,
+                Some(slot_prop_value),
+                false,
+            );
+            body_statements.push(
+                ast.declaration_variable(
+                    SPAN,
+                    VariableDeclarationKind::Const,
+                    ast.vec1(declarator),
+                    false,
+                )
+                .into(),
+            );
+            slot_scope = slot_scope.with_name(binding.local_name);
+        }
+    }
+
+    let child_expression = render_fragment_nodes_expression(ast, nodes, &slot_scope);
+    body_statements.push(ast.statement_return(SPAN, Some(child_expression)));
+
+    let params = if let_bindings.is_empty() {
+        ast.alloc_formal_parameters(SPAN, FormalParameterKind::FormalParameter, ast.vec(), NONE)
+    } else {
+        ast.alloc_formal_parameters(
+            SPAN,
+            FormalParameterKind::FormalParameter,
+            ast.vec1(ast.formal_parameter(
+                SPAN,
+                ast.vec(),
+                ast.binding_pattern_binding_identifier(SPAN, ast.ident("__lux_slot_props")),
+                NONE,
+                NONE,
+                false,
+                None,
+                false,
+                false,
+            )),
+            NONE,
+        )
+    };
     let body = ast.alloc_function_body(
         SPAN,
         ast.vec(),
-        ast.vec1(ast.statement_return(SPAN, Some(child_expression))),
+        body_statements,
     );
     ast.expression_function(
         SPAN,
@@ -452,26 +555,87 @@ fn build_slot_function_for_nodes<'a>(
     )
 }
 
-fn collect_component_slot_groups<'n>(fragment: &'n Fragment<'n>) -> Vec<(&'n str, Vec<&'n FragmentNode<'n>>)> {
-    let mut groups: Vec<(&'n str, Vec<&'n FragmentNode<'n>>)> = Vec::new();
+#[derive(Clone, Copy)]
+struct SlotLetBinding<'a> {
+    prop_name: &'a str,
+    local_name: &'a str,
+}
+
+struct ComponentSlotGroup<'a> {
+    slot_name: &'a str,
+    nodes: Vec<&'a FragmentNode<'a>>,
+    let_bindings: Vec<SlotLetBinding<'a>>,
+}
+
+fn collect_component_slot_groups<'a>(fragment: &'a Fragment<'a>) -> Vec<ComponentSlotGroup<'a>> {
+    let mut groups: Vec<ComponentSlotGroup<'a>> = Vec::new();
 
     for node in &fragment.nodes {
         let slot_name = component_child_slot_name(node).unwrap_or("default");
-        if let Some((_, nodes)) = groups
-            .iter_mut()
-            .find(|(name, _)| *name == slot_name)
-        {
-            nodes.push(node);
+        let mut node_bindings = component_child_slot_let_bindings(node, slot_name);
+
+        if let Some(group) = groups.iter_mut().find(|group| group.slot_name == slot_name) {
+            group.nodes.push(node);
+            for binding in node_bindings.drain(..) {
+                if !group
+                    .let_bindings
+                    .iter()
+                    .any(|existing| existing.local_name == binding.local_name)
+                {
+                    group.let_bindings.push(binding);
+                }
+            }
         } else {
-            groups.push((slot_name, vec![node]));
+            groups.push(ComponentSlotGroup {
+                slot_name,
+                nodes: vec![node],
+                let_bindings: node_bindings,
+            });
         }
     }
 
     groups
 }
 
+fn component_child_slot_let_bindings<'a>(
+    node: &'a FragmentNode<'a>,
+    slot_name: &str,
+) -> Vec<SlotLetBinding<'a>> {
+    let Some(attributes) = fragment_node_attributes(node) else {
+        return Vec::new();
+    };
+    let has_slot_attribute = slot_attribute_name(attributes).is_some();
+    let collect_from_node = has_slot_attribute || matches!(node, FragmentNode::SvelteFragment(_));
+    if !collect_from_node {
+        return Vec::new();
+    }
+    if slot_name == "default" && !has_slot_attribute && !matches!(node, FragmentNode::SvelteFragment(_))
+    {
+        return Vec::new();
+    }
+
+    let mut bindings = Vec::new();
+    for attribute in attributes {
+        if let AttributeNode::LetDirective(directive) = attribute {
+            if let Some(binding) = slot_let_binding(directive) {
+                if !bindings
+                    .iter()
+                    .any(|existing: &SlotLetBinding<'a>| existing.local_name == binding.local_name)
+                {
+                    bindings.push(binding);
+                }
+            }
+        }
+    }
+    bindings
+}
+
 fn component_child_slot_name<'a>(node: &'a FragmentNode<'a>) -> Option<&'a str> {
-    let attributes = match node {
+    fragment_node_attributes(node).and_then(slot_attribute_name)
+}
+
+fn fragment_node_attributes<'a>(node: &'a FragmentNode<'a>) -> Option<&'a [AttributeNode<'a>]> {
+    match node {
         FragmentNode::RegularElement(element) => Some(element.attributes.as_slice()),
         FragmentNode::Component(element) => Some(element.attributes.as_slice()),
         FragmentNode::SvelteComponent(element) => Some(element.attributes.as_slice()),
@@ -499,8 +663,10 @@ fn component_child_slot_name<'a>(node: &'a FragmentNode<'a>) -> Option<&'a str> 
         | FragmentNode::AwaitBlock(_)
         | FragmentNode::KeyBlock(_)
         | FragmentNode::SnippetBlock(_) => None,
-    }?;
+    }
+}
 
+fn slot_attribute_name<'a>(attributes: &'a [AttributeNode<'a>]) -> Option<&'a str> {
     for attribute in attributes {
         if let AttributeNode::Attribute(attribute) = attribute {
             if attribute.name != "slot" {
@@ -515,8 +681,21 @@ fn component_child_slot_name<'a>(node: &'a FragmentNode<'a>) -> Option<&'a str> 
             }
         }
     }
-
     None
+}
+
+fn slot_let_binding<'a>(directive: &'a LetDirective<'a>) -> Option<SlotLetBinding<'a>> {
+    match &directive.expression {
+        None => Some(SlotLetBinding {
+            prop_name: directive.name,
+            local_name: directive.name,
+        }),
+        Some(Expression::Identifier(identifier)) => Some(SlotLetBinding {
+            prop_name: directive.name,
+            local_name: identifier.name.as_str(),
+        }),
+        Some(_) => None,
+    }
 }
 
 fn object_init_property<'a>(

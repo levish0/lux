@@ -368,6 +368,37 @@ fn transform_component_named_slot_only_without_children_prop() {
     assert!(result.js.contains("named: function()"));
 }
 
+#[test]
+fn transform_component_default_slot_let_directive_uses_slot_props() {
+    let source = "<Child let:item>{item}</Child>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("default: function(__lux_slot_props)"));
+    assert!(result.js.contains("__lux_slot_props.item"));
+    assert!(result.js.contains("String(item ?? \"\")"));
+    assert!(!result.js.contains("function({ item })"));
+}
+
+#[test]
+fn transform_component_named_slot_let_directive_uses_slot_props() {
+    let source = "<Child><p slot=\"named\" let:value>{value}</p></Child>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("named: function(__lux_slot_props)"));
+    assert!(result.js.contains("__lux_slot_props.value"));
+    assert!(result.js.contains("String(value ?? \"\")"));
+}
+
 fn assert_component_js_payload(js: &str) {
     assert!(
         js.contains("const __lux_template = "),
