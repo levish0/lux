@@ -12,7 +12,10 @@ pub(super) fn analyze_fragment(fragment: &Fragment<'_>, context: &mut TemplateAn
 
 fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'_>) {
     match node {
-        FragmentNode::Text(_) | FragmentNode::ConstTag(_) | FragmentNode::DebugTag(_) | FragmentNode::Comment(_) => {}
+        FragmentNode::Text(_)
+        | FragmentNode::ConstTag(_)
+        | FragmentNode::DebugTag(_)
+        | FragmentNode::Comment(_) => {}
 
         FragmentNode::ExpressionTag(tag) => {
             reference::analyze_expression(&tag.expression, context);

@@ -69,20 +69,16 @@ impl<'a> TemplateAnalyzerContext<'a> {
         });
     }
 
-    pub(super) fn add_reference(
-        &mut self,
-        name: &str,
-        span: Span,
-        is_read: bool,
-        is_write: bool,
-    ) {
-        self.tables.template_references.push(TemplateReferenceAnalysis {
-            scope: self.current_scope(),
-            name: name.to_owned(),
-            span,
-            is_read,
-            is_write,
-        });
+    pub(super) fn add_reference(&mut self, name: &str, span: Span, is_read: bool, is_write: bool) {
+        self.tables
+            .template_references
+            .push(TemplateReferenceAnalysis {
+                scope: self.current_scope(),
+                name: name.to_owned(),
+                span,
+                is_read,
+                is_write,
+            });
     }
 }
 
