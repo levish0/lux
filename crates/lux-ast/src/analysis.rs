@@ -34,6 +34,32 @@ pub enum TemplateBindingKind {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum AnalysisSeverity {
+    Error,
+    Warning,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum AnalysisDiagnosticCode {
+    EachKeyWithoutContext,
+    EachInvalidContextIdentifier,
+    BlockEmpty,
+    SnippetDuplicateName,
+    TemplateAssignmentToConst,
+    TemplateAssignmentToImport,
+    TemplateAssignmentToBinding,
+    BindDirectiveInvalidExpression,
+}
+
+#[derive(Debug, Clone)]
+pub struct AnalysisDiagnostic {
+    pub severity: AnalysisSeverity,
+    pub code: AnalysisDiagnosticCode,
+    pub message: String,
+    pub span: Span,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ScriptTarget {
     Instance,
     Module,
@@ -147,4 +173,5 @@ pub struct AnalysisTables {
     pub template_scopes: Vec<TemplateScopeAnalysis>,
     pub template_bindings: Vec<TemplateBindingAnalysis>,
     pub template_references: Vec<TemplateReferenceAnalysis>,
+    pub diagnostics: Vec<AnalysisDiagnostic>,
 }
