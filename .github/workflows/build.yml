@@ -1,4 +1,4 @@
-name: axumkit-server
+name: build
 
 on:
   push:
