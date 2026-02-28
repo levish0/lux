@@ -96,7 +96,8 @@ fn transform_generates_expression_runtime_render() {
 
     assert!(result.js.contains("String("));
     assert!(result.js.contains("_props"));
-    assert!(result.js.contains("{name}"));
+    assert!(result.js.contains("function({ name })"));
+    assert!(result.js.contains("return name;"));
     assert!(result.js.contains("\"<p\" + \">\""));
     assert!(result.js.contains("</p>"));
 }
@@ -111,7 +112,7 @@ fn transform_generates_if_runtime_render() {
     let analysis = analyze(&parsed.root);
     let result = transform(&parsed.root, &analysis);
 
-    assert!(result.js.contains("ok ?"));
+    assert!(result.js.contains("function({ ok })"));
     assert!(result.js.contains("\"A\""));
     assert!(result.js.contains("\"B\""));
 }
