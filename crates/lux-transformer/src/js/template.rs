@@ -65,7 +65,9 @@ fn render_node(node: &FragmentNode<'_>, out: &mut String, has_dynamic: &mut bool
         FragmentNode::SnippetBlock(_) => push_dynamic_marker("snippet-block", out, has_dynamic),
 
         FragmentNode::Component(_) => push_dynamic_marker("component", out, has_dynamic),
-        FragmentNode::SvelteComponent(_) => push_dynamic_marker("svelte-component", out, has_dynamic),
+        FragmentNode::SvelteComponent(_) => {
+            push_dynamic_marker("svelte-component", out, has_dynamic)
+        }
         FragmentNode::SvelteElement(_) => push_dynamic_marker("svelte-element", out, has_dynamic),
         FragmentNode::SvelteSelf(_) => push_dynamic_marker("svelte-self", out, has_dynamic),
         FragmentNode::SvelteFragment(_) => push_dynamic_marker("svelte-fragment", out, has_dynamic),
@@ -74,7 +76,9 @@ fn render_node(node: &FragmentNode<'_>, out: &mut String, has_dynamic: &mut bool
         FragmentNode::SvelteWindow(_) => push_dynamic_marker("svelte-window", out, has_dynamic),
         FragmentNode::SvelteDocument(_) => push_dynamic_marker("svelte-document", out, has_dynamic),
         FragmentNode::SvelteBoundary(_) => push_dynamic_marker("svelte-boundary", out, has_dynamic),
-        FragmentNode::SvelteOptionsRaw(_) => push_dynamic_marker("svelte-options", out, has_dynamic),
+        FragmentNode::SvelteOptionsRaw(_) => {
+            push_dynamic_marker("svelte-options", out, has_dynamic)
+        }
     }
 }
 
@@ -105,7 +109,10 @@ fn render_regular_element(
     }
 }
 
-fn render_static_attribute(attribute: &AttributeNode<'_>, has_dynamic: &mut bool) -> Option<String> {
+fn render_static_attribute(
+    attribute: &AttributeNode<'_>,
+    has_dynamic: &mut bool,
+) -> Option<String> {
     let AttributeNode::Attribute(attribute) = attribute else {
         *has_dynamic = true;
         return None;
@@ -134,7 +141,11 @@ fn serialize_attribute(attribute: &Attribute<'_>, has_dynamic: &mut bool) -> Opt
                 }
             }
 
-            Some(format!("{}=\"{}\"", attribute.name, escape_attribute_value(&value)))
+            Some(format!(
+                "{}=\"{}\"",
+                attribute.name,
+                escape_attribute_value(&value)
+            ))
         }
     }
 }
