@@ -1,16 +1,19 @@
 use lux_ast::common::Span;
 use lux_ast::template::attribute::{AttributeNode, AttributeValue};
 use lux_ast::template::directive::{
-    AnimateDirective, BindDirective, ClassDirective, EventModifier, LetDirective, OnDirective,
-    StyleDirective, StyleDirectiveValue, StyleModifier, TransitionDirective, TransitionModifier,
-    UseDirective,
+    AnimateDirective, BindDirective, ClassDirective, LetDirective, OnDirective, StyleDirective,
+    StyleDirectiveValue, TransitionDirective, UseDirective,
 };
-use lux_ast::template::tag::TextOrExpressionTag;
-use oxc_ast::ast::Expression;
 use winnow::Result;
 use winnow::error::ContextError;
 
 use crate::input::Input;
+
+mod extract;
+mod modifier;
+
+use extract::{extract_directive_expression, extract_expression_from_value};
+use modifier::{parse_event_modifier, parse_style_modifier, parse_transition_modifier};
 
 pub fn parse_directive<'a>(
     input: &mut Input<'a>,
@@ -33,7 +36,7 @@ pub fn parse_directive<'a>(
             let expression = value.map(extract_expression_from_value).transpose()?;
             let modifiers = modifiers_str
                 .iter()
-                .filter_map(|m| parse_event_modifier(m))
+                .filter_map(|modifier| parse_event_modifier(modifier))
                 .collect();
             Ok(AttributeNode::OnDirective(OnDirective {
                 span,
@@ -58,10 +61,7 @@ pub fn parse_directive<'a>(
             };
             let modifiers = modifiers_str
                 .iter()
-                .filter_map(|m| match *m {
-                    "important" => Some(StyleModifier::Important),
-                    _ => None,
-                })
+                .filter_map(|modifier| parse_style_modifier(modifier))
                 .collect();
             Ok(AttributeNode::StyleDirective(StyleDirective {
                 span,
@@ -112,8 +112,9 @@ fn build_transition<'a>(
     let expression = value.map(extract_expression_from_value).transpose()?;
     let modifiers = modifiers_str
         .iter()
-        .filter_map(|m| parse_transition_modifier(m))
+        .filter_map(|modifier| parse_transition_modifier(modifier))
         .collect();
+
     Ok(AttributeNode::TransitionDirective(TransitionDirective {
         span,
         name,
@@ -122,65 +123,4 @@ fn build_transition<'a>(
         intro,
         outro,
     }))
-}
-
-fn extract_directive_expression<'a>(
-    input: &mut Input<'a>,
-    value: Option<AttributeValue<'a>>,
-    name: &'a str,
-) -> Result<Expression<'a>> {
-    match value {
-        Some(v) => extract_expression_from_value(v),
-        None => {
-            let allocator = input.state.allocator;
-            let source_type = if input.state.ts {
-                oxc_span::SourceType::ts()
-            } else {
-                oxc_span::SourceType::mjs()
-            };
-            oxc_parser::Parser::new(allocator, name, source_type)
-                .parse_expression()
-                .map_err(|_| ContextError::new())
-        }
-    }
-}
-
-fn extract_expression_from_value(value: AttributeValue<'_>) -> Result<Expression<'_>> {
-    match value {
-        AttributeValue::ExpressionTag(et) => Ok(et.expression),
-        AttributeValue::Sequence(mut seq) => {
-            if seq.len() == 1 {
-                match seq.remove(0) {
-                    TextOrExpressionTag::ExpressionTag(et) => Ok(et.expression),
-                    _ => Err(ContextError::new()),
-                }
-            } else {
-                Err(ContextError::new())
-            }
-        }
-        AttributeValue::True => Err(ContextError::new()),
-    }
-}
-
-fn parse_event_modifier(m: &str) -> Option<EventModifier> {
-    match m {
-        "capture" => Some(EventModifier::Capture),
-        "nonpassive" => Some(EventModifier::Nonpassive),
-        "once" => Some(EventModifier::Once),
-        "passive" => Some(EventModifier::Passive),
-        "preventDefault" => Some(EventModifier::PreventDefault),
-        "self" => Some(EventModifier::Self_),
-        "stopImmediatePropagation" => Some(EventModifier::StopImmediatePropagation),
-        "stopPropagation" => Some(EventModifier::StopPropagation),
-        "trusted" => Some(EventModifier::Trusted),
-        _ => None,
-    }
-}
-
-fn parse_transition_modifier(m: &str) -> Option<TransitionModifier> {
-    match m {
-        "local" => Some(TransitionModifier::Local),
-        "global" => Some(TransitionModifier::Global),
-        _ => None,
-    }
 }
