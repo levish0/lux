@@ -5,6 +5,7 @@ use oxc_parser::Parser as OxcParser;
 use oxc_span::SourceType;
 use winnow::Result;
 use winnow::prelude::*;
+use winnow::stream::Location as StreamLocation;
 use winnow::token::{literal, take_until};
 
 use crate::input::Input;
