@@ -119,8 +119,6 @@
 		min-height: 100vh;
 	}
 
-
-
 	.site-header {
 		position: fixed;
 		top: 0;
