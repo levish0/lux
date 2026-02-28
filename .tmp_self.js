@@ -1,4 +1,4 @@
-const __lux_template = "\n\n<input>\n";
+const __lux_template = "<!--lux:dynamic:svelte-self-->\r\n";
 const __lux_css = null;
 const __lux_css_hash = null;
 const __lux_css_scope = null;
@@ -13,11 +13,8 @@ export default {
 	render: function(_props = {}) {
 		return function() {
 			let __lux_chunks = [];
-			__lux_chunks.push("\n\n");
-			__lux_chunks.push("<input" + (" value=\"" + String(function({ v, value }) {
-				return () => value, (v) => value = v.toLowerCase();
-			}(_props) ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;") + "\"") + ">");
-			__lux_chunks.push("\n");
+			__lux_chunks.push("<!--lux:dynamic:svelte-self-->");
+			__lux_chunks.push("\r\n");
 			return __lux_chunks.join("");
 		}();
 	}

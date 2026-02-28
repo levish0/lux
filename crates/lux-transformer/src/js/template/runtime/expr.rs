@@ -177,10 +177,6 @@ pub(super) fn const_statement<'a>(ast: AstBuilder<'a>, name: &str, init: Express
     .into()
 }
 
-pub(super) fn dynamic_marker_expr<'a>(ast: AstBuilder<'a>, kind: &str) -> Expression<'a> {
-    string_expr(ast, &format!("<!--lux:dynamic:{kind}-->"))
-}
-
 pub(super) fn string_expr<'a>(ast: AstBuilder<'a>, value: &str) -> Expression<'a> {
     ast.expression_string_literal(SPAN, ast.atom(value), None)
 }

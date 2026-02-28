@@ -1,5 +1,5 @@
 use lux_ast::template::attribute::{AttributeNode, AttributeValue};
-use lux_ast::template::element::{Component, SvelteComponent, SvelteElement};
+use lux_ast::template::element::{Component, SvelteComponent, SvelteElement, SvelteSelf};
 use lux_ast::template::root::Fragment;
 use lux_ast::template::tag::TextOrExpressionTag;
 use lux_utils::elements::is_void;
@@ -85,6 +85,26 @@ pub(super) fn render_svelte_component_expression<'a>(
 ) -> Expression<'a> {
     let callee = resolve_expression(ast, component.expression.clone_in(ast.allocator), scope);
     render_component_like_expression(ast, callee, &component.attributes, &component.fragment, scope)
+}
+
+pub(super) fn render_svelte_self_expression<'a>(
+    ast: AstBuilder<'a>,
+    component: &SvelteSelf<'_>,
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    let callee = ast.member_expression_static(
+        SPAN,
+        ast.expression_identifier(SPAN, ast.ident("_props")),
+        ast.identifier_name(SPAN, ast.ident("__lux_self")),
+        false,
+    );
+    render_component_like_expression(
+        ast,
+        callee.into(),
+        &component.attributes,
+        &component.fragment,
+        scope,
+    )
 }
 
 fn render_component_like_expression<'a>(

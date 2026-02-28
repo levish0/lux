@@ -1,8 +1,10 @@
+use oxc_allocator::CloneIn;
 use oxc_ast::{
     AstBuilder, NONE,
     ast::{
-        ExportDefaultDeclarationKind, Expression, FormalParameterKind, FunctionType,
-        ImportOrExportKind, PropertyKind, Statement,
+        AssignmentOperator, BinaryOperator, ExportDefaultDeclarationKind, Expression,
+        FormalParameterKind, FunctionType, ImportOrExportKind, LogicalOperator, PropertyKind,
+        Statement,
     },
 };
 use oxc_span::SPAN;
@@ -104,16 +106,38 @@ fn function_property<'a>(
         NONE,
     );
 
+    let self_member = ast.member_expression_static(
+        SPAN,
+        ast.expression_identifier(SPAN, ast.ident("_props")),
+        ast.identifier_name(SPAN, ast.ident("__lux_self")),
+        false,
+    );
+    let self_missing = ast.expression_binary(
+        SPAN,
+        self_member.clone_in(ast.allocator).into(),
+        BinaryOperator::Equality,
+        ast.expression_null_literal(SPAN),
+    );
+    let self_assign = ast.expression_assignment(
+        SPAN,
+        AssignmentOperator::Assign,
+        self_member.into(),
+        ast.expression_identifier(SPAN, ast.ident("__lux_render")),
+    );
+    let init_self = ast.expression_logical(SPAN, self_missing, LogicalOperator::And, self_assign);
     let function_body = ast.alloc_function_body(
         SPAN,
         ast.vec(),
-        ast.vec1(ast.statement_return(SPAN, Some(render_expression))),
+        ast.vec_from_array([
+            ast.statement_expression(SPAN, init_self),
+            ast.statement_return(SPAN, Some(render_expression)),
+        ]),
     );
 
     let function_expression = ast.expression_function(
         SPAN,
         FunctionType::FunctionExpression,
-        None,
+        Some(ast.binding_identifier(SPAN, ast.ident("__lux_render"))),
         false,
         false,
         false,

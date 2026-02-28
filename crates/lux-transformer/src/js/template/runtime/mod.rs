@@ -7,6 +7,7 @@ mod scope;
 use lux_ast::template::root::{Fragment, FragmentNode};
 use oxc_allocator::CloneIn;
 use oxc_ast::{AstBuilder, ast::Expression};
+use oxc_ast::ast::PropertyKind;
 use oxc_span::SPAN;
 
 use self::blocks::{
@@ -15,11 +16,10 @@ use self::blocks::{
 };
 use self::elements::{
     render_component_expression, render_regular_element_expression, render_svelte_component_expression,
-    render_svelte_element_expression,
+    render_svelte_element_expression, render_svelte_self_expression,
 };
 use self::expr::{
-    call_iife, call_static_method, dynamic_marker_expr, escape_html_expression, string_expr,
-    stringify_expression,
+    call_iife, call_static_method, escape_html_expression, string_expr, stringify_expression,
 };
 use self::scope::{RuntimeScope, resolve_expression};
 use super::marker::sanitize_comment;
@@ -161,19 +161,19 @@ fn render_node_expression<'a>(
         FragmentNode::KeyBlock(block) => render_fragment_expression(ast, &block.fragment, scope),
 
         FragmentNode::ConstTag(_) => string_expr(ast, ""),
-        FragmentNode::DebugTag(_) => dynamic_marker_expr(ast, "debug-tag"),
+        FragmentNode::DebugTag(tag) => render_debug_tag_expression(ast, tag, scope),
         FragmentNode::RenderTag(tag) => stringify_expression(
             ast,
             resolve_expression(ast, tag.expression.clone_in(ast.allocator), scope),
         ),
-        FragmentNode::AttachTag(_) => dynamic_marker_expr(ast, "attach-tag"),
+        FragmentNode::AttachTag(_) => string_expr(ast, ""),
         FragmentNode::SnippetBlock(_) => string_expr(ast, ""),
         FragmentNode::Component(component) => render_component_expression(ast, component, scope),
         FragmentNode::SvelteComponent(component) => {
             render_svelte_component_expression(ast, component, scope)
         }
         FragmentNode::SvelteElement(element) => render_svelte_element_expression(ast, element, scope),
-        FragmentNode::SvelteSelf(_) => dynamic_marker_expr(ast, "svelte-self"),
+        FragmentNode::SvelteSelf(component) => render_svelte_self_expression(ast, component, scope),
         FragmentNode::SvelteFragment(element) => render_fragment_expression(ast, &element.fragment, scope),
         FragmentNode::SvelteHead(element) => render_fragment_expression(ast, &element.fragment, scope),
         FragmentNode::SvelteBody(element) => render_fragment_expression(ast, &element.fragment, scope),
@@ -186,4 +186,46 @@ fn render_node_expression<'a>(
         }
         FragmentNode::SvelteOptionsRaw(_) => string_expr(ast, ""),
     }
+}
+
+fn render_debug_tag_expression<'a>(
+    ast: AstBuilder<'a>,
+    tag: &lux_ast::template::tag::DebugTag<'_>,
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    let mut properties = ast.vec_with_capacity(tag.identifiers.len());
+    for identifier in &tag.identifiers {
+        let name = identifier.name.as_str();
+        let value = resolve_expression(
+            ast,
+            ast.expression_identifier(SPAN, ast.ident(name)),
+            scope,
+        );
+        properties.push(ast.object_property_kind_object_property(
+            SPAN,
+            PropertyKind::Init,
+            ast.property_key_static_identifier(SPAN, ast.ident(name)),
+            value,
+            false,
+            false,
+            false,
+        ));
+    }
+
+    let object = ast.expression_object(SPAN, properties);
+    let console_log = ast.member_expression_static(
+        SPAN,
+        ast.expression_identifier(SPAN, ast.ident("console")),
+        ast.identifier_name(SPAN, ast.ident("log")),
+        false,
+    );
+    let call = ast.expression_call(
+        SPAN,
+        console_log.into(),
+        oxc_ast::NONE,
+        ast.vec1(object.into()),
+        false,
+    );
+
+    ast.expression_sequence(SPAN, ast.vec_from_array([call, string_expr(ast, "")]))
 }

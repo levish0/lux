@@ -100,6 +100,7 @@ fn transform_generates_expression_runtime_render() {
     assert!(result.js.contains("return name;"));
     assert!(result.js.contains("\"<p\" + \">\""));
     assert!(result.js.contains("</p>"));
+    assert!(!result.js.contains("<!--lux:dynamic:expression-->"));
 }
 
 #[test]
@@ -191,6 +192,7 @@ fn transform_generates_component_runtime_render_path() {
     assert!(result.js.contains("const __lux_component_props = {"));
     assert!(result.js.contains("msg: function({ name })"));
     assert!(result.js.contains("children: function()"));
+    assert!(!result.js.contains("<!--lux:dynamic:component-->"));
 }
 
 #[test]
@@ -206,6 +208,7 @@ fn transform_generates_svelte_element_runtime_render_path() {
     assert!(result.js.contains("const __lux_tag = String(function({ tag })"));
     assert!(result.js.contains("\"<\" + __lux_tag"));
     assert!(result.js.contains("\"</\" + __lux_tag + \">\""));
+    assert!(!result.js.contains("<!--lux:dynamic:svelte-element-->"));
 }
 
 #[test]
@@ -254,6 +257,37 @@ fn transform_generates_const_tag_runtime_binding() {
     assert!(result.js.contains("String(x ?? \"\")"));
 }
 
+#[test]
+fn transform_generates_debug_tag_runtime_side_effect() {
+    let source = "{@debug name}<p>x</p>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("<!--lux:dynamic:debug-tag-->"));
+    assert!(result.js.contains("console.log({"));
+    assert!(result.js.contains("name: function({ name })"));
+}
+
+#[test]
+fn transform_generates_svelte_self_runtime_render_path() {
+    let source = "<svelte:self msg={name} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("<!--lux:dynamic:svelte-self-->"));
+    assert!(result.js.contains("_props.__lux_self"));
+    assert!(result.js.contains("msg: function({ name })"));
+    assert!(result.js.contains("__lux_render"));
+}
+
 fn assert_component_js_payload(js: &str) {
     assert!(
         js.contains("const __lux_template = "),
@@ -281,7 +315,7 @@ fn assert_component_js_payload(js: &str) {
         "missing default export: {js}"
     );
     assert!(
-        js.contains("render: function(_props = {})"),
+        js.contains("render: function") && js.contains("_props = {}"),
         "missing render parameter default: {js}"
     );
     assert_js_parses_as_module(js);
