@@ -1,21 +1,11 @@
-use lux_ast::template::attribute::{Attribute, AttributeNode, AttributeValue};
+use lux_ast::template::attribute::AttributeNode;
 use lux_ast::template::root::{Fragment, FragmentNode};
-use lux_ast::template::tag::TextOrExpressionTag;
 use lux_utils::elements::is_void;
 
-pub(super) struct TemplateRenderResult {
-    pub html: String,
-    pub has_dynamic: bool,
-}
+use super::attribute::render_static_attribute;
+use super::marker::{push_dynamic_marker, sanitize_comment};
 
-pub(super) fn render_fragment_template(fragment: &Fragment<'_>) -> TemplateRenderResult {
-    let mut html = String::new();
-    let mut has_dynamic = false;
-    render_fragment(fragment, &mut html, &mut has_dynamic);
-    TemplateRenderResult { html, has_dynamic }
-}
-
-fn render_fragment(fragment: &Fragment<'_>, out: &mut String, has_dynamic: &mut bool) {
+pub(super) fn render_fragment(fragment: &Fragment<'_>, out: &mut String, has_dynamic: &mut bool) {
     for node in &fragment.nodes {
         render_node(node, out, has_dynamic);
     }
@@ -107,74 +97,4 @@ fn render_regular_element(
         out.push_str(name);
         out.push('>');
     }
-}
-
-fn render_static_attribute(
-    attribute: &AttributeNode<'_>,
-    has_dynamic: &mut bool,
-) -> Option<String> {
-    let AttributeNode::Attribute(attribute) = attribute else {
-        *has_dynamic = true;
-        return None;
-    };
-
-    serialize_attribute(attribute, has_dynamic)
-}
-
-fn serialize_attribute(attribute: &Attribute<'_>, has_dynamic: &mut bool) -> Option<String> {
-    match &attribute.value {
-        AttributeValue::True => Some(attribute.name.to_string()),
-        AttributeValue::ExpressionTag(_) => {
-            *has_dynamic = true;
-            None
-        }
-        AttributeValue::Sequence(chunks) => {
-            let mut value = String::new();
-
-            for chunk in chunks {
-                match chunk {
-                    TextOrExpressionTag::Text(text) => value.push_str(text.raw),
-                    TextOrExpressionTag::ExpressionTag(_) => {
-                        *has_dynamic = true;
-                        return None;
-                    }
-                }
-            }
-
-            Some(format!(
-                "{}=\"{}\"",
-                attribute.name,
-                escape_attribute_value(&value)
-            ))
-        }
-    }
-}
-
-fn escape_attribute_value(value: &str) -> String {
-    let mut escaped = String::with_capacity(value.len());
-    for ch in value.chars() {
-        match ch {
-            '&' => escaped.push_str("&amp;"),
-            '"' => escaped.push_str("&quot;"),
-            '<' => escaped.push_str("&lt;"),
-            '>' => escaped.push_str("&gt;"),
-            _ => escaped.push(ch),
-        }
-    }
-    escaped
-}
-
-fn sanitize_comment(data: &str) -> String {
-    let mut sanitized = data.replace("--", "- -");
-    if sanitized.ends_with('-') {
-        sanitized.push(' ');
-    }
-    sanitized
-}
-
-fn push_dynamic_marker(kind: &str, out: &mut String, has_dynamic: &mut bool) {
-    *has_dynamic = true;
-    out.push_str("<!--lux:dynamic:");
-    out.push_str(kind);
-    out.push_str("-->");
 }

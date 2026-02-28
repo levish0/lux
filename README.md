@@ -1,6 +1,6 @@
 # lux
 
-Svelte compiler implemented in Rust. Aims for 100% compatibility with the official Svelte compiler.
+A Blazing-Fast Compiler for Svelte 5.
 ## Architecture
 
 Pipeline: **Parse → Analyze → Transform**

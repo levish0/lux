@@ -3,6 +3,8 @@ use lux_parser::parse;
 use lux_transformer::transform;
 use lux_utils::hash::hash;
 use oxc_allocator::Allocator;
+use oxc_parser::Parser;
+use oxc_span::SourceType;
 
 #[test]
 fn transform_includes_css_hash_and_scope_for_style_blocks() {
@@ -28,7 +30,7 @@ fn transform_includes_css_hash_and_scope_for_style_blocks() {
     assert!(rendered_css.contains(&format!("h1.{expected_scope}")));
     assert_eq!(result.css_hash.as_deref(), Some(expected_hash.as_str()));
     assert_eq!(result.css_scope.as_deref(), Some(expected_scope.as_str()));
-    assert_eq!(result.js, "export default {};\n");
+    assert_component_js_payload(&result.js);
 }
 
 #[test]
@@ -44,7 +46,7 @@ fn transform_has_no_css_payload_without_style_blocks() {
     assert_eq!(result.css, None);
     assert_eq!(result.css_hash, None);
     assert_eq!(result.css_scope, None);
-    assert_eq!(result.js, "export default {};\n");
+    assert_component_js_payload(&result.js);
 }
 
 #[test]
@@ -80,4 +82,96 @@ fn transform_scopes_local_part_of_mixed_global_selector() {
     assert!(css.contains(&format!(".a.{scope}")));
     assert!(css.contains(".b"));
     assert!(!css.contains(":global("));
+}
+
+#[test]
+fn transform_generates_expression_runtime_render() {
+    let source = "<p>{name}</p>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("String("));
+    assert!(result.js.contains("_props"));
+    assert!(result.js.contains("{name}"));
+    assert!(result.js.contains("\"<p\" + \">\""));
+    assert!(result.js.contains("</p>"));
+}
+
+#[test]
+fn transform_generates_if_runtime_render() {
+    let source = "{#if ok}<p>A</p>{:else}<p>B</p>{/if}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("ok ?"));
+    assert!(result.js.contains("\"A\""));
+    assert!(result.js.contains("\"B\""));
+}
+
+#[test]
+fn transform_generates_each_runtime_render() {
+    let source = "{#each items as item}<p>{item}</p>{/each}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("Array.from("));
+    assert!(result.js.contains("_props"));
+    assert!(result.js.contains(".map(function(item)"));
+    assert!(result.js.contains(".join(\"\")"));
+}
+
+fn assert_component_js_payload(js: &str) {
+    assert!(
+        js.contains("const __lux_template = "),
+        "missing template const: {js}"
+    );
+    assert!(js.contains("const __lux_css = "), "missing css const: {js}");
+    assert!(
+        js.contains("const __lux_css_hash = "),
+        "missing css hash const: {js}"
+    );
+    assert!(
+        js.contains("const __lux_css_scope = "),
+        "missing css scope const: {js}"
+    );
+    assert!(
+        js.contains("const __lux_has_dynamic = "),
+        "missing has_dynamic const: {js}"
+    );
+    assert!(
+        js.contains("export { __lux_template as template"),
+        "missing named export: {js}"
+    );
+    assert!(
+        js.contains("export default {"),
+        "missing default export: {js}"
+    );
+    assert!(
+        js.contains("render: function(_props = {})"),
+        "missing render parameter default: {js}"
+    );
+    assert_js_parses_as_module(js);
+}
+
+fn assert_js_parses_as_module(js: &str) {
+    let allocator = Allocator::default();
+    let parsed = Parser::new(&allocator, js, SourceType::mjs()).parse();
+    assert!(
+        parsed.errors.is_empty(),
+        "generated js failed to parse: {:?}\nsource:\n{}",
+        parsed.errors,
+        js
+    );
 }

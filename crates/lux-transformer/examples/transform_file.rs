@@ -10,9 +10,10 @@ fn main() {
     let _ = args.next();
 
     let input_path = args.next().unwrap_or_else(|| "ToParse.svelte".to_string());
-    let output_path = args
+    let output_js_path = args
         .next()
-        .unwrap_or_else(|| "ToParse.transformed.txt".to_string());
+        .unwrap_or_else(|| "ToParse.transformed.js".to_string());
+    let output_css_path = args.next();
 
     let source = fs::read_to_string(&input_path)
         .unwrap_or_else(|err| panic!("failed to read `{input_path}`: {err}"));
@@ -38,30 +39,37 @@ fn main() {
     let transformed = lux_transformer::transform(&parsed.root, &analysis);
     let transform_duration = transform_start.elapsed();
 
-    let mut lines = Vec::new();
-    lines.push(format!("input={input_path}"));
-    lines.push(format!("diagnostics={}", analysis.diagnostics.len()));
-    lines.push(format!("js={:?}", transformed.js));
-    lines.push(format!(
-        "css_present={}",
-        transformed.css.as_ref().is_some()
-    ));
-    lines.push(format!(
-        "css_hash={}",
-        transformed.css_hash.as_deref().unwrap_or("none")
-    ));
-    lines.push(format!(
-        "css_scope={}",
-        transformed.css_scope.as_deref().unwrap_or("none")
-    ));
+    let output_js_path = PathBuf::from(output_js_path);
+    fs::write(&output_js_path, &transformed.js)
+        .unwrap_or_else(|err| panic!("failed to write {}: {err}", output_js_path.display()));
 
-    if let Some(css) = transformed.css.as_deref() {
-        lines.push(format!("css={css:?}"));
+    let css_written_path = if let Some(css) = transformed.css.as_deref() {
+        let css_path = output_css_path
+            .map(PathBuf::from)
+            .unwrap_or_else(|| output_js_path.with_extension("css"));
+        fs::write(&css_path, css)
+            .unwrap_or_else(|err| panic!("failed to write {}: {err}", css_path.display()));
+        Some(css_path)
+    } else {
+        None
+    };
+
+    println!("Input: {input_path}");
+    println!("Diagnostics: {}", analysis.diagnostics.len());
+    println!("JS written: {}", output_js_path.display());
+    if let Some(css_path) = css_written_path {
+        println!("CSS written: {}", css_path.display());
+    } else {
+        println!("CSS written: none");
     }
-
-    let output_path = PathBuf::from(output_path);
-    fs::write(&output_path, lines.join("\n"))
-        .unwrap_or_else(|err| panic!("failed to write {}: {err}", output_path.display()));
+    println!(
+        "CSS hash: {}",
+        transformed.css_hash.as_deref().unwrap_or("none")
+    );
+    println!(
+        "CSS scope: {}",
+        transformed.css_scope.as_deref().unwrap_or("none")
+    );
 
     let parse_throughput =
         input_len as f64 / 1024.0 / parse_duration.as_secs_f64().max(f64::EPSILON);
@@ -70,7 +78,6 @@ fn main() {
     let transform_throughput =
         input_len as f64 / 1024.0 / transform_duration.as_secs_f64().max(f64::EPSILON);
 
-    println!("Output written to {}", output_path.display());
     println!(
         "Parse: {:?} ({:.2} KB/s), Analyze: {:?} ({:.2} KB/s), Transform: {:?} ({:.2} KB/s)",
         parse_duration,
