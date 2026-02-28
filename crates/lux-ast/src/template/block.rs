@@ -27,8 +27,8 @@ pub struct EachBlock<'a> {
 pub struct AwaitBlock<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
-    pub value: Option<Expression<'a>>,
-    pub error: Option<Expression<'a>>,
+    pub value: Option<BindingPattern<'a>>,
+    pub error: Option<BindingPattern<'a>>,
     pub pending: Option<Fragment<'a>>,
     pub then: Option<Fragment<'a>>,
     pub catch: Option<Fragment<'a>>,
@@ -46,6 +46,6 @@ pub struct SnippetBlock<'a> {
     pub span: Span,
     pub expression: IdentifierReference<'a>,
     pub type_params: Option<&'a str>,
-    pub parameters: Vec<Expression<'a>>,
+    pub parameters: Vec<BindingPattern<'a>>,
     pub body: Fragment<'a>,
 }
