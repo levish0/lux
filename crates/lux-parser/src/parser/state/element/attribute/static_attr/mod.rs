@@ -1,6 +1,5 @@
 use lux_ast::common::Span;
 use lux_ast::template::attribute::{Attribute, AttributeValue};
-use lux_ast::template::tag::Text;
 use winnow::Result;
 use winnow::prelude::*;
 use winnow::stream::Location as StreamLocation;
@@ -10,6 +9,10 @@ use crate::input::Input;
 use crate::parser::utils::helpers::skip_whitespace;
 
 use super::is_attr_name_char;
+
+mod value;
+
+use value::read_static_value;
 
 pub fn read_static_attributes<'a>(input: &mut Input<'a>) -> Result<Vec<Attribute<'a>>> {
     let mut attrs = Vec::new();
@@ -59,37 +62,4 @@ fn read_static_attribute<'a>(input: &mut Input<'a>) -> Result<Attribute<'a>> {
         name,
         value,
     })
-}
-
-fn read_static_value<'a>(input: &mut Input<'a>) -> Result<AttributeValue<'a>> {
-    let remaining: &str = &input.input;
-
-    let (quote, content) = if remaining.starts_with('"') {
-        input.next_slice(1);
-        let val: &str = take_while(0.., |c: char| c != '"').parse_next(input)?;
-        input.next_slice(1); // closing "
-        ('"', val)
-    } else if remaining.starts_with('\'') {
-        input.next_slice(1);
-        let val: &str = take_while(0.., |c: char| c != '\'').parse_next(input)?;
-        input.next_slice(1); // closing '
-        ('\'', val)
-    } else {
-        let val: &str = take_while(1.., |c: char| {
-            !c.is_ascii_whitespace() && c != '>' && c != '/'
-        })
-        .parse_next(input)?;
-        (' ', val)
-    };
-
-    let start = input.current_token_start() - content.len() - if quote != ' ' { 1 } else { 0 };
-    let end = input.previous_token_end();
-
-    Ok(AttributeValue::Sequence(vec![
-        lux_ast::template::tag::TextOrExpressionTag::Text(Text {
-            span: Span::new(start as u32, end as u32),
-            data: content,
-            raw: content,
-        }),
-    ]))
 }
