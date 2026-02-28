@@ -3,10 +3,21 @@ use lux_ast::template::block::AwaitBlock;
 
 use super::super::binding::collect_pattern_bindings;
 use super::super::context::TemplateAnalyzerContext;
+use super::super::diagnostics;
 use super::super::fragment;
 use super::super::reference;
 
 pub(crate) fn analyze(block: &AwaitBlock<'_>, context: &mut TemplateAnalyzerContext<'_>) {
+    if let Some(pending) = &block.pending {
+        diagnostics::warn_if_block_empty(pending, context);
+    }
+    if let Some(then_fragment) = &block.then {
+        diagnostics::warn_if_block_empty(then_fragment, context);
+    }
+    if let Some(catch_fragment) = &block.catch {
+        diagnostics::warn_if_block_empty(catch_fragment, context);
+    }
+
     reference::analyze_expression(&block.expression, context);
 
     if let Some(pending) = &block.pending {

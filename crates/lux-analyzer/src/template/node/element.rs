@@ -6,6 +6,7 @@ use lux_ast::template::tag::TextOrExpressionTag;
 
 use super::super::binding::collect_destructuring_expression_bindings;
 use super::super::context::TemplateAnalyzerContext;
+use super::super::diagnostics;
 use super::super::fragment;
 use super::super::reference;
 
@@ -27,6 +28,7 @@ pub(crate) fn analyze<'a>(
             }
             AttributeNode::BindDirective(directive) => {
                 reference::analyze_expression(&directive.expression, context);
+                diagnostics::validate_bind_directive_expression(directive, context);
             }
             AttributeNode::ClassDirective(directive) => {
                 reference::analyze_expression(&directive.expression, context);

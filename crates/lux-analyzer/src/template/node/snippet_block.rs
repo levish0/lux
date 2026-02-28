@@ -3,9 +3,13 @@ use lux_ast::template::block::SnippetBlock;
 
 use super::super::binding::collect_pattern_bindings;
 use super::super::context::TemplateAnalyzerContext;
+use super::super::diagnostics;
 use super::super::fragment;
 
 pub(crate) fn analyze(block: &SnippetBlock<'_>, context: &mut TemplateAnalyzerContext<'_>) {
+    diagnostics::validate_snippet_block(block, context);
+    diagnostics::warn_if_block_empty(&block.body, context);
+
     context.add_binding(
         TemplateBindingKind::SnippetName,
         block.expression.name.as_str(),

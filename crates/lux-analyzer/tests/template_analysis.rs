@@ -1,5 +1,8 @@
 use lux_analyzer::analyze;
-use lux_ast::analysis::{AnalysisTables, TemplateBindingKind, TemplateScopeId, TemplateScopeKind};
+use lux_ast::analysis::{
+    AnalysisDiagnosticCode, AnalysisSeverity, AnalysisTables, TemplateBindingKind, TemplateScopeId,
+    TemplateScopeKind,
+};
 use lux_parser::parse;
 use oxc_allocator::Allocator;
 
@@ -161,6 +164,62 @@ fn analyze_collects_template_reference_read_write_flags() {
         .collect();
     assert!(count_refs.iter().any(|reference| reference.is_read));
     assert!(count_refs.iter().any(|reference| reference.is_write));
+}
+
+#[test]
+fn analyze_reports_bind_invalid_expression() {
+    let tables = analyze_source("<input bind:value={count + 1} />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveInvalidExpression
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_snippet_duplicate_name() {
+    let tables = analyze_source("{#snippet demo()}{/snippet}{#snippet demo()}{/snippet}");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::SnippetDuplicateName
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_assignment_to_template_binding() {
+    let tables = analyze_source("{#each items as item}{item = 1}{/each}");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::TemplateAssignmentToBinding
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_assignment_to_const_and_import() {
+    let tables = analyze_source(
+        "<script>import { value as imported } from 'pkg'; const fixed = 1;</script>{fixed = 2}{imported = 3}",
+    );
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::TemplateAssignmentToConst
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::TemplateAssignmentToImport
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_block_empty_warning() {
+    let tables = analyze_source("{#snippet empty()} {/snippet}");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BlockEmpty
+            && diagnostic.severity == AnalysisSeverity::Warning
+    }));
 }
 
 fn analyze_source(source: &str) -> AnalysisTables {

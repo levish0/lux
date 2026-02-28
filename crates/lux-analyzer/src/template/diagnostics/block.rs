@@ -3,7 +3,10 @@ use lux_ast::template::root::{Fragment, FragmentNode};
 
 use crate::template::context::TemplateAnalyzerContext;
 
-pub(super) fn warn_if_block_empty(fragment: &Fragment<'_>, context: &mut TemplateAnalyzerContext<'_>) {
+pub(crate) fn warn_if_block_empty(
+    fragment: &Fragment<'_>,
+    context: &mut TemplateAnalyzerContext<'_>,
+) {
     if fragment.nodes.len() != 1 {
         return;
     }
