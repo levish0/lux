@@ -133,6 +133,97 @@ fn transform_generates_each_runtime_render() {
     assert!(result.js.contains(".join(\"\")"));
 }
 
+#[test]
+fn transform_generates_await_runtime_render() {
+    let source = "{#await promise then value}<p>{value}</p>{:catch err}<p>{err}</p>{/await}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("__lux_await_value"));
+    assert!(result.js.contains("typeof __lux_await_value.then === \"function\""));
+    assert!(result.js.contains("catch (err)"));
+}
+
+#[test]
+fn transform_generates_snippet_assignment_and_render_call() {
+    let source = "{#snippet greet(name)}<p>{name}</p>{/snippet}{@render greet('x')}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("_props.greet = function(name)"));
+    assert!(result.js.contains("greet(\"x\")"));
+}
+
+#[test]
+fn transform_escapes_expression_tag_but_not_html_tag() {
+    let source = "<p>{value}</p><p>{@html value}</p>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("replaceAll(\"<\", \"&lt;\")"));
+    assert!(result.js.contains("replaceAll(\">\", \"&gt;\")"));
+    assert!(result.js.contains("String(function({ value })"));
+}
+
+#[test]
+fn transform_generates_component_runtime_render_path() {
+    let source = "<Child msg={name}>hi</Child>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("typeof __lux_component.render === \"function\""));
+    assert!(result.js.contains("const __lux_component_props = {"));
+    assert!(result.js.contains("msg: function({ name })"));
+    assert!(result.js.contains("children: function()"));
+}
+
+#[test]
+fn transform_generates_svelte_element_runtime_render_path() {
+    let source = "<svelte:element this={tag} foo={x}>ok</svelte:element>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("const __lux_tag = String(function({ tag })"));
+    assert!(result.js.contains("\"<\" + __lux_tag"));
+    assert!(result.js.contains("\"</\" + __lux_tag + \">\""));
+}
+
+#[test]
+fn transform_generates_spread_and_directive_runtime_attributes() {
+    let source = "<div {...attrs} class:active={ok} style:color={color}></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("Object.entries("));
+    assert!(result.js.contains("__lux_entry[1] === true"));
+    assert!(result.js.contains(" ? \" class=\\\"\" + \"active\" + \"\\\"\" : \"\""));
+    assert!(result.js.contains("\" style=\\\"color: \" + String("));
+}
+
 fn assert_component_js_payload(js: &str) {
     assert!(
         js.contains("const __lux_template = "),
