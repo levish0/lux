@@ -20,7 +20,10 @@ pub(super) fn detect_script_context(
                 ErrorKind::InvalidScript,
                 "script_reserved_attribute",
                 attr.span,
-                format!("The `{}` attribute is reserved and cannot be used", attr.name),
+                format!(
+                    "The `{}` attribute is reserved and cannot be used",
+                    attr.name
+                ),
             ));
         }
 
