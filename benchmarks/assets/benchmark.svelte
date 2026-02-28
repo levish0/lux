@@ -1,72 +1,62 @@
 <script lang="ts">
-  export let items: Array<{ id: number; label: string; done: boolean }> = [];
-  let filter = "";
-  let selected = new Set<number>();
-
-  const visible = $derived(
-    items.filter((item) => item.label.toLowerCase().includes(filter.toLowerCase())),
-  );
-
-  function toggle(id: number) {
-    if (selected.has(id)) {
-      selected.delete(id);
-    } else {
-      selected.add(id);
-    }
-    selected = selected;
-  }
+  import * as Tabs from "$lib/components/ui/tabs/index.js";
+  import * as Card from "$lib/components/ui/card/index.js";
+  import { Button } from "$lib/components/ui/button/index.js";
+  import { Input } from "$lib/components/ui/input/index.js";
+  import { Label } from "$lib/components/ui/label/index.js";
 </script>
 
-<svelte:window on:keydown={(e) => e.key === "Escape" && (filter = "")} />
-
-<section class="panel">
-  <header>
-    <h1>Bench Fixture</h1>
-    <input bind:value={filter} placeholder="Filter items" />
-  </header>
-
-  {#if visible.length === 0}
-    <p class="empty">No items</p>
-  {:else}
-    <ul>
-      {#each visible as item, index (item.id)}
-        <li class:done={item.done} on:click={() => toggle(item.id)}>
-          <span>{index + 1}</span>
-          <strong>{item.label}</strong>
-          {#if selected.has(item.id)}
-            <em>selected</em>
-          {/if}
-        </li>
-      {/each}
-    </ul>
-  {/if}
-</section>
-
-<style>
-  .panel {
-    display: grid;
-    gap: 0.75rem;
-    padding: 1rem;
-  }
-
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  li {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    padding: 0.25rem 0;
-  }
-
-  li.done strong {
-    text-decoration: line-through;
-  }
-
-  .empty {
-    opacity: 0.7;
-  }
-</style>
+<div class="-mb-4 flex w-full max-w-sm flex-col gap-6">
+  <Tabs.Root value="account">
+    <Tabs.List>
+      <Tabs.Trigger value="account">Account</Tabs.Trigger>
+      <Tabs.Trigger value="password">Password</Tabs.Trigger>
+    </Tabs.List>
+    <Tabs.Content value="account">
+      <Card.Root>
+        <Card.Header>
+          <Card.Title>Account</Card.Title>
+          <Card.Description>
+            Make changes to your account here. Click save when you&apos;re done.
+          </Card.Description>
+        </Card.Header>
+        <Card.Content class="grid gap-6">
+          <div class="grid gap-3">
+            <Label for="tabs-demo-name">Name</Label>
+            <Input id="tabs-demo-name" value="Pedro Duarte" />
+          </div>
+          <div class="grid gap-3">
+            <Label for="tabs-demo-username">Username</Label>
+            <Input id="tabs-demo-username" value="@peduarte" />
+          </div>
+        </Card.Content>
+        <Card.Footer>
+          <Button>Save changes</Button>
+        </Card.Footer>
+      </Card.Root>
+    </Tabs.Content>
+    <Tabs.Content value="password">
+      <Card.Root>
+        <Card.Header>
+          <Card.Title>Password</Card.Title>
+          <Card.Description>
+            Change your password here. After saving, you&apos;ll be logged out.
+          </Card.Description>
+        </Card.Header>
+        <Card.Content class="grid gap-6">
+          <div class="grid gap-3">
+            <Label for="tabs-demo-current">Current password</Label>
+            <Input id="tabs-demo-current" type="password" />
+          </div>
+          <div class="grid gap-3">
+            <Label for="tabs-demo-new">New password</Label>
+            <Input id="tabs-demo-new" type="password" />
+          </div>
+        </Card.Content>
+        <Card.Footer>
+          <Button>Save password</Button>
+        </Card.Footer>
+      </Card.Root>
+    </Tabs.Content>
+  </Tabs.Root>
+</div>
