@@ -10,6 +10,46 @@ pub enum AnalysisNodeKind {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct TemplateScopeId(pub u32);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TemplateScopeKind {
+    Root,
+    Element,
+    Each,
+    AwaitThen,
+    AwaitCatch,
+    Snippet,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TemplateBindingKind {
+    EachContext,
+    EachIndex,
+    AwaitValue,
+    AwaitError,
+    SnippetName,
+    SnippetParameter,
+    LetDirective,
+}
+
+#[derive(Debug, Clone)]
+pub struct TemplateScopeAnalysis {
+    pub id: TemplateScopeId,
+    pub kind: TemplateScopeKind,
+    pub parent: Option<TemplateScopeId>,
+    pub span: Option<Span>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TemplateBindingAnalysis {
+    pub scope: TemplateScopeId,
+    pub kind: TemplateBindingKind,
+    pub name: String,
+    pub span: Option<Span>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SpanKey {
     pub kind: AnalysisNodeKind,
     pub start: u32,
@@ -52,4 +92,6 @@ pub struct AnalysisTables {
     pub css_rules: HashMap<SpanKey, CssRuleAnalysis>,
     pub complex_selectors: HashMap<SpanKey, ComplexSelectorAnalysis>,
     pub relative_selectors: HashMap<SpanKey, RelativeSelectorAnalysis>,
+    pub template_scopes: Vec<TemplateScopeAnalysis>,
+    pub template_bindings: Vec<TemplateBindingAnalysis>,
 }
