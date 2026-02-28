@@ -30,6 +30,7 @@ oxc_syntax = "0.115.0"
 oxc_diagnostics = "0.115.0"
 oxc_estree = { version = "0.115.0", features = ["serialize"] }
 oxc_ast_visit = "0.115.0"
+oxc_semantic = "0.115.0"
 rayon = "1.11.0"
 phf = { version = "0.13.1", features = ["macros"] }
 regex = "1.12.3"
