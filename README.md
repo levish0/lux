@@ -23,8 +23,8 @@ The benchmark uses `node` in `crates/lux-parser/tests/tools/svelte_runner` for S
 Default input is `benchmarks/assets/benchmark.svelte`.
 Set `LUX_BENCH_INPUT` to benchmark a different `.svelte` file.
 Reports are written under:
-- `target/criterion/lux-parser`
-- `target/criterion/lux-analyzer`
+- `benchmarks/criterion/lux-parser`
+- `benchmarks/criterion/lux-analyzer`
 
 ## License
 

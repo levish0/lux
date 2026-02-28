@@ -329,6 +329,7 @@ dependencies = [
  "oxc_span",
  "oxc_syntax",
  "rustc-hash",
+ "serde_json",
 ]
 
 [[package]]
@@ -375,7 +376,9 @@ version = "0.1.0"
 dependencies = [
  "lux-analyzer",
  "lux-ast",
+ "lux-parser",
  "lux-utils",
+ "oxc_allocator",
  "oxc_ast",
  "oxc_span",
  "rustc-hash",

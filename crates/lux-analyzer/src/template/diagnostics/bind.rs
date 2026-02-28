@@ -5,8 +5,8 @@ use lux_ast::template::tag::TextOrExpressionTag;
 use lux_metadata::bindings::{
     is_binding_valid_for_element, is_known_binding, known_binding_names, valid_bindings_for_element,
 };
-use lux_utils::fuzzymatch::fuzzymatch;
 use lux_utils::elements::is_svg;
+use lux_utils::fuzzymatch::fuzzymatch;
 use oxc_ast::ast::Expression;
 use oxc_span::GetSpan;
 

@@ -161,7 +161,7 @@ fn criterion_config() -> Criterion {
 
     Criterion::default()
         .measurement_time(Duration::from_secs(8))
-        .output_directory(&*workspace_root.join("target/criterion/lux-analyzer"))
+        .output_directory(&*workspace_root.join("benchmarks/criterion/lux-analyzer"))
 }
 
 criterion_group! {

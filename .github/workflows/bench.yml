@@ -1,0 +1,44 @@
+name: bench
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "."
+
+      - name: Install Svelte runner deps
+        run: npm install --prefix crates/lux-parser/tests/tools/svelte_runner --silent --no-fund --no-audit
+
+      - name: Run parser benchmark
+        run: cargo bench -p lux-parser --bench svelte_compare_parser -- --sample-size 30 --warm-up-time 1 --measurement-time 8
+
+      - name: Run analyzer benchmark
+        run: cargo bench -p lux-analyzer --bench svelte_compare_analyzer -- --sample-size 30 --warm-up-time 1 --measurement-time 8
+
+      - name: Upload benchmark reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: criterion-reports
+          path: benchmarks/criterion
+          if-no-files-found: warn

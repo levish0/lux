@@ -392,15 +392,24 @@ mod tests {
         assert!(!is_binding_valid_for_element("value", "div"));
         assert!(is_binding_valid_for_element("clientWidth", "div")); // any element
         assert!(is_binding_valid_for_element("clientWidth", "span")); // any element
-        assert!(!is_binding_valid_for_element("clientWidth", "svelte:window"));
-        assert!(!is_binding_valid_for_element("clientWidth", "svelte:document"));
+        assert!(!is_binding_valid_for_element(
+            "clientWidth",
+            "svelte:window"
+        ));
+        assert!(!is_binding_valid_for_element(
+            "clientWidth",
+            "svelte:document"
+        ));
         assert!(is_binding_valid_for_element("innerWidth", "svelte:window"));
         assert!(!is_binding_valid_for_element("innerWidth", "div"));
         assert!(is_binding_valid_for_element(
             "visibilityState",
             "svelte:document"
         ));
-        assert!(!is_binding_valid_for_element("visibilityState", "svelte:window"));
+        assert!(!is_binding_valid_for_element(
+            "visibilityState",
+            "svelte:window"
+        ));
     }
 
     #[test]

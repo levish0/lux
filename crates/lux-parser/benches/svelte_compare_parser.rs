@@ -1,4 +1,4 @@
-use criterion::{criterion_group, criterion_main, Criterion, Throughput};
+use criterion::{Criterion, Throughput, criterion_group, criterion_main};
 use oxc_allocator::Allocator;
 use std::fs;
 use std::hint::black_box;
@@ -135,7 +135,7 @@ fn criterion_config() -> Criterion {
 
     Criterion::default()
         .measurement_time(Duration::from_secs(8))
-        .output_directory(&*workspace_root.join("target/criterion/lux-parser"))
+        .output_directory(&*workspace_root.join("benchmarks/criterion/lux-parser"))
 }
 
 criterion_group! {
