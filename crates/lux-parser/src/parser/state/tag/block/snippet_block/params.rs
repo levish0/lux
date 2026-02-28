@@ -1,14 +1,16 @@
-use oxc_ast::ast::Expression;
+use oxc_ast::ast::BindingPattern;
 use winnow::Result;
 use winnow::combinator::opt;
 use winnow::prelude::*;
 use winnow::token::literal;
 
 use crate::input::Input;
-use crate::parser::read::expression::read_expression_until;
+use crate::parser::read::pattern::read_binding_pattern_until;
 use crate::parser::utils::helpers::skip_whitespace;
 
-pub(super) fn parse_snippet_params<'a>(input: &mut Input<'a>) -> Result<Vec<Expression<'a>>> {
+pub(super) fn parse_snippet_params<'a>(
+    input: &mut Input<'a>,
+) -> Result<Vec<BindingPattern<'a>>> {
     let mut params = Vec::new();
 
     loop {
@@ -19,7 +21,7 @@ pub(super) fn parse_snippet_params<'a>(input: &mut Input<'a>) -> Result<Vec<Expr
             break;
         }
 
-        let expr = read_expression_until(input, b",)")?;
+        let expr = read_binding_pattern_until(input, b",)")?;
         params.push(expr);
 
         skip_whitespace(input);
