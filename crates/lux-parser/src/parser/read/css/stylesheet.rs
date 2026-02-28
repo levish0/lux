@@ -4,7 +4,7 @@ use winnow::Result;
 use super::parser::CssParser;
 use super::rule::{parse_css_atrule, parse_css_rule};
 
-pub fn parse_stylesheet(source: &str, offset: u32) -> Result<Vec<StyleSheetChild>> {
+pub fn parse_stylesheet(source: &str, offset: u32) -> Result<Vec<StyleSheetChild<'_>>> {
     let mut parser = CssParser::new(source, offset);
     let mut children = Vec::new();
 
