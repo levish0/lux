@@ -33,6 +33,46 @@ pub enum TemplateBindingKind {
     LetDirective,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ScriptTarget {
+    Instance,
+    Module,
+}
+
+#[derive(Debug, Clone)]
+pub struct ScriptScopeAnalysis {
+    pub target: ScriptTarget,
+    pub id: u32,
+    pub parent: Option<u32>,
+    pub flags: u16,
+    pub node_id: u32,
+}
+
+#[derive(Debug, Clone)]
+pub struct ScriptSymbolAnalysis {
+    pub target: ScriptTarget,
+    pub id: u32,
+    pub name: String,
+    pub scope_id: u32,
+    pub declaration_node_id: u32,
+    pub declaration_span: Span,
+    pub flags: u32,
+    pub mutated: bool,
+    pub unused: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct ScriptReferenceAnalysis {
+    pub target: ScriptTarget,
+    pub id: u32,
+    pub name: String,
+    pub span: Span,
+    pub scope_id: u32,
+    pub symbol_id: Option<u32>,
+    pub is_read: bool,
+    pub is_write: bool,
+}
+
 #[derive(Debug, Clone)]
 pub struct TemplateScopeAnalysis {
     pub id: TemplateScopeId,
@@ -47,6 +87,15 @@ pub struct TemplateBindingAnalysis {
     pub kind: TemplateBindingKind,
     pub name: String,
     pub span: Option<Span>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TemplateReferenceAnalysis {
+    pub scope: TemplateScopeId,
+    pub name: String,
+    pub span: Span,
+    pub is_read: bool,
+    pub is_write: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -92,6 +141,10 @@ pub struct AnalysisTables {
     pub css_rules: HashMap<SpanKey, CssRuleAnalysis>,
     pub complex_selectors: HashMap<SpanKey, ComplexSelectorAnalysis>,
     pub relative_selectors: HashMap<SpanKey, RelativeSelectorAnalysis>,
+    pub script_scopes: Vec<ScriptScopeAnalysis>,
+    pub script_symbols: Vec<ScriptSymbolAnalysis>,
+    pub script_references: Vec<ScriptReferenceAnalysis>,
     pub template_scopes: Vec<TemplateScopeAnalysis>,
     pub template_bindings: Vec<TemplateBindingAnalysis>,
+    pub template_references: Vec<TemplateReferenceAnalysis>,
 }
