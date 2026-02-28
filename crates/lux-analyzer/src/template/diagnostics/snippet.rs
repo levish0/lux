@@ -3,7 +3,7 @@ use lux_ast::template::block::SnippetBlock;
 
 use crate::template::context::TemplateAnalyzerContext;
 
-pub(super) fn validate_snippet_block(
+pub(crate) fn validate_snippet_block(
     block: &SnippetBlock<'_>,
     context: &mut TemplateAnalyzerContext<'_>,
 ) {
