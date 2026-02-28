@@ -11,12 +11,10 @@ fn root_only_svelte_meta_tag_must_be_top_level() {
         false,
     );
 
-    assert!(
-        result
-            .errors
-            .iter()
-            .any(|e| e.message.contains("only valid at the top level"))
-    );
+    assert!(result.errors.iter().any(|e| {
+        e.code == Some("svelte_meta_invalid_placement")
+            && e.message.contains("only valid at the top level")
+    }));
 }
 
 #[test]
@@ -28,12 +26,10 @@ fn duplicate_root_only_svelte_meta_tag_reports_error() {
         false,
     );
 
-    assert!(
-        result
-            .errors
-            .iter()
-            .any(|e| e.message.contains("Duplicate root-only Svelte meta tag"))
-    );
+    assert!(result.errors.iter().any(|e| {
+        e.code == Some("svelte_meta_duplicate")
+            && e.message.contains("Duplicate root-only Svelte meta tag")
+    }));
 }
 
 #[test]
@@ -49,7 +45,7 @@ fn duplicate_top_level_script_reports_error() {
         result
             .errors
             .iter()
-            .any(|e| e.kind == ErrorKind::InvalidScript)
+            .any(|e| e.kind == ErrorKind::InvalidScript && e.code == Some("script_duplicate"))
     );
 }
 
@@ -66,7 +62,7 @@ fn duplicate_top_level_style_reports_error() {
         result
             .errors
             .iter()
-            .any(|e| e.kind == ErrorKind::InvalidCss)
+            .any(|e| e.kind == ErrorKind::InvalidCss && e.code == Some("style_duplicate"))
     );
 }
 
@@ -83,7 +79,7 @@ fn script_module_attribute_with_value_reports_error() {
         result
             .errors
             .iter()
-            .any(|e| e.message.contains("module` attribute"))
+            .any(|e| e.code == Some("script_invalid_attribute_value"))
     );
 }
 
@@ -96,8 +92,24 @@ fn script_context_attribute_must_be_module() {
         false,
     );
 
-    assert!(result.errors.iter().any(|e| {
-        e.message
-            .contains("context` attribute on <script> must be \"module\"")
-    }));
+    assert!(
+        result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("script_invalid_context"))
+    );
+}
+
+#[test]
+fn script_unknown_attribute_emits_warning() {
+    let allocator = Allocator::default();
+    let result = parse("<script foo>let a = 1;</script>", &allocator, false);
+
+    assert!(result.errors.is_empty());
+    assert!(
+        result
+            .warnings
+            .iter()
+            .any(|w| w.code == "script_unknown_attribute")
+    );
 }
