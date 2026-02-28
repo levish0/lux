@@ -2,6 +2,7 @@ use lux_ast::template::root::FragmentNode;
 use winnow::Result;
 use winnow::error::ContextError;
 
+use crate::context::in_shadowroot_template;
 use crate::input::Input;
 
 use super::meta::{enforce_root_only_svelte_tag_rules, is_root_only_svelte_tag};
@@ -36,7 +37,7 @@ pub(super) fn dispatch_element<'a>(
         return component::parse_component(input, start, name);
     }
 
-    if name == "slot" {
+    if name == "slot" && !in_shadowroot_template(input) {
         return slot::parse_slot(input, start, name);
     }
 

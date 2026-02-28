@@ -10,7 +10,6 @@ use oxc_span::GetSpan;
 use serde_json::Value;
 
 #[test]
-#[ignore = "parity tracking against reference parser-modern samples (strict only)"]
 fn parity_against_reference_parser_modern_strict() {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let samples_dir = manifest_dir.join("tests/fixtures/parser-modern/samples");
@@ -92,19 +91,11 @@ fn normalize_reference_input(input: &str) -> String {
 }
 
 fn npm_executable() -> &'static str {
-    if cfg!(windows) {
-        "npm.cmd"
-    } else {
-        "npm"
-    }
+    if cfg!(windows) { "npm.cmd" } else { "npm" }
 }
 
 fn node_executable() -> &'static str {
-    if cfg!(windows) {
-        "node.exe"
-    } else {
-        "node"
-    }
+    if cfg!(windows) { "node.exe" } else { "node" }
 }
 
 fn ensure_svelte_runner(manifest_dir: &Path) -> PathBuf {
@@ -124,7 +115,12 @@ fn ensure_svelte_runner(manifest_dir: &Path) -> PathBuf {
         .arg("--no-audit")
         .current_dir(&runner_dir)
         .output()
-        .unwrap_or_else(|err| panic!("failed to run npm install in {}: {err}", runner_dir.display()));
+        .unwrap_or_else(|err| {
+            panic!(
+                "failed to run npm install in {}: {err}",
+                runner_dir.display()
+            )
+        });
 
     assert!(
         install.status.success(),
