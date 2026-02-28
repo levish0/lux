@@ -1,6 +1,10 @@
-use oxc_ast::ast::{BindingPattern, Expression};
+use std::cell::Cell;
+
+use oxc_allocator::{Allocator, Box as ArenaBox};
+use oxc_ast::ast::{AssignmentPattern, BindingPattern, Expression};
 use oxc_parser::Parser as OxcParser;
-use oxc_span::SourceType;
+use oxc_span::{GetSpan, SourceType, Span};
+use oxc_syntax::node::NodeId;
 use winnow::Result;
 use winnow::error::ContextError;
 use winnow::prelude::*;
@@ -39,7 +43,8 @@ pub fn read_binding_pattern_until<'a>(
         .parse_expression()
         .map_err(|_| ContextError::new())?;
 
-    let mut pattern = extract_parameter_pattern(expression).ok_or_else(ContextError::new)?;
+    let mut pattern =
+        extract_parameter_pattern(expression, allocator).ok_or_else(ContextError::new)?;
 
     let _ = take(pattern_source.len()).parse_next(input)?;
     // Wrapped source prepends `(` before pattern.
@@ -48,7 +53,10 @@ pub fn read_binding_pattern_until<'a>(
     Ok(pattern)
 }
 
-fn extract_parameter_pattern<'a>(expression: Expression<'a>) -> Option<BindingPattern<'a>> {
+fn extract_parameter_pattern<'a>(
+    expression: Expression<'a>,
+    allocator: &'a Allocator,
+) -> Option<BindingPattern<'a>> {
     let Expression::ArrowFunctionExpression(arrow) = expression else {
         return None;
     };
@@ -60,13 +68,26 @@ fn extract_parameter_pattern<'a>(expression: Expression<'a>) -> Option<BindingPa
     }
 
     let mut items = params.items.into_iter();
-    let param = items.next()?;
+    let param = items.next()?.unbox();
 
     if items.next().is_some() {
         return None;
     }
 
-    Some(param.pattern)
+    let mut pattern = param.pattern;
+    if let Some(initializer) = param.initializer {
+        let right = initializer.unbox();
+        let span = Span::new(pattern.span().start, right.span().end);
+        let assignment = AssignmentPattern {
+            node_id: Cell::new(NodeId::DUMMY),
+            span,
+            left: pattern,
+            right,
+        };
+        pattern = BindingPattern::AssignmentPattern(ArenaBox::new_in(assignment, allocator));
+    }
+
+    Some(pattern)
 }
 
 fn make_source_type(ts: bool) -> SourceType {
