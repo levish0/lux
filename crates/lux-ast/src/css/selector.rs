@@ -10,9 +10,6 @@ pub struct SelectorList<'a> {
 pub struct ComplexSelector<'a> {
     pub span: Span,
     pub children: Vec<RelativeSelector<'a>>,
-    // metadata (analysis phase)
-    pub is_global: bool,
-    pub used: bool,
 }
 
 #[derive(Debug)]
@@ -20,10 +17,6 @@ pub struct RelativeSelector<'a> {
     pub span: Span,
     pub combinator: Option<Combinator>,
     pub selectors: Vec<SimpleSelector<'a>>,
-    // metadata (analysis phase)
-    pub is_global: bool,
-    pub is_global_like: bool,
-    pub scoped: bool,
 }
 
 #[derive(Debug)]

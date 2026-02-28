@@ -2,8 +2,8 @@ use lux_ast::css::stylesheet::{CssAtrule, CssRule};
 use winnow::Result;
 
 use super::block::parse_css_block;
+use super::parser::CssParser;
 use super::selector::parse_selector_list;
-use super::value::CssParser;
 
 pub fn parse_css_rule<'a>(p: &mut CssParser<'a>) -> Result<CssRule<'a>> {
     let start = p.index;
@@ -14,10 +14,6 @@ pub fn parse_css_rule<'a>(p: &mut CssParser<'a>) -> Result<CssRule<'a>> {
         span: p.span(start, p.index),
         prelude,
         block,
-        parent_rule: None,
-        has_local_selectors: false,
-        has_global_selectors: false,
-        is_global_block: false,
     })
 }
 

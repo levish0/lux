@@ -1,7 +1,7 @@
 Root {
     span: Span {
         start: 0,
-        end: 150,
+        end: 1484,
     },
     options: None,
     fragment: Fragment {
@@ -9,8 +9,8 @@ Root {
             Text(
                 Text {
                     span: Span {
-                        start: 91,
-                        end: 93,
+                        start: 137,
+                        end: 139,
                     },
                     data: "\n\n",
                     raw: "\n\n",
@@ -19,34 +19,55 @@ Root {
             RegularElement(
                 RegularElement {
                     span: Span {
-                        start: 93,
-                        end: 150,
+                        start: 139,
+                        end: 187,
                     },
-                    name: "button",
+                    name: "h1",
                     attributes: [
-                        OnDirective(
-                            OnDirective {
+                        Attribute(
+                            Attribute {
                                 span: Span {
-                                    start: 101,
-                                    end: 121,
+                                    start: 143,
+                                    end: 168,
                                 },
-                                name: "click",
-                                expression: Some(
-                                    Identifier(
-                                        IdentifierReference {
-                                            span: Span {
-                                                start: 111,
-                                                end: 120,
+                                name: "style",
+                                value: Sequence(
+                                    [
+                                        Text(
+                                            Text {
+                                                span: Span {
+                                                    start: 150,
+                                                    end: 157,
+                                                },
+                                                data: "color: ",
+                                                raw: "color: ",
                                             },
-                                            name: "increment",
-                                            reference_id: Cell {
-                                                value: None,
+                                        ),
+                                        ExpressionTag(
+                                            ExpressionTag {
+                                                span: Span {
+                                                    start: 157,
+                                                    end: 167,
+                                                },
+                                                expression: Identifier(
+                                                    IdentifierReference {
+                                                        span: Span {
+                                                            start: 158,
+                                                            end: 166,
+                                                        },
+                                                        name: "selected",
+                                                        node_id: Cell {
+                                                            value: NodeId(0),
+                                                        },
+                                                        reference_id: Cell {
+                                                            value: None,
+                                                        },
+                                                    },
+                                                ),
                                             },
-                                        },
-                                    ),
+                                        ),
+                                    ],
                                 ),
-                                modifiers: [],
-                                metadata: None,
                             },
                         ),
                     ],
@@ -55,39 +76,922 @@ Root {
                             Text(
                                 Text {
                                     span: Span {
-                                        start: 122,
-                                        end: 133,
+                                        start: 169,
+                                        end: 182,
                                     },
-                                    data: "\n  clicks: ",
-                                    raw: "\n  clicks: ",
+                                    data: "Pick a colour",
+                                    raw: "Pick a colour",
                                 },
                             ),
-                            ExpressionTag(
-                                ExpressionTag {
+                        ],
+                        transparent: true,
+                        dynamic: false,
+                    },
+                },
+            ),
+            Text(
+                Text {
+                    span: Span {
+                        start: 187,
+                        end: 189,
+                    },
+                    data: "\n\n",
+                    raw: "\n\n",
+                },
+            ),
+            RegularElement(
+                RegularElement {
+                    span: Span {
+                        start: 189,
+                        end: 865,
+                    },
+                    name: "div",
+                    attributes: [],
+                    fragment: Fragment {
+                        nodes: [
+                            Text(
+                                Text {
                                     span: Span {
-                                        start: 133,
-                                        end: 140,
+                                        start: 194,
+                                        end: 197,
                                     },
-                                    expression: Identifier(
-                                        IdentifierReference {
-                                            span: Span {
-                                                start: 134,
-                                                end: 139,
+                                    data: "\n  ",
+                                    raw: "\n  ",
+                                },
+                            ),
+                            RegularElement(
+                                RegularElement {
+                                    span: Span {
+                                        start: 197,
+                                        end: 365,
+                                    },
+                                    name: "button",
+                                    attributes: [
+                                        Attribute(
+                                            Attribute {
+                                                span: Span {
+                                                    start: 215,
+                                                    end: 238,
+                                                },
+                                                name: "style",
+                                                value: Sequence(
+                                                    [
+                                                        Text(
+                                                            Text {
+                                                                span: Span {
+                                                                    start: 222,
+                                                                    end: 237,
+                                                                },
+                                                                data: "background: red",
+                                                                raw: "background: red",
+                                                            },
+                                                        ),
+                                                    ],
+                                                ),
                                             },
-                                            name: "count",
-                                            reference_id: Cell {
-                                                value: None,
+                                        ),
+                                        Attribute(
+                                            Attribute {
+                                                span: Span {
+                                                    start: 249,
+                                                    end: 265,
+                                                },
+                                                name: "aria-label",
+                                                value: Sequence(
+                                                    [
+                                                        Text(
+                                                            Text {
+                                                                span: Span {
+                                                                    start: 261,
+                                                                    end: 264,
+                                                                },
+                                                                data: "red",
+                                                                raw: "red",
+                                                            },
+                                                        ),
+                                                    ],
+                                                ),
                                             },
-                                        },
-                                    ),
-                                    metadata: None,
+                                        ),
+                                        Attribute(
+                                            Attribute {
+                                                span: Span {
+                                                    start: 276,
+                                                    end: 309,
+                                                },
+                                                name: "aria-current",
+                                                value: ExpressionTag(
+                                                    ExpressionTag {
+                                                        span: Span {
+                                                            start: 289,
+                                                            end: 309,
+                                                        },
+                                                        expression: BinaryExpression(
+                                                            BinaryExpression {
+                                                                span: Span {
+                                                                    start: 290,
+                                                                    end: 308,
+                                                                },
+                                                                left: Identifier(
+                                                                    IdentifierReference {
+                                                                        span: Span {
+                                                                            start: 290,
+                                                                            end: 298,
+                                                                        },
+                                                                        name: "selected",
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        reference_id: Cell {
+                                                                            value: None,
+                                                                        },
+                                                                    },
+                                                                ),
+                                                                right: StringLiteral(
+                                                                    StringLiteral {
+                                                                        span: Span {
+                                                                            start: 303,
+                                                                            end: 308,
+                                                                        },
+                                                                        value: "red",
+                                                                        raw: Some(
+                                                                            "'red'",
+                                                                        ),
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        lone_surrogates: false,
+                                                                    },
+                                                                ),
+                                                                node_id: Cell {
+                                                                    value: NodeId(0),
+                                                                },
+                                                                operator: StrictEquality,
+                                                            },
+                                                        ),
+                                                    },
+                                                ),
+                                            },
+                                        ),
+                                        Attribute(
+                                            Attribute {
+                                                span: Span {
+                                                    start: 320,
+                                                    end: 352,
+                                                },
+                                                name: "onclick",
+                                                value: ExpressionTag(
+                                                    ExpressionTag {
+                                                        span: Span {
+                                                            start: 328,
+                                                            end: 352,
+                                                        },
+                                                        expression: ArrowFunctionExpression(
+                                                            ArrowFunctionExpression {
+                                                                span: Span {
+                                                                    start: 329,
+                                                                    end: 351,
+                                                                },
+                                                                type_parameters: None,
+                                                                params: FormalParameters {
+                                                                    span: Span {
+                                                                        start: 329,
+                                                                        end: 331,
+                                                                    },
+                                                                    items: Vec(
+                                                                        [],
+                                                                    ),
+                                                                    rest: None,
+                                                                    node_id: Cell {
+                                                                        value: NodeId(0),
+                                                                    },
+                                                                    kind: ArrowFormalParameters,
+                                                                },
+                                                                return_type: None,
+                                                                body: FunctionBody {
+                                                                    span: Span {
+                                                                        start: 335,
+                                                                        end: 351,
+                                                                    },
+                                                                    directives: Vec(
+                                                                        [],
+                                                                    ),
+                                                                    statements: Vec(
+                                                                        [
+                                                                            ExpressionStatement(
+                                                                                ExpressionStatement {
+                                                                                    span: Span {
+                                                                                        start: 335,
+                                                                                        end: 351,
+                                                                                    },
+                                                                                    expression: AssignmentExpression(
+                                                                                        AssignmentExpression {
+                                                                                            span: Span {
+                                                                                                start: 335,
+                                                                                                end: 351,
+                                                                                            },
+                                                                                            left: AssignmentTargetIdentifier(
+                                                                                                IdentifierReference {
+                                                                                                    span: Span {
+                                                                                                        start: 335,
+                                                                                                        end: 343,
+                                                                                                    },
+                                                                                                    name: "selected",
+                                                                                                    node_id: Cell {
+                                                                                                        value: NodeId(0),
+                                                                                                    },
+                                                                                                    reference_id: Cell {
+                                                                                                        value: None,
+                                                                                                    },
+                                                                                                },
+                                                                                            ),
+                                                                                            right: StringLiteral(
+                                                                                                StringLiteral {
+                                                                                                    span: Span {
+                                                                                                        start: 346,
+                                                                                                        end: 351,
+                                                                                                    },
+                                                                                                    value: "red",
+                                                                                                    raw: Some(
+                                                                                                        "'red'",
+                                                                                                    ),
+                                                                                                    node_id: Cell {
+                                                                                                        value: NodeId(0),
+                                                                                                    },
+                                                                                                    lone_surrogates: false,
+                                                                                                },
+                                                                                            ),
+                                                                                            node_id: Cell {
+                                                                                                value: NodeId(0),
+                                                                                            },
+                                                                                            operator: Assign,
+                                                                                        },
+                                                                                    ),
+                                                                                    node_id: Cell {
+                                                                                        value: NodeId(0),
+                                                                                    },
+                                                                                },
+                                                                            ),
+                                                                        ],
+                                                                    ),
+                                                                    node_id: Cell {
+                                                                        value: NodeId(0),
+                                                                    },
+                                                                },
+                                                                node_id: Cell {
+                                                                    value: NodeId(0),
+                                                                },
+                                                                scope_id: Cell {
+                                                                    value: None,
+                                                                },
+                                                                expression: true,
+                                                                async: false,
+                                                                pure: false,
+                                                                pife: false,
+                                                            },
+                                                        ),
+                                                    },
+                                                ),
+                                            },
+                                        ),
+                                    ],
+                                    fragment: Fragment {
+                                        nodes: [],
+                                        transparent: true,
+                                        dynamic: false,
+                                    },
                                 },
                             ),
                             Text(
                                 Text {
                                     span: Span {
-                                        start: 140,
-                                        end: 141,
+                                        start: 365,
+                                        end: 369,
+                                    },
+                                    data: "\n\n  ",
+                                    raw: "\n\n  ",
+                                },
+                            ),
+                            RegularElement(
+                                RegularElement {
+                                    span: Span {
+                                        start: 369,
+                                        end: 549,
+                                    },
+                                    name: "button",
+                                    attributes: [
+                                        Attribute(
+                                            Attribute {
+                                                span: Span {
+                                                    start: 387,
+                                                    end: 413,
+                                                },
+                                                name: "style",
+                                                value: Sequence(
+                                                    [
+                                                        Text(
+                                                            Text {
+                                                                span: Span {
+                                                                    start: 394,
+                                                                    end: 412,
+                                                                },
+                                                                data: "background: orange",
+                                                                raw: "background: orange",
+                                                            },
+                                                        ),
+                                                    ],
+                                                ),
+                                            },
+                                        ),
+                                        Attribute(
+                                            Attribute {
+                                                span: Span {
+                                                    start: 424,
+                                                    end: 443,
+                                                },
+                                                name: "aria-label",
+                                                value: Sequence(
+                                                    [
+                                                        Text(
+                                                            Text {
+                                                                span: Span {
+                                                                    start: 436,
+                                                                    end: 442,
+                                                                },
+                                                                data: "orange",
+                                                                raw: "orange",
+                                                            },
+                                                        ),
+                                                    ],
+                                                ),
+                                            },
+                                        ),
+                                        Attribute(
+                                            Attribute {
+                                                span: Span {
+                                                    start: 454,
+                                                    end: 490,
+                                                },
+                                                name: "aria-current",
+                                                value: ExpressionTag(
+                                                    ExpressionTag {
+                                                        span: Span {
+                                                            start: 467,
+                                                            end: 490,
+                                                        },
+                                                        expression: BinaryExpression(
+                                                            BinaryExpression {
+                                                                span: Span {
+                                                                    start: 468,
+                                                                    end: 489,
+                                                                },
+                                                                left: Identifier(
+                                                                    IdentifierReference {
+                                                                        span: Span {
+                                                                            start: 468,
+                                                                            end: 476,
+                                                                        },
+                                                                        name: "selected",
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        reference_id: Cell {
+                                                                            value: None,
+                                                                        },
+                                                                    },
+                                                                ),
+                                                                right: StringLiteral(
+                                                                    StringLiteral {
+                                                                        span: Span {
+                                                                            start: 481,
+                                                                            end: 489,
+                                                                        },
+                                                                        value: "orange",
+                                                                        raw: Some(
+                                                                            "'orange'",
+                                                                        ),
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        lone_surrogates: false,
+                                                                    },
+                                                                ),
+                                                                node_id: Cell {
+                                                                    value: NodeId(0),
+                                                                },
+                                                                operator: StrictEquality,
+                                                            },
+                                                        ),
+                                                    },
+                                                ),
+                                            },
+                                        ),
+                                        Attribute(
+                                            Attribute {
+                                                span: Span {
+                                                    start: 501,
+                                                    end: 536,
+                                                },
+                                                name: "onclick",
+                                                value: ExpressionTag(
+                                                    ExpressionTag {
+                                                        span: Span {
+                                                            start: 509,
+                                                            end: 536,
+                                                        },
+                                                        expression: ArrowFunctionExpression(
+                                                            ArrowFunctionExpression {
+                                                                span: Span {
+                                                                    start: 510,
+                                                                    end: 535,
+                                                                },
+                                                                type_parameters: None,
+                                                                params: FormalParameters {
+                                                                    span: Span {
+                                                                        start: 510,
+                                                                        end: 512,
+                                                                    },
+                                                                    items: Vec(
+                                                                        [],
+                                                                    ),
+                                                                    rest: None,
+                                                                    node_id: Cell {
+                                                                        value: NodeId(0),
+                                                                    },
+                                                                    kind: ArrowFormalParameters,
+                                                                },
+                                                                return_type: None,
+                                                                body: FunctionBody {
+                                                                    span: Span {
+                                                                        start: 516,
+                                                                        end: 535,
+                                                                    },
+                                                                    directives: Vec(
+                                                                        [],
+                                                                    ),
+                                                                    statements: Vec(
+                                                                        [
+                                                                            ExpressionStatement(
+                                                                                ExpressionStatement {
+                                                                                    span: Span {
+                                                                                        start: 516,
+                                                                                        end: 535,
+                                                                                    },
+                                                                                    expression: AssignmentExpression(
+                                                                                        AssignmentExpression {
+                                                                                            span: Span {
+                                                                                                start: 516,
+                                                                                                end: 535,
+                                                                                            },
+                                                                                            left: AssignmentTargetIdentifier(
+                                                                                                IdentifierReference {
+                                                                                                    span: Span {
+                                                                                                        start: 516,
+                                                                                                        end: 524,
+                                                                                                    },
+                                                                                                    name: "selected",
+                                                                                                    node_id: Cell {
+                                                                                                        value: NodeId(0),
+                                                                                                    },
+                                                                                                    reference_id: Cell {
+                                                                                                        value: None,
+                                                                                                    },
+                                                                                                },
+                                                                                            ),
+                                                                                            right: StringLiteral(
+                                                                                                StringLiteral {
+                                                                                                    span: Span {
+                                                                                                        start: 527,
+                                                                                                        end: 535,
+                                                                                                    },
+                                                                                                    value: "orange",
+                                                                                                    raw: Some(
+                                                                                                        "'orange'",
+                                                                                                    ),
+                                                                                                    node_id: Cell {
+                                                                                                        value: NodeId(0),
+                                                                                                    },
+                                                                                                    lone_surrogates: false,
+                                                                                                },
+                                                                                            ),
+                                                                                            node_id: Cell {
+                                                                                                value: NodeId(0),
+                                                                                            },
+                                                                                            operator: Assign,
+                                                                                        },
+                                                                                    ),
+                                                                                    node_id: Cell {
+                                                                                        value: NodeId(0),
+                                                                                    },
+                                                                                },
+                                                                            ),
+                                                                        ],
+                                                                    ),
+                                                                    node_id: Cell {
+                                                                        value: NodeId(0),
+                                                                    },
+                                                                },
+                                                                node_id: Cell {
+                                                                    value: NodeId(0),
+                                                                },
+                                                                scope_id: Cell {
+                                                                    value: None,
+                                                                },
+                                                                expression: true,
+                                                                async: false,
+                                                                pure: false,
+                                                                pife: false,
+                                                            },
+                                                        ),
+                                                    },
+                                                ),
+                                            },
+                                        ),
+                                    ],
+                                    fragment: Fragment {
+                                        nodes: [],
+                                        transparent: true,
+                                        dynamic: false,
+                                    },
+                                },
+                            ),
+                            Text(
+                                Text {
+                                    span: Span {
+                                        start: 549,
+                                        end: 553,
+                                    },
+                                    data: "\n\n  ",
+                                    raw: "\n\n  ",
+                                },
+                            ),
+                            RegularElement(
+                                RegularElement {
+                                    span: Span {
+                                        start: 553,
+                                        end: 733,
+                                    },
+                                    name: "button",
+                                    attributes: [
+                                        Attribute(
+                                            Attribute {
+                                                span: Span {
+                                                    start: 571,
+                                                    end: 597,
+                                                },
+                                                name: "style",
+                                                value: Sequence(
+                                                    [
+                                                        Text(
+                                                            Text {
+                                                                span: Span {
+                                                                    start: 578,
+                                                                    end: 596,
+                                                                },
+                                                                data: "background: yellow",
+                                                                raw: "background: yellow",
+                                                            },
+                                                        ),
+                                                    ],
+                                                ),
+                                            },
+                                        ),
+                                        Attribute(
+                                            Attribute {
+                                                span: Span {
+                                                    start: 608,
+                                                    end: 627,
+                                                },
+                                                name: "aria-label",
+                                                value: Sequence(
+                                                    [
+                                                        Text(
+                                                            Text {
+                                                                span: Span {
+                                                                    start: 620,
+                                                                    end: 626,
+                                                                },
+                                                                data: "yellow",
+                                                                raw: "yellow",
+                                                            },
+                                                        ),
+                                                    ],
+                                                ),
+                                            },
+                                        ),
+                                        Attribute(
+                                            Attribute {
+                                                span: Span {
+                                                    start: 638,
+                                                    end: 674,
+                                                },
+                                                name: "aria-current",
+                                                value: ExpressionTag(
+                                                    ExpressionTag {
+                                                        span: Span {
+                                                            start: 651,
+                                                            end: 674,
+                                                        },
+                                                        expression: BinaryExpression(
+                                                            BinaryExpression {
+                                                                span: Span {
+                                                                    start: 652,
+                                                                    end: 673,
+                                                                },
+                                                                left: Identifier(
+                                                                    IdentifierReference {
+                                                                        span: Span {
+                                                                            start: 652,
+                                                                            end: 660,
+                                                                        },
+                                                                        name: "selected",
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        reference_id: Cell {
+                                                                            value: None,
+                                                                        },
+                                                                    },
+                                                                ),
+                                                                right: StringLiteral(
+                                                                    StringLiteral {
+                                                                        span: Span {
+                                                                            start: 665,
+                                                                            end: 673,
+                                                                        },
+                                                                        value: "yellow",
+                                                                        raw: Some(
+                                                                            "'yellow'",
+                                                                        ),
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        lone_surrogates: false,
+                                                                    },
+                                                                ),
+                                                                node_id: Cell {
+                                                                    value: NodeId(0),
+                                                                },
+                                                                operator: StrictEquality,
+                                                            },
+                                                        ),
+                                                    },
+                                                ),
+                                            },
+                                        ),
+                                        Attribute(
+                                            Attribute {
+                                                span: Span {
+                                                    start: 685,
+                                                    end: 720,
+                                                },
+                                                name: "onclick",
+                                                value: ExpressionTag(
+                                                    ExpressionTag {
+                                                        span: Span {
+                                                            start: 693,
+                                                            end: 720,
+                                                        },
+                                                        expression: ArrowFunctionExpression(
+                                                            ArrowFunctionExpression {
+                                                                span: Span {
+                                                                    start: 694,
+                                                                    end: 719,
+                                                                },
+                                                                type_parameters: None,
+                                                                params: FormalParameters {
+                                                                    span: Span {
+                                                                        start: 694,
+                                                                        end: 696,
+                                                                    },
+                                                                    items: Vec(
+                                                                        [],
+                                                                    ),
+                                                                    rest: None,
+                                                                    node_id: Cell {
+                                                                        value: NodeId(0),
+                                                                    },
+                                                                    kind: ArrowFormalParameters,
+                                                                },
+                                                                return_type: None,
+                                                                body: FunctionBody {
+                                                                    span: Span {
+                                                                        start: 700,
+                                                                        end: 719,
+                                                                    },
+                                                                    directives: Vec(
+                                                                        [],
+                                                                    ),
+                                                                    statements: Vec(
+                                                                        [
+                                                                            ExpressionStatement(
+                                                                                ExpressionStatement {
+                                                                                    span: Span {
+                                                                                        start: 700,
+                                                                                        end: 719,
+                                                                                    },
+                                                                                    expression: AssignmentExpression(
+                                                                                        AssignmentExpression {
+                                                                                            span: Span {
+                                                                                                start: 700,
+                                                                                                end: 719,
+                                                                                            },
+                                                                                            left: AssignmentTargetIdentifier(
+                                                                                                IdentifierReference {
+                                                                                                    span: Span {
+                                                                                                        start: 700,
+                                                                                                        end: 708,
+                                                                                                    },
+                                                                                                    name: "selected",
+                                                                                                    node_id: Cell {
+                                                                                                        value: NodeId(0),
+                                                                                                    },
+                                                                                                    reference_id: Cell {
+                                                                                                        value: None,
+                                                                                                    },
+                                                                                                },
+                                                                                            ),
+                                                                                            right: StringLiteral(
+                                                                                                StringLiteral {
+                                                                                                    span: Span {
+                                                                                                        start: 711,
+                                                                                                        end: 719,
+                                                                                                    },
+                                                                                                    value: "yellow",
+                                                                                                    raw: Some(
+                                                                                                        "'yellow'",
+                                                                                                    ),
+                                                                                                    node_id: Cell {
+                                                                                                        value: NodeId(0),
+                                                                                                    },
+                                                                                                    lone_surrogates: false,
+                                                                                                },
+                                                                                            ),
+                                                                                            node_id: Cell {
+                                                                                                value: NodeId(0),
+                                                                                            },
+                                                                                            operator: Assign,
+                                                                                        },
+                                                                                    ),
+                                                                                    node_id: Cell {
+                                                                                        value: NodeId(0),
+                                                                                    },
+                                                                                },
+                                                                            ),
+                                                                        ],
+                                                                    ),
+                                                                    node_id: Cell {
+                                                                        value: NodeId(0),
+                                                                    },
+                                                                },
+                                                                node_id: Cell {
+                                                                    value: NodeId(0),
+                                                                },
+                                                                scope_id: Cell {
+                                                                    value: None,
+                                                                },
+                                                                expression: true,
+                                                                async: false,
+                                                                pure: false,
+                                                                pife: false,
+                                                            },
+                                                        ),
+                                                    },
+                                                ),
+                                            },
+                                        ),
+                                    ],
+                                    fragment: Fragment {
+                                        nodes: [],
+                                        transparent: true,
+                                        dynamic: false,
+                                    },
+                                },
+                            ),
+                            Text(
+                                Text {
+                                    span: Span {
+                                        start: 733,
+                                        end: 737,
+                                    },
+                                    data: "\n\n  ",
+                                    raw: "\n\n  ",
+                                },
+                            ),
+                            Comment(
+                                Comment {
+                                    span: Span {
+                                        start: 737,
+                                        end: 778,
+                                    },
+                                    data: " TODO add the rest of the colours ",
+                                },
+                            ),
+                            Text(
+                                Text {
+                                    span: Span {
+                                        start: 778,
+                                        end: 781,
+                                    },
+                                    data: "\n  ",
+                                    raw: "\n  ",
+                                },
+                            ),
+                            RegularElement(
+                                RegularElement {
+                                    span: Span {
+                                        start: 781,
+                                        end: 798,
+                                    },
+                                    name: "button",
+                                    attributes: [],
+                                    fragment: Fragment {
+                                        nodes: [],
+                                        transparent: true,
+                                        dynamic: false,
+                                    },
+                                },
+                            ),
+                            Text(
+                                Text {
+                                    span: Span {
+                                        start: 798,
+                                        end: 801,
+                                    },
+                                    data: "\n  ",
+                                    raw: "\n  ",
+                                },
+                            ),
+                            RegularElement(
+                                RegularElement {
+                                    span: Span {
+                                        start: 801,
+                                        end: 818,
+                                    },
+                                    name: "button",
+                                    attributes: [],
+                                    fragment: Fragment {
+                                        nodes: [],
+                                        transparent: true,
+                                        dynamic: false,
+                                    },
+                                },
+                            ),
+                            Text(
+                                Text {
+                                    span: Span {
+                                        start: 818,
+                                        end: 821,
+                                    },
+                                    data: "\n  ",
+                                    raw: "\n  ",
+                                },
+                            ),
+                            RegularElement(
+                                RegularElement {
+                                    span: Span {
+                                        start: 821,
+                                        end: 838,
+                                    },
+                                    name: "button",
+                                    attributes: [],
+                                    fragment: Fragment {
+                                        nodes: [],
+                                        transparent: true,
+                                        dynamic: false,
+                                    },
+                                },
+                            ),
+                            Text(
+                                Text {
+                                    span: Span {
+                                        start: 838,
+                                        end: 841,
+                                    },
+                                    data: "\n  ",
+                                    raw: "\n  ",
+                                },
+                            ),
+                            RegularElement(
+                                RegularElement {
+                                    span: Span {
+                                        start: 841,
+                                        end: 858,
+                                    },
+                                    name: "button",
+                                    attributes: [],
+                                    fragment: Fragment {
+                                        nodes: [],
+                                        transparent: true,
+                                        dynamic: false,
+                                    },
+                                },
+                            ),
+                            Text(
+                                Text {
+                                    span: Span {
+                                        start: 858,
+                                        end: 859,
                                     },
                                     data: "\n",
                                     raw: "\n",
@@ -97,27 +1001,466 @@ Root {
                         transparent: true,
                         dynamic: false,
                     },
-                    metadata: None,
+                },
+            ),
+            Text(
+                Text {
+                    span: Span {
+                        start: 865,
+                        end: 867,
+                    },
+                    data: "\n\n",
+                    raw: "\n\n",
+                },
+            ),
+            Text(
+                Text {
+                    span: Span {
+                        start: 1483,
+                        end: 1484,
+                    },
+                    data: "\n",
+                    raw: "\n",
                 },
             ),
         ],
         transparent: false,
         dynamic: false,
     },
-    css: None,
+    css: Some(
+        StyleSheet {
+            span: Span {
+                start: 867,
+                end: 1483,
+            },
+            attributes: [],
+            children: [
+                Rule(
+                    CssRule {
+                        span: Span {
+                            start: 877,
+                            end: 956,
+                        },
+                        prelude: SelectorList {
+                            span: Span {
+                                start: 877,
+                                end: 879,
+                            },
+                            children: [
+                                ComplexSelector {
+                                    span: Span {
+                                        start: 877,
+                                        end: 879,
+                                    },
+                                    children: [
+                                        RelativeSelector {
+                                            span: Span {
+                                                start: 877,
+                                                end: 879,
+                                            },
+                                            combinator: None,
+                                            selectors: [
+                                                TypeSelector(
+                                                    TypeSelector {
+                                                        span: Span {
+                                                            start: 877,
+                                                            end: 879,
+                                                        },
+                                                        name: "h1",
+                                                    },
+                                                ),
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        block: CssBlock {
+                            span: Span {
+                                start: 880,
+                                end: 956,
+                            },
+                            children: [
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 886,
+                                            end: 901,
+                                        },
+                                        property: "font-size",
+                                        value: "2rem",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 907,
+                                            end: 923,
+                                        },
+                                        property: "font-weight",
+                                        value: "700",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 929,
+                                            end: 951,
+                                        },
+                                        property: "transition",
+                                        value: "color 0.2s",
+                                    },
+                                ),
+                            ],
+                        },
+                    },
+                ),
+                Rule(
+                    CssRule {
+                        span: Span {
+                            start: 960,
+                            end: 1072,
+                        },
+                        prelude: SelectorList {
+                            span: Span {
+                                start: 960,
+                                end: 963,
+                            },
+                            children: [
+                                ComplexSelector {
+                                    span: Span {
+                                        start: 960,
+                                        end: 963,
+                                    },
+                                    children: [
+                                        RelativeSelector {
+                                            span: Span {
+                                                start: 960,
+                                                end: 963,
+                                            },
+                                            combinator: None,
+                                            selectors: [
+                                                TypeSelector(
+                                                    TypeSelector {
+                                                        span: Span {
+                                                            start: 960,
+                                                            end: 963,
+                                                        },
+                                                        name: "div",
+                                                    },
+                                                ),
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        block: CssBlock {
+                            span: Span {
+                                start: 964,
+                                end: 1072,
+                            },
+                            children: [
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 970,
+                                            end: 983,
+                                        },
+                                        property: "display",
+                                        value: "grid",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 989,
+                                            end: 1026,
+                                        },
+                                        property: "grid-template-columns",
+                                        value: "repeat(7, 1fr)",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1032,
+                                            end: 1045,
+                                        },
+                                        property: "grid-gap",
+                                        value: "5px",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1051,
+                                            end: 1067,
+                                        },
+                                        property: "max-width",
+                                        value: "400px",
+                                    },
+                                ),
+                            ],
+                        },
+                    },
+                ),
+                Rule(
+                    CssRule {
+                        span: Span {
+                            start: 1076,
+                            end: 1347,
+                        },
+                        prelude: SelectorList {
+                            span: Span {
+                                start: 1076,
+                                end: 1082,
+                            },
+                            children: [
+                                ComplexSelector {
+                                    span: Span {
+                                        start: 1076,
+                                        end: 1082,
+                                    },
+                                    children: [
+                                        RelativeSelector {
+                                            span: Span {
+                                                start: 1076,
+                                                end: 1082,
+                                            },
+                                            combinator: None,
+                                            selectors: [
+                                                TypeSelector(
+                                                    TypeSelector {
+                                                        span: Span {
+                                                            start: 1076,
+                                                            end: 1082,
+                                                        },
+                                                        name: "button",
+                                                    },
+                                                ),
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        block: CssBlock {
+                            span: Span {
+                                start: 1083,
+                                end: 1347,
+                            },
+                            children: [
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1089,
+                                            end: 1104,
+                                        },
+                                        property: "aspect-ratio",
+                                        value: "1",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1110,
+                                            end: 1128,
+                                        },
+                                        property: "border-radius",
+                                        value: "50%",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1134,
+                                            end: 1164,
+                                        },
+                                        property: "background",
+                                        value: "var(--color, #fff)",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1170,
+                                            end: 1201,
+                                        },
+                                        property: "transform",
+                                        value: "translate(-2px,-2px)",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1207,
+                                            end: 1255,
+                                        },
+                                        property: "filter",
+                                        value: "drop-shadow(2px 2px 3px rgba(0,0,0,0.2))",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1261,
+                                            end: 1281,
+                                        },
+                                        property: "transition",
+                                        value: "all 0.1s",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1287,
+                                            end: 1299,
+                                        },
+                                        property: "color",
+                                        value: "black",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1305,
+                                            end: 1321,
+                                        },
+                                        property: "font-weight",
+                                        value: "700",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1327,
+                                            end: 1342,
+                                        },
+                                        property: "font-size",
+                                        value: "2rem",
+                                    },
+                                ),
+                            ],
+                        },
+                    },
+                ),
+                Rule(
+                    CssRule {
+                        span: Span {
+                            start: 1351,
+                            end: 1474,
+                        },
+                        prelude: SelectorList {
+                            span: Span {
+                                start: 1351,
+                                end: 1378,
+                            },
+                            children: [
+                                ComplexSelector {
+                                    span: Span {
+                                        start: 1351,
+                                        end: 1378,
+                                    },
+                                    children: [
+                                        RelativeSelector {
+                                            span: Span {
+                                                start: 1351,
+                                                end: 1378,
+                                            },
+                                            combinator: None,
+                                            selectors: [
+                                                TypeSelector(
+                                                    TypeSelector {
+                                                        span: Span {
+                                                            start: 1351,
+                                                            end: 1357,
+                                                        },
+                                                        name: "button",
+                                                    },
+                                                ),
+                                                AttributeSelector(
+                                                    AttributeSelector {
+                                                        span: Span {
+                                                            start: 1357,
+                                                            end: 1378,
+                                                        },
+                                                        name: "aria-current",
+                                                        matcher: Some(
+                                                            "=",
+                                                        ),
+                                                        value: Some(
+                                                            "true",
+                                                        ),
+                                                        flags: None,
+                                                    },
+                                                ),
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        block: CssBlock {
+                            span: Span {
+                                start: 1379,
+                                end: 1474,
+                            },
+                            children: [
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1385,
+                                            end: 1400,
+                                        },
+                                        property: "transform",
+                                        value: "none",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1406,
+                                            end: 1418,
+                                        },
+                                        property: "filter",
+                                        value: "none",
+                                    },
+                                ),
+                                Declaration(
+                                    CssDeclaration {
+                                        span: Span {
+                                            start: 1424,
+                                            end: 1469,
+                                        },
+                                        property: "box-shadow",
+                                        value: "inset 3px 3px 4px rgba(0,0,0,0.2)",
+                                    },
+                                ),
+                            ],
+                        },
+                    },
+                ),
+            ],
+            content_start: 874,
+            content_end: 1475,
+            content_styles: "\n  h1 {\n    font-size: 2rem;\n    font-weight: 700;\n    transition: color 0.2s;\n  }\n\n  div {\n    display: grid;\n    grid-template-columns: repeat(7, 1fr);\n    grid-gap: 5px;\n    max-width: 400px;\n  }\n\n  button {\n    aspect-ratio: 1;\n    border-radius: 50%;\n    background: var(--color, #fff);\n    transform: translate(-2px,-2px);\n    filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.2));\n    transition: all 0.1s;\n    color: black;\n    font-weight: 700;\n    font-size: 2rem;\n  }\n\n  button[aria-current=\"true\"] {\n    transform: none;\n    filter: none;\n    box-shadow: inset 3px 3px 4px rgba(0,0,0,0.2);\n  }\n",
+            content_comment: None,
+        },
+    ),
     instance: Some(
         Script {
             span: Span {
                 start: 0,
-                end: 91,
+                end: 137,
             },
             context: Default,
             content: Program {
                 span: Span {
                     start: 0,
-                    end: 82,
+                    end: 128,
                 },
-                source_text: "                  \n  let count = 0;\n\n  function increment() {\n    count += 1;\n  }\n",
+                source_text: "        \n  const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'];\n  let selected = $state(colors[0]);\n",
                 comments: Vec(
                     [],
                 ),
@@ -130,23 +1473,26 @@ Root {
                         VariableDeclaration(
                             VariableDeclaration {
                                 span: Span {
-                                    start: 21,
-                                    end: 35,
+                                    start: 11,
+                                    end: 91,
                                 },
                                 declarations: Vec(
                                     [
                                         VariableDeclarator {
                                             span: Span {
-                                                start: 25,
-                                                end: 34,
+                                                start: 17,
+                                                end: 90,
                                             },
                                             id: BindingIdentifier(
                                                 BindingIdentifier {
                                                     span: Span {
-                                                        start: 25,
-                                                        end: 30,
+                                                        start: 17,
+                                                        end: 23,
                                                     },
-                                                    name: "count",
+                                                    name: "colors",
+                                                    node_id: Cell {
+                                                        value: NodeId(0),
+                                                    },
                                                     symbol_id: Cell {
                                                         value: None,
                                                     },
@@ -154,131 +1500,276 @@ Root {
                                             ),
                                             type_annotation: None,
                                             init: Some(
-                                                NumericLiteral(
-                                                    NumericLiteral {
+                                                ArrayExpression(
+                                                    ArrayExpression {
                                                         span: Span {
-                                                            start: 33,
-                                                            end: 34,
+                                                            start: 26,
+                                                            end: 90,
                                                         },
-                                                        value: 0.0,
-                                                        raw: Some(
-                                                            "0",
+                                                        elements: Vec(
+                                                            [
+                                                                StringLiteral(
+                                                                    StringLiteral {
+                                                                        span: Span {
+                                                                            start: 27,
+                                                                            end: 32,
+                                                                        },
+                                                                        value: "red",
+                                                                        raw: Some(
+                                                                            "'red'",
+                                                                        ),
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        lone_surrogates: false,
+                                                                    },
+                                                                ),
+                                                                StringLiteral(
+                                                                    StringLiteral {
+                                                                        span: Span {
+                                                                            start: 34,
+                                                                            end: 42,
+                                                                        },
+                                                                        value: "orange",
+                                                                        raw: Some(
+                                                                            "'orange'",
+                                                                        ),
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        lone_surrogates: false,
+                                                                    },
+                                                                ),
+                                                                StringLiteral(
+                                                                    StringLiteral {
+                                                                        span: Span {
+                                                                            start: 44,
+                                                                            end: 52,
+                                                                        },
+                                                                        value: "yellow",
+                                                                        raw: Some(
+                                                                            "'yellow'",
+                                                                        ),
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        lone_surrogates: false,
+                                                                    },
+                                                                ),
+                                                                StringLiteral(
+                                                                    StringLiteral {
+                                                                        span: Span {
+                                                                            start: 54,
+                                                                            end: 61,
+                                                                        },
+                                                                        value: "green",
+                                                                        raw: Some(
+                                                                            "'green'",
+                                                                        ),
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        lone_surrogates: false,
+                                                                    },
+                                                                ),
+                                                                StringLiteral(
+                                                                    StringLiteral {
+                                                                        span: Span {
+                                                                            start: 63,
+                                                                            end: 69,
+                                                                        },
+                                                                        value: "blue",
+                                                                        raw: Some(
+                                                                            "'blue'",
+                                                                        ),
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        lone_surrogates: false,
+                                                                    },
+                                                                ),
+                                                                StringLiteral(
+                                                                    StringLiteral {
+                                                                        span: Span {
+                                                                            start: 71,
+                                                                            end: 79,
+                                                                        },
+                                                                        value: "indigo",
+                                                                        raw: Some(
+                                                                            "'indigo'",
+                                                                        ),
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        lone_surrogates: false,
+                                                                    },
+                                                                ),
+                                                                StringLiteral(
+                                                                    StringLiteral {
+                                                                        span: Span {
+                                                                            start: 81,
+                                                                            end: 89,
+                                                                        },
+                                                                        value: "violet",
+                                                                        raw: Some(
+                                                                            "'violet'",
+                                                                        ),
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        lone_surrogates: false,
+                                                                    },
+                                                                ),
+                                                            ],
                                                         ),
-                                                        base: Decimal,
+                                                        node_id: Cell {
+                                                            value: NodeId(0),
+                                                        },
                                                     },
                                                 ),
                                             ),
+                                            node_id: Cell {
+                                                value: NodeId(0),
+                                            },
+                                            kind: Const,
+                                            definite: false,
+                                        },
+                                    ],
+                                ),
+                                node_id: Cell {
+                                    value: NodeId(0),
+                                },
+                                kind: Const,
+                                declare: false,
+                            },
+                        ),
+                        VariableDeclaration(
+                            VariableDeclaration {
+                                span: Span {
+                                    start: 94,
+                                    end: 127,
+                                },
+                                declarations: Vec(
+                                    [
+                                        VariableDeclarator {
+                                            span: Span {
+                                                start: 98,
+                                                end: 126,
+                                            },
+                                            id: BindingIdentifier(
+                                                BindingIdentifier {
+                                                    span: Span {
+                                                        start: 98,
+                                                        end: 106,
+                                                    },
+                                                    name: "selected",
+                                                    node_id: Cell {
+                                                        value: NodeId(0),
+                                                    },
+                                                    symbol_id: Cell {
+                                                        value: None,
+                                                    },
+                                                },
+                                            ),
+                                            type_annotation: None,
+                                            init: Some(
+                                                CallExpression(
+                                                    CallExpression {
+                                                        span: Span {
+                                                            start: 109,
+                                                            end: 126,
+                                                        },
+                                                        callee: Identifier(
+                                                            IdentifierReference {
+                                                                span: Span {
+                                                                    start: 109,
+                                                                    end: 115,
+                                                                },
+                                                                name: "$state",
+                                                                node_id: Cell {
+                                                                    value: NodeId(0),
+                                                                },
+                                                                reference_id: Cell {
+                                                                    value: None,
+                                                                },
+                                                            },
+                                                        ),
+                                                        type_arguments: None,
+                                                        arguments: Vec(
+                                                            [
+                                                                ComputedMemberExpression(
+                                                                    ComputedMemberExpression {
+                                                                        span: Span {
+                                                                            start: 116,
+                                                                            end: 125,
+                                                                        },
+                                                                        object: Identifier(
+                                                                            IdentifierReference {
+                                                                                span: Span {
+                                                                                    start: 116,
+                                                                                    end: 122,
+                                                                                },
+                                                                                name: "colors",
+                                                                                node_id: Cell {
+                                                                                    value: NodeId(0),
+                                                                                },
+                                                                                reference_id: Cell {
+                                                                                    value: None,
+                                                                                },
+                                                                            },
+                                                                        ),
+                                                                        expression: NumericLiteral(
+                                                                            NumericLiteral {
+                                                                                span: Span {
+                                                                                    start: 123,
+                                                                                    end: 124,
+                                                                                },
+                                                                                value: 0.0,
+                                                                                raw: Some(
+                                                                                    "0",
+                                                                                ),
+                                                                                node_id: Cell {
+                                                                                    value: NodeId(0),
+                                                                                },
+                                                                                base: Decimal,
+                                                                            },
+                                                                        ),
+                                                                        node_id: Cell {
+                                                                            value: NodeId(0),
+                                                                        },
+                                                                        optional: false,
+                                                                    },
+                                                                ),
+                                                            ],
+                                                        ),
+                                                        node_id: Cell {
+                                                            value: NodeId(0),
+                                                        },
+                                                        optional: false,
+                                                        pure: false,
+                                                    },
+                                                ),
+                                            ),
+                                            node_id: Cell {
+                                                value: NodeId(0),
+                                            },
                                             kind: Let,
                                             definite: false,
                                         },
                                     ],
                                 ),
+                                node_id: Cell {
+                                    value: NodeId(0),
+                                },
                                 kind: Let,
                                 declare: false,
                             },
                         ),
-                        FunctionDeclaration(
-                            Function {
-                                span: Span {
-                                    start: 39,
-                                    end: 81,
-                                },
-                                id: Some(
-                                    BindingIdentifier {
-                                        span: Span {
-                                            start: 48,
-                                            end: 57,
-                                        },
-                                        name: "increment",
-                                        symbol_id: Cell {
-                                            value: None,
-                                        },
-                                    },
-                                ),
-                                type_parameters: None,
-                                this_param: None,
-                                params: FormalParameters {
-                                    span: Span {
-                                        start: 57,
-                                        end: 59,
-                                    },
-                                    items: Vec(
-                                        [],
-                                    ),
-                                    rest: None,
-                                    kind: FormalParameter,
-                                },
-                                return_type: None,
-                                body: Some(
-                                    FunctionBody {
-                                        span: Span {
-                                            start: 60,
-                                            end: 81,
-                                        },
-                                        directives: Vec(
-                                            [],
-                                        ),
-                                        statements: Vec(
-                                            [
-                                                ExpressionStatement(
-                                                    ExpressionStatement {
-                                                        span: Span {
-                                                            start: 66,
-                                                            end: 77,
-                                                        },
-                                                        expression: AssignmentExpression(
-                                                            AssignmentExpression {
-                                                                span: Span {
-                                                                    start: 66,
-                                                                    end: 76,
-                                                                },
-                                                                left: AssignmentTargetIdentifier(
-                                                                    IdentifierReference {
-                                                                        span: Span {
-                                                                            start: 66,
-                                                                            end: 71,
-                                                                        },
-                                                                        name: "count",
-                                                                        reference_id: Cell {
-                                                                            value: None,
-                                                                        },
-                                                                    },
-                                                                ),
-                                                                right: NumericLiteral(
-                                                                    NumericLiteral {
-                                                                        span: Span {
-                                                                            start: 75,
-                                                                            end: 76,
-                                                                        },
-                                                                        value: 1.0,
-                                                                        raw: Some(
-                                                                            "1",
-                                                                        ),
-                                                                        base: Decimal,
-                                                                    },
-                                                                ),
-                                                                operator: Addition,
-                                                            },
-                                                        ),
-                                                    },
-                                                ),
-                                            ],
-                                        ),
-                                    },
-                                ),
-                                scope_id: Cell {
-                                    value: None,
-                                },
-                                type: FunctionDeclaration,
-                                generator: false,
-                                async: false,
-                                declare: false,
-                                pure: false,
-                                pife: false,
-                            },
-                        ),
                     ],
                 ),
+                node_id: Cell {
+                    value: NodeId(0),
+                },
                 scope_id: Cell {
                     value: None,
                 },
@@ -286,32 +1777,10 @@ Root {
                     language: TypeScript,
                     module_kind: Module,
                     variant: Standard,
+                    extension: None,
                 },
             },
-            attributes: [
-                Attribute {
-                    span: Span {
-                        start: 8,
-                        end: 17,
-                    },
-                    name: "lang",
-                    value: Sequence(
-                        [
-                            Text(
-                                Text {
-                                    span: Span {
-                                        start: 14,
-                                        end: 17,
-                                    },
-                                    data: "ts",
-                                    raw: "ts",
-                                },
-                            ),
-                        ],
-                    ),
-                    metadata: None,
-                },
-            ],
+            attributes: [],
         },
     ),
     module: None,

@@ -9,6 +9,7 @@ use winnow::prelude::*;
 use winnow::stream::Location as StreamLocation;
 use winnow::token::{literal, take_until};
 
+use crate::error::{ErrorKind, ParseError};
 use crate::input::Input;
 use crate::parser::utils::helpers::skip_whitespace;
 
@@ -27,7 +28,7 @@ pub fn read_script<'a>(
 
     let end = input.previous_token_end();
 
-    let context = detect_script_context(&attributes);
+    let context = detect_script_context(input, &attributes);
 
     let allocator = input.state.allocator;
     let template = input.state.template;
@@ -64,21 +65,60 @@ pub fn read_script<'a>(
     })
 }
 
-fn detect_script_context(attributes: &[Attribute<'_>]) -> ScriptContext {
+fn detect_script_context(input: &mut Input<'_>, attributes: &[Attribute<'_>]) -> ScriptContext {
+    const RESERVED_ATTRIBUTES: &[&str] = &["server", "client", "worker", "test", "default"];
+    const ALLOWED_ATTRIBUTES: &[&str] = &["context", "generics", "lang", "module"];
+
+    let mut context = ScriptContext::Default;
+
     for attr in attributes {
-        // <script module> — boolean attribute
-        if attr.name == "module" {
-            return ScriptContext::Module;
+        if RESERVED_ATTRIBUTES.contains(&attr.name) {
+            input.state.errors.push(ParseError::new(
+                ErrorKind::InvalidScript,
+                attr.span,
+                format!("Reserved <script> attribute is not allowed: {}", attr.name),
+            ));
         }
-        // <script context="module"> — legacy syntax
-        if attr.name == "context"
-            && let AttributeValue::Sequence(seq) = &attr.value
-            && seq.len() == 1
-            && let Some(TextOrExpressionTag::Text(text)) = seq.first()
-            && text.data == "module"
-        {
-            return ScriptContext::Module;
+
+        if !ALLOWED_ATTRIBUTES.contains(&attr.name) {
+            // Reference handles this as a warning; warning channel is not implemented yet.
+            continue;
+        }
+
+        if attr.name == "module" {
+            if !matches!(attr.value, AttributeValue::True) {
+                input.state.errors.push(ParseError::new(
+                    ErrorKind::InvalidScript,
+                    attr.span,
+                    "The `module` attribute on <script> must be boolean (no value)",
+                ));
+            } else {
+                context = ScriptContext::Module;
+            }
+            continue;
+        }
+
+        if attr.name == "context" {
+            match &attr.value {
+                AttributeValue::Sequence(seq)
+                    if seq.len() == 1
+                        && matches!(
+                            seq.first(),
+                            Some(TextOrExpressionTag::Text(text)) if text.data == "module"
+                        ) =>
+                {
+                    context = ScriptContext::Module;
+                }
+                _ => {
+                    input.state.errors.push(ParseError::new(
+                        ErrorKind::InvalidScript,
+                        attr.span,
+                        "The `context` attribute on <script> must be \"module\"",
+                    ));
+                }
+            }
         }
     }
-    ScriptContext::Default
+
+    context
 }

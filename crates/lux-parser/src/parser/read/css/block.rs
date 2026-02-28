@@ -2,8 +2,8 @@ use lux_ast::css::stylesheet::{CssBlock, CssBlockChild, CssDeclaration};
 use winnow::Result;
 use winnow::error::ContextError;
 
+use super::parser::CssParser;
 use super::rule::{parse_css_atrule, parse_css_rule};
-use super::value::CssParser;
 
 pub fn parse_css_block<'a>(p: &mut CssParser<'a>) -> Result<CssBlock<'a>> {
     let start = p.index;

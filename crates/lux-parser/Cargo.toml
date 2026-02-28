@@ -13,6 +13,7 @@ lux-ast = { workspace = true }
 lux-utils = { workspace = true }
 winnow = { workspace = true }
 oxc_parser = { workspace = true }
+regex = {workspace = true}
 oxc_allocator = { workspace = true }
 oxc_ast = { workspace = true }
 oxc_ast_visit = { workspace = true }

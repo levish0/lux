@@ -6,6 +6,7 @@ use winnow::prelude::*;
 use winnow::stream::Location as StreamLocation;
 use winnow::token::{literal, take_until};
 
+use crate::error::{ErrorKind, ParseError};
 use crate::input::Input;
 use crate::parser::utils::helpers::skip_whitespace;
 
@@ -26,7 +27,17 @@ pub fn read_style<'a>(
 
     let end = input.previous_token_end();
 
-    let children = super::css::parse_stylesheet(content, content_start as u32).unwrap_or_default();
+    let children = match super::css::parse_stylesheet(content, content_start as u32) {
+        Ok(children) => children,
+        Err(err) => {
+            input.state.errors.push(ParseError::new(
+                ErrorKind::InvalidCss,
+                Span::new(content_start as u32, content_end as u32),
+                format!("CSS parse error: {err}"),
+            ));
+            Vec::new()
+        }
+    };
 
     Ok(StyleSheet {
         span: Span::new(start as u32, end as u32),

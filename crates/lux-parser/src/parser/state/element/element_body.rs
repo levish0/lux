@@ -49,9 +49,7 @@ pub fn parse_element_body<'a>(input: &mut Input<'a>, name: &str) -> Result<(Frag
             dynamic: false,
         }
     } else {
-        input.state.depth += 1;
         let f = parse_fragment_until(input, name)?;
-        input.state.depth -= 1;
 
         // Graceful closing: consume </name> only if it matches
         let remaining: &str = &input.input;

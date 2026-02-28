@@ -28,6 +28,7 @@ pub fn parse_snippet_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fr
     let name_end = input.previous_token_end();
 
     let expression = oxc_ast::ast::IdentifierReference {
+        node_id: std::cell::Cell::new(oxc_syntax::node::NodeId::DUMMY),
         span: oxc_span::Span::new(name_start as u32, name_end as u32),
         name: oxc_span::Atom::from(name).into(),
         reference_id: std::cell::Cell::new(None),
@@ -76,7 +77,7 @@ pub fn parse_snippet_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fr
 }
 
 fn read_type_params<'a>(input: &mut Input<'a>) -> Result<Option<&'a str>> {
-    use crate::parser::utils::bracket::find_matching_bracket;
+    use crate::parser::utils::scanner::find_matching_bracket;
 
     let template = input.state.template;
     let pos = input.current_token_start();

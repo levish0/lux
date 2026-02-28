@@ -25,11 +25,6 @@ pub struct CssRule<'a> {
     pub span: Span,
     pub prelude: SelectorList<'a>,
     pub block: CssBlock<'a>,
-    // metadata (analysis phase)
-    pub parent_rule: Option<usize>,
-    pub has_local_selectors: bool,
-    pub has_global_selectors: bool,
-    pub is_global_block: bool,
 }
 
 #[derive(Debug)]

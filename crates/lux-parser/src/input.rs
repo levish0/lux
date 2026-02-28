@@ -1,6 +1,7 @@
 use lux_ast::css::StyleSheet;
 use lux_ast::template::root::Script;
 use oxc_allocator::Allocator;
+use rustc_hash::FxHashSet;
 use winnow::stream::{LocatingSlice, Stateful};
 
 use crate::error::ParseError;
@@ -13,6 +14,7 @@ pub struct ParserState<'a> {
     pub template: &'a str,
     pub ts: bool,
     pub depth: u32,
+    pub root_meta_tags: FxHashSet<&'a str>,
     pub instance: Option<Script<'a>>,
     pub module: Option<Script<'a>>,
     pub css: Option<StyleSheet<'a>>,
@@ -36,6 +38,7 @@ impl<'a> ParserState<'a> {
             template,
             ts,
             depth: 0,
+            root_meta_tags: FxHashSet::default(),
             instance: None,
             module: None,
             css: None,

@@ -3,6 +3,7 @@ use winnow::Result;
 use winnow::prelude::*;
 use winnow::token::literal;
 
+use crate::error::{ErrorKind, ParseError};
 use crate::input::Input;
 use crate::parser::read::script::read_script;
 use crate::parser::read::style::read_style;
@@ -20,15 +21,36 @@ pub fn parse_script_or_style<'a>(input: &mut Input<'a>, start: usize, name: &'a 
             let script = read_script(input, start, attributes)?;
             match script.context {
                 ScriptContext::Module => {
+                    if input.state.module.is_some() {
+                        input.state.errors.push(ParseError::new(
+                            ErrorKind::InvalidScript,
+                            script.span,
+                            "Duplicate top-level <script module> is not allowed",
+                        ));
+                    }
                     input.state.module = Some(script);
                 }
                 ScriptContext::Default => {
+                    if input.state.instance.is_some() {
+                        input.state.errors.push(ParseError::new(
+                            ErrorKind::InvalidScript,
+                            script.span,
+                            "Duplicate top-level <script> is not allowed",
+                        ));
+                    }
                     input.state.instance = Some(script);
                 }
             }
         }
         "style" => {
             let style = read_style(input, start, attributes)?;
+            if input.state.css.is_some() {
+                input.state.errors.push(ParseError::new(
+                    ErrorKind::InvalidCss,
+                    style.span,
+                    "Duplicate top-level <style> is not allowed",
+                ));
+            }
             input.state.css = Some(style);
         }
         _ => {}

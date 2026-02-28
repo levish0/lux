@@ -15,8 +15,12 @@ use winnow::prelude::*;
 use winnow::stream::Location as StreamLocation;
 use winnow::token::{literal, take_while};
 
+use crate::context::is_top_level;
+use crate::error::{ErrorKind, ParseError};
 use crate::input::Input;
 use attribute::is_tag_name_char;
+
+const ROOT_ONLY_SVELTE_TAGS: &[&str] = &["head", "options", "window", "document", "body"];
 
 pub fn parse_element<'a>(input: &mut Input<'a>) -> Result<Option<FragmentNode<'a>>> {
     let start = input.current_token_start();
@@ -35,7 +39,7 @@ pub fn parse_element<'a>(input: &mut Input<'a>) -> Result<Option<FragmentNode<'a
 
     let name: &str = take_while(1.., is_tag_name_char).parse_next(input)?;
 
-    if (name == "script" || name == "style") && input.state.depth == 0 {
+    if (name == "script" || name == "style") && is_top_level(input) {
         script_style::parse_script_or_style(input, start, name)?;
         return Ok(None);
     }
@@ -49,6 +53,10 @@ fn dispatch_element<'a>(
     name: &'a str,
 ) -> Result<FragmentNode<'a>> {
     if let Some(svelte_kind) = name.strip_prefix("svelte:") {
+        if ROOT_ONLY_SVELTE_TAGS.contains(&svelte_kind) {
+            enforce_root_only_svelte_tag_rules(input, start, name);
+        }
+
         return match svelte_kind {
             "component" => svelte::svelte_component::parse_svelte_component(input, start, name),
             "element" => svelte::svelte_element::parse_svelte_element(input, start, name),
@@ -84,4 +92,25 @@ fn is_component_name(name: &str) -> bool {
         .first()
         .is_some_and(|b| b.is_ascii_uppercase())
         || name.contains('.')
+}
+
+fn enforce_root_only_svelte_tag_rules<'a>(input: &mut Input<'a>, start: usize, name: &'a str) {
+    let span = oxc_span::Span::new(start as u32, (start + name.len() + 2) as u32);
+
+    if !is_top_level(input) {
+        input.state.errors.push(ParseError::new(
+            ErrorKind::General,
+            span,
+            format!("{name} is only valid at the top level"),
+        ));
+        return;
+    }
+
+    if !input.state.root_meta_tags.insert(name) {
+        input.state.errors.push(ParseError::new(
+            ErrorKind::General,
+            span,
+            format!("Duplicate root-only Svelte meta tag: {name}"),
+        ));
+    }
 }
