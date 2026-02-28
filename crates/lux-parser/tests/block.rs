@@ -89,6 +89,44 @@ fn test_each_context_pattern_span_is_preserved() {
 }
 
 #[test]
+fn test_await_clause_binding_pattern_span_is_preserved() {
+    let source = "{#await promise then { value = 1 }}{/await}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+
+    let FragmentNode::AwaitBlock(node) = &parsed.root.fragment.nodes[0] else {
+        panic!("expected await block");
+    };
+
+    let value = node.value.as_ref().expect("expected then binding");
+    assert_eq!(
+        &source[value.span().start as usize..value.span().end as usize],
+        "{ value = 1 }"
+    );
+}
+
+#[test]
+fn test_snippet_parameter_pattern_spans_are_preserved() {
+    let source = "{#snippet demo({ id, name = 'x' }, item = defaultValue)}{/snippet}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+
+    let FragmentNode::SnippetBlock(node) = &parsed.root.fragment.nodes[0] else {
+        panic!("expected snippet block");
+    };
+
+    assert_eq!(node.parameters.len(), 2);
+    assert_eq!(
+        &source[node.parameters[0].span().start as usize..node.parameters[0].span().end as usize],
+        "{ id, name = 'x' }"
+    );
+    assert_eq!(
+        &source[node.parameters[1].span().start as usize..node.parameters[1].span().end as usize],
+        "item = defaultValue"
+    );
+}
+
+#[test]
 fn test_await_block() {
     assert_eq!(
         parse_nodes("{#await promise}{:then value}done{:catch err}fail{/await}"),

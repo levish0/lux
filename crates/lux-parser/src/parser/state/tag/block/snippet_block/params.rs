@@ -8,9 +8,7 @@ use crate::input::Input;
 use crate::parser::read::pattern::read_binding_pattern_until;
 use crate::parser::utils::helpers::skip_whitespace;
 
-pub(super) fn parse_snippet_params<'a>(
-    input: &mut Input<'a>,
-) -> Result<Vec<BindingPattern<'a>>> {
+pub(super) fn parse_snippet_params<'a>(input: &mut Input<'a>) -> Result<Vec<BindingPattern<'a>>> {
     let mut params = Vec::new();
 
     loop {

@@ -288,6 +288,25 @@ fn emit_reference_node(lines: &mut Vec<String>, node: &Value, source: &str, path
             ref_expr_source(expression, source)
         ));
     }
+    if !node["value"].is_null() {
+        lines.push(format!(
+            "{path}:value={:?}",
+            ref_node_source(&node["value"], source)
+        ));
+    }
+    if !node["error"].is_null() {
+        lines.push(format!(
+            "{path}:error={:?}",
+            ref_node_source(&node["error"], source)
+        ));
+    }
+    if let Some(parameters) = node["parameters"].as_array() {
+        let params: Vec<String> = parameters
+            .iter()
+            .map(|parameter| ref_node_source(parameter, source))
+            .collect();
+        lines.push(format!("{path}:params={params:?}"));
+    }
     if !node["context"].is_null() {
         lines.push(format!(
             "{path}:context={:?}",
@@ -298,7 +317,10 @@ fn emit_reference_node(lines: &mut Vec<String>, node: &Value, source: &str, path
         lines.push(format!("{path}:index={index:?}"));
     }
     if !node["key"].is_null() {
-        lines.push(format!("{path}:key={:?}", ref_expr_source(&node["key"], source)));
+        lines.push(format!(
+            "{path}:key={:?}",
+            ref_expr_source(&node["key"], source)
+        ));
     }
 
     if let Some(attributes) = node["attributes"].as_array() {
@@ -339,6 +361,9 @@ fn emit_reference_node(lines: &mut Vec<String>, node: &Value, source: &str, path
     }
     if !node["catch"].is_null() {
         emit_reference_fragment(lines, &node["catch"], source, &format!("{path}/catch"));
+    }
+    if !node["pending"].is_null() {
+        emit_reference_fragment(lines, &node["pending"], source, &format!("{path}/pending"));
     }
     if !node["fallback"].is_null() {
         emit_reference_fragment(
@@ -582,6 +607,12 @@ fn emit_lux_node(lines: &mut Vec<String>, node: &FragmentNode<'_>, source: &str,
                 node.span.start, node.span.end
             ));
             lines.push(format!("{path}:expr={:?}", node.expression.name.as_str()));
+            let params: Vec<String> = node
+                .parameters
+                .iter()
+                .map(|parameter| slice(source, parameter.span().start, parameter.span().end))
+                .collect();
+            lines.push(format!("{path}:params={params:?}"));
             emit_lux_fragment(lines, &node.body.nodes, source, &format!("{path}/body"));
         }
         FragmentNode::RegularElement(node) => emit_lux_element(
@@ -841,11 +872,31 @@ fn emit_lux_await(
             node.expression.span().end
         )
     ));
+    if let Some(value) = &node.value {
+        lines.push(format!(
+            "{path}:value={:?}",
+            slice(source, value.span().start, value.span().end)
+        ));
+    }
+    if let Some(error) = &node.error {
+        lines.push(format!(
+            "{path}:error={:?}",
+            slice(source, error.span().start, error.span().end)
+        ));
+    }
     if let Some(then_frag) = &node.then {
         emit_lux_fragment(lines, &then_frag.nodes, source, &format!("{path}/then"));
     }
     if let Some(catch_frag) = &node.catch {
         emit_lux_fragment(lines, &catch_frag.nodes, source, &format!("{path}/catch"));
+    }
+    if let Some(pending_frag) = &node.pending {
+        emit_lux_fragment(
+            lines,
+            &pending_frag.nodes,
+            source,
+            &format!("{path}/pending"),
+        );
     }
 }
 

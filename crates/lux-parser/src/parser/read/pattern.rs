@@ -3,7 +3,7 @@ use std::cell::Cell;
 use oxc_allocator::{Allocator, Box as ArenaBox};
 use oxc_ast::ast::{AssignmentPattern, BindingPattern, Expression};
 use oxc_parser::Parser as OxcParser;
-use oxc_span::{GetSpan, SourceType, Span};
+use oxc_span::{GetSpan, GetSpanMut, SourceType, Span};
 use oxc_syntax::node::NodeId;
 use winnow::Result;
 use winnow::error::ContextError;
@@ -68,15 +68,18 @@ fn extract_parameter_pattern<'a>(
     }
 
     let mut items = params.items.into_iter();
-    let param = items.next()?.unbox();
+    let param = items.next()?;
 
     if items.next().is_some() {
         return None;
     }
 
     let mut pattern = param.pattern;
+    if let Some(type_annotation) = &param.type_annotation {
+        pattern.span_mut().end = type_annotation.span().end;
+    }
     if let Some(initializer) = param.initializer {
-        let right = initializer.unbox();
+        let right: Expression<'a> = initializer.unbox();
         let span = Span::new(pattern.span().start, right.span().end);
         let assignment = AssignmentPattern {
             node_id: Cell::new(NodeId::DUMMY),
