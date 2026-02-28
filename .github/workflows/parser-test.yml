@@ -22,8 +22,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'pnpm'
-          cache-dependency-path: crates/lux-parser/tests/tools/svelte_runner/pnpm-lock.yaml
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
