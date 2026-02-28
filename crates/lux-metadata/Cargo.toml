@@ -1,0 +1,11 @@
+[package]
+name = "lux-metadata"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Shared Svelte metadata tables for the Lux compiler"
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]

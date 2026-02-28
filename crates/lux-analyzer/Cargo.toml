@@ -10,7 +10,7 @@ rust-version.workspace = true
 
 [dependencies]
 lux-ast = { workspace = true }
-lux-utils = { workspace = true }
+lux-metadata = { workspace = true }
 oxc_ast = { workspace = true }
 oxc_span = { workspace = true }
 oxc_syntax = { workspace = true }

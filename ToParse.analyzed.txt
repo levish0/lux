@@ -1,0 +1,452 @@
+=== Analyzer Summary ===
+script_scopes: 1
+script_symbols: 2
+script_references: 2
+template_scopes: 10
+template_bindings: 0
+template_references: 7
+css_rules: 4
+diagnostics: 0
+
+=== Analysis Tables (Debug) ===
+AnalysisTables {
+    css_rules: {
+        SpanKey {
+            kind: CssRule,
+            start: 877,
+            end: 956,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 1076,
+            end: 1347,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 1351,
+            end: 1474,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 960,
+            end: 1072,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+    },
+    complex_selectors: {
+        SpanKey {
+            kind: ComplexSelector,
+            start: 1351,
+            end: 1378,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 877,
+            end: 879,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 1076,
+            end: 1082,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 960,
+            end: 963,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+    },
+    relative_selectors: {
+        SpanKey {
+            kind: RelativeSelector,
+            start: 1351,
+            end: 1378,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 877,
+            end: 879,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 960,
+            end: 963,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 1076,
+            end: 1082,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+    },
+    script_scopes: [
+        ScriptScopeAnalysis {
+            target: Instance,
+            id: 0,
+            parent: None,
+            flags: 3,
+            node_id: 0,
+        },
+    ],
+    script_symbols: [
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 0,
+            name: "colors",
+            scope_id: 0,
+            declaration_node_id: 2,
+            declaration_span: Span {
+                start: 17,
+                end: 23,
+            },
+            flags: 6,
+            mutated: false,
+            unused: false,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 1,
+            name: "selected",
+            scope_id: 0,
+            declaration_node_id: 13,
+            declaration_span: Span {
+                start: 98,
+                end: 106,
+            },
+            flags: 2,
+            mutated: false,
+            unused: true,
+        },
+    ],
+    script_references: [
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 1,
+            name: "colors",
+            span: Span {
+                start: 116,
+                end: 122,
+            },
+            scope_id: 0,
+            symbol_id: Some(
+                0,
+            ),
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 0,
+            name: "$state",
+            span: Span {
+                start: 109,
+                end: 115,
+            },
+            scope_id: 0,
+            symbol_id: None,
+            is_read: true,
+            is_write: false,
+        },
+    ],
+    template_scopes: [
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                0,
+            ),
+            kind: Root,
+            parent: None,
+            span: Some(
+                Span {
+                    start: 0,
+                    end: 1484,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                1,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    0,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 139,
+                    end: 187,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                2,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    0,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 189,
+                    end: 865,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                3,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    2,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 197,
+                    end: 365,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                4,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    2,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 369,
+                    end: 549,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                5,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    2,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 553,
+                    end: 733,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                6,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    2,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 781,
+                    end: 798,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                7,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    2,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 801,
+                    end: 818,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                8,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    2,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 821,
+                    end: 838,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                9,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    2,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 841,
+                    end: 858,
+                },
+            ),
+        },
+    ],
+    template_bindings: [],
+    template_references: [
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                0,
+            ),
+            name: "selected",
+            span: Span {
+                start: 158,
+                end: 166,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                2,
+            ),
+            name: "selected",
+            span: Span {
+                start: 290,
+                end: 298,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                2,
+            ),
+            name: "selected",
+            span: Span {
+                start: 335,
+                end: 343,
+            },
+            is_read: false,
+            is_write: true,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                2,
+            ),
+            name: "selected",
+            span: Span {
+                start: 468,
+                end: 476,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                2,
+            ),
+            name: "selected",
+            span: Span {
+                start: 516,
+                end: 524,
+            },
+            is_read: false,
+            is_write: true,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                2,
+            ),
+            name: "selected",
+            span: Span {
+                start: 652,
+                end: 660,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                2,
+            ),
+            name: "selected",
+            span: Span {
+                start: 700,
+                end: 708,
+            },
+            is_read: false,
+            is_write: true,
+        },
+    ],
+    diagnostics: [],
+}

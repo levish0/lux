@@ -115,8 +115,8 @@ name = "lux-analyzer"
 version = "0.1.0"
 dependencies = [
  "lux-ast",
+ "lux-metadata",
  "lux-parser",
- "lux-utils",
  "oxc_allocator",
  "oxc_ast",
  "oxc_ast_visit",
@@ -138,6 +138,10 @@ dependencies = [
  "oxc_syntax",
  "serde",
 ]
+
+[[package]]
+name = "lux-metadata"
+version = "0.1.0"
 
 [[package]]
 name = "lux-parser"

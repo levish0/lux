@@ -1,6 +1,5 @@
 pub mod a11y;
 pub mod attributes;
-pub mod bindings;
 pub mod closing_tag;
 pub mod elements;
 pub mod events;

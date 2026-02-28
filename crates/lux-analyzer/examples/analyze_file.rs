@@ -49,9 +49,19 @@ fn main() {
     writeln!(output, "=== Analyzer Summary ===").unwrap();
     writeln!(output, "script_scopes: {}", tables.script_scopes.len()).unwrap();
     writeln!(output, "script_symbols: {}", tables.script_symbols.len()).unwrap();
-    writeln!(output, "script_references: {}", tables.script_references.len()).unwrap();
+    writeln!(
+        output,
+        "script_references: {}",
+        tables.script_references.len()
+    )
+    .unwrap();
     writeln!(output, "template_scopes: {}", tables.template_scopes.len()).unwrap();
-    writeln!(output, "template_bindings: {}", tables.template_bindings.len()).unwrap();
+    writeln!(
+        output,
+        "template_bindings: {}",
+        tables.template_bindings.len()
+    )
+    .unwrap();
     writeln!(
         output,
         "template_references: {}",

@@ -1,7 +1,8 @@
 use std::collections::HashSet;
 
 use lux_ast::analysis::{
-    AnalysisDiagnostic, AnalysisDiagnosticCode, AnalysisSeverity, AnalysisTables, TemplateScopeId,
+    AnalysisDiagnostic, AnalysisDiagnosticCode, AnalysisSeverity, AnalysisTables, ScriptTarget,
+    TemplateScopeId,
 };
 use oxc_syntax::symbol::SymbolFlags;
 
@@ -94,6 +95,10 @@ fn collect_script_write_info(
     let mut info_map = std::collections::HashMap::new();
 
     for symbol in &tables.script_symbols {
+        if symbol.target != ScriptTarget::Instance {
+            continue;
+        }
+
         let symbol_flags = SymbolFlags::from_bits_truncate(symbol.flags);
         let entry = info_map
             .entry(symbol.name.as_str())

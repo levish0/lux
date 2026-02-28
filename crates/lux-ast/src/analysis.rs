@@ -49,6 +49,15 @@ pub enum AnalysisDiagnosticCode {
     TemplateAssignmentToImport,
     TemplateAssignmentToBinding,
     BindDirectiveInvalidExpression,
+    BindDirectiveUnknownName,
+    BindDirectiveInvalidTarget,
+    BindDirectiveGroupInvalidExpression,
+    BindDirectiveInputTypeInvalid,
+    BindDirectiveInputTypeMismatch,
+    BindDirectiveSelectMultipleDynamic,
+    BindDirectiveContenteditableMissing,
+    BindDirectiveContenteditableDynamic,
+    LetDirectiveInvalidPlacement,
 }
 
 #[derive(Debug, Clone)]

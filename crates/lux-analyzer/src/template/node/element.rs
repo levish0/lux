@@ -6,11 +6,14 @@ use lux_ast::template::tag::TextOrExpressionTag;
 
 use super::super::binding::collect_destructuring_expression_bindings;
 use super::super::context::TemplateAnalyzerContext;
-use super::super::diagnostics;
+use super::super::diagnostics::{self, BindDirectiveTarget};
 use super::super::fragment;
 use super::super::reference;
 
 pub(crate) fn analyze<'a>(
+    bind_target: BindDirectiveTarget<'a>,
+    // Svelte analyze phase rule: only specific element kinds allow `let:`.
+    allow_let_directive: bool,
     span: Span,
     attributes: &[AttributeNode<'a>],
     children: &Fragment<'a>,
@@ -27,8 +30,14 @@ pub(crate) fn analyze<'a>(
                 reference::analyze_expression(&attribute.expression, context);
             }
             AttributeNode::BindDirective(directive) => {
-                reference::analyze_expression(&directive.expression, context);
+                reference::analyze_bind_expression(&directive.expression, context);
                 diagnostics::validate_bind_directive_expression(directive, context);
+                diagnostics::validate_bind_directive_target(
+                    directive,
+                    attributes,
+                    bind_target,
+                    context,
+                );
             }
             AttributeNode::ClassDirective(directive) => {
                 reference::analyze_expression(&directive.expression, context);
@@ -67,6 +76,11 @@ pub(crate) fn analyze<'a>(
                 }
             }
             AttributeNode::LetDirective(let_directive) => {
+                if !allow_let_directive {
+                    diagnostics::report_invalid_let_directive_placement(let_directive, context);
+                    continue;
+                }
+
                 if let Some(expression) = &let_directive.expression {
                     for binding in collect_destructuring_expression_bindings(expression) {
                         context.add_binding_in_scope(

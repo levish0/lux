@@ -222,6 +222,175 @@ fn analyze_reports_block_empty_warning() {
     }));
 }
 
+#[test]
+fn analyze_treats_bind_identifier_as_read_and_write_reference() {
+    let tables = analyze_source("<input bind:value={count} />");
+
+    let count_refs: Vec<_> = tables
+        .template_references
+        .iter()
+        .filter(|reference| reference.name == "count")
+        .collect();
+
+    assert!(count_refs.iter().any(|reference| reference.is_read));
+    assert!(count_refs.iter().any(|reference| reference.is_write));
+}
+
+#[test]
+fn analyze_reports_bind_assignment_to_const_and_import() {
+    let tables = analyze_source(
+        "<script>import { value as imported } from 'pkg'; const fixed = 1; let ok = 0;</script><input bind:value={fixed} /><input bind:value={imported} /><input bind:value={ok} />",
+    );
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::TemplateAssignmentToConst
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::TemplateAssignmentToImport
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_ignores_module_script_const_for_template_assignment_checks() {
+    let tables = analyze_source(
+        "<script context=\"module\">const count = 1;</script><script>let count = 0;</script>{count = 2}",
+    );
+
+    assert!(!tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::TemplateAssignmentToConst
+            || diagnostic.code == AnalysisDiagnosticCode::TemplateAssignmentToImport
+    }));
+}
+
+#[test]
+fn analyze_reports_bind_unknown_name_on_regular_element() {
+    let tables = analyze_source("<div bind:notARealBinding={value} />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveUnknownName
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_bind_invalid_target_for_window_binding_on_regular_element() {
+    let tables = analyze_source("<div bind:innerWidth={width} />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveInvalidTarget
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_accepts_window_binding_on_svelte_window() {
+    let tables = analyze_source("<svelte:window bind:innerWidth={width} />");
+
+    assert!(!tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveInvalidTarget
+            || diagnostic.code == AnalysisDiagnosticCode::BindDirectiveUnknownName
+    }));
+}
+
+#[test]
+fn analyze_reports_bind_group_getter_setter_expression() {
+    let tables = analyze_source("<input bind:group={get(), set(value)} />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveGroupInvalidExpression
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_bind_checked_type_mismatch() {
+    let tables = analyze_source("<input type=\"text\" bind:checked={checked} />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveInputTypeMismatch
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_bind_files_type_mismatch_without_type_attribute() {
+    let tables = analyze_source("<input bind:files={files} />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveInputTypeMismatch
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_dynamic_input_type_for_bind_checked() {
+    let tables = analyze_source("<input type={field_type} bind:checked={checked} />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveInputTypeInvalid
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_dynamic_select_multiple_attribute_with_bind() {
+    let tables = analyze_source("<select multiple={is_many} bind:value={selected}></select>");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveSelectMultipleDynamic
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_contenteditable_missing_for_text_content_binding() {
+    let tables = analyze_source("<div bind:textContent={content}></div>");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveContenteditableMissing
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_dynamic_contenteditable_attribute_for_text_content_binding() {
+    let tables =
+        analyze_source("<div contenteditable={is_editable} bind:textContent={content}></div>");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::BindDirectiveContenteditableDynamic
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_block_empty_warning_for_if_and_key_blocks() {
+    let tables = analyze_source("{#if cond} {/if}{#key value} {/key}");
+
+    let empty_block_count = tables
+        .diagnostics
+        .iter()
+        .filter(|diagnostic| {
+            diagnostic.code == AnalysisDiagnosticCode::BlockEmpty
+                && diagnostic.severity == AnalysisSeverity::Warning
+        })
+        .count();
+
+    assert_eq!(empty_block_count, 2);
+}
+
+#[test]
+fn analyze_reports_invalid_let_directive_placement() {
+    let tables = analyze_source("<svelte:window let:item />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::LetDirectiveInvalidPlacement
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
 fn analyze_source(source: &str) -> AnalysisTables {
     let allocator = Allocator::default();
     let parsed = parse(source, &allocator, false);
