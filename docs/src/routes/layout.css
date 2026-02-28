@@ -157,3 +157,14 @@
 		background: color-mix(in srgb, var(--primary) 30%, transparent);
 	}
 }
+
+.container {
+	width: min(1120px, calc(100% - 3rem));
+	margin-inline: auto;
+}
+
+@media (max-width: 760px) {
+	.container {
+		width: min(1120px, calc(100% - 1.5rem));
+	}
+}
