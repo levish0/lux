@@ -1,5 +1,6 @@
 use oxc_allocator::Allocator;
 use std::io::Write;
+use std::time::Instant;
 
 fn main() {
     let path = std::env::args()
@@ -10,9 +11,12 @@ fn main() {
         eprintln!("Failed to read {path}: {e}");
         std::process::exit(1);
     });
+    let input_len = source.len();
 
+    let start_time = Instant::now();
     let allocator = Allocator::default();
     let result = lux_parser::parse(&source, &allocator, true);
+    let duration = start_time.elapsed();
 
     let output_path = std::path::Path::new(&path).with_extension("parsed.txt");
 
@@ -40,4 +44,13 @@ fn main() {
     writeln!(out, "{:#?}", result.root).unwrap();
 
     println!("Output written to {}", output_path.display());
+    println!(
+        "Parsed {} top-level nodes in {:?}",
+        result.root.fragment.nodes.len(),
+        duration
+    );
+    println!(
+        "Performance: {:.2} KB/s",
+        input_len as f64 / 1024.0 / duration.as_secs_f64().max(f64::EPSILON)
+    );
 }

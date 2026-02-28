@@ -288,6 +288,18 @@ fn emit_reference_node(lines: &mut Vec<String>, node: &Value, source: &str, path
             ref_expr_source(expression, source)
         ));
     }
+    if !node["context"].is_null() {
+        lines.push(format!(
+            "{path}:context={:?}",
+            ref_node_source(&node["context"], source)
+        ));
+    }
+    if let Some(index) = node["index"].as_str() {
+        lines.push(format!("{path}:index={index:?}"));
+    }
+    if !node["key"].is_null() {
+        lines.push(format!("{path}:key={:?}", ref_expr_source(&node["key"], source)));
+    }
 
     if let Some(attributes) = node["attributes"].as_array() {
         let attrs: Vec<String> = attributes
@@ -327,6 +339,14 @@ fn emit_reference_node(lines: &mut Vec<String>, node: &Value, source: &str, path
     }
     if !node["catch"].is_null() {
         emit_reference_fragment(lines, &node["catch"], source, &format!("{path}/catch"));
+    }
+    if !node["fallback"].is_null() {
+        emit_reference_fragment(
+            lines,
+            &node["fallback"],
+            source,
+            &format!("{path}/fallback"),
+        );
     }
 }
 
@@ -781,7 +801,25 @@ fn emit_lux_each(
             node.expression.span().end
         )
     ));
+    if let Some(context) = &node.context {
+        lines.push(format!(
+            "{path}:context={:?}",
+            slice(source, context.span().start, context.span().end)
+        ));
+    }
+    if let Some(index) = node.index {
+        lines.push(format!("{path}:index={index:?}"));
+    }
+    if let Some(key) = &node.key {
+        lines.push(format!(
+            "{path}:key={:?}",
+            slice(source, key.span().start, key.span().end)
+        ));
+    }
     emit_lux_fragment(lines, &node.body.nodes, source, &format!("{path}/body"));
+    if let Some(fallback) = &node.fallback {
+        emit_lux_fragment(lines, &fallback.nodes, source, &format!("{path}/fallback"));
+    }
 }
 
 fn emit_lux_await(
@@ -855,6 +893,12 @@ fn ref_span(node: &Value) -> String {
 fn ref_expr_source(expr: &Value, source: &str) -> String {
     let start = expr["start"].as_u64().unwrap_or(0) as usize;
     let end = expr["end"].as_u64().unwrap_or(0) as usize;
+    source.get(start..end).unwrap_or("").to_string()
+}
+
+fn ref_node_source(node: &Value, source: &str) -> String {
+    let start = node["start"].as_u64().unwrap_or(0) as usize;
+    let end = node["end"].as_u64().unwrap_or(0) as usize;
     source.get(start..end).unwrap_or("").to_string()
 }
 

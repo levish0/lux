@@ -1,5 +1,9 @@
 mod common;
 use common::parse_nodes;
+use lux_ast::template::root::FragmentNode;
+use lux_parser::parse;
+use oxc_allocator::Allocator;
+use oxc_span::GetSpan;
 
 #[test]
 fn test_if_block() {
@@ -64,6 +68,23 @@ fn test_each_array_destructuring() {
     assert_eq!(
         parse_nodes("{#each items as [a, b]}{a}{/each}"),
         vec!["EachBlock"]
+    );
+}
+
+#[test]
+fn test_each_context_pattern_span_is_preserved() {
+    let source = "{#each items as {id, name = 'x'}}{id}{/each}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+
+    let FragmentNode::EachBlock(node) = &parsed.root.fragment.nodes[0] else {
+        panic!("expected each block");
+    };
+
+    let context = node.context.as_ref().expect("expected each context");
+    assert_eq!(
+        &source[context.span().start as usize..context.span().end as usize],
+        "{id, name = 'x'}"
     );
 }
 

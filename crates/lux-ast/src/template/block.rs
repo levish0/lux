@@ -1,4 +1,4 @@
-use oxc_ast::ast::{Expression, IdentifierReference};
+use oxc_ast::ast::{BindingPattern, Expression, IdentifierReference};
 
 use crate::common::Span;
 use crate::template::root::Fragment;
@@ -16,7 +16,7 @@ pub struct IfBlock<'a> {
 pub struct EachBlock<'a> {
     pub span: Span,
     pub expression: Expression<'a>,
-    pub context: Option<Expression<'a>>,
+    pub context: Option<BindingPattern<'a>>,
     pub body: Fragment<'a>,
     pub fallback: Option<Fragment<'a>>,
     pub index: Option<&'a str>,
