@@ -1,4 +1,4 @@
-name: mofumofu Frontend
+name: docs build
 on:
   workflow_dispatch:
   push:

@@ -72,11 +72,63 @@ impl<'ctx, 'tables> ExpressionReferenceCollector<'ctx, 'tables> {
             mode.is_write,
         );
     }
+
+    fn visit_expression_as_assignment_target(&mut self, expression: &Expression<'_>) {
+        match expression {
+            Expression::Identifier(identifier) => {
+                self.record_identifier_reference(identifier);
+            }
+            Expression::ComputedMemberExpression(member) => {
+                self.with_mode(READ, |collector| {
+                    collector.visit_expression(&member.object);
+                    collector.visit_expression(&member.expression);
+                });
+            }
+            Expression::StaticMemberExpression(member) => {
+                self.with_mode(READ, |collector| {
+                    collector.visit_expression(&member.object);
+                });
+            }
+            Expression::PrivateFieldExpression(member) => {
+                self.with_mode(READ, |collector| {
+                    collector.visit_expression(&member.object);
+                });
+            }
+            Expression::TSAsExpression(expression) => {
+                self.visit_expression_as_assignment_target(&expression.expression);
+            }
+            Expression::TSSatisfiesExpression(expression) => {
+                self.visit_expression_as_assignment_target(&expression.expression);
+            }
+            Expression::TSNonNullExpression(expression) => {
+                self.visit_expression_as_assignment_target(&expression.expression);
+            }
+            Expression::TSTypeAssertion(expression) => {
+                self.visit_expression_as_assignment_target(&expression.expression);
+            }
+            Expression::ParenthesizedExpression(expression) => {
+                self.visit_expression_as_assignment_target(&expression.expression);
+            }
+            _ => {
+                self.visit_expression(expression);
+            }
+        }
+    }
 }
 
 impl<'a> Visit<'a> for ExpressionReferenceCollector<'_, '_> {
+    fn visit_expression(&mut self, it: &Expression<'a>) {
+        walk::walk_expression(self, it);
+    }
+
     fn visit_identifier_reference(&mut self, it: &IdentifierReference<'a>) {
         self.record_identifier_reference(it);
+    }
+
+    fn visit_update_expression(&mut self, it: &UpdateExpression<'a>) {
+        self.with_mode(READ_WRITE, |collector| {
+            collector.visit_simple_assignment_target(&it.argument);
+        });
     }
 
     fn visit_assignment_expression(&mut self, it: &AssignmentExpression<'a>) {
@@ -92,12 +144,6 @@ impl<'a> Visit<'a> for ExpressionReferenceCollector<'_, '_> {
 
         self.with_mode(READ, |collector| {
             collector.visit_expression(&it.right);
-        });
-    }
-
-    fn visit_update_expression(&mut self, it: &UpdateExpression<'a>) {
-        self.with_mode(READ_WRITE, |collector| {
-            collector.visit_simple_assignment_target(&it.argument);
         });
     }
 
@@ -124,14 +170,16 @@ impl<'a> Visit<'a> for ExpressionReferenceCollector<'_, '_> {
             }
             _ => {
                 if let Some(expression) = it.get_expression() {
-                    if let Some(target) = expression.as_simple_assignment_target() {
-                        self.visit_simple_assignment_target(target);
-                    } else {
-                        self.visit_expression(expression);
-                    }
+                    self.visit_expression_as_assignment_target(expression);
                 }
             }
         }
+    }
+
+    fn visit_assignment_target_rest(&mut self, it: &AssignmentTargetRest<'a>) {
+        self.with_mode(WRITE, |collector| {
+            collector.visit_assignment_target(&it.target);
+        });
     }
 
     fn visit_assignment_target_with_default(&mut self, it: &AssignmentTargetWithDefault<'a>) {
@@ -169,15 +217,5 @@ impl<'a> Visit<'a> for ExpressionReferenceCollector<'_, '_> {
         self.with_mode(WRITE, |collector| {
             collector.visit_assignment_target_maybe_default(&it.binding);
         });
-    }
-
-    fn visit_assignment_target_rest(&mut self, it: &AssignmentTargetRest<'a>) {
-        self.with_mode(WRITE, |collector| {
-            collector.visit_assignment_target(&it.target);
-        });
-    }
-
-    fn visit_expression(&mut self, it: &Expression<'a>) {
-        walk::walk_expression(self, it);
     }
 }

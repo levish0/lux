@@ -142,6 +142,27 @@ fn analyze_collects_let_directive_bindings() {
     }
 }
 
+#[test]
+fn analyze_collects_template_reference_read_write_flags() {
+    let tables = analyze_source("{value}{value = value + 1}{++count}");
+
+    let value_refs: Vec<_> = tables
+        .template_references
+        .iter()
+        .filter(|reference| reference.name == "value")
+        .collect();
+    assert!(value_refs.iter().any(|reference| reference.is_read));
+    assert!(value_refs.iter().any(|reference| reference.is_write));
+
+    let count_refs: Vec<_> = tables
+        .template_references
+        .iter()
+        .filter(|reference| reference.name == "count")
+        .collect();
+    assert!(count_refs.iter().any(|reference| reference.is_read));
+    assert!(count_refs.iter().any(|reference| reference.is_write));
+}
+
 fn analyze_source(source: &str) -> AnalysisTables {
     let allocator = Allocator::default();
     let parsed = parse(source, &allocator, false);
