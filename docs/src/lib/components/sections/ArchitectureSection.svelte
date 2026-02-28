@@ -65,9 +65,7 @@
 					<Card.Title>lux-transformer</Card.Title>
 				</Card.Header>
 				<Card.Content>
-					<p>
-						Generates JS/CSS output from analyzed state while preserving compatibility intent.
-					</p>
+					<p>Generates JS/CSS output from analyzed state while preserving compatibility intent.</p>
 				</Card.Content>
 			</Card.Root>
 		</div>

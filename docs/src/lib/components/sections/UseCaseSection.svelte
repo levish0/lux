@@ -14,7 +14,8 @@
 			<Card.Root class="use-card use-card-good">
 				<Card.Header>
 					<Card.Title>Good fit</Card.Title>
-					<Card.Description>When tight feedback and micro-bench visibility matter.</Card.Description>
+					<Card.Description>When tight feedback and micro-bench visibility matter.</Card.Description
+					>
 				</Card.Header>
 				<Card.Content>
 					<ul>
@@ -29,7 +30,9 @@
 			<Card.Root class="use-card use-card-neutral">
 				<Card.Header>
 					<Card.Title>Not trying to replace</Card.Title>
-					<Card.Description>Official Svelte compiler as the behavior source of truth.</Card.Description>
+					<Card.Description
+						>Official Svelte compiler as the behavior source of truth.</Card.Description
+					>
 				</Card.Header>
 				<Card.Content>
 					<ul>

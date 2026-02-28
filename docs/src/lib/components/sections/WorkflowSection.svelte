@@ -15,9 +15,7 @@
 					</Card.Header>
 					<Card.Content>
 						<Snippet
-							text={block.command.includes('\n')
-								? block.command.split('\n')
-								: block.command}
+							text={block.command.includes('\n') ? block.command.split('\n') : block.command}
 						/>
 					</Card.Content>
 				</Card.Root>
