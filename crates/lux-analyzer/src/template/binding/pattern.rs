@@ -1,11 +1,6 @@
-use lux_ast::common::Span;
 use oxc_ast::ast::BindingPattern;
 
-#[derive(Debug, Clone, Copy)]
-pub(super) struct CollectedBinding<'a> {
-    pub name: &'a str,
-    pub span: Span,
-}
+use super::CollectedBinding;
 
 pub(super) fn collect_pattern_bindings<'a>(
     pattern: &'a BindingPattern<'a>,
