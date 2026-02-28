@@ -22,8 +22,9 @@ pub fn parse_script_or_style<'a>(input: &mut Input<'a>, start: usize, name: &'a 
             match script.context {
                 ScriptContext::Module => {
                     if input.state.module.is_some() {
-                        input.state.errors.push(ParseError::new(
+                        input.state.errors.push(ParseError::with_code(
                             ErrorKind::InvalidScript,
+                            "script_duplicate",
                             script.span,
                             "Duplicate top-level <script module> is not allowed",
                         ));
@@ -32,8 +33,9 @@ pub fn parse_script_or_style<'a>(input: &mut Input<'a>, start: usize, name: &'a 
                 }
                 ScriptContext::Default => {
                     if input.state.instance.is_some() {
-                        input.state.errors.push(ParseError::new(
+                        input.state.errors.push(ParseError::with_code(
                             ErrorKind::InvalidScript,
+                            "script_duplicate",
                             script.span,
                             "Duplicate top-level <script> is not allowed",
                         ));
@@ -45,8 +47,9 @@ pub fn parse_script_or_style<'a>(input: &mut Input<'a>, start: usize, name: &'a 
         "style" => {
             let style = read_style(input, start, attributes)?;
             if input.state.css.is_some() {
-                input.state.errors.push(ParseError::new(
+                input.state.errors.push(ParseError::with_code(
                     ErrorKind::InvalidCss,
+                    "style_duplicate",
                     style.span,
                     "Duplicate top-level <style> is not allowed",
                 ));

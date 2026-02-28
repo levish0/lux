@@ -4,7 +4,7 @@ use oxc_allocator::Allocator;
 use rustc_hash::FxHashSet;
 use winnow::stream::{LocatingSlice, Stateful};
 
-use crate::error::ParseError;
+use crate::error::{ParseError, ParseWarning};
 
 pub type InputSource<'a> = LocatingSlice<&'a str>;
 pub type Input<'a> = Stateful<InputSource<'a>, ParserState<'a>>;
@@ -19,6 +19,7 @@ pub struct ParserState<'a> {
     pub module: Option<Script<'a>>,
     pub css: Option<StyleSheet<'a>>,
     pub errors: Vec<ParseError>,
+    pub warnings: Vec<ParseWarning>,
 }
 
 impl<'a> std::fmt::Debug for ParserState<'a> {
@@ -27,6 +28,7 @@ impl<'a> std::fmt::Debug for ParserState<'a> {
             .field("ts", &self.ts)
             .field("depth", &self.depth)
             .field("errors", &self.errors.len())
+            .field("warnings", &self.warnings.len())
             .finish()
     }
 }
@@ -43,6 +45,7 @@ impl<'a> ParserState<'a> {
             module: None,
             css: None,
             errors: Vec::new(),
+            warnings: Vec::new(),
         }
     }
 }

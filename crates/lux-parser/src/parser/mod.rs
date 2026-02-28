@@ -9,7 +9,7 @@ use oxc_allocator::Allocator;
 use oxc_span::Span;
 use winnow::stream::{LocatingSlice, Location as StreamLocation, Stateful};
 
-use crate::error::{ErrorKind, ParseError};
+use crate::error::{ErrorKind, ParseError, ParseWarning};
 use crate::input::ParserState;
 use crate::parser::read::options::process_svelte_options;
 use crate::parser::state::fragment::parse_fragment;
@@ -18,6 +18,7 @@ use crate::parser::utils::language::detect_typescript_lang;
 pub struct ParseResult<'a> {
     pub root: Root<'a>,
     pub errors: Vec<ParseError>,
+    pub warnings: Vec<ParseWarning>,
 }
 
 pub fn parse<'a>(template: &'a str, allocator: &'a Allocator, ts: bool) -> ParseResult<'a> {
@@ -49,6 +50,7 @@ pub fn parse<'a>(template: &'a str, allocator: &'a Allocator, ts: bool) -> Parse
     let module = input.state.module.take();
     let css = input.state.css.take();
     let mut errors = input.state.errors;
+    let warnings = input.state.warnings;
 
     // Extract all SvelteOptionsRaw nodes from fragment to Root.options.
     let mut options = None;
@@ -62,7 +64,7 @@ pub fn parse<'a>(template: &'a str, allocator: &'a Allocator, ts: bool) -> Parse
     }
 
     if let Some(first) = options_nodes.into_iter().next() {
-        match process_svelte_options(first) {
+        match process_svelte_options(first, allocator) {
             Ok(opts) => options = Some(opts),
             Err(e) => errors.push(e),
         }
@@ -79,5 +81,9 @@ pub fn parse<'a>(template: &'a str, allocator: &'a Allocator, ts: bool) -> Parse
         ts: effective_ts,
     };
 
-    ParseResult { root, errors }
+    ParseResult {
+        root,
+        errors,
+        warnings,
+    }
 }

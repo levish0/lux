@@ -98,8 +98,9 @@ fn enforce_root_only_svelte_tag_rules<'a>(input: &mut Input<'a>, start: usize, n
     let span = oxc_span::Span::new(start as u32, (start + name.len() + 2) as u32);
 
     if !is_top_level(input) {
-        input.state.errors.push(ParseError::new(
+        input.state.errors.push(ParseError::with_code(
             ErrorKind::General,
+            "svelte_meta_invalid_placement",
             span,
             format!("{name} is only valid at the top level"),
         ));
@@ -107,8 +108,9 @@ fn enforce_root_only_svelte_tag_rules<'a>(input: &mut Input<'a>, start: usize, n
     }
 
     if !input.state.root_meta_tags.insert(name) {
-        input.state.errors.push(ParseError::new(
+        input.state.errors.push(ParseError::with_code(
             ErrorKind::General,
+            "svelte_meta_duplicate",
             span,
             format!("Duplicate root-only Svelte meta tag: {name}"),
         ));

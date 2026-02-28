@@ -1,4 +1,4 @@
-use oxc_ast::ast::{ArrowFunctionExpression, ObjectExpression, Program};
+use oxc_ast::ast::{Expression, ObjectExpression, Program};
 
 use crate::common::Span;
 use crate::css::StyleSheet;
@@ -108,7 +108,14 @@ pub enum CssOption {
 #[derive(Debug)]
 pub struct CustomElementOptions<'a> {
     pub tag: Option<&'a str>,
-    pub shadow: Option<&'a str>,
+    pub shadow: Option<CustomElementShadow<'a>>,
     pub props: Option<ObjectExpression<'a>>,
-    pub extend: Option<ArrowFunctionExpression<'a>>,
+    pub extend: Option<Expression<'a>>,
+}
+
+#[derive(Debug)]
+pub enum CustomElementShadow<'a> {
+    Open,
+    None,
+    Object(ObjectExpression<'a>),
 }

@@ -29,6 +29,14 @@ fn main() {
         writeln!(out).unwrap();
     }
 
+    if !result.warnings.is_empty() {
+        writeln!(out, "=== Warnings ({}) ===", result.warnings.len()).unwrap();
+        for warning in &result.warnings {
+            writeln!(out, "  {:?}", warning).unwrap();
+        }
+        writeln!(out).unwrap();
+    }
+
     writeln!(out, "{:#?}", result.root).unwrap();
 
     println!("Output written to {}", output_path.display());

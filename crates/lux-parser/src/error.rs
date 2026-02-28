@@ -3,6 +3,15 @@ use oxc_span::Span;
 #[derive(Debug, Clone)]
 pub struct ParseError {
     pub kind: ErrorKind,
+    pub code: Option<&'static str>,
+    pub span: Span,
+    pub message: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct ParseWarning {
+    pub kind: WarningKind,
+    pub code: &'static str,
     pub span: Span,
     pub message: String,
 }
@@ -28,6 +37,12 @@ pub enum ErrorKind {
     General,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum WarningKind {
+    InvalidScript,
+    General,
+}
+
 impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.message)
@@ -36,10 +51,31 @@ impl std::fmt::Display for ParseError {
 
 impl std::error::Error for ParseError {}
 
+impl std::fmt::Display for ParseWarning {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
 impl ParseError {
     pub fn new(kind: ErrorKind, span: Span, message: impl Into<String>) -> Self {
         Self {
             kind,
+            code: None,
+            span,
+            message: message.into(),
+        }
+    }
+
+    pub fn with_code(
+        kind: ErrorKind,
+        code: &'static str,
+        span: Span,
+        message: impl Into<String>,
+    ) -> Self {
+        Self {
+            kind,
+            code: Some(code),
             span,
             message: message.into(),
         }
@@ -67,5 +103,21 @@ impl ParseError {
             span,
             format!("Block was left open: {{#{name}}}"),
         )
+    }
+}
+
+impl ParseWarning {
+    pub fn new(
+        kind: WarningKind,
+        code: &'static str,
+        span: Span,
+        message: impl Into<String>,
+    ) -> Self {
+        Self {
+            kind,
+            code,
+            span,
+            message: message.into(),
+        }
     }
 }
