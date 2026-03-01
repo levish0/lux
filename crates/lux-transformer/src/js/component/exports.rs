@@ -33,6 +33,7 @@ pub(super) fn named_export_statement(ast: AstBuilder) -> Statement {
 pub(super) fn default_export_statement<'a>(
     ast: AstBuilder<'a>,
     render_expression: Expression<'a>,
+    render_setup_statements: oxc_allocator::Vec<'a, Statement<'a>>,
 ) -> Statement<'a> {
     let mut properties = ast.vec_with_capacity(6);
     properties.push(named_property(ast, "template", LUX_TEMPLATE));
@@ -40,7 +41,12 @@ pub(super) fn default_export_statement<'a>(
     properties.push(named_property(ast, "cssHash", LUX_CSS_HASH));
     properties.push(named_property(ast, "cssScope", LUX_CSS_SCOPE));
     properties.push(named_property(ast, "hasDynamic", LUX_HAS_DYNAMIC));
-    properties.push(function_property(ast, "render", render_expression));
+    properties.push(function_property(
+        ast,
+        "render",
+        render_expression,
+        render_setup_statements,
+    ));
 
     let object_expression = ast.expression_object(SPAN, properties);
     ast.module_declaration_export_default_declaration(
@@ -83,6 +89,7 @@ fn function_property<'a>(
     ast: AstBuilder<'a>,
     key: &str,
     render_expression: Expression<'a>,
+    render_setup_statements: oxc_allocator::Vec<'a, Statement<'a>>,
 ) -> oxc_ast::ast::ObjectPropertyKind<'a> {
     let props_pattern = ast.binding_pattern_assignment_pattern(
         SPAN,
@@ -125,14 +132,12 @@ fn function_property<'a>(
         ast.expression_identifier(SPAN, ast.ident("__lux_render")),
     );
     let init_self = ast.expression_logical(SPAN, self_missing, LogicalOperator::And, self_assign);
-    let function_body = ast.alloc_function_body(
-        SPAN,
-        ast.vec(),
-        ast.vec_from_array([
-            ast.statement_expression(SPAN, init_self),
-            ast.statement_return(SPAN, Some(render_expression)),
-        ]),
-    );
+    let mut statements = ast.vec_with_capacity(render_setup_statements.len() + 2);
+    statements.push(ast.statement_expression(SPAN, init_self));
+    statements.extend(render_setup_statements);
+    statements.push(ast.statement_return(SPAN, Some(render_expression)));
+
+    let function_body = ast.alloc_function_body(SPAN, ast.vec(), statements);
 
     let function_expression = ast.expression_function(
         SPAN,

@@ -1,5 +1,5 @@
 use lux_analyzer::analyze;
-use lux_ast::analysis::ScriptTarget;
+use lux_ast::analysis::{ScriptRuneKind, ScriptTarget};
 use lux_parser::parse;
 use oxc_allocator::Allocator;
 
@@ -86,6 +86,116 @@ fn analyze_script_reference_read_write_flags() {
         count_references
             .iter()
             .any(|reference| reference.is_read && reference.is_write)
+    );
+}
+
+#[test]
+fn analyze_collects_script_rune_calls() {
+    let source = r#"
+<script>
+  let count = $state(0);
+  let doubled = $derived.by(() => count * 2);
+  $effect.pre(() => {
+    console.log(count);
+  });
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    let runes: Vec<_> = tables
+        .script_runes
+        .iter()
+        .filter(|rune| rune.target == ScriptTarget::Instance)
+        .collect();
+
+    assert!(runes.iter().any(|rune| rune.name == "$state"
+        && rune.kind == ScriptRuneKind::Known
+        && rune.is_state_creation));
+    assert!(runes.iter().any(|rune| rune.name == "$derived.by"
+        && rune.kind == ScriptRuneKind::Known
+        && rune.is_state_creation));
+    assert!(runes.iter().any(|rune| rune.name == "$effect.pre"
+        && rune.kind == ScriptRuneKind::Known
+        && !rune.is_state_creation));
+}
+
+#[test]
+fn analyze_marks_unknown_runes() {
+    let source = r#"
+<script>
+  $unknown_rune(1, 2, 3);
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(tables.script_runes.iter().any(|rune| {
+        rune.target == ScriptTarget::Instance
+            && rune.name == "$unknown_rune"
+            && rune.kind == ScriptRuneKind::Unknown
+            && rune.argument_count == 3
+    }));
+}
+
+#[test]
+fn analyze_collects_script_imports() {
+    let source = r#"
+<script context="module">
+  import { m } from './m';
+</script>
+<script>
+  import * as Tabs from './tabs';
+  import x, { y as z } from "./x";
+</script>
+"#;
+
+    let tables = analyze_source(source);
+
+    assert!(tables.script_imports.iter().any(|item| {
+        item.target == ScriptTarget::Module
+            && item.source.contains("import { m } from './m';")
+            && item.local_names == vec!["m".to_string()]
+    }));
+    assert!(tables.script_imports.iter().any(|item| {
+        item.target == ScriptTarget::Instance
+            && item.source.contains("import * as Tabs from './tabs';")
+            && item.local_names == vec!["Tabs".to_string()]
+    }));
+    assert!(tables.script_imports.iter().any(|item| {
+        item.target == ScriptTarget::Instance
+            && item.source.contains("import x, { y as z } from \"./x\";")
+            && item.local_names == vec!["x".to_string(), "z".to_string()]
+    }));
+}
+
+#[test]
+fn analyze_skips_type_only_imports_and_type_specifiers() {
+    let source = r#"
+<script lang="ts">
+  import type { A } from './types';
+  import { type B, c } from './mixed';
+  import {} from './side-effect';
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    let instance_imports: Vec<_> = tables
+        .script_imports
+        .iter()
+        .filter(|item| item.target == ScriptTarget::Instance)
+        .collect();
+
+    assert_eq!(instance_imports.len(), 2);
+    assert!(instance_imports.iter().any(|item| {
+        item.source.contains("import { type B, c } from './mixed';")
+            && item.local_names == vec!["c".to_string()]
+    }));
+    assert!(instance_imports.iter().any(|item| {
+        item.source.contains("import {} from './side-effect';") && item.local_names.is_empty()
+    }));
+    assert!(
+        !instance_imports
+            .iter()
+            .any(|item| item.source.contains("import type { A } from './types';"))
     );
 }
 

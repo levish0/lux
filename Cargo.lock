@@ -390,6 +390,7 @@ dependencies = [
 name = "lux-transformer"
 version = "0.1.0"
 dependencies = [
+ "criterion",
  "lux-analyzer",
  "lux-ast",
  "lux-parser",
@@ -401,6 +402,7 @@ dependencies = [
  "oxc_parser",
  "oxc_span",
  "rustc-hash",
+ "serde_json",
 ]
 
 [[package]]

@@ -36,20 +36,20 @@ impl BenchContext {
         }
     }
 
-    fn run_svelte_parse(&self, iterations: u64) -> Duration {
+    fn run_svelte_phase(&self, phase: &str, iterations: u64) -> Duration {
         let script_path = self.runner_dir.join("benchmark_phase.mjs");
         let output = Command::new(node_executable())
             .arg(script_path)
-            .arg("parse")
+            .arg(phase)
             .arg(&self.input_path)
             .arg(iterations.to_string())
             .current_dir(&self.runner_dir)
             .output()
-            .unwrap_or_else(|err| panic!("failed to run node parse benchmark: {err}"));
+            .unwrap_or_else(|err| panic!("failed to run node for phase {phase}: {err}"));
 
         assert!(
             output.status.success(),
-            "svelte parse benchmark failed\nstdout:\n{}\nstderr:\n{}",
+            "svelte benchmark phase {phase} failed\nstdout:\n{}\nstderr:\n{}",
             String::from_utf8_lossy(&output.stdout),
             String::from_utf8_lossy(&output.stderr),
         );
@@ -58,9 +58,9 @@ impl BenchContext {
         let elapsed_ns = stdout
             .split_whitespace()
             .next()
-            .unwrap_or("0")
+            .unwrap_or_else(|| panic!("missing elapsed ns for phase {phase}"))
             .parse::<u64>()
-            .unwrap_or_else(|err| panic!("invalid elapsed ns from svelte runner: {err}"));
+            .unwrap_or_else(|err| panic!("invalid elapsed ns for phase {phase}: {err}"));
 
         Duration::from_nanos(elapsed_ns)
     }
@@ -106,21 +106,24 @@ fn ensure_svelte_runner(runner_dir: &Path) {
     );
 }
 
-fn bench_parser(c: &mut Criterion) {
+fn bench_transform_pipeline(c: &mut Criterion) {
     let ctx = BenchContext::new();
-    let mut group = c.benchmark_group("parser");
+    let mut group = c.benchmark_group("transform_pipeline");
     group.throughput(Throughput::Bytes(ctx.source.len() as u64));
 
-    group.bench_function("lux_parse", |b| {
+    group.bench_function("lux_parse_analyze_transform", |b| {
         b.iter(|| {
             let allocator = Allocator::default();
-            let result = lux_parser::parse(&ctx.source, &allocator, true);
-            black_box(result.root.fragment.nodes.len());
+            let parsed = lux_parser::parse(&ctx.source, &allocator, true);
+            let analysis = lux_analyzer::analyze(&parsed.root);
+            let transformed = lux_transformer::transform(&parsed.root, &analysis);
+            let output_size = transformed.js.len() + transformed.css.as_deref().unwrap_or("").len();
+            black_box(output_size);
         });
     });
 
-    group.bench_function("svelte_parse_node", |b| {
-        b.iter_custom(|iters| ctx.run_svelte_parse(iters));
+    group.bench_function("svelte_compile_server_node", |b| {
+        b.iter_custom(|iters| ctx.run_svelte_phase("transform", iters));
     });
 
     group.finish();
@@ -135,12 +138,12 @@ fn criterion_config() -> Criterion {
 
     Criterion::default()
         .measurement_time(Duration::from_secs(8))
-        .output_directory(&*workspace_root.join("benchmarks/criterion/lux-parser"))
+        .output_directory(&*workspace_root.join("benchmarks/criterion/lux-transformer"))
 }
 
 criterion_group! {
     name = benches;
     config = criterion_config();
-    targets = bench_parser
+    targets = bench_transform_pipeline
 }
 criterion_main!(benches);

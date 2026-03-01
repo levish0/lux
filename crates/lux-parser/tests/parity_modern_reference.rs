@@ -99,7 +99,11 @@ fn node_executable() -> &'static str {
 }
 
 fn ensure_svelte_runner(manifest_dir: &Path) -> PathBuf {
-    let runner_dir = manifest_dir.join("tests/tools/svelte_runner");
+    let workspace_root = manifest_dir
+        .parent()
+        .and_then(Path::parent)
+        .expect("failed to resolve workspace root");
+    let runner_dir = workspace_root.join("tools/svelte_runner");
     let script_path = runner_dir.join("parse_ast.mjs");
     assert!(script_path.exists(), "missing {}", script_path.display());
 

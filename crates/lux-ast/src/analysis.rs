@@ -79,6 +79,12 @@ pub enum ScriptTarget {
     Module,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ScriptRuneKind {
+    Known,
+    Unknown,
+}
+
 #[derive(Debug, Clone)]
 pub struct ScriptScopeAnalysis {
     pub target: ScriptTarget,
@@ -111,6 +117,25 @@ pub struct ScriptReferenceAnalysis {
     pub symbol_id: Option<u32>,
     pub is_read: bool,
     pub is_write: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct ScriptRuneAnalysis {
+    pub target: ScriptTarget,
+    pub name: String,
+    pub kind: ScriptRuneKind,
+    pub span: Span,
+    pub callee_span: Span,
+    pub argument_count: u32,
+    pub is_state_creation: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct ScriptImportAnalysis {
+    pub target: ScriptTarget,
+    pub span: Span,
+    pub source: String,
+    pub local_names: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -184,6 +209,8 @@ pub struct AnalysisTables {
     pub script_scopes: Vec<ScriptScopeAnalysis>,
     pub script_symbols: Vec<ScriptSymbolAnalysis>,
     pub script_references: Vec<ScriptReferenceAnalysis>,
+    pub script_runes: Vec<ScriptRuneAnalysis>,
+    pub script_imports: Vec<ScriptImportAnalysis>,
     pub template_scopes: Vec<TemplateScopeAnalysis>,
     pub template_bindings: Vec<TemplateBindingAnalysis>,
     pub template_references: Vec<TemplateReferenceAnalysis>,

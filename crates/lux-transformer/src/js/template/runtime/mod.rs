@@ -25,14 +25,17 @@ use self::elements::{
 use self::expr::{
     call_iife, call_static_method, escape_html_expression, string_expr, stringify_expression,
 };
-use self::scope::{RuntimeScope, resolve_expression};
+use self::scope::resolve_expression;
 use super::marker::sanitize_comment;
+
+pub(crate) use self::scope::RuntimeScope;
 
 pub(super) fn build_render_expression<'a>(
     ast: AstBuilder<'a>,
     fragment: &Fragment<'_>,
+    scope: &RuntimeScope,
 ) -> Expression<'a> {
-    render_fragment_expression(ast, fragment, &RuntimeScope::default())
+    render_fragment_expression(ast, fragment, scope)
 }
 
 fn render_fragment_expression<'a>(

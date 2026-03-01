@@ -1,16 +1,16 @@
 use lux_ast::template::attribute::{AttributeNode, AttributeValue};
 use lux_ast::template::directive::{StyleDirective, StyleDirectiveValue, StyleModifier};
 use lux_ast::template::tag::TextOrExpressionTag;
+use lux_utils::attributes::is_boolean_attribute;
 use oxc_allocator::CloneIn;
 use oxc_ast::{
     AstBuilder, NONE,
-    ast::{BinaryOperator, Expression, FormalParameterKind, FunctionType, LogicalOperator},
+    ast::{BinaryOperator, Expression, LogicalOperator},
 };
 use oxc_span::SPAN;
 
 use super::expr::{
-    call_static_method, escape_attr_expression, join_chunks_expression, string_expr,
-    stringify_expression,
+    escape_attr_expression, join_chunks_expression, string_expr, stringify_expression,
 };
 use super::scope::{RuntimeScope, is_valid_js_identifier, resolve_expression};
 
@@ -36,28 +36,22 @@ pub(super) fn render_attribute_expression<'a>(
                     for chunk in chunks {
                         let chunk_expr = match chunk {
                             TextOrExpressionTag::Text(text) => string_expr(ast, text.raw),
-                            TextOrExpressionTag::ExpressionTag(tag) => escape_attr_expression(
+                            TextOrExpressionTag::ExpressionTag(tag) => stringify_expression(
                                 ast,
-                                stringify_expression(
+                                resolve_expression(
                                     ast,
-                                    resolve_expression(
-                                        ast,
-                                        tag.expression.clone_in(ast.allocator),
-                                        scope,
-                                    ),
+                                    tag.expression.clone_in(ast.allocator),
+                                    scope,
                                 ),
                             ),
                         };
                         value_parts.push(chunk_expr);
                     }
 
-                    join_chunks_expression(
+                    render_named_expression_attribute(
                         ast,
-                        ast.vec_from_array([
-                            string_expr(ast, &format!(" {}=\"", attribute.name)),
-                            join_chunks_expression(ast, value_parts),
-                            string_expr(ast, "\""),
-                        ]),
+                        attribute.name,
+                        join_chunks_expression(ast, value_parts),
                     )
                 }
             }
@@ -99,13 +93,17 @@ fn render_named_expression_attribute<'a>(
     name: &str,
     value: Expression<'a>,
 ) -> Expression<'a> {
-    join_chunks_expression(
-        ast,
+    ast.expression_call(
+        SPAN,
+        ast.expression_identifier(SPAN, ast.ident("__lux_attr")),
+        NONE,
         ast.vec_from_array([
-            string_expr(ast, &format!(" {}=\"", name)),
-            escape_attr_expression(ast, stringify_expression(ast, value)),
-            string_expr(ast, "\""),
+            string_expr(ast, name).into(),
+            value.into(),
+            ast.expression_boolean_literal(SPAN, is_boolean_attribute(name))
+                .into(),
         ]),
+        false,
     )
 }
 
@@ -196,105 +194,13 @@ fn render_spread_attribute_expression<'a>(
     ast: AstBuilder<'a>,
     spread_expression: Expression<'a>,
 ) -> Expression<'a> {
-    let object_expr = ast.expression_logical(
+    ast.expression_call(
         SPAN,
-        spread_expression,
-        LogicalOperator::Coalesce,
-        ast.expression_object(SPAN, ast.vec()),
-    );
-    let entries = call_static_method(
-        ast,
-        ast.expression_identifier(SPAN, ast.ident("Object")),
-        "entries",
-        ast.vec1(object_expr.into()),
-    );
-
-    let entry_ident = ast.expression_identifier(SPAN, ast.ident("__lux_entry"));
-    let key_expr = ast.member_expression_computed(
-        SPAN,
-        entry_ident.clone_in(ast.allocator),
-        ast.expression_numeric_literal(SPAN, 0.0, None, oxc_ast::ast::NumberBase::Decimal),
-        false,
-    );
-    let value_expr = ast.member_expression_computed(
-        SPAN,
-        entry_ident.clone_in(ast.allocator),
-        ast.expression_numeric_literal(SPAN, 1.0, None, oxc_ast::ast::NumberBase::Decimal),
-        false,
-    );
-    let is_true = ast.expression_binary(
-        SPAN,
-        value_expr.clone_in(ast.allocator).into(),
-        BinaryOperator::StrictEquality,
-        ast.expression_boolean_literal(SPAN, true),
-    );
-    let omitted =
-        is_falsy_attribute_value_expression(ast, value_expr.clone_in(ast.allocator).into());
-
-    let true_attr = join_chunks_expression(
-        ast,
-        ast.vec_from_array([
-            string_expr(ast, " "),
-            stringify_expression(ast, key_expr.clone_in(ast.allocator).into()),
-        ]),
-    );
-
-    let value_attr = join_chunks_expression(
-        ast,
-        ast.vec_from_array([
-            string_expr(ast, " "),
-            stringify_expression(ast, key_expr.into()),
-            string_expr(ast, "=\""),
-            escape_attr_expression(
-                ast,
-                stringify_expression(ast, value_expr.clone_in(ast.allocator).into()),
-            ),
-            string_expr(ast, "\""),
-        ]),
-    );
-
-    let mapped_value = ast.expression_conditional(
-        SPAN,
-        is_true,
-        true_attr,
-        ast.expression_conditional(SPAN, omitted, string_expr(ast, ""), value_attr),
-    );
-    let params = ast.alloc_formal_parameters(
-        SPAN,
-        FormalParameterKind::FormalParameter,
-        ast.vec1(ast.formal_parameter(
-            SPAN,
-            ast.vec(),
-            ast.binding_pattern_binding_identifier(SPAN, ast.ident("__lux_entry")),
-            NONE,
-            NONE,
-            false,
-            None,
-            false,
-            false,
-        )),
+        ast.expression_identifier(SPAN, ast.ident("__lux_attributes")),
         NONE,
-    );
-    let body = ast.alloc_function_body(
-        SPAN,
-        ast.vec(),
-        ast.vec1(ast.statement_return(SPAN, Some(mapped_value))),
-    );
-    let mapper = ast.expression_function(
-        SPAN,
-        FunctionType::FunctionExpression,
-        None,
+        ast.vec1(spread_expression.into()),
         false,
-        false,
-        false,
-        NONE,
-        NONE,
-        params,
-        NONE,
-        Some(body),
-    );
-    let mapped = call_static_method(ast, entries, "map", ast.vec1(mapper.into()));
-    call_static_method(ast, mapped, "join", ast.vec1(string_expr(ast, "").into()))
+    )
 }
 
 fn is_falsy_attribute_value_expression<'a>(

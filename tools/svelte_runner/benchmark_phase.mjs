@@ -5,12 +5,12 @@ const [, , phase, inputPath, iterationsArg] = process.argv;
 
 if (!phase || !inputPath || !iterationsArg) {
   console.error(
-    "usage: node benchmark_phase.mjs <parse|analyze> <input.svelte> <iterations>",
+    "usage: node benchmark_phase.mjs <parse|analyze|transform> <input.svelte> <iterations>",
   );
   process.exit(2);
 }
 
-if (phase !== "parse" && phase !== "analyze") {
+if (phase !== "parse" && phase !== "analyze" && phase !== "transform") {
   console.error(`unsupported phase: ${phase}`);
   process.exit(2);
 }
@@ -28,13 +28,20 @@ for (let i = 0; i < 3; i += 1) {
   if (phase === "parse") {
     const ast = parse(source, { modern: true });
     sink ^= ast.fragment.nodes.length;
-  } else {
+  } else if (phase === "analyze") {
     const result = compile(source, {
       filename: inputPath,
       generate: false,
       modernAst: true,
     });
     sink ^= result.warnings.length;
+  } else {
+    const result = compile(source, {
+      filename: inputPath,
+      generate: "server",
+      modernAst: true,
+    });
+    sink ^= result.js.code.length;
   }
 }
 
@@ -43,13 +50,20 @@ for (let i = 0; i < iterations; i += 1) {
   if (phase === "parse") {
     const ast = parse(source, { modern: true });
     sink ^= ast.fragment.nodes.length;
-  } else {
+  } else if (phase === "analyze") {
     const result = compile(source, {
       filename: inputPath,
       generate: false,
       modernAst: true,
     });
     sink ^= result.warnings.length;
+  } else {
+    const result = compile(source, {
+      filename: inputPath,
+      generate: "server",
+      modernAst: true,
+    });
+    sink ^= result.js.code.length;
   }
 }
 const elapsedNs = process.hrtime.bigint() - start;

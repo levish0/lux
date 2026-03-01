@@ -26,6 +26,7 @@ pub fn transform(root: &Root<'_>, analysis: &AnalysisTables) -> TransformResult 
 
     let js = js::render_component(
         root,
+        analysis,
         css.as_deref(),
         css_hash.as_deref(),
         css_scope.as_deref(),

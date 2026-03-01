@@ -23,11 +23,7 @@ pub(super) fn render_component_expression<'a>(
     component: &Component<'_>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
-    let callee = resolve_expression(
-        ast,
-        ast.expression_identifier(SPAN, ast.ident(component.name)),
-        scope,
-    );
+    let callee = resolve_expression(ast, component_name_expression(ast, component.name), scope);
     render_component_like_expression(
         ast,
         callee,
@@ -35,6 +31,27 @@ pub(super) fn render_component_expression<'a>(
         &component.fragment,
         scope,
     )
+}
+
+fn component_name_expression<'a>(ast: AstBuilder<'a>, name: &str) -> Expression<'a> {
+    let mut segments = name.split('.');
+    let Some(first) = segments.next() else {
+        return string_expr(ast, "");
+    };
+
+    let mut expression = ast.expression_identifier(SPAN, ast.ident(first));
+    for segment in segments {
+        expression = ast
+            .member_expression_static(
+                SPAN,
+                expression,
+                ast.identifier_name(SPAN, ast.ident(segment)),
+                false,
+            )
+            .into();
+    }
+
+    expression
 }
 
 pub(super) fn render_svelte_component_expression<'a>(

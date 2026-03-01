@@ -275,7 +275,9 @@ fn transform_generates_spread_and_directive_runtime_attributes() {
     let result = transform(&parsed.root, &analysis);
 
     assert!(result.js.contains("Object.entries("));
-    assert!(result.js.contains("__lux_entry[1] === true"));
+    assert!(result.js.contains("__lux_attributes("));
+    assert!(result.js.contains("typeof __lux_entry[1] === \"function\""));
+    assert!(result.js.contains("__lux_is_boolean_attr("));
     assert!(result.js.contains("\" class=\\\"\""));
     assert!(result.js.contains("\"active\""));
     assert!(result.js.contains("\" style=\\\"color: \""));
@@ -284,6 +286,90 @@ fn transform_generates_spread_and_directive_runtime_attributes() {
             .js
             .contains("__lux_escape_attr(__lux_stringify(function({ color })")
     );
+}
+
+#[test]
+fn transform_re_emits_instance_import_and_handles_dotted_component_name() {
+    let source = "<script>import * as Tabs from './tabs';</script><Tabs.Root />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("import * as Tabs from \"./tabs\";"));
+    assert!(result.js.contains("const __lux_component = Tabs.Root;"));
+    assert!(!result.js.contains("function({ Tabs })"));
+}
+
+#[test]
+fn transform_import_emit_and_scope_seed_are_driven_by_analysis_table() {
+    let source = "<script>import * as Tabs from './tabs';</script><Tabs.Root />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let mut analysis = analyze(&parsed.root);
+    analysis.script_imports.clear();
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("import * as Tabs from \"./tabs\";"));
+    assert!(result.js.contains("function({ Tabs })"));
+}
+
+#[test]
+fn transform_emits_instance_imports_before_module_imports() {
+    let source = r#"
+<script context="module">
+  import { m } from './m';
+</script>
+<script>
+  import x from './x';
+</script>
+<p>{x}</p>
+"#;
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    let instance_idx = result
+        .js
+        .find("import x from \"./x\";")
+        .expect("instance import missing");
+    let module_idx = result
+        .js
+        .find("import { m } from \"./m\";")
+        .expect("module import missing");
+    assert!(instance_idx < module_idx);
+}
+
+#[test]
+fn transform_strips_typescript_type_only_import_syntax() {
+    let source = r#"
+<script lang="ts">
+  import type { A } from './types';
+  import { type B, c } from './mixed';
+  import {} from './side-effect';
+</script>
+{c}
+"#;
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("import type"));
+    assert!(!result.js.contains("type B"));
+    assert!(result.js.contains("import { c } from \"./mixed\";"));
+    assert!(result.js.contains("import \"./side-effect\";"));
+    assert!(!result.js.contains("from \"./types\""));
+    assert_js_parses_as_module(&result.js);
 }
 
 #[test]
@@ -392,7 +478,7 @@ fn transform_component_groups_named_slots() {
     assert!(result.js.contains("default: function()"));
     assert!(result.js.contains("title: function()"));
     assert!(result.js.contains("footer: function()"));
-    assert!(result.js.contains(" slot=\\\""));
+    assert!(result.js.contains("__lux_attr(\"slot\""));
 }
 
 #[test]

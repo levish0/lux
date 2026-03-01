@@ -5,6 +5,7 @@ mod runtime;
 
 use lux_ast::template::root::Fragment;
 use oxc_ast::{AstBuilder, ast::Expression};
+pub(crate) use runtime::RuntimeScope;
 
 pub(super) struct TemplateRenderResult {
     pub html: String,
@@ -21,6 +22,7 @@ pub(super) fn render_fragment_template(fragment: &Fragment<'_>) -> TemplateRende
 pub(super) fn build_render_expression<'a>(
     ast: AstBuilder<'a>,
     fragment: &Fragment<'_>,
+    scope: &RuntimeScope,
 ) -> Expression<'a> {
-    runtime::build_render_expression(ast, fragment)
+    runtime::build_render_expression(ast, fragment, scope)
 }

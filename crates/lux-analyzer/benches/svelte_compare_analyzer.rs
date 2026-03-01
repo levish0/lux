@@ -26,7 +26,7 @@ impl BenchContext {
         let source = fs::read_to_string(&input_path)
             .unwrap_or_else(|err| panic!("failed to read {}: {err}", input_path.display()));
 
-        let runner_dir = workspace_root.join("crates/lux-parser/tests/tools/svelte_runner");
+        let runner_dir = workspace_root.join("tools/svelte_runner");
         ensure_svelte_runner(&runner_dir);
 
         Self {

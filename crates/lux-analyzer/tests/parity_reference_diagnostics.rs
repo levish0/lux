@@ -182,7 +182,7 @@ fn node_executable() -> &'static str {
 }
 
 fn ensure_svelte_runner(workspace_root: &Path) -> PathBuf {
-    let runner_dir = workspace_root.join("crates/lux-parser/tests/tools/svelte_runner");
+    let runner_dir = workspace_root.join("tools/svelte_runner");
     let script_path = runner_dir.join("analyze_diagnostics.mjs");
     assert!(script_path.exists(), "missing {}", script_path.display());
 

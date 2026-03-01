@@ -27,13 +27,16 @@ jobs:
           workspaces: "."
 
       - name: Install Svelte runner deps
-        run: npm install --prefix crates/lux-parser/tests/tools/svelte_runner --silent --no-fund --no-audit
+        run: npm install --prefix tools/svelte_runner --silent --no-fund --no-audit
 
       - name: Run parser benchmark
         run: cargo bench -p lux-parser --bench svelte_compare_parser -- --sample-size 30 --warm-up-time 1 --measurement-time 8
 
       - name: Run analyzer benchmark
         run: cargo bench -p lux-analyzer --bench svelte_compare_analyzer -- --sample-size 30 --warm-up-time 1 --measurement-time 8
+
+      - name: Run transformer benchmark
+        run: cargo bench -p lux-transformer --bench svelte_compare_transformer -- --sample-size 30 --warm-up-time 1 --measurement-time 8
 
       - name: Upload benchmark reports
         if: always()

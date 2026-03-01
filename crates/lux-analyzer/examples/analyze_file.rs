@@ -55,6 +55,8 @@ fn main() {
         tables.script_references.len()
     )
     .unwrap();
+    writeln!(output, "script_runes: {}", tables.script_runes.len()).unwrap();
+    writeln!(output, "script_imports: {}", tables.script_imports.len()).unwrap();
     writeln!(output, "template_scopes: {}", tables.template_scopes.len()).unwrap();
     writeln!(
         output,

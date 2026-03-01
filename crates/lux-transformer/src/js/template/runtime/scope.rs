@@ -7,13 +7,25 @@ use oxc_span::SPAN;
 use rustc_hash::FxHashSet;
 
 #[derive(Default, Clone)]
-pub(super) struct RuntimeScope {
+pub(crate) struct RuntimeScope {
     local_bindings: FxHashSet<String>,
 }
 
 impl RuntimeScope {
     pub(super) fn contains(&self, name: &str) -> bool {
         self.local_bindings.contains(name)
+    }
+
+    pub(crate) fn from_names<I, S>(names: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        let mut scope = Self::default();
+        for name in names {
+            scope.local_bindings.insert(name.as_ref().to_owned());
+        }
+        scope
     }
 
     pub(super) fn with_binding_pattern(&self, pattern: &BindingPattern<'_>) -> Self {
