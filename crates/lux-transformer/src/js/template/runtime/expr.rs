@@ -27,7 +27,10 @@ pub(super) fn call_static_method<'a>(
     ast.expression_call(SPAN, callee.into(), NONE, arguments, false)
 }
 
-pub(super) fn stringify_expression<'a>(ast: AstBuilder<'a>, expression: Expression<'a>) -> Expression<'a> {
+pub(super) fn stringify_expression<'a>(
+    ast: AstBuilder<'a>,
+    expression: Expression<'a>,
+) -> Expression<'a> {
     ast.expression_call(
         SPAN,
         ast.expression_identifier(SPAN, ast.ident("__lux_stringify")),
@@ -37,7 +40,10 @@ pub(super) fn stringify_expression<'a>(ast: AstBuilder<'a>, expression: Expressi
     )
 }
 
-pub(super) fn escape_html_expression<'a>(ast: AstBuilder<'a>, value: Expression<'a>) -> Expression<'a> {
+pub(super) fn escape_html_expression<'a>(
+    ast: AstBuilder<'a>,
+    value: Expression<'a>,
+) -> Expression<'a> {
     ast.expression_call(
         SPAN,
         ast.expression_identifier(SPAN, ast.ident("__lux_escape")),
@@ -47,7 +53,10 @@ pub(super) fn escape_html_expression<'a>(ast: AstBuilder<'a>, value: Expression<
     )
 }
 
-pub(super) fn escape_attr_expression<'a>(ast: AstBuilder<'a>, value: Expression<'a>) -> Expression<'a> {
+pub(super) fn escape_attr_expression<'a>(
+    ast: AstBuilder<'a>,
+    value: Expression<'a>,
+) -> Expression<'a> {
     ast.expression_call(
         SPAN,
         ast.expression_identifier(SPAN, ast.ident("__lux_escape_attr")),
@@ -108,7 +117,10 @@ pub(super) fn bind_pattern_value_expression<'a>(
         SPAN,
         binder,
         NONE,
-        ast.vec1(ast.expression_identifier(SPAN, ast.ident(value_ident_name)).into()),
+        ast.vec1(
+            ast.expression_identifier(SPAN, ast.ident(value_ident_name))
+                .into(),
+        ),
         false,
     )
 }
@@ -136,7 +148,11 @@ pub(super) fn call_iife<'a>(
     ast.expression_call(SPAN, function, NONE, ast.vec(), false)
 }
 
-pub(super) fn const_statement<'a>(ast: AstBuilder<'a>, name: &str, init: Expression<'a>) -> Statement<'a> {
+pub(super) fn const_statement<'a>(
+    ast: AstBuilder<'a>,
+    name: &str,
+    init: Expression<'a>,
+) -> Statement<'a> {
     let declarator = ast.variable_declarator(
         SPAN,
         VariableDeclarationKind::Const,

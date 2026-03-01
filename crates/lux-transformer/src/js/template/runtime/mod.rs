@@ -6,8 +6,8 @@ mod scope;
 
 use lux_ast::template::root::{Fragment, FragmentNode};
 use oxc_allocator::CloneIn;
-use oxc_ast::{AstBuilder, ast::Expression};
 use oxc_ast::ast::PropertyKind;
+use oxc_ast::{AstBuilder, ast::Expression};
 use oxc_span::SPAN;
 
 use self::blocks::{
@@ -16,7 +16,8 @@ use self::blocks::{
 };
 use self::elements::{
     render_component_expression, render_regular_element_expression, render_slot_element_expression,
-    render_svelte_component_expression, render_svelte_element_expression, render_svelte_self_expression,
+    render_svelte_component_expression, render_svelte_element_expression,
+    render_svelte_self_expression,
 };
 use self::expr::{
     call_iife, call_static_method, escape_html_expression, string_expr, stringify_expression,
@@ -79,32 +80,28 @@ fn render_fragment_nodes_expression<'a>(
             }
             FragmentNode::SnippetBlock(block) => {
                 let rendered = render_snippet_block_declaration(ast, block, &current_scope);
-                statements.push(
-                    ast.statement_expression(
-                        SPAN,
-                        call_static_method(
-                            ast,
-                            chunks_ident.clone_in(ast.allocator),
-                            "push",
-                            ast.vec1(rendered.into()),
-                        ),
+                statements.push(ast.statement_expression(
+                    SPAN,
+                    call_static_method(
+                        ast,
+                        chunks_ident.clone_in(ast.allocator),
+                        "push",
+                        ast.vec1(rendered.into()),
                     ),
-                );
+                ));
                 current_scope = current_scope.with_name(block.expression.name.as_str());
             }
             _ => {
                 let rendered = render_node_expression(ast, node, &current_scope);
-                statements.push(
-                    ast.statement_expression(
-                        SPAN,
-                        call_static_method(
-                            ast,
-                            chunks_ident.clone_in(ast.allocator),
-                            "push",
-                            ast.vec1(rendered.into()),
-                        ),
+                statements.push(ast.statement_expression(
+                    SPAN,
+                    call_static_method(
+                        ast,
+                        chunks_ident.clone_in(ast.allocator),
+                        "push",
+                        ast.vec1(rendered.into()),
                     ),
-                );
+                ));
             }
         }
     }
@@ -175,12 +172,22 @@ fn render_node_expression<'a>(
         FragmentNode::SvelteComponent(component) => {
             render_svelte_component_expression(ast, component, scope)
         }
-        FragmentNode::SvelteElement(element) => render_svelte_element_expression(ast, element, scope),
+        FragmentNode::SvelteElement(element) => {
+            render_svelte_element_expression(ast, element, scope)
+        }
         FragmentNode::SvelteSelf(component) => render_svelte_self_expression(ast, component, scope),
-        FragmentNode::SvelteFragment(element) => render_fragment_expression(ast, &element.fragment, scope),
-        FragmentNode::SvelteHead(element) => render_fragment_expression(ast, &element.fragment, scope),
-        FragmentNode::SvelteBody(element) => render_fragment_expression(ast, &element.fragment, scope),
-        FragmentNode::SvelteWindow(element) => render_fragment_expression(ast, &element.fragment, scope),
+        FragmentNode::SvelteFragment(element) => {
+            render_fragment_expression(ast, &element.fragment, scope)
+        }
+        FragmentNode::SvelteHead(element) => {
+            render_fragment_expression(ast, &element.fragment, scope)
+        }
+        FragmentNode::SvelteBody(element) => {
+            render_fragment_expression(ast, &element.fragment, scope)
+        }
+        FragmentNode::SvelteWindow(element) => {
+            render_fragment_expression(ast, &element.fragment, scope)
+        }
         FragmentNode::SvelteDocument(element) => {
             render_fragment_expression(ast, &element.fragment, scope)
         }
@@ -199,11 +206,8 @@ fn render_debug_tag_expression<'a>(
     let mut properties = ast.vec_with_capacity(tag.identifiers.len());
     for identifier in &tag.identifiers {
         let name = identifier.name.as_str();
-        let value = resolve_expression(
-            ast,
-            ast.expression_identifier(SPAN, ast.ident(name)),
-            scope,
-        );
+        let value =
+            resolve_expression(ast, ast.expression_identifier(SPAN, ast.ident(name)), scope);
         properties.push(ast.object_property_kind_object_property(
             SPAN,
             PropertyKind::Init,

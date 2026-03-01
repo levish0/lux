@@ -56,5 +56,8 @@ fn test_const_tag_id_is_binding_pattern() {
         panic!("expected ConstTag");
     };
 
-    assert!(matches!(tag.declaration.id, BindingPattern::ObjectPattern(_)));
+    assert!(matches!(
+        tag.declaration.id,
+        BindingPattern::ObjectPattern(_)
+    ));
 }

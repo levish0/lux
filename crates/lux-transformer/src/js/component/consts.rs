@@ -1,5 +1,5 @@
-use oxc_allocator::Vec as ArenaVec;
 use oxc_allocator::CloneIn;
+use oxc_allocator::Vec as ArenaVec;
 use oxc_ast::{
     AstBuilder, NONE,
     ast::{
@@ -48,8 +48,16 @@ pub(super) fn optional_string_expr<'a>(ast: AstBuilder<'a>, value: Option<&str>)
     )
 }
 
-pub(super) fn push_runtime_helpers<'a>(ast: AstBuilder<'a>, body: &mut ArenaVec<'a, Statement<'a>>) {
-    push_const(ast, body, LUX_STRINGIFY, build_stringify_helper_expression(ast));
+pub(super) fn push_runtime_helpers<'a>(
+    ast: AstBuilder<'a>,
+    body: &mut ArenaVec<'a, Statement<'a>>,
+) {
+    push_const(
+        ast,
+        body,
+        LUX_STRINGIFY,
+        build_stringify_helper_expression(ast),
+    );
     push_const(ast, body, LUX_ESCAPE, build_escape_helper_expression(ast));
     push_const(
         ast,
@@ -113,8 +121,10 @@ fn build_escape_helper_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
         stringify_call,
         "replaceAll",
         ast.vec_from_array([
-            ast.expression_string_literal(SPAN, ast.atom("&"), None).into(),
-            ast.expression_string_literal(SPAN, ast.atom("&amp;"), None).into(),
+            ast.expression_string_literal(SPAN, ast.atom("&"), None)
+                .into(),
+            ast.expression_string_literal(SPAN, ast.atom("&amp;"), None)
+                .into(),
         ]),
     );
     let escaped_lt = call_method(
@@ -122,8 +132,10 @@ fn build_escape_helper_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
         escaped_amp,
         "replaceAll",
         ast.vec_from_array([
-            ast.expression_string_literal(SPAN, ast.atom("<"), None).into(),
-            ast.expression_string_literal(SPAN, ast.atom("&lt;"), None).into(),
+            ast.expression_string_literal(SPAN, ast.atom("<"), None)
+                .into(),
+            ast.expression_string_literal(SPAN, ast.atom("&lt;"), None)
+                .into(),
         ]),
     );
     let escaped = call_method(
@@ -131,8 +143,10 @@ fn build_escape_helper_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
         escaped_lt,
         "replaceAll",
         ast.vec_from_array([
-            ast.expression_string_literal(SPAN, ast.atom(">"), None).into(),
-            ast.expression_string_literal(SPAN, ast.atom("&gt;"), None).into(),
+            ast.expression_string_literal(SPAN, ast.atom(">"), None)
+                .into(),
+            ast.expression_string_literal(SPAN, ast.atom("&gt;"), None)
+                .into(),
         ]),
     );
 
@@ -152,8 +166,10 @@ fn build_escape_attr_helper_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a
         escape_call,
         "replaceAll",
         ast.vec_from_array([
-            ast.expression_string_literal(SPAN, ast.atom("\""), None).into(),
-            ast.expression_string_literal(SPAN, ast.atom("&quot;"), None).into(),
+            ast.expression_string_literal(SPAN, ast.atom("\""), None)
+                .into(),
+            ast.expression_string_literal(SPAN, ast.atom("&quot;"), None)
+                .into(),
         ]),
     );
     let escaped = call_method(
@@ -161,8 +177,10 @@ fn build_escape_attr_helper_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a
         escaped_quote,
         "replaceAll",
         ast.vec_from_array([
-            ast.expression_string_literal(SPAN, ast.atom("'"), None).into(),
-            ast.expression_string_literal(SPAN, ast.atom("&#39;"), None).into(),
+            ast.expression_string_literal(SPAN, ast.atom("'"), None)
+                .into(),
+            ast.expression_string_literal(SPAN, ast.atom("&#39;"), None)
+                .into(),
         ]),
     );
 

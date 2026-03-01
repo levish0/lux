@@ -147,7 +147,8 @@ pub(super) fn render_await_block_expression<'a>(
     block: &AwaitBlock<'_>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
-    let awaited_expression = resolve_expression(ast, block.expression.clone_in(ast.allocator), scope);
+    let awaited_expression =
+        resolve_expression(ast, block.expression.clone_in(ast.allocator), scope);
 
     let pending_expr = block.pending.as_ref().map_or_else(
         || string_expr(ast, ""),
@@ -210,7 +211,11 @@ pub(super) fn render_await_block_expression<'a>(
         );
         body_statements.push(ast.statement_try(SPAN, try_block, Some(catch_clause), NONE));
     } else {
-        body_statements.push(const_statement(ast, "__lux_await_value", awaited_expression));
+        body_statements.push(const_statement(
+            ast,
+            "__lux_await_value",
+            awaited_expression,
+        ));
         body_statements.push(ast.statement_return(SPAN, Some(try_result)));
     }
 

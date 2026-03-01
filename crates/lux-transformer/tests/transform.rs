@@ -145,7 +145,11 @@ fn transform_generates_await_runtime_render() {
     let result = transform(&parsed.root, &analysis);
 
     assert!(result.js.contains("__lux_await_value"));
-    assert!(result.js.contains("typeof __lux_await_value.then === \"function\""));
+    assert!(
+        result
+            .js
+            .contains("typeof __lux_await_value.then === \"function\"")
+    );
     assert!(result.js.contains("catch (err)"));
 }
 
@@ -174,7 +178,11 @@ fn transform_escapes_expression_tag_but_not_html_tag() {
     let result = transform(&parsed.root, &analysis);
 
     assert!(result.js.contains("const __lux_escape = function(value)"));
-    assert!(result.js.contains("const __lux_escape_attr = function(value)"));
+    assert!(
+        result
+            .js
+            .contains("const __lux_escape_attr = function(value)")
+    );
     assert!(result.js.contains("__lux_stringify(function({ value })"));
 }
 
@@ -188,11 +196,46 @@ fn transform_generates_component_runtime_render_path() {
     let analysis = analyze(&parsed.root);
     let result = transform(&parsed.root, &analysis);
 
-    assert!(result.js.contains("typeof __lux_component.render === \"function\""));
+    assert!(
+        result
+            .js
+            .contains("typeof __lux_component.render === \"function\"")
+    );
     assert!(result.js.contains("const __lux_component_props = {"));
     assert!(result.js.contains("msg: function({ name })"));
     assert!(result.js.contains("children: function()"));
     assert!(!result.js.contains("<!--lux:dynamic:component-->"));
+}
+
+#[test]
+fn transform_component_props_include_events_object() {
+    let source = "<Child on:click={handle} on:change={onChange} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("$$events"));
+    assert!(result.js.contains("click: function({ handle })"));
+    assert!(result.js.contains("change: function({ onChange })"));
+}
+
+#[test]
+fn transform_component_props_group_duplicate_event_handlers() {
+    let source = "<Child on:click={a} on:click={b} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("$$events"));
+    assert!(result.js.contains("click: ["));
+    assert!(result.js.contains("function({ a })"));
+    assert!(result.js.contains("function({ b })"));
 }
 
 #[test]
@@ -205,7 +248,11 @@ fn transform_generates_svelte_element_runtime_render_path() {
     let analysis = analyze(&parsed.root);
     let result = transform(&parsed.root, &analysis);
 
-    assert!(result.js.contains("const __lux_tag = __lux_stringify(function({ tag })"));
+    assert!(
+        result
+            .js
+            .contains("const __lux_tag = __lux_stringify(function({ tag })")
+    );
     assert!(result.js.contains("\"<\" + __lux_tag"));
     assert!(result.js.contains("\"</\" + __lux_tag + \">\""));
     assert!(!result.js.contains("<!--lux:dynamic:svelte-element-->"));
@@ -223,8 +270,16 @@ fn transform_generates_spread_and_directive_runtime_attributes() {
 
     assert!(result.js.contains("Object.entries("));
     assert!(result.js.contains("__lux_entry[1] === true"));
-    assert!(result.js.contains(" ? \" class=\\\"\" + \"active\" + \"\\\"\" : \"\""));
-    assert!(result.js.contains("\" style=\\\"color: \" + __lux_escape_attr(__lux_stringify("));
+    assert!(
+        result
+            .js
+            .contains(" ? \" class=\\\"\" + \"active\" + \"\\\"\" : \"\"")
+    );
+    assert!(
+        result
+            .js
+            .contains("\" style=\\\"color: \" + __lux_escape_attr(__lux_stringify(")
+    );
 }
 
 #[test]
@@ -320,8 +375,7 @@ fn transform_component_props_include_default_slots_object() {
 
 #[test]
 fn transform_component_groups_named_slots() {
-    let source =
-        "<Child>default<p slot=\"title\">t</p><svelte:fragment slot=\"footer\"><i>f</i></svelte:fragment></Child>";
+    let source = "<Child>default<p slot=\"title\">t</p><svelte:fragment slot=\"footer\"><i>f</i></svelte:fragment></Child>";
     let allocator = Allocator::default();
     let parsed = parse(source, &allocator, false);
     assert!(parsed.errors.is_empty(), "parse should succeed");

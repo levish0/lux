@@ -1,6 +1,8 @@
 use lux_ast::template::attribute::{AttributeNode, AttributeValue};
 use lux_ast::template::directive::LetDirective;
-use lux_ast::template::element::{Component, SlotElement, SvelteComponent, SvelteElement, SvelteSelf};
+use lux_ast::template::element::{
+    Component, SlotElement, SvelteComponent, SvelteElement, SvelteSelf,
+};
 use lux_ast::template::root::{Fragment, FragmentNode};
 use lux_ast::template::tag::TextOrExpressionTag;
 use lux_utils::elements::{is_load_error_element, is_void};
@@ -8,16 +10,16 @@ use oxc_allocator::CloneIn;
 use oxc_ast::{
     AstBuilder, NONE,
     ast::{
-        BinaryOperator, Expression, FormalParameterKind, FunctionType, LogicalOperator, PropertyKind,
-        VariableDeclarationKind,
+        BinaryOperator, Expression, FormalParameterKind, FunctionType, LogicalOperator,
+        PropertyKind, VariableDeclarationKind,
     },
 };
 use oxc_span::SPAN;
 
 use super::attributes::render_attribute_expression;
 use super::expr::{call_iife, concat_expr, const_statement, string_expr, stringify_expression};
-use super::{render_fragment_expression, render_fragment_nodes_expression};
 use super::scope::{RuntimeScope, is_valid_js_identifier, resolve_expression};
+use super::{render_fragment_expression, render_fragment_nodes_expression};
 
 pub(super) fn render_regular_element_expression<'a>(
     ast: AstBuilder<'a>,
@@ -160,7 +162,10 @@ pub(super) fn render_slot_element_expression<'a>(
                 SPAN,
                 slot_fn_ident,
                 NONE,
-                ast.vec1(ast.expression_identifier(SPAN, ast.ident("__lux_slot_props")).into()),
+                ast.vec1(
+                    ast.expression_identifier(SPAN, ast.ident("__lux_slot_props"))
+                        .into(),
+                ),
                 false,
             ),
         ),
@@ -184,12 +189,20 @@ pub(super) fn render_svelte_element_expression<'a>(
     statements.push(const_statement(ast, "__lux_tag", tag_expression));
 
     let tag_ident = ast.expression_identifier(SPAN, ast.ident("__lux_tag"));
-    let mut out = concat_expr(ast, string_expr(ast, "<"), tag_ident.clone_in(ast.allocator));
+    let mut out = concat_expr(
+        ast,
+        string_expr(ast, "<"),
+        tag_ident.clone_in(ast.allocator),
+    );
     for attribute in &element.attributes {
         out = concat_expr(ast, out, render_attribute_expression(ast, attribute, scope));
     }
     out = concat_expr(ast, out, string_expr(ast, ">"));
-    out = concat_expr(ast, out, render_fragment_expression(ast, &element.fragment, scope));
+    out = concat_expr(
+        ast,
+        out,
+        render_fragment_expression(ast, &element.fragment, scope),
+    );
     out = concat_expr(ast, out, string_expr(ast, "</"));
     out = concat_expr(ast, out, tag_ident);
     out = concat_expr(ast, out, string_expr(ast, ">"));
@@ -208,7 +221,13 @@ pub(super) fn render_component_expression<'a>(
         ast.expression_identifier(SPAN, ast.ident(component.name)),
         scope,
     );
-    render_component_like_expression(ast, callee, &component.attributes, &component.fragment, scope)
+    render_component_like_expression(
+        ast,
+        callee,
+        &component.attributes,
+        &component.fragment,
+        scope,
+    )
 }
 
 pub(super) fn render_svelte_component_expression<'a>(
@@ -217,7 +236,13 @@ pub(super) fn render_svelte_component_expression<'a>(
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let callee = resolve_expression(ast, component.expression.clone_in(ast.allocator), scope);
-    render_component_like_expression(ast, callee, &component.attributes, &component.fragment, scope)
+    render_component_like_expression(
+        ast,
+        callee,
+        &component.attributes,
+        &component.fragment,
+        scope,
+    )
 }
 
 pub(super) fn render_svelte_self_expression<'a>(
@@ -263,7 +288,11 @@ fn render_component_like_expression<'a>(
         LogicalOperator::And,
         ast.expression_binary(
             SPAN,
-            ast.expression_unary(SPAN, oxc_ast::ast::UnaryOperator::Typeof, render_member.clone_in(ast.allocator).into()),
+            ast.expression_unary(
+                SPAN,
+                oxc_ast::ast::UnaryOperator::Typeof,
+                render_member.clone_in(ast.allocator).into(),
+            ),
             BinaryOperator::StrictEquality,
             string_expr(ast, "function"),
         ),
@@ -404,12 +433,8 @@ fn build_component_props_expression<'a>(
                     }
                 }
             }
-            let slot_function = build_slot_function_for_nodes(
-                ast,
-                &group.nodes,
-                &let_bindings,
-                scope,
-            );
+            let slot_function =
+                build_slot_function_for_nodes(ast, &group.nodes, &let_bindings, scope);
 
             if group.slot_name == "default" && !has_children_prop && let_bindings.is_empty() {
                 properties.push(object_init_property(
@@ -617,11 +642,7 @@ fn build_slot_function_for_nodes<'a>(
             NONE,
         )
     };
-    let body = ast.alloc_function_body(
-        SPAN,
-        ast.vec(),
-        body_statements,
-    );
+    let body = ast.alloc_function_body(SPAN, ast.vec(), body_statements);
     ast.expression_function(
         SPAN,
         FunctionType::FunctionExpression,
@@ -691,7 +712,9 @@ fn component_child_slot_let_bindings<'a>(
     if !collect_from_node {
         return Vec::new();
     }
-    if slot_name == "default" && !has_slot_attribute && !matches!(node, FragmentNode::SvelteFragment(_))
+    if slot_name == "default"
+        && !has_slot_attribute
+        && !matches!(node, FragmentNode::SvelteFragment(_))
     {
         return Vec::new();
     }

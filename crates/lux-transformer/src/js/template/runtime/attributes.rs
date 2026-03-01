@@ -120,7 +120,11 @@ fn render_style_directive_attribute_expression<'a>(
 ) -> Expression<'a> {
     let value = render_style_directive_value_expression(ast, directive, scope);
     let style_body = if directive.modifiers.contains(&StyleModifier::Important) {
-        concat_expr(ast, value.clone_in(ast.allocator), string_expr(ast, " !important"))
+        concat_expr(
+            ast,
+            value.clone_in(ast.allocator),
+            string_expr(ast, " !important"),
+        )
     } else {
         value.clone_in(ast.allocator)
     };
@@ -209,7 +213,8 @@ fn render_spread_attribute_expression<'a>(
         BinaryOperator::StrictEquality,
         ast.expression_boolean_literal(SPAN, true),
     );
-    let omitted = is_falsy_attribute_value_expression(ast, value_expr.clone_in(ast.allocator).into());
+    let omitted =
+        is_falsy_attribute_value_expression(ast, value_expr.clone_in(ast.allocator).into());
 
     let mut true_attr = string_expr(ast, " ");
     true_attr = concat_expr(
@@ -275,7 +280,10 @@ fn render_spread_attribute_expression<'a>(
     call_static_method(ast, mapped, "join", ast.vec1(string_expr(ast, "").into()))
 }
 
-fn is_falsy_attribute_value_expression<'a>(ast: AstBuilder<'a>, value: Expression<'a>) -> Expression<'a> {
+fn is_falsy_attribute_value_expression<'a>(
+    ast: AstBuilder<'a>,
+    value: Expression<'a>,
+) -> Expression<'a> {
     let is_nullish = ast.expression_binary(
         SPAN,
         value.clone_in(ast.allocator),

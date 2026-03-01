@@ -74,7 +74,9 @@ pub(super) fn render_node(node: &FragmentNode<'_>, out: &mut String, has_dynamic
         FragmentNode::SvelteSelf(_) => {
             *has_dynamic = true;
         }
-        FragmentNode::SvelteFragment(element) => render_fragment(&element.fragment, out, has_dynamic),
+        FragmentNode::SvelteFragment(element) => {
+            render_fragment(&element.fragment, out, has_dynamic)
+        }
         FragmentNode::SvelteHead(element) => render_fragment(&element.fragment, out, has_dynamic),
         FragmentNode::SvelteBody(element) => render_fragment(&element.fragment, out, has_dynamic),
         FragmentNode::SvelteWindow(element) => render_fragment(&element.fragment, out, has_dynamic),
