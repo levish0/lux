@@ -11,17 +11,20 @@ use oxc_allocator::CloneIn;
 use oxc_ast::AstBuilder;
 use oxc_ast::ast::{ImportDeclaration, ImportDeclarationSpecifier, Statement};
 use oxc_codegen::Codegen;
+use oxc_parser::Parser;
 use oxc_span::{SPAN, SourceType};
 
 use self::consts::{
-    LUX_CSS, LUX_CSS_HASH, LUX_CSS_SCOPE, LUX_HAS_DYNAMIC, LUX_TEMPLATE, optional_string_expr,
-    push_const, push_runtime_helpers,
+    LUX_ATTR, LUX_ATTRIBUTES, LUX_CSS, LUX_CSS_HASH, LUX_CSS_SCOPE, LUX_ESCAPE, LUX_ESCAPE_ATTR,
+    LUX_HAS_DYNAMIC, LUX_IS_BOOLEAN_ATTR, LUX_RUNTIME_IMPORT_SOURCE, LUX_STRINGIFY, LUX_TEMPLATE,
+    optional_string_expr, push_const,
 };
 use self::exports::{default_export_statement, named_export_statement};
 use self::script::{
     collect_instance_runtime_binding_names, collect_instance_runtime_statements,
     collect_module_runtime_statements,
 };
+use super::ComponentRenderOutput;
 use super::template::{RuntimeScope, build_render_expression, render_fragment_template};
 
 pub(super) fn render(
@@ -30,13 +33,16 @@ pub(super) fn render(
     css: Option<&str>,
     css_hash: Option<&str>,
     css_scope: Option<&str>,
-) -> String {
+) -> ComponentRenderOutput {
     let template_result = render_fragment_template(&root.fragment);
 
     let allocator = Allocator::default();
     let ast = AstBuilder::new(&allocator);
 
     let mut body = ast.vec_with_capacity(16);
+    if template_result.has_dynamic {
+        push_runtime_helper_import(ast, &mut body);
+    }
     push_import_declarations(ast, &mut body, root, analysis);
     let module_runtime = collect_module_runtime_statements(ast, root);
     body.extend(module_runtime);
@@ -66,9 +72,6 @@ pub(super) fn render(
         LUX_HAS_DYNAMIC,
         ast.expression_boolean_literal(SPAN, template_result.has_dynamic),
     );
-    if template_result.has_dynamic {
-        push_runtime_helpers(ast, &mut body);
-    }
 
     body.push(named_export_statement(ast));
     let instance_runtime = collect_instance_runtime_statements(ast, root);
@@ -95,7 +98,31 @@ pub(super) fn render(
         ast.vec(),
         body,
     );
-    Codegen::new().build(&program).code
+    ComponentRenderOutput {
+        js: Codegen::new().build(&program).code,
+        needs_server_runtime: template_result.has_dynamic,
+    }
+}
+
+fn push_runtime_helper_import<'a>(
+    ast: AstBuilder<'a>,
+    body: &mut oxc_allocator::Vec<'a, Statement<'a>>,
+) {
+    let parser_allocator = Allocator::default();
+    let parsed = Parser::new(
+        &parser_allocator,
+        LUX_RUNTIME_IMPORT_SOURCE,
+        SourceType::mjs(),
+    )
+    .parse();
+    debug_assert!(
+        parsed.errors.is_empty(),
+        "runtime helper import parse failed: {:?}",
+        parsed.errors
+    );
+    if let Some(statement) = parsed.program.body.first() {
+        body.push(statement.clone_in(ast.allocator));
+    }
 }
 
 fn push_import_declarations<'a>(
@@ -202,6 +229,13 @@ fn sanitize_import_statement<'a>(
 
 fn collect_instance_import_names(analysis: &AnalysisTables) -> Vec<String> {
     let mut names = BTreeSet::new();
+    // Runtime helper aliases are local bindings in generated module scope.
+    names.insert(LUX_STRINGIFY.to_string());
+    names.insert(LUX_ESCAPE.to_string());
+    names.insert(LUX_ESCAPE_ATTR.to_string());
+    names.insert(LUX_ATTR.to_string());
+    names.insert(LUX_ATTRIBUTES.to_string());
+    names.insert(LUX_IS_BOOLEAN_ATTR.to_string());
     for import in &analysis.script_imports {
         if import.target != ScriptTarget::Instance {
             continue;

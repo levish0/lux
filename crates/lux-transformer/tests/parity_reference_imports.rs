@@ -85,6 +85,7 @@ fn normalize_relevant_import_lines(js: &str) -> Vec<String> {
         .map(str::trim)
         .filter(|line| line.starts_with("import "))
         .filter(|line| !line.contains("svelte/internal/"))
+        .filter(|line| !line.contains("lux/runtime/"))
         .map(|line| line.replace('\'', "\""))
         .collect()
 }

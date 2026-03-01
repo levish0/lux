@@ -19,10 +19,10 @@ oxc_codegen = { workspace = true }
 oxc_ast_visit = { workspace = true }
 oxc_span = { workspace = true }
 oxc_syntax = { workspace = true }
+oxc_parser = { workspace = true }
 rustc-hash = { workspace = true }
 
 [dev-dependencies]
-oxc_parser = { workspace = true }
 serde_json = { workspace = true }
 criterion = { workspace = true }
 

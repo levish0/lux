@@ -46,6 +46,7 @@ fn transform_has_no_css_payload_without_style_blocks() {
     assert_eq!(result.css, None);
     assert_eq!(result.css_hash, None);
     assert_eq!(result.css_scope, None);
+    assert!(result.runtime_modules.is_empty());
     assert_component_js_payload(&result.js);
 }
 
@@ -102,6 +103,9 @@ fn transform_generates_expression_runtime_render() {
     assert!(result.js.contains("\"<p\","));
     assert!(result.js.contains("</p>"));
     assert!(!result.js.contains("<!--lux:dynamic:expression-->"));
+    assert_eq!(result.runtime_modules.len(), 1);
+    assert_eq!(result.runtime_modules[0].specifier, "lux/runtime/server");
+    assert!(result.runtime_modules[0].code.contains("export function stringify"));
 }
 
 #[test]
@@ -178,14 +182,10 @@ fn transform_escapes_expression_tag_but_not_html_tag() {
     let analysis = analyze(&parsed.root);
     let result = transform(&parsed.root, &analysis);
 
-    assert!(result.js.contains("const __lux_escape = function(value)"));
-    assert!(
-        result
-            .js
-            .contains("const __lux_escape_attr = function(value)")
-    );
-    assert!(result.js.contains("replace(/[&<>]/g"));
-    assert!(result.js.contains("replace(/[&<>\"']/g"));
+    assert!(result.js.contains("from \"lux/runtime/server\";"));
+    assert!(result.js.contains("stringify as __lux_stringify"));
+    assert!(result.js.contains("escape as __lux_escape"));
+    assert!(result.js.contains("escape_attr as __lux_escape_attr"));
     assert!(!result.js.contains("replaceAll("));
     assert!(result.js.contains("__lux_stringify(function({ value })"));
 }
@@ -274,10 +274,8 @@ fn transform_generates_spread_and_directive_runtime_attributes() {
     let analysis = analyze(&parsed.root);
     let result = transform(&parsed.root, &analysis);
 
-    assert!(result.js.contains("Object.entries("));
+    assert!(result.js.contains("from \"lux/runtime/server\";"));
     assert!(result.js.contains("__lux_attributes("));
-    assert!(result.js.contains("typeof __lux_entry[1] === \"function\""));
-    assert!(result.js.contains("__lux_is_boolean_attr("));
     assert!(result.js.contains("\" class=\\\"\""));
     assert!(result.js.contains("\"active\""));
     assert!(result.js.contains("\" style=\\\"color: \""));
