@@ -94,7 +94,7 @@ fn transform_generates_expression_runtime_render() {
     let analysis = analyze(&parsed.root);
     let result = transform(&parsed.root, &analysis);
 
-    assert!(result.js.contains("String("));
+    assert!(result.js.contains("__lux_stringify("));
     assert!(result.js.contains("_props"));
     assert!(result.js.contains("function({ name })"));
     assert!(result.js.contains("return name;"));
@@ -173,9 +173,9 @@ fn transform_escapes_expression_tag_but_not_html_tag() {
     let analysis = analyze(&parsed.root);
     let result = transform(&parsed.root, &analysis);
 
-    assert!(result.js.contains("replaceAll(\"<\", \"&lt;\")"));
-    assert!(result.js.contains("replaceAll(\">\", \"&gt;\")"));
-    assert!(result.js.contains("String(function({ value })"));
+    assert!(result.js.contains("const __lux_escape = function(value)"));
+    assert!(result.js.contains("const __lux_escape_attr = function(value)"));
+    assert!(result.js.contains("__lux_stringify(function({ value })"));
 }
 
 #[test]
@@ -205,7 +205,7 @@ fn transform_generates_svelte_element_runtime_render_path() {
     let analysis = analyze(&parsed.root);
     let result = transform(&parsed.root, &analysis);
 
-    assert!(result.js.contains("const __lux_tag = String(function({ tag })"));
+    assert!(result.js.contains("const __lux_tag = __lux_stringify(function({ tag })"));
     assert!(result.js.contains("\"<\" + __lux_tag"));
     assert!(result.js.contains("\"</\" + __lux_tag + \">\""));
     assert!(!result.js.contains("<!--lux:dynamic:svelte-element-->"));
@@ -224,7 +224,7 @@ fn transform_generates_spread_and_directive_runtime_attributes() {
     assert!(result.js.contains("Object.entries("));
     assert!(result.js.contains("__lux_entry[1] === true"));
     assert!(result.js.contains(" ? \" class=\\\"\" + \"active\" + \"\\\"\" : \"\""));
-    assert!(result.js.contains("\" style=\\\"color: \" + String("));
+    assert!(result.js.contains("\" style=\\\"color: \" + __lux_escape_attr(__lux_stringify("));
 }
 
 #[test]
@@ -254,7 +254,7 @@ fn transform_generates_const_tag_runtime_binding() {
 
     assert!(!result.js.contains("<!--lux:dynamic:const-tag-->"));
     assert!(result.js.contains("const x = function({ value })"));
-    assert!(result.js.contains("String(x ?? \"\")"));
+    assert!(result.js.contains("__lux_stringify(x)"));
 }
 
 #[test]
@@ -380,8 +380,9 @@ fn transform_component_default_slot_let_directive_uses_slot_props() {
 
     assert!(result.js.contains("default: function(__lux_slot_props)"));
     assert!(result.js.contains("__lux_slot_props.item"));
-    assert!(result.js.contains("String(item ?? \"\")"));
+    assert!(result.js.contains("__lux_stringify(item)"));
     assert!(!result.js.contains("function({ item })"));
+    assert!(!result.js.contains("children: function("));
 }
 
 #[test]
@@ -396,7 +397,105 @@ fn transform_component_named_slot_let_directive_uses_slot_props() {
 
     assert!(result.js.contains("named: function(__lux_slot_props)"));
     assert!(result.js.contains("__lux_slot_props.value"));
-    assert!(result.js.contains("String(value ?? \"\")"));
+    assert!(result.js.contains("__lux_stringify(value)"));
+}
+
+#[test]
+fn transform_adds_load_error_capture_for_on_directives() {
+    let source = "<img on:load={ready} on:error={failed}>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains(" onload=\\\"this.__e=event\\\""));
+    assert!(result.js.contains(" onerror=\\\"this.__e=event\\\""));
+}
+
+#[test]
+fn transform_adds_load_error_capture_for_spread_and_use() {
+    let source = "<img {...attrs} use:enhance>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains(" onload=\\\"this.__e=event\\\""));
+    assert!(result.js.contains(" onerror=\\\"this.__e=event\\\""));
+}
+
+#[test]
+fn transform_does_not_add_load_error_capture_for_non_load_error_elements() {
+    let source = "<div on:load={ready} {...attrs} use:enhance></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains(" onload=\\\"this.__e=event\\\""));
+    assert!(!result.js.contains(" onerror=\\\"this.__e=event\\\""));
+}
+
+#[test]
+fn transform_plain_onload_attribute_is_captured_for_load_error_elements() {
+    let source = "<img onload=\"alert(1)\">";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains(" onload=\\\"this.__e=event\\\""));
+    assert!(!result.js.contains("alert(1)"));
+}
+
+#[test]
+fn transform_plain_event_attributes_are_omitted_on_non_load_error_elements() {
+    let source = "<div onclick=\"alert(1)\">x</div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("onclick"));
+    assert!(!result.js.contains("alert(1)"));
+}
+
+#[test]
+fn transform_omits_bind_this_attribute_on_regular_element() {
+    let source = "<div bind:this={el}></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains(" this=\\\""));
+    assert!(!result.js.contains("bind:this"));
+}
+
+#[test]
+fn transform_omits_bind_this_from_component_props() {
+    let source = "<Child bind:this={child} foo={x} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("foo: function({ x })"));
+    assert!(!result.js.contains("this: function({ child })"));
 }
 
 fn assert_component_js_payload(js: &str) {

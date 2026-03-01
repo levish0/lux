@@ -5,12 +5,20 @@ pub(super) fn render_static_attribute(
     attribute: &AttributeNode<'_>,
     has_dynamic: &mut bool,
 ) -> Option<String> {
-    let AttributeNode::Attribute(attribute) = attribute else {
-        *has_dynamic = true;
-        return None;
-    };
-
-    serialize_attribute(attribute, has_dynamic)
+    match attribute {
+        AttributeNode::Attribute(attribute) => {
+            if is_event_attribute_name(attribute.name) {
+                return None;
+            }
+            serialize_attribute(attribute, has_dynamic)
+        }
+        // bind:this is client-only; omit in SSR without forcing runtime path.
+        AttributeNode::BindDirective(directive) if directive.name == "this" => None,
+        _ => {
+            *has_dynamic = true;
+            None
+        }
+    }
 }
 
 fn serialize_attribute(attribute: &Attribute<'_>, has_dynamic: &mut bool) -> Option<String> {
@@ -54,4 +62,8 @@ fn escape_attribute_value(value: &str) -> String {
         }
     }
     escaped
+}
+
+pub(super) fn is_event_attribute_name(name: &str) -> bool {
+    name.len() > 2 && name.starts_with("on")
 }

@@ -1,7 +1,11 @@
 use oxc_allocator::Vec as ArenaVec;
+use oxc_allocator::CloneIn;
 use oxc_ast::{
     AstBuilder, NONE,
-    ast::{Expression, Statement, VariableDeclarationKind},
+    ast::{
+        BinaryOperator, Expression, FormalParameterKind, FunctionType, Statement,
+        VariableDeclarationKind,
+    },
 };
 use oxc_span::SPAN;
 
@@ -10,6 +14,9 @@ pub(super) const LUX_CSS: &str = "__lux_css";
 pub(super) const LUX_CSS_HASH: &str = "__lux_css_hash";
 pub(super) const LUX_CSS_SCOPE: &str = "__lux_css_scope";
 pub(super) const LUX_HAS_DYNAMIC: &str = "__lux_has_dynamic";
+pub(super) const LUX_STRINGIFY: &str = "__lux_stringify";
+pub(super) const LUX_ESCAPE: &str = "__lux_escape";
+pub(super) const LUX_ESCAPE_ATTR: &str = "__lux_escape_attr";
 
 pub(super) fn push_const<'a>(
     ast: AstBuilder<'a>,
@@ -39,4 +46,182 @@ pub(super) fn optional_string_expr<'a>(ast: AstBuilder<'a>, value: Option<&str>)
         || ast.expression_null_literal(SPAN),
         |value| ast.expression_string_literal(SPAN, ast.atom(value), None),
     )
+}
+
+pub(super) fn push_runtime_helpers<'a>(ast: AstBuilder<'a>, body: &mut ArenaVec<'a, Statement<'a>>) {
+    push_const(ast, body, LUX_STRINGIFY, build_stringify_helper_expression(ast));
+    push_const(ast, body, LUX_ESCAPE, build_escape_helper_expression(ast));
+    push_const(
+        ast,
+        body,
+        LUX_ESCAPE_ATTR,
+        build_escape_attr_helper_expression(ast),
+    );
+}
+
+fn build_stringify_helper_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
+    let value_ident = ast.expression_identifier(SPAN, ast.ident("value"));
+
+    let type_check = ast.expression_binary(
+        SPAN,
+        ast.expression_unary(
+            SPAN,
+            oxc_ast::ast::UnaryOperator::Typeof,
+            value_ident.clone_in(ast.allocator),
+        ),
+        BinaryOperator::StrictEquality,
+        ast.expression_string_literal(SPAN, ast.atom("string"), None),
+    );
+    let nullish_check = ast.expression_binary(
+        SPAN,
+        value_ident.clone_in(ast.allocator),
+        BinaryOperator::Equality,
+        ast.expression_null_literal(SPAN),
+    );
+    let value_plus_empty = ast.expression_binary(
+        SPAN,
+        value_ident,
+        BinaryOperator::Addition,
+        ast.expression_string_literal(SPAN, ast.atom(""), None),
+    );
+
+    let result = ast.expression_conditional(
+        SPAN,
+        type_check,
+        ast.expression_identifier(SPAN, ast.ident("value")),
+        ast.expression_conditional(
+            SPAN,
+            nullish_check,
+            ast.expression_string_literal(SPAN, ast.atom(""), None),
+            value_plus_empty,
+        ),
+    );
+
+    single_param_function_expression(ast, "value", result)
+}
+
+fn build_escape_helper_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
+    let stringify_call = ast.expression_call(
+        SPAN,
+        ast.expression_identifier(SPAN, ast.ident(LUX_STRINGIFY)),
+        NONE,
+        ast.vec1(ast.expression_identifier(SPAN, ast.ident("value")).into()),
+        false,
+    );
+    let escaped_amp = call_method(
+        ast,
+        stringify_call,
+        "replaceAll",
+        ast.vec_from_array([
+            ast.expression_string_literal(SPAN, ast.atom("&"), None).into(),
+            ast.expression_string_literal(SPAN, ast.atom("&amp;"), None).into(),
+        ]),
+    );
+    let escaped_lt = call_method(
+        ast,
+        escaped_amp,
+        "replaceAll",
+        ast.vec_from_array([
+            ast.expression_string_literal(SPAN, ast.atom("<"), None).into(),
+            ast.expression_string_literal(SPAN, ast.atom("&lt;"), None).into(),
+        ]),
+    );
+    let escaped = call_method(
+        ast,
+        escaped_lt,
+        "replaceAll",
+        ast.vec_from_array([
+            ast.expression_string_literal(SPAN, ast.atom(">"), None).into(),
+            ast.expression_string_literal(SPAN, ast.atom("&gt;"), None).into(),
+        ]),
+    );
+
+    single_param_function_expression(ast, "value", escaped)
+}
+
+fn build_escape_attr_helper_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
+    let escape_call = ast.expression_call(
+        SPAN,
+        ast.expression_identifier(SPAN, ast.ident(LUX_ESCAPE)),
+        NONE,
+        ast.vec1(ast.expression_identifier(SPAN, ast.ident("value")).into()),
+        false,
+    );
+    let escaped_quote = call_method(
+        ast,
+        escape_call,
+        "replaceAll",
+        ast.vec_from_array([
+            ast.expression_string_literal(SPAN, ast.atom("\""), None).into(),
+            ast.expression_string_literal(SPAN, ast.atom("&quot;"), None).into(),
+        ]),
+    );
+    let escaped = call_method(
+        ast,
+        escaped_quote,
+        "replaceAll",
+        ast.vec_from_array([
+            ast.expression_string_literal(SPAN, ast.atom("'"), None).into(),
+            ast.expression_string_literal(SPAN, ast.atom("&#39;"), None).into(),
+        ]),
+    );
+
+    single_param_function_expression(ast, "value", escaped)
+}
+
+fn single_param_function_expression<'a>(
+    ast: AstBuilder<'a>,
+    param_name: &str,
+    body_expression: Expression<'a>,
+) -> Expression<'a> {
+    let params = ast.alloc_formal_parameters(
+        SPAN,
+        FormalParameterKind::FormalParameter,
+        ast.vec1(ast.formal_parameter(
+            SPAN,
+            ast.vec(),
+            ast.binding_pattern_binding_identifier(SPAN, ast.ident(param_name)),
+            NONE,
+            NONE,
+            false,
+            None,
+            false,
+            false,
+        )),
+        NONE,
+    );
+    let body = ast.alloc_function_body(
+        SPAN,
+        ast.vec(),
+        ast.vec1(ast.statement_return(SPAN, Some(body_expression))),
+    );
+
+    ast.expression_function(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        NONE,
+        NONE,
+        params,
+        NONE,
+        Some(body),
+    )
+}
+
+fn call_method<'a>(
+    ast: AstBuilder<'a>,
+    object: Expression<'a>,
+    method: &str,
+    arguments: oxc_allocator::Vec<'a, oxc_ast::ast::Argument<'a>>,
+) -> Expression<'a> {
+    let callee = ast.member_expression_static(
+        SPAN,
+        object,
+        ast.identifier_name(SPAN, ast.ident(method)),
+        false,
+    );
+    ast.expression_call(SPAN, callee.into(), NONE, arguments, false)
 }

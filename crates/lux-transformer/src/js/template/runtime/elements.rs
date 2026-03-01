@@ -3,7 +3,7 @@ use lux_ast::template::directive::LetDirective;
 use lux_ast::template::element::{Component, SlotElement, SvelteComponent, SvelteElement, SvelteSelf};
 use lux_ast::template::root::{Fragment, FragmentNode};
 use lux_ast::template::tag::TextOrExpressionTag;
-use lux_utils::elements::is_void;
+use lux_utils::elements::{is_load_error_element, is_void};
 use oxc_allocator::CloneIn;
 use oxc_ast::{
     AstBuilder, NONE,
@@ -31,6 +31,13 @@ pub(super) fn render_regular_element_expression<'a>(
     for attribute in attributes {
         out = concat_expr(ast, out, render_attribute_expression(ast, attribute, scope));
     }
+    let (capture_onload, capture_onerror) = detect_load_error_captures(name, attributes);
+    if capture_onload {
+        out = concat_expr(ast, out, string_expr(ast, " onload=\"this.__e=event\""));
+    }
+    if capture_onerror {
+        out = concat_expr(ast, out, string_expr(ast, " onerror=\"this.__e=event\""));
+    }
 
     out = concat_expr(ast, out, string_expr(ast, ">"));
     if !is_void(name) {
@@ -39,6 +46,37 @@ pub(super) fn render_regular_element_expression<'a>(
     }
 
     out
+}
+
+fn detect_load_error_captures(name: &str, attributes: &[AttributeNode<'_>]) -> (bool, bool) {
+    if !is_load_error_element(name) {
+        return (false, false);
+    }
+
+    let mut onload = false;
+    let mut onerror = false;
+
+    for attribute in attributes {
+        match attribute {
+            AttributeNode::OnDirective(directive) => match directive.name {
+                "load" => onload = true,
+                "error" => onerror = true,
+                _ => {}
+            },
+            AttributeNode::Attribute(attribute) => match attribute.name {
+                "onload" => onload = true,
+                "onerror" => onerror = true,
+                _ => {}
+            },
+            AttributeNode::SpreadAttribute(_) | AttributeNode::UseDirective(_) => {
+                onload = true;
+                onerror = true;
+            }
+            _ => {}
+        }
+    }
+
+    (onload, onerror)
 }
 
 pub(super) fn render_slot_element_expression<'a>(
@@ -276,6 +314,7 @@ fn build_component_props_expression<'a>(
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let mut properties = ast.vec();
+    let mut event_handlers: Vec<(&str, Vec<Expression<'a>>)> = Vec::new();
 
     for attribute in attributes {
         match attribute {
@@ -292,19 +331,59 @@ fn build_component_props_expression<'a>(
                 properties.push(ast.object_property_kind_spread_property(SPAN, expression));
             }
             AttributeNode::BindDirective(attribute) => {
+                if attribute.name == "this" {
+                    continue;
+                }
                 let expression =
                     resolve_expression(ast, attribute.expression.clone_in(ast.allocator), scope);
                 properties.push(object_init_property(ast, attribute.name, expression));
             }
+            AttributeNode::OnDirective(attribute) => {
+                let Some(expression) = &attribute.expression else {
+                    continue;
+                };
+                let resolved = resolve_expression(ast, expression.clone_in(ast.allocator), scope);
+                if let Some((_, handlers)) = event_handlers
+                    .iter_mut()
+                    .find(|(name, _)| *name == attribute.name)
+                {
+                    handlers.push(resolved);
+                } else {
+                    event_handlers.push((attribute.name, vec![resolved]));
+                }
+            }
             AttributeNode::ClassDirective(_)
             | AttributeNode::StyleDirective(_)
-            | AttributeNode::OnDirective(_)
             | AttributeNode::TransitionDirective(_)
             | AttributeNode::AnimateDirective(_)
             | AttributeNode::UseDirective(_)
             | AttributeNode::LetDirective(_)
             | AttributeNode::AttachTag(_) => {}
         }
+    }
+
+    if !event_handlers.is_empty() {
+        let mut events_properties = ast.vec();
+        for (name, handlers) in event_handlers {
+            let value = if handlers.len() == 1 {
+                handlers
+                    .into_iter()
+                    .next()
+                    .expect("single handler must exist")
+            } else {
+                let mut items = ast.vec();
+                for handler in handlers {
+                    items.push(handler.into());
+                }
+                ast.expression_array(SPAN, items)
+            };
+            events_properties.push(object_init_property(ast, name, value));
+        }
+        properties.push(object_init_property(
+            ast,
+            "$$events",
+            ast.expression_object(SPAN, events_properties),
+        ));
     }
 
     let has_children_prop = component_has_children_prop(attributes);
@@ -332,7 +411,7 @@ fn build_component_props_expression<'a>(
                 scope,
             );
 
-            if group.slot_name == "default" && !has_children_prop {
+            if group.slot_name == "default" && !has_children_prop && let_bindings.is_empty() {
                 properties.push(object_init_property(
                     ast,
                     "children",
@@ -448,6 +527,9 @@ fn build_slot_props_expression<'a>(
                 properties.push(ast.object_property_kind_spread_property(SPAN, expression));
             }
             AttributeNode::BindDirective(attribute) => {
+                if attribute.name == "this" {
+                    continue;
+                }
                 let expression =
                     resolve_expression(ast, attribute.expression.clone_in(ast.allocator), scope);
                 properties.push(object_init_property(ast, attribute.name, expression));

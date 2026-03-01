@@ -3,8 +3,8 @@ use oxc_allocator::CloneIn;
 use oxc_ast::{
     AstBuilder, NONE,
     ast::{
-        BinaryOperator, BindingPattern, Expression, FormalParameterKind, FunctionType,
-        LogicalOperator, Statement, VariableDeclarationKind,
+        BinaryOperator, BindingPattern, Expression, FormalParameterKind, FunctionType, Statement,
+        VariableDeclarationKind,
     },
 };
 use oxc_span::SPAN;
@@ -28,55 +28,32 @@ pub(super) fn call_static_method<'a>(
 }
 
 pub(super) fn stringify_expression<'a>(ast: AstBuilder<'a>, expression: Expression<'a>) -> Expression<'a> {
-    let value = ast.expression_logical(
-        SPAN,
-        expression,
-        LogicalOperator::Coalesce,
-        string_expr(ast, ""),
-    );
     ast.expression_call(
         SPAN,
-        ast.expression_identifier(SPAN, ast.ident("String")),
+        ast.expression_identifier(SPAN, ast.ident("__lux_stringify")),
+        NONE,
+        ast.vec1(expression.into()),
+        false,
+    )
+}
+
+pub(super) fn escape_html_expression<'a>(ast: AstBuilder<'a>, value: Expression<'a>) -> Expression<'a> {
+    ast.expression_call(
+        SPAN,
+        ast.expression_identifier(SPAN, ast.ident("__lux_escape")),
         NONE,
         ast.vec1(value.into()),
         false,
     )
 }
 
-pub(super) fn escape_html_expression<'a>(ast: AstBuilder<'a>, value: Expression<'a>) -> Expression<'a> {
-    let mut escaped = call_static_method(
-        ast,
-        value,
-        "replaceAll",
-        ast.vec_from_array([string_expr(ast, "&").into(), string_expr(ast, "&amp;").into()]),
-    );
-    escaped = call_static_method(
-        ast,
-        escaped,
-        "replaceAll",
-        ast.vec_from_array([string_expr(ast, "<").into(), string_expr(ast, "&lt;").into()]),
-    );
-    call_static_method(
-        ast,
-        escaped,
-        "replaceAll",
-        ast.vec_from_array([string_expr(ast, ">").into(), string_expr(ast, "&gt;").into()]),
-    )
-}
-
 pub(super) fn escape_attr_expression<'a>(ast: AstBuilder<'a>, value: Expression<'a>) -> Expression<'a> {
-    let escaped_html = escape_html_expression(ast, value);
-    let escaped_quote = call_static_method(
-        ast,
-        escaped_html,
-        "replaceAll",
-        ast.vec_from_array([string_expr(ast, "\"").into(), string_expr(ast, "&quot;").into()]),
-    );
-    call_static_method(
-        ast,
-        escaped_quote,
-        "replaceAll",
-        ast.vec_from_array([string_expr(ast, "'").into(), string_expr(ast, "&#39;").into()]),
+    ast.expression_call(
+        SPAN,
+        ast.expression_identifier(SPAN, ast.ident("__lux_escape_attr")),
+        NONE,
+        ast.vec1(value.into()),
+        false,
     )
 }
 

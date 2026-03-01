@@ -9,7 +9,7 @@ use oxc_span::{SPAN, SourceType};
 
 use self::consts::{
     LUX_CSS, LUX_CSS_HASH, LUX_CSS_SCOPE, LUX_HAS_DYNAMIC, LUX_TEMPLATE, optional_string_expr,
-    push_const,
+    push_const, push_runtime_helpers,
 };
 use self::exports::{default_export_statement, named_export_statement};
 use super::template::{build_render_expression, render_fragment_template};
@@ -25,7 +25,7 @@ pub(super) fn render(
     let allocator = Allocator::default();
     let ast = AstBuilder::new(&allocator);
 
-    let mut body = ast.vec_with_capacity(7);
+    let mut body = ast.vec_with_capacity(10);
     push_const(
         ast,
         &mut body,
@@ -51,6 +51,9 @@ pub(super) fn render(
         LUX_HAS_DYNAMIC,
         ast.expression_boolean_literal(SPAN, template_result.has_dynamic),
     );
+    if template_result.has_dynamic {
+        push_runtime_helpers(ast, &mut body);
+    }
 
     body.push(named_export_statement(ast));
     let render_expression = if template_result.has_dynamic {

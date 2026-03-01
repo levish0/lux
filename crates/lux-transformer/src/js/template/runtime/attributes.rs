@@ -19,43 +19,58 @@ pub(super) fn render_attribute_expression<'a>(
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     match attribute {
-        AttributeNode::Attribute(attribute) => match &attribute.value {
-            AttributeValue::True => string_expr(ast, &format!(" {}", attribute.name)),
-            AttributeValue::ExpressionTag(tag) => render_named_expression_attribute(
-                ast,
-                attribute.name,
-                resolve_expression(ast, tag.expression.clone_in(ast.allocator), scope),
-            ),
-            AttributeValue::Sequence(chunks) => {
-                let mut value_expr = string_expr(ast, "");
-                for chunk in chunks {
-                    let chunk_expr = match chunk {
-                        TextOrExpressionTag::Text(text) => string_expr(ast, text.raw),
-                        TextOrExpressionTag::ExpressionTag(tag) => escape_attr_expression(
-                            ast,
-                            stringify_expression(
-                                ast,
-                                resolve_expression(ast, tag.expression.clone_in(ast.allocator), scope),
-                            ),
-                        ),
-                    };
-                    value_expr = concat_expr(ast, value_expr, chunk_expr);
-                }
-
-                let mut out = string_expr(ast, &format!(" {}=\"", attribute.name));
-                out = concat_expr(ast, out, value_expr);
-                concat_expr(ast, out, string_expr(ast, "\""))
+        AttributeNode::Attribute(attribute) => {
+            if is_event_attribute_name(attribute.name) {
+                return string_expr(ast, "");
             }
-        },
+            match &attribute.value {
+                AttributeValue::True => string_expr(ast, &format!(" {}", attribute.name)),
+                AttributeValue::ExpressionTag(tag) => render_named_expression_attribute(
+                    ast,
+                    attribute.name,
+                    resolve_expression(ast, tag.expression.clone_in(ast.allocator), scope),
+                ),
+                AttributeValue::Sequence(chunks) => {
+                    let mut value_expr = string_expr(ast, "");
+                    for chunk in chunks {
+                        let chunk_expr = match chunk {
+                            TextOrExpressionTag::Text(text) => string_expr(ast, text.raw),
+                            TextOrExpressionTag::ExpressionTag(tag) => escape_attr_expression(
+                                ast,
+                                stringify_expression(
+                                    ast,
+                                    resolve_expression(
+                                        ast,
+                                        tag.expression.clone_in(ast.allocator),
+                                        scope,
+                                    ),
+                                ),
+                            ),
+                        };
+                        value_expr = concat_expr(ast, value_expr, chunk_expr);
+                    }
+
+                    let mut out = string_expr(ast, &format!(" {}=\"", attribute.name));
+                    out = concat_expr(ast, out, value_expr);
+                    concat_expr(ast, out, string_expr(ast, "\""))
+                }
+            }
+        }
         AttributeNode::SpreadAttribute(attribute) => render_spread_attribute_expression(
             ast,
             resolve_expression(ast, attribute.expression.clone_in(ast.allocator), scope),
         ),
-        AttributeNode::BindDirective(attribute) => render_named_expression_attribute(
-            ast,
-            attribute.name,
-            resolve_expression(ast, attribute.expression.clone_in(ast.allocator), scope),
-        ),
+        AttributeNode::BindDirective(attribute) => {
+            if attribute.name == "this" {
+                string_expr(ast, "")
+            } else {
+                render_named_expression_attribute(
+                    ast,
+                    attribute.name,
+                    resolve_expression(ast, attribute.expression.clone_in(ast.allocator), scope),
+                )
+            }
+        }
         AttributeNode::ClassDirective(attribute) => render_class_directive_attribute_expression(
             ast,
             attribute.name,
@@ -274,4 +289,8 @@ fn is_falsy_attribute_value_expression<'a>(ast: AstBuilder<'a>, value: Expressio
         ast.expression_boolean_literal(SPAN, false),
     );
     ast.expression_logical(SPAN, is_nullish, LogicalOperator::Or, is_false)
+}
+
+fn is_event_attribute_name(name: &str) -> bool {
+    name.len() > 2 && name.starts_with("on")
 }
