@@ -373,6 +373,92 @@ fn transform_strips_typescript_type_only_import_syntax() {
 }
 
 #[test]
+fn transform_emits_instance_script_declarations_and_uses_local_scope() {
+    let source = "<script>let x = 1;</script><p>{x}</p>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("let x = 1;"));
+    assert!(!result.js.contains("function({ x })"));
+}
+
+#[test]
+fn transform_lowers_state_and_derived_runes_in_variable_initializers() {
+    let source = "<script>let count = $state(1); let doubled = $derived.by(() => count * 2);</script>{doubled}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("$state"));
+    assert!(!result.js.contains("$derived.by"));
+    assert!(result.js.contains("let count = 1;"));
+    assert!(result.js.contains("let doubled = (() => count * 2)();"));
+}
+
+#[test]
+fn transform_drops_effect_rune_expression_statements() {
+    let source = "<script>$effect(() => { console.log('x'); });</script><p>ok</p>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("$effect"));
+    assert!(!result.js.contains("console.log('x')"));
+}
+
+#[test]
+fn transform_maps_props_rune_to_runtime_props_object() {
+    let source = "<script>let { a } = $props();</script>{a}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("$props"));
+    assert!(result.js.contains("let { a } = _props;"));
+    assert!(!result.js.contains("function({ a })"));
+}
+
+#[test]
+fn transform_emits_module_script_statements() {
+    let source =
+        "<script context=\"module\">const n = 1; function f() { return n; }</script><p>x</p>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("const n = 1;"));
+    assert!(result.js.contains("function f()"));
+}
+
+#[test]
+fn transform_ts_instance_script_output_is_valid_javascript() {
+    let source = "<script lang=\"ts\">let x: number = 1;</script>{x}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+    assert_js_parses_as_module(&result.js);
+}
+
+#[test]
 fn transform_keeps_svelte_head_static_when_children_are_static() {
     let source = "<svelte:head><title>t</title></svelte:head>";
     let allocator = Allocator::default();

@@ -5,7 +5,7 @@ use oxc_allocator::CloneIn;
 use oxc_ast::AstBuilder;
 use oxc_ast::ast::{
     Argument, BindingPattern, CallExpression, Declaration, ExportNamedDeclaration, Expression,
-    ImportDeclaration, Statement,
+    Statement,
 };
 use oxc_span::SPAN;
 
@@ -20,6 +20,9 @@ pub(super) fn collect_module_runtime_statements<'a>(
     root: &Root<'_>,
 ) -> oxc_allocator::Vec<'a, Statement<'a>> {
     let mut statements = ast.vec();
+    if root.ts {
+        return statements;
+    }
     let Some(module_script) = &root.module else {
         return statements;
     };
@@ -38,6 +41,9 @@ pub(super) fn collect_instance_runtime_statements<'a>(
     root: &Root<'_>,
 ) -> oxc_allocator::Vec<'a, Statement<'a>> {
     let mut statements = ast.vec();
+    if root.ts {
+        return statements;
+    }
     let Some(instance_script) = &root.instance else {
         return statements;
     };
@@ -147,9 +153,9 @@ fn sanitize_declaration_to_statement<'a>(
         Declaration::VariableDeclaration(declaration) => {
             sanitize_variable_declaration_statement(ast, declaration)
         }
-        Declaration::FunctionDeclaration(function) => {
-            Some(Statement::FunctionDeclaration(function.clone_in(ast.allocator)))
-        }
+        Declaration::FunctionDeclaration(function) => Some(Statement::FunctionDeclaration(
+            function.clone_in(ast.allocator),
+        )),
         Declaration::ClassDeclaration(class) => {
             Some(Statement::ClassDeclaration(class.clone_in(ast.allocator)))
         }
@@ -164,8 +170,12 @@ fn sanitize_declaration_to_statement<'a>(
 
 fn statement_to_declaration(statement: Statement<'_>) -> Option<Declaration<'_>> {
     match statement {
-        Statement::VariableDeclaration(declaration) => Some(Declaration::VariableDeclaration(declaration)),
-        Statement::FunctionDeclaration(function) => Some(Declaration::FunctionDeclaration(function)),
+        Statement::VariableDeclaration(declaration) => {
+            Some(Declaration::VariableDeclaration(declaration))
+        }
+        Statement::FunctionDeclaration(function) => {
+            Some(Declaration::FunctionDeclaration(function))
+        }
         Statement::ClassDeclaration(class) => Some(Declaration::ClassDeclaration(class)),
         _ => None,
     }
@@ -197,7 +207,7 @@ fn rewrite_rune_initializer<'a>(ast: AstBuilder<'a>, init: Expression<'a>) -> Ex
         return init;
     };
 
-    match name {
+    match name.as_str() {
         "$state" | "$state.raw" | "$derived" => first_call_argument_expression(ast, call)
             .unwrap_or_else(|| ast.expression_identifier(SPAN, ast.ident("undefined"))),
         "$derived.by" => {
@@ -215,9 +225,13 @@ fn first_call_argument_expression<'a>(
     ast: AstBuilder<'a>,
     call: &CallExpression<'a>,
 ) -> Option<Expression<'a>> {
-    call.arguments.iter().find_map(|argument| match argument {
-        Argument::Expression(expression) => Some(expression.clone_in(ast.allocator)),
-        Argument::SpreadElement(_) => None,
+    call.arguments.iter().find_map(|argument| {
+        if matches!(argument, Argument::SpreadElement(_)) {
+            return None;
+        }
+        argument
+            .as_expression()
+            .map(|expression| expression.clone_in(ast.allocator))
     })
 }
 
@@ -247,7 +261,9 @@ fn extract_rune_name(callee: &Expression<'_>) -> Option<String> {
             let object_name = extract_rune_name(&member.object)?;
             Some(format!("{object_name}.{}", member.property.name.as_str()))
         }
-        Expression::ParenthesizedExpression(expression) => extract_rune_name(&expression.expression),
+        Expression::ParenthesizedExpression(expression) => {
+            extract_rune_name(&expression.expression)
+        }
         _ => None,
     }
 }

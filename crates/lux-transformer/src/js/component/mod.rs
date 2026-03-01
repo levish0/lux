@@ -80,7 +80,11 @@ pub(super) fn render(
     } else {
         ast.expression_identifier(SPAN, ast.ident(LUX_TEMPLATE))
     };
-    body.push(default_export_statement(ast, render_expression, instance_runtime));
+    body.push(default_export_statement(
+        ast,
+        render_expression,
+        instance_runtime,
+    ));
 
     let program = ast.program(
         SPAN,
