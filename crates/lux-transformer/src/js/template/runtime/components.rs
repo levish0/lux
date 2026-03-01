@@ -5,18 +5,18 @@ use lux_ast::template::root::{Fragment, FragmentNode};
 use lux_ast::template::tag::TextOrExpressionTag;
 use oxc_allocator::CloneIn;
 use oxc_ast::{
+    AstBuilder, NONE,
     ast::{
         BinaryOperator, Expression, FormalParameterKind, FunctionType, LogicalOperator,
         VariableDeclarationKind,
     },
-    AstBuilder, NONE,
 };
 use oxc_span::SPAN;
 
 use super::elements::{attribute_value_to_component_prop_expression, object_init_property};
 use super::expr::{call_iife, const_statement, string_expr, stringify_expression};
 use super::render_fragment_nodes_expression;
-use super::scope::{resolve_expression, RuntimeScope};
+use super::scope::{RuntimeScope, resolve_expression};
 
 pub(super) fn render_component_expression<'a>(
     ast: AstBuilder<'a>,

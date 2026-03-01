@@ -3,8 +3,8 @@ use lux_ast::template::directive::{StyleDirective, StyleDirectiveValue, StyleMod
 use lux_ast::template::tag::TextOrExpressionTag;
 use oxc_allocator::CloneIn;
 use oxc_ast::{
-    ast::{BinaryOperator, Expression, FormalParameterKind, FunctionType, LogicalOperator},
     AstBuilder, NONE,
+    ast::{BinaryOperator, Expression, FormalParameterKind, FunctionType, LogicalOperator},
 };
 use oxc_span::SPAN;
 
@@ -12,7 +12,7 @@ use super::expr::{
     call_static_method, escape_attr_expression, join_chunks_expression, string_expr,
     stringify_expression,
 };
-use super::scope::{is_valid_js_identifier, resolve_expression, RuntimeScope};
+use super::scope::{RuntimeScope, is_valid_js_identifier, resolve_expression};
 
 pub(super) fn render_attribute_expression<'a>(
     ast: AstBuilder<'a>,

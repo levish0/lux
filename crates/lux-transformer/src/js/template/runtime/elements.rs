@@ -5,8 +5,8 @@ use lux_ast::template::tag::TextOrExpressionTag;
 use lux_utils::elements::{is_load_error_element, is_void};
 use oxc_allocator::CloneIn;
 use oxc_ast::{
-    ast::{BinaryOperator, Expression, LogicalOperator, PropertyKind},
     AstBuilder, NONE,
+    ast::{BinaryOperator, Expression, LogicalOperator, PropertyKind},
 };
 use oxc_span::SPAN;
 
@@ -15,7 +15,7 @@ use super::expr::{
     call_iife, const_statement, join_chunks_expression, string_expr, stringify_expression,
 };
 use super::render_fragment_expression;
-use super::scope::{is_valid_js_identifier, resolve_expression, RuntimeScope};
+use super::scope::{RuntimeScope, is_valid_js_identifier, resolve_expression};
 
 pub(super) fn render_regular_element_expression<'a>(
     ast: AstBuilder<'a>,

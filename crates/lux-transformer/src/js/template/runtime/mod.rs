@@ -8,7 +8,7 @@ mod scope;
 use lux_ast::template::root::{Fragment, FragmentNode};
 use oxc_allocator::CloneIn;
 use oxc_ast::ast::PropertyKind;
-use oxc_ast::{ast::Expression, AstBuilder};
+use oxc_ast::{AstBuilder, ast::Expression};
 use oxc_span::SPAN;
 
 use self::blocks::{
@@ -25,7 +25,7 @@ use self::elements::{
 use self::expr::{
     call_iife, call_static_method, escape_html_expression, string_expr, stringify_expression,
 };
-use self::scope::{resolve_expression, RuntimeScope};
+use self::scope::{RuntimeScope, resolve_expression};
 use super::marker::sanitize_comment;
 
 pub(super) fn build_render_expression<'a>(

@@ -2,11 +2,11 @@ use lux_ast::template::block::{AwaitBlock, EachBlock, IfBlock, SnippetBlock};
 use lux_ast::template::tag::ConstTag;
 use oxc_allocator::CloneIn;
 use oxc_ast::{
+    AstBuilder, NONE,
     ast::{
         AssignmentOperator, BinaryOperator, Expression, FormalParameterKind, FunctionType,
         LogicalOperator, UnaryOperator, VariableDeclarationKind,
     },
-    AstBuilder, NONE,
 };
 use oxc_span::SPAN;
 
@@ -14,7 +14,7 @@ use super::expr::{
     bind_pattern_value_expression, call_iife, call_static_method, const_statement, string_expr,
 };
 use super::render_fragment_expression;
-use super::scope::{resolve_expression, RuntimeScope};
+use super::scope::{RuntimeScope, resolve_expression};
 
 pub(super) fn render_if_block_expression<'a>(
     ast: AstBuilder<'a>,

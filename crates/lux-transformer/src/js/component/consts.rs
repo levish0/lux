@@ -1,11 +1,11 @@
 use oxc_allocator::CloneIn;
 use oxc_allocator::Vec as ArenaVec;
 use oxc_ast::{
+    AstBuilder, NONE,
     ast::{
         BinaryOperator, Expression, FormalParameterKind, FunctionType, RegExp, RegExpFlags,
         RegExpPattern, Statement, VariableDeclarationKind,
     },
-    AstBuilder, NONE,
 };
 use oxc_span::SPAN;
 

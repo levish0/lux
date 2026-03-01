@@ -1,8 +1,8 @@
 use oxc_ast::{
-    ast::{BindingPattern, Expression, FormalParameterKind, FunctionType, IdentifierReference},
     AstBuilder, NONE,
+    ast::{BindingPattern, Expression, FormalParameterKind, FunctionType, IdentifierReference},
 };
-use oxc_ast_visit::{walk, Visit};
+use oxc_ast_visit::{Visit, walk};
 use oxc_span::SPAN;
 use rustc_hash::FxHashSet;
 

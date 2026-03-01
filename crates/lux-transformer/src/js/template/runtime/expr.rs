@@ -1,11 +1,11 @@
 use lux_ast::template::root::Fragment;
 use oxc_allocator::CloneIn;
 use oxc_ast::{
+    AstBuilder, NONE,
     ast::{
         BindingPattern, Expression, FormalParameterKind, FunctionType, Statement,
         VariableDeclarationKind,
     },
-    AstBuilder, NONE,
 };
 use oxc_span::SPAN;
 
