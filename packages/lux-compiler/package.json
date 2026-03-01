@@ -1,0 +1,14 @@
+{
+  "name": "@lux/compiler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "scripts": {
+    "build:debug": "node ./scripts/build-local.mjs",
+    "build:release": "node ./scripts/build-local.mjs --release"
+  }
+}

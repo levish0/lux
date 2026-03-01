@@ -105,7 +105,11 @@ fn transform_generates_expression_runtime_render() {
     assert!(!result.js.contains("<!--lux:dynamic:expression-->"));
     assert_eq!(result.runtime_modules.len(), 1);
     assert_eq!(result.runtime_modules[0].specifier, "lux/runtime/server");
-    assert!(result.runtime_modules[0].code.contains("export function stringify"));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function stringify")
+    );
 }
 
 #[test]

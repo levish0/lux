@@ -101,7 +101,10 @@ fn main() {
     );
 }
 
-fn write_runtime_modules(base_dir: &Path, modules: &[lux_transformer::RuntimeModule]) -> Vec<PathBuf> {
+fn write_runtime_modules(
+    base_dir: &Path,
+    modules: &[lux_transformer::RuntimeModule],
+) -> Vec<PathBuf> {
     let mut paths = Vec::with_capacity(modules.len());
 
     for module in modules {
@@ -115,11 +118,17 @@ fn write_runtime_modules(base_dir: &Path, modules: &[lux_transformer::RuntimeMod
 
         if let Some(parent) = output_path.parent() {
             fs::create_dir_all(parent).unwrap_or_else(|err| {
-                panic!("failed to create runtime module dir {}: {err}", parent.display())
+                panic!(
+                    "failed to create runtime module dir {}: {err}",
+                    parent.display()
+                )
             });
         }
         fs::write(&output_path, &module.code).unwrap_or_else(|err| {
-            panic!("failed to write runtime module {}: {err}", output_path.display())
+            panic!(
+                "failed to write runtime module {}: {err}",
+                output_path.display()
+            )
         });
         paths.push(output_path);
     }

@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const docsDir = fileURLToPath(new URL("../docs", import.meta.url));
@@ -19,16 +20,16 @@ runPackageManager(["build", ...passthroughArgs], { run: true, env });
 function runPackageManager(args, { run, env }) {
   if (!run) return;
 
-  const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
-  const pnpmRun = spawnSync(pnpm, args, {
-    cwd: docsDir,
-    stdio: "inherit",
-    env,
-  });
-  if (!pnpmRun.error) {
+  const pnpmRun = runCommand(resolveExecutable("pnpm"), args, env);
+
+  if (!pnpmRun.error && pnpmRun.status === 0) {
     process.exitCode = pnpmRun.status ?? 1;
     if (process.exitCode !== 0) process.exit(process.exitCode);
     return;
+  }
+
+  if (!pnpmRun.error) {
+    process.exit(pnpmRun.status ?? 1);
   }
 
   if (pnpmRun.error.code !== "ENOENT") {
@@ -36,17 +37,37 @@ function runPackageManager(args, { run, env }) {
     process.exit(1);
   }
 
-  const npm = process.platform === "win32" ? "npm.cmd" : "npm";
   const npmArgs = args[0] === "build" ? ["run", "build", "--", ...args.slice(1)] : args;
-  const npmRun = spawnSync(npm, npmArgs, {
+  const npmRun = runCommand(resolveExecutable("npm"), npmArgs, env);
+
+  if (npmRun.error) {
+    console.error(npmRun.error);
+    process.exit(1);
+  }
+
+  process.exitCode = npmRun.status ?? 0;
+  if (process.exitCode !== 0) {
+    process.exit(process.exitCode);
+  }
+}
+
+function resolveExecutable(name) {
+  if (process.platform !== "win32") return name;
+  const cmdPath = join(dirname(process.execPath), `${name}.cmd`);
+  return existsSync(cmdPath) ? cmdPath : name;
+}
+
+function runCommand(command, args, env) {
+  const options = {
     cwd: docsDir,
     stdio: "inherit",
     env,
-  });
+  };
 
-  process.exitCode = npmRun.status ?? 1;
-  if (process.exitCode !== 0) {
-    if (npmRun.error) console.error(npmRun.error);
-    process.exit(process.exitCode);
+  const result = spawnSync(command, args, options);
+  if (process.platform !== "win32" || result.error?.code !== "EINVAL") {
+    return result;
   }
+
+  return spawnSync("cmd.exe", ["/d", "/s", "/c", command, ...args], options);
 }

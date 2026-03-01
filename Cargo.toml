@@ -36,6 +36,9 @@ oxc_codegen = "0.115.0"
 phf = { version = "0.13.1", features = ["macros"] }
 regex = "1.12.3"
 line-span = "0.1.5"
+napi = { version = "3.8.3", default-features = false, features = ["napi8"] }
+napi-derive = "3.5.2"
+napi-build = "2.3.1"
 strsim = "0.11.1"
 rustc-hash = "2.1.1"
 criterion = "0.8.2"
