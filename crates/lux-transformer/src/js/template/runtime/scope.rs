@@ -1,9 +1,15 @@
+use oxc_allocator::CloneIn;
 use oxc_ast::{
     AstBuilder, NONE,
-    ast::{BindingPattern, Expression, FormalParameterKind, FunctionType, IdentifierReference},
+    ast::{
+        AccessorProperty, ArrowFunctionExpression, BindingPattern, CallExpression, CatchParameter,
+        Class, Expression, FormalParameter, FormalParameterKind, Function, FunctionType,
+        IdentifierReference, MethodDefinition, PropertyDefinition, VariableDeclarator,
+    },
 };
-use oxc_ast_visit::{Visit, walk};
+use oxc_ast_visit::{Visit, VisitMut, walk, walk_mut};
 use oxc_span::SPAN;
+use oxc_syntax::scope::ScopeFlags;
 use rustc_hash::FxHashSet;
 
 #[derive(Default, Clone)]
@@ -46,6 +52,7 @@ pub(super) fn resolve_expression<'a>(
     expression: Expression<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
+    let expression = strip_typescript_expression(ast, expression);
     let mut collector = IdentifierCollector::default();
     collector.visit_expression(&expression);
 
@@ -207,4 +214,121 @@ pub(super) fn is_valid_js_identifier(name: &str) -> bool {
     }
 
     chars.all(|ch| ch == '_' || ch == '$' || ch.is_ascii_alphanumeric())
+}
+
+fn strip_typescript_expression<'a>(
+    ast: AstBuilder<'a>,
+    mut expression: Expression<'a>,
+) -> Expression<'a> {
+    let mut eraser = TypeScriptExpressionStripper { ast };
+    eraser.visit_expression(&mut expression);
+    expression
+}
+
+fn strip_typescript_expression_wrapper<'a>(
+    ast: AstBuilder<'a>,
+    expression: &Expression<'a>,
+) -> Option<Expression<'a>> {
+    match expression {
+        Expression::TSAsExpression(wrapper) => Some(wrapper.expression.clone_in(ast.allocator)),
+        Expression::TSSatisfiesExpression(wrapper) => {
+            Some(wrapper.expression.clone_in(ast.allocator))
+        }
+        Expression::TSTypeAssertion(wrapper) => Some(wrapper.expression.clone_in(ast.allocator)),
+        Expression::TSNonNullExpression(wrapper) => {
+            Some(wrapper.expression.clone_in(ast.allocator))
+        }
+        Expression::TSInstantiationExpression(wrapper) => {
+            Some(wrapper.expression.clone_in(ast.allocator))
+        }
+        _ => None,
+    }
+}
+
+struct TypeScriptExpressionStripper<'a> {
+    ast: AstBuilder<'a>,
+}
+
+impl<'a> VisitMut<'a> for TypeScriptExpressionStripper<'a> {
+    fn visit_expression(&mut self, expression: &mut Expression<'a>) {
+        while let Some(inner) = strip_typescript_expression_wrapper(self.ast, expression) {
+            *expression = inner;
+        }
+        walk_mut::walk_expression(self, expression);
+    }
+
+    fn visit_variable_declarator(&mut self, declarator: &mut VariableDeclarator<'a>) {
+        declarator.type_annotation = None;
+        declarator.definite = false;
+        walk_mut::walk_variable_declarator(self, declarator);
+    }
+
+    fn visit_function(&mut self, function: &mut Function<'a>, flags: ScopeFlags) {
+        function.type_parameters = None;
+        function.this_param = None;
+        function.return_type = None;
+        walk_mut::walk_function(self, function, flags);
+    }
+
+    fn visit_formal_parameter(&mut self, parameter: &mut FormalParameter<'a>) {
+        parameter.decorators = self.ast.vec();
+        parameter.type_annotation = None;
+        parameter.optional = false;
+        parameter.accessibility = None;
+        walk_mut::walk_formal_parameter(self, parameter);
+    }
+
+    fn visit_catch_parameter(&mut self, parameter: &mut CatchParameter<'a>) {
+        parameter.type_annotation = None;
+        walk_mut::walk_catch_parameter(self, parameter);
+    }
+
+    fn visit_arrow_function_expression(&mut self, expression: &mut ArrowFunctionExpression<'a>) {
+        expression.type_parameters = None;
+        expression.return_type = None;
+        walk_mut::walk_arrow_function_expression(self, expression);
+    }
+
+    fn visit_class(&mut self, class: &mut Class<'a>) {
+        class.type_parameters = None;
+        class.super_type_arguments = None;
+        class.implements = self.ast.vec();
+        walk_mut::walk_class(self, class);
+    }
+
+    fn visit_method_definition(&mut self, definition: &mut MethodDefinition<'a>) {
+        definition.r#override = false;
+        definition.optional = false;
+        definition.accessibility = None;
+        walk_mut::walk_method_definition(self, definition);
+    }
+
+    fn visit_property_definition(&mut self, definition: &mut PropertyDefinition<'a>) {
+        definition.type_annotation = None;
+        definition.declare = false;
+        definition.r#override = false;
+        definition.optional = false;
+        definition.definite = false;
+        definition.readonly = false;
+        definition.accessibility = None;
+        walk_mut::walk_property_definition(self, definition);
+    }
+
+    fn visit_accessor_property(&mut self, property: &mut AccessorProperty<'a>) {
+        property.type_annotation = None;
+        property.r#override = false;
+        property.definite = false;
+        property.accessibility = None;
+        walk_mut::walk_accessor_property(self, property);
+    }
+
+    fn visit_call_expression(&mut self, expression: &mut CallExpression<'a>) {
+        expression.type_arguments = None;
+        walk_mut::walk_call_expression(self, expression);
+    }
+
+    fn visit_new_expression(&mut self, expression: &mut oxc_ast::ast::NewExpression<'a>) {
+        expression.type_arguments = None;
+        walk_mut::walk_new_expression(self, expression);
+    }
 }

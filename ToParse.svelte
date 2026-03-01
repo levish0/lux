@@ -1,5 +1,10 @@
-{#if x > 10}
-    <p>x is greater than 10</p>
-{:else if x < 5}
-    <p>x is less than 5</p>
-{/if}
+<script lang="ts">
+    let count = $state(0);
+</script>
+
+<button
+        on:click={(e: MouseEvent) => {
+		const next: number = count + 1;
+		count = next;
+	}}
+>clicks: {count}</button>

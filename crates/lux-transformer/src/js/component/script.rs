@@ -4,10 +4,13 @@ use lux_ast::template::root::Root;
 use oxc_allocator::CloneIn;
 use oxc_ast::AstBuilder;
 use oxc_ast::ast::{
-    Argument, BindingPattern, CallExpression, Declaration, ExportNamedDeclaration, Expression,
-    Statement,
+    AccessorProperty, Argument, ArrowFunctionExpression, BindingPattern, CallExpression,
+    CatchParameter, Class, Declaration, ExportNamedDeclaration, Expression, FormalParameter,
+    Function, MethodDefinition, PropertyDefinition, Statement, VariableDeclarator,
 };
+use oxc_ast_visit::{VisitMut, walk_mut};
 use oxc_span::SPAN;
+use oxc_syntax::scope::ScopeFlags;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum ScriptTarget {
@@ -20,15 +23,14 @@ pub(super) fn collect_module_runtime_statements<'a>(
     root: &Root<'_>,
 ) -> oxc_allocator::Vec<'a, Statement<'a>> {
     let mut statements = ast.vec();
-    if root.ts {
-        return statements;
-    }
     let Some(module_script) = &root.module else {
         return statements;
     };
 
     for statement in &module_script.content.body {
-        if let Some(statement) = sanitize_script_statement(ast, statement, ScriptTarget::Module) {
+        if let Some(mut statement) = sanitize_script_statement(ast, statement, ScriptTarget::Module)
+        {
+            strip_typescript_from_statement(ast, &mut statement);
             statements.push(statement);
         }
     }
@@ -41,15 +43,15 @@ pub(super) fn collect_instance_runtime_statements<'a>(
     root: &Root<'_>,
 ) -> oxc_allocator::Vec<'a, Statement<'a>> {
     let mut statements = ast.vec();
-    if root.ts {
-        return statements;
-    }
     let Some(instance_script) = &root.instance else {
         return statements;
     };
 
     for statement in &instance_script.content.body {
-        if let Some(statement) = sanitize_script_statement(ast, statement, ScriptTarget::Instance) {
+        if let Some(mut statement) =
+            sanitize_script_statement(ast, statement, ScriptTarget::Instance)
+        {
+            strip_typescript_from_statement(ast, &mut statement);
             statements.push(statement);
         }
     }
@@ -199,6 +201,10 @@ fn sanitize_variable_declaration_statement<'a>(
 }
 
 fn rewrite_rune_initializer<'a>(ast: AstBuilder<'a>, init: Expression<'a>) -> Expression<'a> {
+    if let Some(inner) = strip_typescript_expression_wrapper(ast, &init) {
+        return rewrite_rune_initializer(ast, inner);
+    }
+
     let Expression::CallExpression(call) = &init else {
         return init;
     };
@@ -265,6 +271,120 @@ fn extract_rune_name(callee: &Expression<'_>) -> Option<String> {
             extract_rune_name(&expression.expression)
         }
         _ => None,
+    }
+}
+
+fn strip_typescript_expression_wrapper<'a>(
+    ast: AstBuilder<'a>,
+    expression: &Expression<'a>,
+) -> Option<Expression<'a>> {
+    match expression {
+        Expression::TSAsExpression(wrapper) => Some(wrapper.expression.clone_in(ast.allocator)),
+        Expression::TSSatisfiesExpression(wrapper) => {
+            Some(wrapper.expression.clone_in(ast.allocator))
+        }
+        Expression::TSTypeAssertion(wrapper) => Some(wrapper.expression.clone_in(ast.allocator)),
+        Expression::TSNonNullExpression(wrapper) => {
+            Some(wrapper.expression.clone_in(ast.allocator))
+        }
+        Expression::TSInstantiationExpression(wrapper) => {
+            Some(wrapper.expression.clone_in(ast.allocator))
+        }
+        _ => None,
+    }
+}
+
+fn strip_typescript_from_statement<'a>(ast: AstBuilder<'a>, statement: &mut Statement<'a>) {
+    let mut eraser = TypeScriptEraser { ast };
+    eraser.visit_statement(statement);
+}
+
+struct TypeScriptEraser<'a> {
+    ast: AstBuilder<'a>,
+}
+
+impl<'a> VisitMut<'a> for TypeScriptEraser<'a> {
+    fn visit_expression(&mut self, expression: &mut Expression<'a>) {
+        while let Some(inner) = strip_typescript_expression_wrapper(self.ast, expression) {
+            *expression = inner;
+        }
+        walk_mut::walk_expression(self, expression);
+    }
+
+    fn visit_call_expression(&mut self, expression: &mut CallExpression<'a>) {
+        expression.type_arguments = None;
+        walk_mut::walk_call_expression(self, expression);
+    }
+
+    fn visit_new_expression(&mut self, expression: &mut oxc_ast::ast::NewExpression<'a>) {
+        expression.type_arguments = None;
+        walk_mut::walk_new_expression(self, expression);
+    }
+
+    fn visit_variable_declarator(&mut self, declarator: &mut VariableDeclarator<'a>) {
+        declarator.type_annotation = None;
+        declarator.definite = false;
+        walk_mut::walk_variable_declarator(self, declarator);
+    }
+
+    fn visit_catch_parameter(&mut self, parameter: &mut CatchParameter<'a>) {
+        parameter.type_annotation = None;
+        walk_mut::walk_catch_parameter(self, parameter);
+    }
+
+    fn visit_function(&mut self, function: &mut Function<'a>, flags: ScopeFlags) {
+        function.declare = false;
+        function.type_parameters = None;
+        function.this_param = None;
+        function.return_type = None;
+        walk_mut::walk_function(self, function, flags);
+    }
+
+    fn visit_formal_parameter(&mut self, parameter: &mut FormalParameter<'a>) {
+        parameter.decorators = self.ast.vec();
+        parameter.type_annotation = None;
+        parameter.optional = false;
+        parameter.accessibility = None;
+        walk_mut::walk_formal_parameter(self, parameter);
+    }
+
+    fn visit_arrow_function_expression(&mut self, expression: &mut ArrowFunctionExpression<'a>) {
+        expression.type_parameters = None;
+        expression.return_type = None;
+        walk_mut::walk_arrow_function_expression(self, expression);
+    }
+
+    fn visit_class(&mut self, class: &mut Class<'a>) {
+        class.type_parameters = None;
+        class.super_type_arguments = None;
+        class.implements = self.ast.vec();
+        walk_mut::walk_class(self, class);
+    }
+
+    fn visit_method_definition(&mut self, definition: &mut MethodDefinition<'a>) {
+        definition.r#override = false;
+        definition.optional = false;
+        definition.accessibility = None;
+        walk_mut::walk_method_definition(self, definition);
+    }
+
+    fn visit_property_definition(&mut self, definition: &mut PropertyDefinition<'a>) {
+        definition.type_annotation = None;
+        definition.declare = false;
+        definition.r#override = false;
+        definition.optional = false;
+        definition.definite = false;
+        definition.readonly = false;
+        definition.accessibility = None;
+        walk_mut::walk_property_definition(self, definition);
+    }
+
+    fn visit_accessor_property(&mut self, property: &mut AccessorProperty<'a>) {
+        property.type_annotation = None;
+        property.r#override = false;
+        property.definite = false;
+        property.accessibility = None;
+        walk_mut::walk_accessor_property(self, property);
     }
 }
 

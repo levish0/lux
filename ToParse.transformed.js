@@ -1,4 +1,4 @@
-const __lux_template = "\n";
+const __lux_template = "\n\n<button>clicks: </button>\n";
 const __lux_css = null;
 const __lux_css_hash = null;
 const __lux_css_scope = null;
@@ -67,45 +67,21 @@ export default {
 		_props.__lux_self == null && (_props.__lux_self = __lux_render);
 		return function() {
 			let __lux_chunks = [];
-			__lux_chunks.push(function({ x }) {
-				return x > 10;
-			}(_props) ? function() {
-				let __lux_chunks = [];
-				__lux_chunks.push("\n    ");
-				__lux_chunks.push([
-					"<p",
-					">",
-					function() {
-						let __lux_chunks = [];
-						__lux_chunks.push("x is greater than 10");
-						return __lux_chunks.join("");
-					}(),
-					"</p>"
-				].join(""));
-				__lux_chunks.push("\n");
-				return __lux_chunks.join("");
-			}() : function() {
-				let __lux_chunks = [];
-				__lux_chunks.push(function({ x }) {
-					return x < 5;
-				}(_props) ? function() {
+			__lux_chunks.push("\n\n");
+			__lux_chunks.push([
+				"<button",
+				"",
+				">",
+				function() {
 					let __lux_chunks = [];
-					__lux_chunks.push("\n    ");
-					__lux_chunks.push([
-						"<p",
-						">",
-						function() {
-							let __lux_chunks = [];
-							__lux_chunks.push("x is less than 5");
-							return __lux_chunks.join("");
-						}(),
-						"</p>"
-					].join(""));
-					__lux_chunks.push("\n");
+					__lux_chunks.push("clicks: ");
+					__lux_chunks.push(__lux_escape(__lux_stringify(function({ count }) {
+						return count;
+					}(_props))));
 					return __lux_chunks.join("");
-				}() : "");
-				return __lux_chunks.join("");
-			}());
+				}(),
+				"</button>"
+			].join(""));
 			__lux_chunks.push("\n");
 			return __lux_chunks.join("");
 		}();
