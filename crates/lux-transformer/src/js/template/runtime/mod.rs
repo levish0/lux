@@ -1,5 +1,6 @@
 mod attributes;
 mod blocks;
+mod components;
 mod elements;
 mod expr;
 mod scope;
@@ -7,22 +8,24 @@ mod scope;
 use lux_ast::template::root::{Fragment, FragmentNode};
 use oxc_allocator::CloneIn;
 use oxc_ast::ast::PropertyKind;
-use oxc_ast::{AstBuilder, ast::Expression};
+use oxc_ast::{ast::Expression, AstBuilder};
 use oxc_span::SPAN;
 
 use self::blocks::{
     render_await_block_expression, render_const_tag_declaration_statement,
     render_each_block_expression, render_if_block_expression, render_snippet_block_declaration,
 };
+use self::components::{
+    render_component_expression, render_svelte_component_expression, render_svelte_self_expression,
+};
 use self::elements::{
-    render_component_expression, render_regular_element_expression, render_slot_element_expression,
-    render_svelte_component_expression, render_svelte_element_expression,
-    render_svelte_self_expression,
+    render_regular_element_expression, render_slot_element_expression,
+    render_svelte_element_expression,
 };
 use self::expr::{
     call_iife, call_static_method, escape_html_expression, string_expr, stringify_expression,
 };
-use self::scope::{RuntimeScope, resolve_expression};
+use self::scope::{resolve_expression, RuntimeScope};
 use super::marker::sanitize_comment;
 
 pub(super) fn build_render_expression<'a>(

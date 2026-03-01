@@ -1,11 +1,11 @@
 use oxc_allocator::CloneIn;
 use oxc_allocator::Vec as ArenaVec;
 use oxc_ast::{
-    AstBuilder, NONE,
     ast::{
-        BinaryOperator, Expression, FormalParameterKind, FunctionType, Statement,
-        VariableDeclarationKind,
+        BinaryOperator, Expression, FormalParameterKind, FunctionType, RegExp, RegExpFlags,
+        RegExpPattern, Statement, VariableDeclarationKind,
     },
+    AstBuilder, NONE,
 };
 use oxc_span::SPAN;
 
@@ -116,37 +116,24 @@ fn build_escape_helper_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
         ast.vec1(ast.expression_identifier(SPAN, ast.ident("value")).into()),
         false,
     );
-    let escaped_amp = call_method(
-        ast,
-        stringify_call,
-        "replaceAll",
-        ast.vec_from_array([
-            ast.expression_string_literal(SPAN, ast.atom("&"), None)
-                .into(),
-            ast.expression_string_literal(SPAN, ast.atom("&amp;"), None)
-                .into(),
-        ]),
-    );
-    let escaped_lt = call_method(
-        ast,
-        escaped_amp,
-        "replaceAll",
-        ast.vec_from_array([
-            ast.expression_string_literal(SPAN, ast.atom("<"), None)
-                .into(),
-            ast.expression_string_literal(SPAN, ast.atom("&lt;"), None)
-                .into(),
-        ]),
-    );
     let escaped = call_method(
         ast,
-        escaped_lt,
-        "replaceAll",
+        stringify_call,
+        "replace",
         ast.vec_from_array([
-            ast.expression_string_literal(SPAN, ast.atom(">"), None)
-                .into(),
-            ast.expression_string_literal(SPAN, ast.atom("&gt;"), None)
-                .into(),
+            ast.expression_reg_exp_literal(
+                SPAN,
+                RegExp {
+                    pattern: RegExpPattern {
+                        text: ast.atom("[&<>]"),
+                        pattern: None,
+                    },
+                    flags: RegExpFlags::G,
+                },
+                Some(ast.atom("/[&<>]/g")),
+            )
+            .into(),
+            build_html_escape_replacer(ast).into(),
         ]),
     );
 
@@ -154,37 +141,115 @@ fn build_escape_helper_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
 }
 
 fn build_escape_attr_helper_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
-    let escape_call = ast.expression_call(
-        SPAN,
-        ast.expression_identifier(SPAN, ast.ident(LUX_ESCAPE)),
-        NONE,
-        ast.vec1(ast.expression_identifier(SPAN, ast.ident("value")).into()),
-        false,
-    );
-    let escaped_quote = call_method(
-        ast,
-        escape_call,
-        "replaceAll",
-        ast.vec_from_array([
-            ast.expression_string_literal(SPAN, ast.atom("\""), None)
-                .into(),
-            ast.expression_string_literal(SPAN, ast.atom("&quot;"), None)
-                .into(),
-        ]),
-    );
     let escaped = call_method(
         ast,
-        escaped_quote,
-        "replaceAll",
+        ast.expression_call(
+            SPAN,
+            ast.expression_identifier(SPAN, ast.ident(LUX_STRINGIFY)),
+            NONE,
+            ast.vec1(ast.expression_identifier(SPAN, ast.ident("value")).into()),
+            false,
+        ),
+        "replace",
         ast.vec_from_array([
-            ast.expression_string_literal(SPAN, ast.atom("'"), None)
-                .into(),
-            ast.expression_string_literal(SPAN, ast.atom("&#39;"), None)
-                .into(),
+            ast.expression_reg_exp_literal(
+                SPAN,
+                RegExp {
+                    pattern: RegExpPattern {
+                        text: ast.atom("[&<>\"']"),
+                        pattern: None,
+                    },
+                    flags: RegExpFlags::G,
+                },
+                Some(ast.atom("/[&<>\"']/g")),
+            )
+            .into(),
+            build_attr_escape_replacer(ast).into(),
         ]),
     );
 
     single_param_function_expression(ast, "value", escaped)
+}
+
+fn build_html_escape_replacer<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
+    let ch_ident = ast.expression_identifier(SPAN, ast.ident("ch"));
+    let amp_check = ast.expression_binary(
+        SPAN,
+        ch_ident.clone_in(ast.allocator),
+        BinaryOperator::StrictEquality,
+        ast.expression_string_literal(SPAN, ast.atom("&"), None),
+    );
+    let lt_check = ast.expression_binary(
+        SPAN,
+        ch_ident.clone_in(ast.allocator),
+        BinaryOperator::StrictEquality,
+        ast.expression_string_literal(SPAN, ast.atom("<"), None),
+    );
+    let result = ast.expression_conditional(
+        SPAN,
+        amp_check,
+        ast.expression_string_literal(SPAN, ast.atom("&amp;"), None),
+        ast.expression_conditional(
+            SPAN,
+            lt_check,
+            ast.expression_string_literal(SPAN, ast.atom("&lt;"), None),
+            ast.expression_string_literal(SPAN, ast.atom("&gt;"), None),
+        ),
+    );
+
+    single_param_function_expression(ast, "ch", result)
+}
+
+fn build_attr_escape_replacer<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
+    let ch_ident = ast.expression_identifier(SPAN, ast.ident("ch"));
+    let amp_check = ast.expression_binary(
+        SPAN,
+        ch_ident.clone_in(ast.allocator),
+        BinaryOperator::StrictEquality,
+        ast.expression_string_literal(SPAN, ast.atom("&"), None),
+    );
+    let lt_check = ast.expression_binary(
+        SPAN,
+        ch_ident.clone_in(ast.allocator),
+        BinaryOperator::StrictEquality,
+        ast.expression_string_literal(SPAN, ast.atom("<"), None),
+    );
+    let gt_check = ast.expression_binary(
+        SPAN,
+        ch_ident.clone_in(ast.allocator),
+        BinaryOperator::StrictEquality,
+        ast.expression_string_literal(SPAN, ast.atom(">"), None),
+    );
+    let quote_check = ast.expression_binary(
+        SPAN,
+        ch_ident.clone_in(ast.allocator),
+        BinaryOperator::StrictEquality,
+        ast.expression_string_literal(SPAN, ast.atom("\""), None),
+    );
+
+    let result = ast.expression_conditional(
+        SPAN,
+        amp_check,
+        ast.expression_string_literal(SPAN, ast.atom("&amp;"), None),
+        ast.expression_conditional(
+            SPAN,
+            lt_check,
+            ast.expression_string_literal(SPAN, ast.atom("&lt;"), None),
+            ast.expression_conditional(
+                SPAN,
+                gt_check,
+                ast.expression_string_literal(SPAN, ast.atom("&gt;"), None),
+                ast.expression_conditional(
+                    SPAN,
+                    quote_check,
+                    ast.expression_string_literal(SPAN, ast.atom("&quot;"), None),
+                    ast.expression_string_literal(SPAN, ast.atom("&#39;"), None),
+                ),
+            ),
+        ),
+    );
+
+    single_param_function_expression(ast, "ch", result)
 }
 
 fn single_param_function_expression<'a>(

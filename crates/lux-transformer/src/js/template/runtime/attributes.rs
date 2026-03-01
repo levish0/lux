@@ -3,15 +3,15 @@ use lux_ast::template::directive::{StyleDirective, StyleDirectiveValue, StyleMod
 use lux_ast::template::tag::TextOrExpressionTag;
 use oxc_allocator::CloneIn;
 use oxc_ast::{
-    AstBuilder, NONE,
     ast::{BinaryOperator, Expression, FormalParameterKind, FunctionType, LogicalOperator},
+    AstBuilder, NONE,
 };
 use oxc_span::SPAN;
 
 use super::expr::{
     call_static_method, concat_expr, escape_attr_expression, string_expr, stringify_expression,
 };
-use super::scope::{RuntimeScope, is_valid_js_identifier, resolve_expression};
+use super::scope::{is_valid_js_identifier, resolve_expression, RuntimeScope};
 
 pub(super) fn render_attribute_expression<'a>(
     ast: AstBuilder<'a>,

@@ -1,11 +1,11 @@
 === Analyzer Summary ===
-script_scopes: 1
-script_symbols: 2
-script_references: 2
-template_scopes: 10
-template_bindings: 0
-template_references: 7
-css_rules: 4
+script_scopes: 4
+script_symbols: 24
+script_references: 16
+template_scopes: 80
+template_bindings: 3
+template_references: 37
+css_rules: 45
 diagnostics: 0
 
 === Analysis Tables (Debug) ===
@@ -13,8 +13,8 @@ AnalysisTables {
     css_rules: {
         SpanKey {
             kind: CssRule,
-            start: 1351,
-            end: 1474,
+            start: 8940,
+            end: 8986,
         }: CssRuleAnalysis {
             parent_rule: None,
             has_local_selectors: true,
@@ -23,8 +23,8 @@ AnalysisTables {
         },
         SpanKey {
             kind: CssRule,
-            start: 960,
-            end: 1072,
+            start: 14298,
+            end: 14383,
         }: CssRuleAnalysis {
             parent_rule: None,
             has_local_selectors: true,
@@ -33,8 +33,8 @@ AnalysisTables {
         },
         SpanKey {
             kind: CssRule,
-            start: 877,
-            end: 956,
+            start: 10652,
+            end: 10836,
         }: CssRuleAnalysis {
             parent_rule: None,
             has_local_selectors: true,
@@ -43,8 +43,418 @@ AnalysisTables {
         },
         SpanKey {
             kind: CssRule,
-            start: 1076,
-            end: 1347,
+            start: 9609,
+            end: 9749,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 9140,
+            end: 9223,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 8328,
+            end: 8656,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 9755,
+            end: 9909,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 9229,
+            end: 9291,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 9297,
+            end: 9411,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 12227,
+            end: 12481,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 9554,
+            end: 9603,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 12980,
+            end: 13061,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 11329,
+            end: 11384,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 8662,
+            end: 8934,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 8992,
+            end: 9134,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 11929,
+            end: 12136,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 12142,
+            end: 12221,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 14042,
+            end: 14076,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 14393,
+            end: 14448,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 14682,
+            end: 14730,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 8274,
+            end: 8322,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 8069,
+            end: 8112,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 13237,
+            end: 13676,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 14118,
+            end: 14180,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 10589,
+            end: 10646,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 10842,
+            end: 11076,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 11456,
+            end: 11561,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 14190,
+            end: 14288,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 12803,
+            end: 12974,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 13682,
+            end: 13773,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 10431,
+            end: 10583,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 13067,
+            end: 13231,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 14458,
+            end: 14557,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 13779,
+            end: 14036,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 9417,
+            end: 9548,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 9915,
+            end: 10100,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 11239,
+            end: 11323,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 10106,
+            end: 10425,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 11390,
+            end: 11450,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: false,
+            has_global_selectors: true,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 14567,
+            end: 14634,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 11567,
+            end: 11706,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 8118,
+            end: 8268,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 11082,
+            end: 11233,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 11712,
+            end: 11923,
+        }: CssRuleAnalysis {
+            parent_rule: None,
+            has_local_selectors: true,
+            has_global_selectors: false,
+            is_global_block: false,
+        },
+        SpanKey {
+            kind: CssRule,
+            start: 12487,
+            end: 12797,
         }: CssRuleAnalysis {
             parent_rule: None,
             has_local_selectors: true,
@@ -55,32 +465,464 @@ AnalysisTables {
     complex_selectors: {
         SpanKey {
             kind: ComplexSelector,
-            start: 1351,
-            end: 1378,
+            start: 9140,
+            end: 9168,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 11456,
+            end: 11476,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 10431,
+            end: 10461,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 8336,
+            end: 8347,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 10589,
+            end: 10612,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9755,
+            end: 9776,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9554,
+            end: 9576,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 11390,
+            end: 11414,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 14393,
+            end: 14404,
         }: ComplexSelectorAnalysis {
             is_global: false,
             used: false,
         },
         SpanKey {
             kind: ComplexSelector,
-            start: 960,
-            end: 963,
+            start: 11929,
+            end: 11941,
         }: ComplexSelectorAnalysis {
             is_global: false,
             used: false,
         },
         SpanKey {
             kind: ComplexSelector,
-            start: 877,
-            end: 879,
+            start: 14042,
+            end: 14046,
         }: ComplexSelectorAnalysis {
             is_global: false,
             used: false,
         },
         SpanKey {
             kind: ComplexSelector,
-            start: 1076,
-            end: 1082,
+            start: 8992,
+            end: 9002,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 13067,
+            end: 13081,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 14567,
+            end: 14582,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 10106,
+            end: 10130,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9229,
+            end: 9255,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9417,
+            end: 9437,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 11239,
+            end: 11261,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 13682,
+            end: 13698,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 14298,
+            end: 14309,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 13237,
+            end: 13248,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 10842,
+            end: 10861,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9297,
+            end: 9307,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 10597,
+            end: 10611,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 8069,
+            end: 8074,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 8118,
+            end: 8128,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 14458,
+            end: 14472,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 11398,
+            end: 11413,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 14118,
+            end: 14128,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 12980,
+            end: 12996,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9915,
+            end: 9939,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 11329,
+            end: 11355,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 13779,
+            end: 13790,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 11337,
+            end: 11354,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9923,
+            end: 9938,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 8940,
+            end: 8947,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 12227,
+            end: 12247,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 12803,
+            end: 12814,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9562,
+            end: 9575,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 10114,
+            end: 10129,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9425,
+            end: 9436,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 8328,
+            end: 8348,
+        }: ComplexSelectorAnalysis {
+            is_global: true,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9609,
+            end: 9626,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 14682,
+            end: 14687,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 11082,
+            end: 11102,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 12487,
+            end: 12503,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 14190,
+            end: 14200,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 8274,
+            end: 8284,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9237,
+            end: 9254,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 12142,
+            end: 12153,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 10439,
+            end: 10460,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 8662,
+            end: 8664,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 11567,
+            end: 11577,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9148,
+            end: 9167,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 10652,
+            end: 10667,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: false,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 11464,
+            end: 11475,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 9763,
+            end: 9775,
+        }: ComplexSelectorAnalysis {
+            is_global: false,
+            used: true,
+        },
+        SpanKey {
+            kind: ComplexSelector,
+            start: 11712,
+            end: 11723,
         }: ComplexSelectorAnalysis {
             is_global: false,
             used: false,
@@ -89,8 +931,8 @@ AnalysisTables {
     relative_selectors: {
         SpanKey {
             kind: RelativeSelector,
-            start: 960,
-            end: 963,
+            start: 8118,
+            end: 8128,
         }: RelativeSelectorAnalysis {
             is_global: false,
             is_global_like: false,
@@ -98,8 +940,26 @@ AnalysisTables {
         },
         SpanKey {
             kind: RelativeSelector,
-            start: 1351,
-            end: 1378,
+            start: 9229,
+            end: 9255,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 10431,
+            end: 10461,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 10597,
+            end: 10611,
         }: RelativeSelectorAnalysis {
             is_global: false,
             is_global_like: false,
@@ -107,8 +967,8 @@ AnalysisTables {
         },
         SpanKey {
             kind: RelativeSelector,
-            start: 877,
-            end: 879,
+            start: 8336,
+            end: 8347,
         }: RelativeSelectorAnalysis {
             is_global: false,
             is_global_like: false,
@@ -116,8 +976,521 @@ AnalysisTables {
         },
         SpanKey {
             kind: RelativeSelector,
-            start: 1076,
-            end: 1082,
+            start: 9755,
+            end: 9776,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 10439,
+            end: 10460,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 12980,
+            end: 12996,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 8940,
+            end: 8942,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11398,
+            end: 11413,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11464,
+            end: 11475,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 13682,
+            end: 13696,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11254,
+            end: 11261,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 9915,
+            end: 9939,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 9923,
+            end: 9938,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 8069,
+            end: 8074,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11390,
+            end: 11414,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 14118,
+            end: 14128,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 14393,
+            end: 14404,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 12142,
+            end: 12153,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 10114,
+            end: 10129,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11456,
+            end: 11476,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 10652,
+            end: 10667,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 14298,
+            end: 14309,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 10842,
+            end: 10857,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 14458,
+            end: 14472,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 12803,
+            end: 12814,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11239,
+            end: 11254,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 12227,
+            end: 12247,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 8942,
+            end: 8947,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 9609,
+            end: 9626,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 13779,
+            end: 13790,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11567,
+            end: 11577,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 8662,
+            end: 8664,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 13237,
+            end: 13248,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 9140,
+            end: 9168,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 10589,
+            end: 10612,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11329,
+            end: 11355,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 8328,
+            end: 8348,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 9763,
+            end: 9775,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 9417,
+            end: 9437,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11097,
+            end: 11102,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 10106,
+            end: 10130,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 13067,
+            end: 13081,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 12487,
+            end: 12503,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 13696,
+            end: 13698,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 9148,
+            end: 9167,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 9237,
+            end: 9254,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11337,
+            end: 11354,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 14042,
+            end: 14046,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 9297,
+            end: 9307,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 9554,
+            end: 9576,
+        }: RelativeSelectorAnalysis {
+            is_global: true,
+            is_global_like: false,
+            scoped: false,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 8992,
+            end: 9002,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11712,
+            end: 11723,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 14190,
+            end: 14200,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 8274,
+            end: 8284,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 14567,
+            end: 14582,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11929,
+            end: 11941,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 14682,
+            end: 14687,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 9425,
+            end: 9436,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 9562,
+            end: 9575,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 11082,
+            end: 11097,
+        }: RelativeSelectorAnalysis {
+            is_global: false,
+            is_global_like: false,
+            scoped: true,
+        },
+        SpanKey {
+            kind: RelativeSelector,
+            start: 10857,
+            end: 10861,
         }: RelativeSelectorAnalysis {
             is_global: false,
             is_global_like: false,
@@ -132,49 +1505,549 @@ AnalysisTables {
             flags: 3,
             node_id: 0,
         },
+        ScriptScopeAnalysis {
+            target: Instance,
+            id: 1,
+            parent: Some(
+                0,
+            ),
+            flags: 13,
+            node_id: 83,
+        },
+        ScriptScopeAnalysis {
+            target: Instance,
+            id: 2,
+            parent: Some(
+                0,
+            ),
+            flags: 5,
+            node_id: 105,
+        },
+        ScriptScopeAnalysis {
+            target: Instance,
+            id: 3,
+            parent: Some(
+                0,
+            ),
+            flags: 5,
+            node_id: 135,
+        },
     ],
     script_symbols: [
         ScriptSymbolAnalysis {
             target: Instance,
             id: 0,
-            name: "colors",
+            name: "Icon",
             scope_id: 0,
             declaration_node_id: 2,
             declaration_span: Span {
-                start: 17,
-                end: 23,
+                start: 32,
+                end: 36,
             },
-            flags: 6,
+            flags: 64,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 1,
+            name: "Bolt",
+            scope_id: 0,
+            declaration_node_id: 5,
+            declaration_span: Span {
+                start: 38,
+                end: 42,
+            },
+            flags: 64,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 2,
+            name: "InformationCircle",
+            scope_id: 0,
+            declaration_node_id: 8,
+            declaration_span: Span {
+                start: 44,
+                end: 61,
+            },
+            flags: 64,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 3,
+            name: "Badge",
+            scope_id: 0,
+            declaration_node_id: 13,
+            declaration_span: Span {
+                start: 103,
+                end: 108,
+            },
+            flags: 64,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 4,
+            name: "Card",
+            scope_id: 0,
+            declaration_node_id: 18,
+            declaration_span: Span {
+                start: 169,
+                end: 173,
+            },
+            flags: 64,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 5,
+            name: "Dialog",
+            scope_id: 0,
+            declaration_node_id: 22,
+            declaration_span: Span {
+                start: 231,
+                end: 237,
+            },
+            flags: 64,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 6,
+            name: "Snippet",
+            scope_id: 0,
+            declaration_node_id: 26,
+            declaration_span: Span {
+                start: 294,
+                end: 301,
+            },
+            flags: 64,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 7,
+            name: "Table",
+            scope_id: 0,
+            declaration_node_id: 31,
+            declaration_span: Span {
+                start: 364,
+                end: 369,
+            },
+            flags: 64,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 8,
+            name: "Tabs",
+            scope_id: 0,
+            declaration_node_id: 35,
+            declaration_span: Span {
+                start: 428,
+                end: 432,
+            },
+            flags: 64,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 9,
+            name: "commandPresets",
+            scope_id: 0,
+            declaration_node_id: 39,
+            declaration_span: Span {
+                start: 495,
+                end: 509,
+            },
+            flags: 64,
             mutated: false,
             unused: false,
         },
         ScriptSymbolAnalysis {
             target: Instance,
-            id: 1,
-            name: "selected",
+            id: 10,
+            name: "benchmarks",
             scope_id: 0,
-            declaration_node_id: 13,
+            declaration_node_id: 42,
             declaration_span: Span {
-                start: 98,
-                end: 106,
+                start: 519,
+                end: 529,
+            },
+            flags: 64,
+            mutated: false,
+            unused: false,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 11,
+            name: "benchmarkRows",
+            scope_id: 0,
+            declaration_node_id: 45,
+            declaration_span: Span {
+                start: 539,
+                end: 552,
+            },
+            flags: 64,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 12,
+            name: "CommandPreset",
+            scope_id: 0,
+            declaration_node_id: 48,
+            declaration_span: Span {
+                start: 567,
+                end: 580,
+            },
+            flags: 128,
+            mutated: false,
+            unused: false,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 13,
+            name: "BenchScenario",
+            scope_id: 0,
+            declaration_node_id: 51,
+            declaration_span: Span {
+                start: 595,
+                end: 608,
+            },
+            flags: 128,
+            mutated: false,
+            unused: false,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 14,
+            name: "commandPreset",
+            scope_id: 0,
+            declaration_node_id: 56,
+            declaration_span: Span {
+                start: 655,
+                end: 668,
             },
             flags: 2,
             mutated: false,
+            unused: false,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 15,
+            name: "benchScenario",
+            scope_id: 0,
+            declaration_node_id: 65,
+            declaration_span: Span {
+                start: 716,
+                end: 729,
+            },
+            flags: 2,
+            mutated: false,
+            unused: false,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 16,
+            name: "activeInstall",
+            scope_id: 0,
+            declaration_node_id: 74,
+            declaration_span: Span {
+                start: 774,
+                end: 787,
+            },
+            flags: 6,
+            mutated: false,
             unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 17,
+            name: "item",
+            scope_id: 1,
+            declaration_node_id: 85,
+            declaration_span: Span {
+                start: 829,
+                end: 833,
+            },
+            flags: 1,
+            mutated: false,
+            unused: false,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 18,
+            name: "activeBenchmark",
+            scope_id: 0,
+            declaration_node_id: 98,
+            declaration_span: Span {
+                start: 906,
+                end: 921,
+            },
+            flags: 6,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 19,
+            name: "barWidth",
+            scope_id: 0,
+            declaration_node_id: 105,
+            declaration_span: Span {
+                start: 975,
+                end: 983,
+            },
+            flags: 32,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 20,
+            name: "value",
+            scope_id: 2,
+            declaration_node_id: 108,
+            declaration_span: Span {
+                start: 984,
+                end: 989,
+            },
+            flags: 1,
+            mutated: false,
+            unused: false,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 21,
+            name: "max",
+            scope_id: 2,
+            declaration_node_id: 112,
+            declaration_span: Span {
+                start: 999,
+                end: 1002,
+            },
+            flags: 1,
+            mutated: false,
+            unused: false,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 22,
+            name: "formatMs",
+            scope_id: 0,
+            declaration_node_id: 135,
+            declaration_span: Span {
+                start: 1119,
+                end: 1127,
+            },
+            flags: 32,
+            mutated: false,
+            unused: true,
+        },
+        ScriptSymbolAnalysis {
+            target: Instance,
+            id: 23,
+            name: "value",
+            scope_id: 3,
+            declaration_node_id: 138,
+            declaration_span: Span {
+                start: 1128,
+                end: 1133,
+            },
+            flags: 1,
+            mutated: false,
+            unused: false,
         },
     ],
     script_references: [
         ScriptReferenceAnalysis {
             target: Instance,
-            id: 1,
-            name: "colors",
+            id: 5,
+            name: "commandPresets",
             span: Span {
-                start: 116,
-                end: 122,
+                start: 808,
+                end: 822,
             },
             scope_id: 0,
             symbol_id: Some(
-                0,
+                9,
+            ),
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 8,
+            name: "commandPresets",
+            span: Span {
+                start: 871,
+                end: 885,
+            },
+            scope_id: 0,
+            symbol_id: Some(
+                9,
+            ),
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 10,
+            name: "benchmarks",
+            span: Span {
+                start: 933,
+                end: 943,
+            },
+            scope_id: 0,
+            symbol_id: Some(
+                10,
+            ),
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 1,
+            name: "CommandPreset",
+            span: Span {
+                start: 678,
+                end: 691,
+            },
+            scope_id: 0,
+            symbol_id: Some(
+                12,
+            ),
+            is_read: false,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 3,
+            name: "BenchScenario",
+            span: Span {
+                start: 739,
+                end: 752,
+            },
+            scope_id: 0,
+            symbol_id: Some(
+                13,
+            ),
+            is_read: false,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 7,
+            name: "commandPreset",
+            span: Span {
+                start: 853,
+                end: 866,
+            },
+            scope_id: 1,
+            symbol_id: Some(
+                14,
+            ),
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 11,
+            name: "benchScenario",
+            span: Span {
+                start: 944,
+                end: 957,
+            },
+            scope_id: 0,
+            symbol_id: Some(
+                15,
+            ),
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 6,
+            name: "item",
+            span: Span {
+                start: 838,
+                end: 842,
+            },
+            scope_id: 1,
+            symbol_id: Some(
+                17,
+            ),
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 13,
+            name: "value",
+            span: Span {
+                start: 1076,
+                end: 1081,
+            },
+            scope_id: 2,
+            symbol_id: Some(
+                20,
+            ),
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 12,
+            name: "max",
+            span: Span {
+                start: 1034,
+                end: 1037,
+            },
+            scope_id: 2,
+            symbol_id: Some(
+                21,
+            ),
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 14,
+            name: "max",
+            span: Span {
+                start: 1084,
+                end: 1087,
+            },
+            scope_id: 2,
+            symbol_id: Some(
+                21,
+            ),
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 15,
+            name: "value",
+            span: Span {
+                start: 1171,
+                end: 1176,
+            },
+            scope_id: 3,
+            symbol_id: Some(
+                23,
             ),
             is_read: true,
             is_write: false,
@@ -184,8 +2057,47 @@ AnalysisTables {
             id: 0,
             name: "$state",
             span: Span {
-                start: 109,
-                end: 115,
+                start: 671,
+                end: 677,
+            },
+            scope_id: 0,
+            symbol_id: None,
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 2,
+            name: "$state",
+            span: Span {
+                start: 732,
+                end: 738,
+            },
+            scope_id: 0,
+            symbol_id: None,
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 4,
+            name: "$derived",
+            span: Span {
+                start: 790,
+                end: 798,
+            },
+            scope_id: 0,
+            symbol_id: None,
+            is_read: true,
+            is_write: false,
+        },
+        ScriptReferenceAnalysis {
+            target: Instance,
+            id: 9,
+            name: "$derived",
+            span: Span {
+                start: 924,
+                end: 932,
             },
             scope_id: 0,
             symbol_id: None,
@@ -203,7 +2115,7 @@ AnalysisTables {
             span: Some(
                 Span {
                     start: 0,
-                    end: 1484,
+                    end: 14746,
                 },
             ),
         },
@@ -219,8 +2131,8 @@ AnalysisTables {
             ),
             span: Some(
                 Span {
-                    start: 139,
-                    end: 187,
+                    start: 1210,
+                    end: 8055,
                 },
             ),
         },
@@ -231,13 +2143,13 @@ AnalysisTables {
             kind: Element,
             parent: Some(
                 TemplateScopeId(
-                    0,
+                    1,
                 ),
             ),
             span: Some(
                 Span {
-                    start: 189,
-                    end: 865,
+                    start: 1246,
+                    end: 8044,
                 },
             ),
         },
@@ -253,8 +2165,8 @@ AnalysisTables {
             ),
             span: Some(
                 Span {
-                    start: 197,
-                    end: 365,
+                    start: 1288,
+                    end: 2468,
                 },
             ),
         },
@@ -265,13 +2177,13 @@ AnalysisTables {
             kind: Element,
             parent: Some(
                 TemplateScopeId(
-                    2,
+                    3,
                 ),
             ),
             span: Some(
                 Span {
-                    start: 369,
-                    end: 549,
+                    start: 1324,
+                    end: 1412,
                 },
             ),
         },
@@ -282,13 +2194,13 @@ AnalysisTables {
             kind: Element,
             parent: Some(
                 TemplateScopeId(
-                    2,
+                    3,
                 ),
             ),
             span: Some(
                 Span {
-                    start: 553,
-                    end: 733,
+                    start: 1425,
+                    end: 1544,
                 },
             ),
         },
@@ -299,13 +2211,13 @@ AnalysisTables {
             kind: Element,
             parent: Some(
                 TemplateScopeId(
-                    2,
+                    5,
                 ),
             ),
             span: Some(
                 Span {
-                    start: 781,
-                    end: 798,
+                    start: 1470,
+                    end: 1476,
                 },
             ),
         },
@@ -316,13 +2228,13 @@ AnalysisTables {
             kind: Element,
             parent: Some(
                 TemplateScopeId(
-                    2,
+                    5,
                 ),
             ),
             span: Some(
                 Span {
-                    start: 801,
-                    end: 818,
+                    start: 1493,
+                    end: 1526,
                 },
             ),
         },
@@ -333,13 +2245,13 @@ AnalysisTables {
             kind: Element,
             parent: Some(
                 TemplateScopeId(
-                    2,
+                    3,
                 ),
             ),
             span: Some(
                 Span {
-                    start: 821,
-                    end: 838,
+                    start: 1557,
+                    end: 1800,
                 },
             ),
         },
@@ -350,102 +2262,1692 @@ AnalysisTables {
             kind: Element,
             parent: Some(
                 TemplateScopeId(
+                    3,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 1814,
+                    end: 2394,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                10,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    9,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 1896,
+                    end: 2138,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                11,
+            ),
+            kind: Each,
+            parent: Some(
+                TemplateScopeId(
+                    10,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 1953,
+                    end: 2109,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                12,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    11,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 2021,
+                    end: 2081,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                13,
+            ),
+            kind: Each,
+            parent: Some(
+                TemplateScopeId(
+                    9,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 2156,
+                    end: 2369,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                14,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    13,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 2220,
+                    end: 2345,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                15,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    14,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 2278,
+                    end: 2309,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                16,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    3,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 2408,
+                    end: 2453,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                17,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
                     2,
                 ),
             ),
             span: Some(
                 Span {
-                    start: 841,
-                    end: 858,
+                    start: 2478,
+                    end: 8033,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                18,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    17,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 2536,
+                    end: 6227,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                19,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    18,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 2587,
+                    end: 5779,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                20,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    19,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 2638,
+                    end: 2949,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                21,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    20,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 2668,
+                    end: 2738,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                22,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    20,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 2763,
+                    end: 2922,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                23,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    19,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 2970,
+                    end: 5756,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                24,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    23,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 3008,
+                    end: 3221,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                25,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    24,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 3076,
+                    end: 3131,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                26,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    24,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 3160,
+                    end: 3179,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                27,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    23,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 3246,
+                    end: 5721,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                28,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    27,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 3313,
+                    end: 3665,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                29,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    28,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 3361,
+                    end: 3411,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                30,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    28,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 3444,
+                    end: 3620,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                31,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    27,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 3694,
+                    end: 4404,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                32,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    31,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 3755,
+                    end: 3947,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                33,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    32,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 3797,
+                    end: 3820,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                34,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    32,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 3857,
+                    end: 3908,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                35,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    31,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 3980,
+                    end: 4159,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                36,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    35,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4022,
+                    end: 4044,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                37,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    35,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4081,
+                    end: 4120,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                38,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    31,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4192,
+                    end: 4369,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                39,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    38,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4234,
+                    end: 4261,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                40,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    38,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4298,
+                    end: 4330,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                41,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    27,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4433,
+                    end: 5679,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                42,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    41,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4499,
+                    end: 4944,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                43,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    42,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4550,
+                    end: 4896,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                44,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    43,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4602,
+                    end: 4633,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                45,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    43,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4674,
+                    end: 4705,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                46,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    43,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4746,
+                    end: 4774,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                47,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    43,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4815,
+                    end: 4847,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                48,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    41,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 4977,
+                    end: 5637,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                49,
+            ),
+            kind: Each,
+            parent: Some(
+                TemplateScopeId(
+                    48,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 5026,
+                    end: 5591,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                50,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    49,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 5106,
+                    end: 5547,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                51,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    50,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 5162,
+                    end: 5197,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                52,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    50,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 5242,
+                    end: 5289,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                53,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    50,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 5334,
+                    end: 5378,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                54,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    50,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 5423,
+                    end: 5494,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                55,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    18,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 5797,
+                    end: 6200,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                56,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    55,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 5881,
+                    end: 6171,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                57,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    56,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 5940,
+                    end: 5986,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                58,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    56,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 6011,
+                    end: 6061,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                59,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    56,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 6086,
+                    end: 6138,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                60,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    17,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 6241,
+                    end: 8012,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                61,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    60,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 6381,
+                    end: 6881,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                62,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    61,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 6425,
+                    end: 6473,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                63,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    61,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 6494,
+                    end: 6773,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                64,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    63,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 6544,
+                    end: 6746,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                65,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    61,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 6794,
+                    end: 6858,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                66,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    60,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 6899,
+                    end: 7397,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                67,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    66,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 6943,
+                    end: 6983,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                68,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    66,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 7004,
+                    end: 7276,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                69,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    68,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 7054,
+                    end: 7249,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                70,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    66,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 7297,
+                    end: 7374,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                71,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    60,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 7415,
+                    end: 7740,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                72,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    71,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 7463,
+                    end: 7665,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                73,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    72,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 7512,
+                    end: 7552,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                74,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    72,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 7577,
+                    end: 7638,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                75,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    71,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 7686,
+                    end: 7717,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                76,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    60,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 7758,
+                    end: 7984,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                77,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    76,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 7803,
+                    end: 7839,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                78,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    76,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 7860,
+                    end: 7905,
+                },
+            ),
+        },
+        TemplateScopeAnalysis {
+            id: TemplateScopeId(
+                79,
+            ),
+            kind: Element,
+            parent: Some(
+                TemplateScopeId(
+                    76,
+                ),
+            ),
+            span: Some(
+                Span {
+                    start: 7926,
+                    end: 7961,
                 },
             ),
         },
     ],
-    template_bindings: [],
+    template_bindings: [
+        TemplateBindingAnalysis {
+            scope: TemplateScopeId(
+                11,
+            ),
+            kind: EachContext,
+            name: "item",
+            span: Some(
+                Span {
+                    start: 1978,
+                    end: 1982,
+                },
+            ),
+        },
+        TemplateBindingAnalysis {
+            scope: TemplateScopeId(
+                13,
+            ),
+            kind: EachContext,
+            name: "item",
+            span: Some(
+                Span {
+                    start: 2181,
+                    end: 2185,
+                },
+            ),
+        },
+        TemplateBindingAnalysis {
+            scope: TemplateScopeId(
+                49,
+            ),
+            kind: EachContext,
+            name: "row",
+            span: Some(
+                Span {
+                    start: 5050,
+                    end: 5053,
+                },
+            ),
+        },
+    ],
     template_references: [
         TemplateReferenceAnalysis {
             scope: TemplateScopeId(
-                0,
+                3,
             ),
-            name: "selected",
+            name: "commandPreset",
             span: Span {
-                start: 158,
-                end: 166,
+                start: 1837,
+                end: 1850,
             },
             is_read: true,
             is_write: false,
         },
         TemplateReferenceAnalysis {
             scope: TemplateScopeId(
-                2,
+                3,
             ),
-            name: "selected",
+            name: "commandPreset",
             span: Span {
-                start: 290,
-                end: 298,
+                start: 1837,
+                end: 1850,
             },
             is_read: true,
-            is_write: false,
-        },
-        TemplateReferenceAnalysis {
-            scope: TemplateScopeId(
-                2,
-            ),
-            name: "selected",
-            span: Span {
-                start: 335,
-                end: 343,
-            },
-            is_read: false,
             is_write: true,
         },
         TemplateReferenceAnalysis {
             scope: TemplateScopeId(
-                2,
+                10,
             ),
-            name: "selected",
+            name: "commandPresets",
             span: Span {
-                start: 468,
-                end: 476,
+                start: 1960,
+                end: 1974,
             },
             is_read: true,
             is_write: false,
         },
         TemplateReferenceAnalysis {
             scope: TemplateScopeId(
-                2,
+                10,
             ),
-            name: "selected",
+            name: "item",
             span: Span {
-                start: 516,
-                end: 524,
-            },
-            is_read: false,
-            is_write: true,
-        },
-        TemplateReferenceAnalysis {
-            scope: TemplateScopeId(
-                2,
-            ),
-            name: "selected",
-            span: Span {
-                start: 652,
-                end: 660,
+                start: 1984,
+                end: 1988,
             },
             is_read: true,
             is_write: false,
         },
         TemplateReferenceAnalysis {
             scope: TemplateScopeId(
-                2,
+                11,
             ),
-            name: "selected",
+            name: "item",
             span: Span {
-                start: 700,
-                end: 708,
+                start: 2042,
+                end: 2046,
             },
-            is_read: false,
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                12,
+            ),
+            name: "item",
+            span: Span {
+                start: 2055,
+                end: 2059,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                9,
+            ),
+            name: "commandPresets",
+            span: Span {
+                start: 2163,
+                end: 2177,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                9,
+            ),
+            name: "item",
+            span: Span {
+                start: 2187,
+                end: 2191,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                13,
+            ),
+            name: "item",
+            span: Span {
+                start: 2241,
+                end: 2245,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                14,
+            ),
+            name: "item",
+            span: Span {
+                start: 2293,
+                end: 2297,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                16,
+            ),
+            name: "activeInstall",
+            span: Span {
+                start: 2430,
+                end: 2443,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                24,
+            ),
+            name: "InformationCircle",
+            span: Span {
+                start: 3087,
+                end: 3104,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                48,
+            ),
+            name: "benchmarkRows",
+            span: Span {
+                start: 5033,
+                end: 5046,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                48,
+            ),
+            name: "row",
+            span: Span {
+                start: 5055,
+                end: 5058,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                51,
+            ),
+            name: "row",
+            span: Span {
+                start: 5175,
+                end: 5178,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                52,
+            ),
+            name: "formatMs",
+            span: Span {
+                start: 5255,
+                end: 5263,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                52,
+            ),
+            name: "row",
+            span: Span {
+                start: 5264,
+                end: 5267,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                53,
+            ),
+            name: "formatMs",
+            span: Span {
+                start: 5347,
+                end: 5355,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                53,
+            ),
+            name: "row",
+            span: Span {
+                start: 5356,
+                end: 5359,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                54,
+            ),
+            name: "row",
+            span: Span {
+                start: 5457,
+                end: 5460,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                18,
+            ),
+            name: "benchScenario",
+            span: Span {
+                start: 5820,
+                end: 5833,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                18,
+            ),
+            name: "benchScenario",
+            span: Span {
+                start: 5820,
+                end: 5833,
+            },
+            is_read: true,
             is_write: true,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                63,
+            ),
+            name: "barWidth",
+            span: Span {
+                start: 6669,
+                end: 6677,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                63,
+            ),
+            name: "activeBenchmark",
+            span: Span {
+                start: 6678,
+                end: 6693,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                63,
+            ),
+            name: "maxValue",
+            span: Span {
+                start: 6702,
+                end: 6710,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                65,
+            ),
+            name: "formatMs",
+            span: Span {
+                start: 6819,
+                end: 6827,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                65,
+            ),
+            name: "activeBenchmark",
+            span: Span {
+                start: 6828,
+                end: 6843,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                68,
+            ),
+            name: "barWidth",
+            span: Span {
+                start: 7175,
+                end: 7183,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                68,
+            ),
+            name: "activeBenchmark",
+            span: Span {
+                start: 7184,
+                end: 7199,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                68,
+            ),
+            name: "maxValue",
+            span: Span {
+                start: 7205,
+                end: 7213,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                70,
+            ),
+            name: "formatMs",
+            span: Span {
+                start: 7338,
+                end: 7346,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                70,
+            ),
+            name: "activeBenchmark",
+            span: Span {
+                start: 7347,
+                end: 7362,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                72,
+            ),
+            name: "Bolt",
+            span: Span {
+                start: 7523,
+                end: 7527,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                74,
+            ),
+            name: "activeBenchmark",
+            span: Span {
+                start: 7586,
+                end: 7601,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                75,
+            ),
+            name: "activeBenchmark",
+            span: Span {
+                start: 7690,
+                end: 7705,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                77,
+            ),
+            name: "activeBenchmark",
+            span: Span {
+                start: 7810,
+                end: 7825,
+            },
+            is_read: true,
+            is_write: false,
+        },
+        TemplateReferenceAnalysis {
+            scope: TemplateScopeId(
+                79,
+            ),
+            name: "activeBenchmark",
+            span: Span {
+                start: 7933,
+                end: 7948,
+            },
+            is_read: true,
+            is_write: false,
         },
     ],
     diagnostics: [],
