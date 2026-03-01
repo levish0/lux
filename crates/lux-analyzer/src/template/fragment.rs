@@ -131,11 +131,12 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteHead(component) => {
             maybe_report_meta_invalid_placement(context, "svelte:head", component.span);
+            let head_seen = context.mark_svelte_head_seen();
             maybe_report_meta_duplicate(
                 context,
                 "svelte:head",
                 component.span,
-                context.mark_svelte_head_seen(),
+                head_seen,
             );
             node::element::analyze(
                 ElementContainerKind::Other,
@@ -149,11 +150,12 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteBody(component) => {
             maybe_report_meta_invalid_placement(context, "svelte:body", component.span);
+            let body_seen = context.mark_svelte_body_seen();
             maybe_report_meta_duplicate(
                 context,
                 "svelte:body",
                 component.span,
-                context.mark_svelte_body_seen(),
+                body_seen,
             );
             maybe_report_meta_invalid_content(
                 context,
@@ -173,11 +175,12 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteWindow(component) => {
             maybe_report_meta_invalid_placement(context, "svelte:window", component.span);
+            let window_seen = context.mark_svelte_window_seen();
             maybe_report_meta_duplicate(
                 context,
                 "svelte:window",
                 component.span,
-                context.mark_svelte_window_seen(),
+                window_seen,
             );
             maybe_report_meta_invalid_content(
                 context,
@@ -197,11 +200,12 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteDocument(component) => {
             maybe_report_meta_invalid_placement(context, "svelte:document", component.span);
+            let document_seen = context.mark_svelte_document_seen();
             maybe_report_meta_duplicate(
                 context,
                 "svelte:document",
                 component.span,
-                context.mark_svelte_document_seen(),
+                document_seen,
             );
             maybe_report_meta_invalid_content(
                 context,
@@ -254,11 +258,12 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
         }
         FragmentNode::SvelteOptionsRaw(element) => {
             maybe_report_meta_invalid_placement(context, "svelte:options", element.span);
+            let options_seen = context.mark_svelte_options_seen();
             maybe_report_meta_duplicate(
                 context,
                 "svelte:options",
                 element.span,
-                context.mark_svelte_options_seen(),
+                options_seen,
             );
             maybe_report_meta_invalid_content(
                 context,
