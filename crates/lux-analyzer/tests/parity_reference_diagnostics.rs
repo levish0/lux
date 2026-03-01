@@ -121,6 +121,13 @@ fn parity_against_reference_analyzer_diagnostics_smoke() {
             lux_code: AnalysisDiagnosticCode::BlockEmpty,
             severity: AnalysisSeverity::Warning,
         },
+        ParityCase {
+            name: "state_invalid_placement",
+            source: "{$state(1)}",
+            reference_code: "state_invalid_placement",
+            lux_code: AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+            severity: AnalysisSeverity::Error,
+        },
     ];
 
     for case in cases {
