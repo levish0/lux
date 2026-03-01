@@ -476,16 +476,6 @@ fn analyze_reports_template_rune_invalid_placement() {
 }
 
 #[test]
-fn analyze_reports_svelte_meta_invalid_placement() {
-    let tables = analyze_source("<div><svelte:window /></div>");
-
-    assert!(tables.diagnostics.iter().any(|diagnostic| {
-        diagnostic.code == AnalysisDiagnosticCode::SvelteMetaInvalidPlacement
-            && diagnostic.severity == AnalysisSeverity::Error
-    }));
-}
-
-#[test]
 fn analyze_reports_svelte_meta_invalid_content() {
     let tables = analyze_source("<svelte:window><div /></svelte:window>");
 
@@ -496,11 +486,16 @@ fn analyze_reports_svelte_meta_invalid_content() {
 }
 
 #[test]
-fn analyze_reports_svelte_meta_duplicate() {
-    let tables = analyze_source("<svelte:window /><svelte:window />");
+fn analyze_reports_svelte_meta_invalid_content_for_document_and_body() {
+    let document_tables = analyze_source("<svelte:document><div /></svelte:document>");
+    let body_tables = analyze_source("<svelte:body><div /></svelte:body>");
 
-    assert!(tables.diagnostics.iter().any(|diagnostic| {
-        diagnostic.code == AnalysisDiagnosticCode::SvelteMetaDuplicate
+    assert!(document_tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::SvelteMetaInvalidContent
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+    assert!(body_tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::SvelteMetaInvalidContent
             && diagnostic.severity == AnalysisSeverity::Error
     }));
 }

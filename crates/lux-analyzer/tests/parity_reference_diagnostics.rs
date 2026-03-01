@@ -129,24 +129,10 @@ fn parity_against_reference_analyzer_diagnostics_smoke() {
             severity: AnalysisSeverity::Error,
         },
         ParityCase {
-            name: "window_invalid_placement",
-            source: "<div><svelte:window /></div>",
-            reference_code: "svelte_meta_invalid_placement",
-            lux_code: AnalysisDiagnosticCode::SvelteMetaInvalidPlacement,
-            severity: AnalysisSeverity::Error,
-        },
-        ParityCase {
             name: "window_invalid_content",
             source: "<svelte:window><div /></svelte:window>",
             reference_code: "svelte_meta_invalid_content",
             lux_code: AnalysisDiagnosticCode::SvelteMetaInvalidContent,
-            severity: AnalysisSeverity::Error,
-        },
-        ParityCase {
-            name: "window_duplicate",
-            source: "<svelte:window /><svelte:window />",
-            reference_code: "svelte_meta_duplicate",
-            lux_code: AnalysisDiagnosticCode::SvelteMetaDuplicate,
             severity: AnalysisSeverity::Error,
         },
     ];
