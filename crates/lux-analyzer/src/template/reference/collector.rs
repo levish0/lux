@@ -1,7 +1,9 @@
+use lux_ast::analysis::{AnalysisDiagnosticCode, AnalysisSeverity};
+use lux_utils::runes::is_rune;
 use oxc_ast::ast::{
     AssignmentExpression, AssignmentTargetPropertyIdentifier, AssignmentTargetPropertyProperty,
-    AssignmentTargetRest, AssignmentTargetWithDefault, Expression, IdentifierReference,
-    SimpleAssignmentTarget, UpdateExpression,
+    AssignmentTargetRest, AssignmentTargetWithDefault, CallExpression, Expression,
+    IdentifierReference, SimpleAssignmentTarget, UpdateExpression,
 };
 use oxc_ast_visit::{Visit, walk};
 use oxc_syntax::operator::AssignmentOperator;
@@ -93,6 +95,21 @@ impl<'ctx, 'tables> ExpressionReferenceCollector<'ctx, 'tables> {
 impl<'a> Visit<'a> for ExpressionReferenceCollector<'_, '_> {
     fn visit_expression(&mut self, it: &Expression<'a>) {
         walk::walk_expression(self, it);
+    }
+
+    fn visit_call_expression(&mut self, it: &CallExpression<'a>) {
+        if let Some(name) = extract_rune_name(&it.callee) {
+            if is_rune(&name) {
+                self.context.add_diagnostic(
+                    AnalysisSeverity::Error,
+                    AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+                    format!("`{name}(...)` cannot be used in template expressions."),
+                    it.span,
+                );
+            }
+        }
+
+        walk::walk_call_expression(self, it);
     }
 
     fn visit_identifier_reference(&mut self, it: &IdentifierReference<'a>) {
@@ -191,5 +208,17 @@ impl<'a> Visit<'a> for ExpressionReferenceCollector<'_, '_> {
         self.with_mode(WRITE, |collector| {
             collector.visit_assignment_target_maybe_default(&it.binding);
         });
+    }
+}
+
+fn extract_rune_name(callee: &Expression<'_>) -> Option<String> {
+    match callee {
+        Expression::Identifier(identifier) => Some(identifier.name.as_str().to_owned()),
+        Expression::StaticMemberExpression(member) => {
+            let object_name = extract_rune_name(&member.object)?;
+            Some(format!("{object_name}.{}", member.property.name.as_str()))
+        }
+        Expression::ParenthesizedExpression(expression) => extract_rune_name(&expression.expression),
+        _ => None,
     }
 }

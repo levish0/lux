@@ -466,6 +466,16 @@ fn analyze_reports_render_tag_forbidden_call_expression() {
 }
 
 #[test]
+fn analyze_reports_template_rune_invalid_placement() {
+    let tables = analyze_source("{$state(1)}");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::TemplateRuneInvalidPlacement
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
 fn analyze_reports_snippet_shadowing_component_prop() {
     let tables = analyze_source("<Comp foo=\"value\">{#snippet foo()}{/snippet}</Comp>");
 

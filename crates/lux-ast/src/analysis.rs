@@ -63,6 +63,7 @@ pub enum AnalysisDiagnosticCode {
     LetDirectiveInvalidPlacement,
     RenderTagInvalidSpreadArgument,
     RenderTagInvalidCallExpression,
+    TemplateRuneInvalidPlacement,
 }
 
 #[derive(Debug, Clone)]

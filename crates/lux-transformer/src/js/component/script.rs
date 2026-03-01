@@ -205,26 +205,7 @@ fn rewrite_rune_initializer<'a>(ast: AstBuilder<'a>, init: Expression<'a>) -> Ex
         return rewrite_rune_initializer(ast, inner);
     }
 
-    let Expression::CallExpression(call) = &init else {
-        return init;
-    };
-
-    let Some(name) = extract_rune_name(&call.callee) else {
-        return init;
-    };
-
-    match name.as_str() {
-        "$state" | "$state.raw" | "$derived" => first_call_argument_expression(ast, call)
-            .unwrap_or_else(|| ast.expression_identifier(SPAN, ast.ident("undefined"))),
-        "$derived.by" => {
-            let Some(argument) = first_call_argument_expression(ast, call) else {
-                return ast.expression_identifier(SPAN, ast.ident("undefined"));
-            };
-            ast.expression_call(SPAN, argument, oxc_ast::NONE, ast.vec(), false)
-        }
-        "$props" => ast.expression_identifier(SPAN, ast.ident("_props")),
-        _ => init,
-    }
+    rewrite_rune_call_expression(ast, &init).unwrap_or(init)
 }
 
 fn first_call_argument_expression<'a>(
@@ -258,6 +239,35 @@ fn is_discardable_rune_expression(expression: &Expression<'_>) -> bool {
                 | "$inspect.trace"
         )
     )
+}
+
+fn rewrite_rune_call_expression<'a>(
+    ast: AstBuilder<'a>,
+    expression: &Expression<'a>,
+) -> Option<Expression<'a>> {
+    let Expression::CallExpression(call) = expression else {
+        return None;
+    };
+
+    let name = extract_rune_name(&call.callee)?;
+    match name.as_str() {
+        "$state" | "$state.raw" | "$derived" => Some(
+            first_call_argument_expression(ast, call)
+                .unwrap_or_else(|| ast.expression_identifier(SPAN, ast.ident("undefined"))),
+        ),
+        "$derived.by" => {
+            let argument = first_call_argument_expression(ast, call)
+                .unwrap_or_else(|| ast.expression_identifier(SPAN, ast.ident("undefined")));
+            Some(ast.expression_call(SPAN, argument, oxc_ast::NONE, ast.vec(), false))
+        }
+        "$props" => Some(ast.expression_identifier(SPAN, ast.ident("_props"))),
+        "$props.id" => Some(build_props_id_expression(ast)),
+        "$bindable" | "$effect" | "$effect.pre" | "$effect.tracking" | "$effect.root"
+        | "$effect.pending" | "$inspect" | "$inspect.trace" | "$host" => {
+            Some(ast.expression_identifier(SPAN, ast.ident("undefined")))
+        }
+        _ => None,
+    }
 }
 
 fn extract_rune_name(callee: &Expression<'_>) -> Option<String> {
@@ -299,14 +309,80 @@ fn strip_typescript_from_statement<'a>(ast: AstBuilder<'a>, statement: &mut Stat
     eraser.visit_statement(statement);
 }
 
+fn build_props_id_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
+    let math_random = ast.expression_call(
+        SPAN,
+        ast.member_expression_static(
+            SPAN,
+            ast.expression_identifier(SPAN, ast.ident("Math")),
+            ast.identifier_name(SPAN, ast.ident("random")),
+            false,
+        )
+        .into(),
+        oxc_ast::NONE,
+        ast.vec(),
+        false,
+    );
+    let random_string = ast.expression_call(
+        SPAN,
+        ast.member_expression_static(
+            SPAN,
+            math_random,
+            ast.identifier_name(SPAN, ast.ident("toString")),
+            false,
+        )
+        .into(),
+        oxc_ast::NONE,
+        ast.vec1(
+            ast.expression_numeric_literal(SPAN, 36.0, None, oxc_ast::ast::NumberBase::Decimal)
+                .into(),
+        ),
+        false,
+    );
+    let suffix = ast.expression_call(
+        SPAN,
+        ast.member_expression_static(
+            SPAN,
+            random_string,
+            ast.identifier_name(SPAN, ast.ident("slice")),
+            false,
+        )
+        .into(),
+        oxc_ast::NONE,
+        ast.vec1(
+            ast.expression_numeric_literal(SPAN, 2.0, None, oxc_ast::ast::NumberBase::Decimal)
+                .into(),
+        ),
+        false,
+    );
+
+    ast.expression_binary(
+        SPAN,
+        ast.expression_string_literal(SPAN, ast.atom("lux-"), None),
+        oxc_ast::ast::BinaryOperator::Addition,
+        suffix,
+    )
+}
+
 struct TypeScriptEraser<'a> {
     ast: AstBuilder<'a>,
 }
 
 impl<'a> VisitMut<'a> for TypeScriptEraser<'a> {
     fn visit_expression(&mut self, expression: &mut Expression<'a>) {
-        while let Some(inner) = strip_typescript_expression_wrapper(self.ast, expression) {
-            *expression = inner;
+        loop {
+            let mut changed = false;
+            while let Some(inner) = strip_typescript_expression_wrapper(self.ast, expression) {
+                *expression = inner;
+                changed = true;
+            }
+            if let Some(inner) = rewrite_rune_call_expression(self.ast, expression) {
+                *expression = inner;
+                changed = true;
+            }
+            if !changed {
+                break;
+            }
         }
         walk_mut::walk_expression(self, expression);
     }

@@ -432,6 +432,38 @@ fn transform_maps_props_rune_to_runtime_props_object() {
 }
 
 #[test]
+fn transform_maps_props_id_rune_to_runtime_expression() {
+    let source = "<script>const id = $props.id();</script><div id={id}></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("$props.id"));
+    assert!(result.js.contains("Math.random"));
+    assert!(result.js.contains("const id = \"lux-\" +"));
+    assert_js_parses_as_module(&result.js);
+}
+
+#[test]
+fn transform_rewrites_bindable_default_in_props_destructure() {
+    let source = "<script>let { value = $bindable() } = $props();</script>{value}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("$bindable"));
+    assert!(result.js.contains("let { value = undefined } = _props;"));
+    assert!(!result.js.contains("function({ value })"));
+    assert_js_parses_as_module(&result.js);
+}
+
+#[test]
 fn transform_emits_module_script_statements() {
     let source =
         "<script context=\"module\">const n = 1; function f() { return n; }</script><p>x</p>";
