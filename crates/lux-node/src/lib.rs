@@ -133,3 +133,23 @@ fn compile_internal(source: &str, options: Option<&CompileOptions>) -> CompileOu
         ts: parse_result.root.ts,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{CompileOptions, compile_internal};
+
+    #[test]
+    fn compile_collects_parse_errors() {
+        let output = compile_internal("{#if x}<div>", None);
+        assert!(!output.errors.is_empty());
+        assert_eq!(output.errors[0].phase, "parse");
+    }
+
+    #[test]
+    fn compile_emits_runtime_module_for_dynamic_expression() {
+        let output = compile_internal("<p>{name}</p>", Some(&CompileOptions { ts: Some(false) }));
+        assert!(output.errors.is_empty());
+        assert_eq!(output.runtime_modules.len(), 1);
+        assert_eq!(output.runtime_modules[0].specifier, "lux/runtime/server");
+    }
+}
