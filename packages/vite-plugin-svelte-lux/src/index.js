@@ -6,6 +6,7 @@ import { compile } from './plugins/compile.js';
 import { loadCompiledCss } from './plugins/load-compiled-css.js';
 import { setupOptimizer } from './plugins/setup-optimizer.js';
 import { compileModule } from './plugins/compile-module.js';
+import { luxRuntime } from './plugins/lux-runtime.js';
 import { svelteInspector } from './plugins/inspector/index.js';
 import { loadCustom } from './plugins/load-custom.js';
 import { hotUpdate } from './plugins/hot-update.js';
@@ -28,6 +29,7 @@ export function svelte(inlineOptions) {
 		{ name: 'vite-plugin-svelte' }, // marker for detection logic in other plugins that expect this name
 		configure(api, inlineOptions),
 		setupOptimizer(api),
+		luxRuntime(),
 		loadCompiledCss(api),
 		loadCustom(api),
 		preprocess(api),

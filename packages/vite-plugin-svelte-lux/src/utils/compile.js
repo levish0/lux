@@ -1,3 +1,5 @@
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, isAbsolute, relative, resolve } from 'node:path';
 import * as svelte from 'svelte/compiler';
 import { compile as luxCompile } from '@lux/compiler';
 import { log } from './log.js';
@@ -10,6 +12,16 @@ import { enhanceCompileError } from './error.js';
 // but ideally would be shared exactly with svelte and other tools that use it
 const scriptLangRE =
 	/<!--[^]*?-->|<script\s+(?:[^>]*|(?:[^=>'"/]+=(?:"[^"]*"|'[^']*'|[^>\s]+)\s+)*)lang=(["'])?([^"' >]+)\1[^>]*>/g;
+
+/** @type {Map<string, string>} */
+const luxRuntimeModules = new Map();
+
+/**
+ * @param {string} specifier
+ */
+export function getLuxRuntimeModule(specifier) {
+	return luxRuntimeModules.get(specifier);
+}
 
 /**
  * @returns {import('../types/compile.d.ts').CompileSvelte}
@@ -91,9 +103,19 @@ export function createCompileSvelte() {
 		/** @type {import('svelte/compiler').CompileResult} */
 		let compiled;
 		try {
-			compiled = shouldUseLuxCompiler(ssr)
-				? compileWithLux(finalCode, filename)
-				: svelte.compile(finalCode, { ...finalCompileOptions, filename });
+			if (shouldUseLuxCompiler(ssr)) {
+				const luxOutput = compileWithLux(finalCode, filename);
+				writeLuxArtifactsIfEnabled(
+					luxOutput.result,
+					filename,
+					normalizedFilename,
+					ssr,
+					options
+				);
+				compiled = luxOutput.compiled;
+			} else {
+				compiled = svelte.compile(finalCode, { ...finalCompileOptions, filename });
+			}
 
 			// patch output with partial accept until svelte does it
 			// TODO remove later
@@ -161,10 +183,13 @@ function shouldUseLuxCompiler(ssr) {
 /**
  * @param {string} code
  * @param {string} filename
- * @returns {import('svelte/compiler').CompileResult}
+ * @returns {{ compiled: import('svelte/compiler').CompileResult, result: any }}
  */
 function compileWithLux(code, filename) {
 	const result = luxCompile(code);
+	for (const runtimeModule of result.runtimeModules ?? []) {
+		luxRuntimeModules.set(runtimeModule.specifier, runtimeModule.code);
+	}
 	if (result.errors.length > 0) {
 		throw buildLuxCompileError(result.errors[0], code, filename);
 	}
@@ -182,7 +207,7 @@ function compileWithLux(code, filename) {
 		};
 	});
 
-	return {
+	const compiled = {
 		js: {
 			code: result.js,
 			map: null
@@ -197,6 +222,7 @@ function compileWithLux(code, filename) {
 		metadata: {},
 		ast: null
 	};
+	return { compiled, result };
 }
 
 /**
@@ -235,4 +261,77 @@ function offsetToLocation(code, offset) {
 		column: safe - lineStart,
 		character: safe
 	};
+}
+
+/**
+ * @param {any} result
+ * @param {string} filename
+ * @param {string} normalizedFilename
+ * @param {boolean} ssr
+ * @param {import('../types/options.d.ts').ResolvedOptions} options
+ */
+function writeLuxArtifactsIfEnabled(result, filename, normalizedFilename, ssr, options) {
+	const outputDir = process.env.LUX_ARTIFACTS_DIR;
+	if (!outputDir) {
+		return;
+	}
+
+	let rel = normalizedFilename || filename;
+	if (isAbsolute(rel)) {
+		rel = relative(options.root, rel);
+	}
+	rel = sanitizeArtifactRelativePath(rel);
+
+	const base = resolve(outputDir, `${rel}.${ssr ? 'server' : 'client'}`);
+	mkdirSync(dirname(base), { recursive: true });
+	writeFileSync(`${base}.js`, result.js ?? '', 'utf8');
+	if (typeof result.css === 'string') {
+		writeFileSync(`${base}.css`, result.css, 'utf8');
+	}
+	writeFileSync(
+		`${base}.meta.json`,
+		JSON.stringify(
+			{
+				filename,
+				normalizedFilename,
+				ts: result.ts ?? false,
+				errors: result.errors ?? [],
+				warnings: result.warnings ?? [],
+				runtimeModules: (result.runtimeModules ?? []).map((module) => module.specifier)
+			},
+			null,
+			2
+		),
+		'utf8'
+	);
+}
+
+/**
+ * Ensure generated artifact paths always stay under `.lux_artifacts`
+ * even when Vite provides ids outside the project root.
+ * @param {string} rel
+ */
+function sanitizeArtifactRelativePath(rel) {
+	const segments = String(rel).replace(/\\/g, '/').split('/');
+	const safeSegments = [];
+	let escapedRoot = false;
+
+	for (const segment of segments) {
+		if (!segment || segment === '.') continue;
+		if (segment === '..') {
+			escapedRoot = true;
+			continue;
+		}
+		safeSegments.push(segment.replace(/[:*?"<>|]/g, '_'));
+	}
+
+	if (safeSegments.length === 0) {
+		safeSegments.push('unknown');
+	}
+
+	if (escapedRoot) {
+		safeSegments.unshift('_external');
+	}
+
+	return safeSegments.join('/');
 }
