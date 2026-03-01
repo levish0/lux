@@ -2,7 +2,7 @@ use lux_ast::template::root::Fragment;
 use oxc_allocator::CloneIn;
 use oxc_ast::{
     ast::{
-        BinaryOperator, BindingPattern, Expression, FormalParameterKind, FunctionType, Statement,
+        BindingPattern, Expression, FormalParameterKind, FunctionType, Statement,
         VariableDeclarationKind,
     },
     AstBuilder, NONE,
@@ -174,10 +174,18 @@ pub(super) fn string_expr<'a>(ast: AstBuilder<'a>, value: &str) -> Expression<'a
     ast.expression_string_literal(SPAN, ast.atom(value), None)
 }
 
-pub(super) fn concat_expr<'a>(
+pub(super) fn join_chunks_expression<'a>(
     ast: AstBuilder<'a>,
-    left: Expression<'a>,
-    right: Expression<'a>,
+    chunks: oxc_allocator::Vec<'a, Expression<'a>>,
 ) -> Expression<'a> {
-    ast.expression_binary(SPAN, left, BinaryOperator::Addition, right)
+    let mut items = ast.vec_with_capacity(chunks.len());
+    for chunk in chunks {
+        items.push(chunk.into());
+    }
+    call_static_method(
+        ast,
+        ast.expression_array(SPAN, items),
+        "join",
+        ast.vec1(string_expr(ast, "").into()),
+    )
 }

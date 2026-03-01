@@ -11,7 +11,9 @@ use oxc_ast::{
 use oxc_span::SPAN;
 
 use super::attributes::render_attribute_expression;
-use super::expr::{call_iife, concat_expr, const_statement, string_expr, stringify_expression};
+use super::expr::{
+    call_iife, const_statement, join_chunks_expression, string_expr, stringify_expression,
+};
 use super::render_fragment_expression;
 use super::scope::{is_valid_js_identifier, resolve_expression, RuntimeScope};
 
@@ -22,26 +24,27 @@ pub(super) fn render_regular_element_expression<'a>(
     children: &Fragment<'_>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
-    let mut out = string_expr(ast, &format!("<{name}"));
+    let mut chunks = ast.vec();
+    chunks.push(string_expr(ast, &format!("<{name}")));
 
     for attribute in attributes {
-        out = concat_expr(ast, out, render_attribute_expression(ast, attribute, scope));
+        chunks.push(render_attribute_expression(ast, attribute, scope));
     }
     let (capture_onload, capture_onerror) = detect_load_error_captures(name, attributes);
     if capture_onload {
-        out = concat_expr(ast, out, string_expr(ast, " onload=\"this.__e=event\""));
+        chunks.push(string_expr(ast, " onload=\"this.__e=event\""));
     }
     if capture_onerror {
-        out = concat_expr(ast, out, string_expr(ast, " onerror=\"this.__e=event\""));
+        chunks.push(string_expr(ast, " onerror=\"this.__e=event\""));
     }
 
-    out = concat_expr(ast, out, string_expr(ast, ">"));
+    chunks.push(string_expr(ast, ">"));
     if !is_void(name) {
-        out = concat_expr(ast, out, render_fragment_expression(ast, children, scope));
-        out = concat_expr(ast, out, string_expr(ast, &format!("</{name}>")));
+        chunks.push(render_fragment_expression(ast, children, scope));
+        chunks.push(string_expr(ast, &format!("</{name}>")));
     }
 
-    out
+    join_chunks_expression(ast, chunks)
 }
 
 fn detect_load_error_captures(name: &str, attributes: &[AttributeNode<'_>]) -> (bool, bool) {
@@ -183,25 +186,19 @@ pub(super) fn render_svelte_element_expression<'a>(
     statements.push(const_statement(ast, "__lux_tag", tag_expression));
 
     let tag_ident = ast.expression_identifier(SPAN, ast.ident("__lux_tag"));
-    let mut out = concat_expr(
-        ast,
-        string_expr(ast, "<"),
-        tag_ident.clone_in(ast.allocator),
-    );
+    let mut chunks = ast.vec();
+    chunks.push(string_expr(ast, "<"));
+    chunks.push(tag_ident.clone_in(ast.allocator));
     for attribute in &element.attributes {
-        out = concat_expr(ast, out, render_attribute_expression(ast, attribute, scope));
+        chunks.push(render_attribute_expression(ast, attribute, scope));
     }
-    out = concat_expr(ast, out, string_expr(ast, ">"));
-    out = concat_expr(
-        ast,
-        out,
-        render_fragment_expression(ast, &element.fragment, scope),
-    );
-    out = concat_expr(ast, out, string_expr(ast, "</"));
-    out = concat_expr(ast, out, tag_ident);
-    out = concat_expr(ast, out, string_expr(ast, ">"));
+    chunks.push(string_expr(ast, ">"));
+    chunks.push(render_fragment_expression(ast, &element.fragment, scope));
+    chunks.push(string_expr(ast, "</"));
+    chunks.push(tag_ident);
+    chunks.push(string_expr(ast, ">"));
 
-    statements.push(ast.statement_return(SPAN, Some(out)));
+    statements.push(ast.statement_return(SPAN, Some(join_chunks_expression(ast, chunks))));
     call_iife(ast, statements)
 }
 
@@ -276,7 +273,7 @@ pub(super) fn attribute_value_to_component_prop_expression<'a>(
             resolve_expression(ast, tag.expression.clone_in(ast.allocator), scope)
         }
         AttributeValue::Sequence(chunks) => {
-            let mut out = string_expr(ast, "");
+            let mut parts = ast.vec();
             for chunk in chunks {
                 let chunk_expression = match chunk {
                     TextOrExpressionTag::Text(text) => string_expr(ast, text.raw),
@@ -285,9 +282,9 @@ pub(super) fn attribute_value_to_component_prop_expression<'a>(
                         resolve_expression(ast, tag.expression.clone_in(ast.allocator), scope),
                     ),
                 };
-                out = concat_expr(ast, out, chunk_expression);
+                parts.push(chunk_expression);
             }
-            out
+            join_chunks_expression(ast, parts)
         }
     }
 }

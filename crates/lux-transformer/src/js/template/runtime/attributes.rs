@@ -9,7 +9,8 @@ use oxc_ast::{
 use oxc_span::SPAN;
 
 use super::expr::{
-    call_static_method, concat_expr, escape_attr_expression, string_expr, stringify_expression,
+    call_static_method, escape_attr_expression, join_chunks_expression, string_expr,
+    stringify_expression,
 };
 use super::scope::{is_valid_js_identifier, resolve_expression, RuntimeScope};
 
@@ -31,7 +32,7 @@ pub(super) fn render_attribute_expression<'a>(
                     resolve_expression(ast, tag.expression.clone_in(ast.allocator), scope),
                 ),
                 AttributeValue::Sequence(chunks) => {
-                    let mut value_expr = string_expr(ast, "");
+                    let mut value_parts = ast.vec();
                     for chunk in chunks {
                         let chunk_expr = match chunk {
                             TextOrExpressionTag::Text(text) => string_expr(ast, text.raw),
@@ -47,12 +48,17 @@ pub(super) fn render_attribute_expression<'a>(
                                 ),
                             ),
                         };
-                        value_expr = concat_expr(ast, value_expr, chunk_expr);
+                        value_parts.push(chunk_expr);
                     }
 
-                    let mut out = string_expr(ast, &format!(" {}=\"", attribute.name));
-                    out = concat_expr(ast, out, value_expr);
-                    concat_expr(ast, out, string_expr(ast, "\""))
+                    join_chunks_expression(
+                        ast,
+                        ast.vec_from_array([
+                            string_expr(ast, &format!(" {}=\"", attribute.name)),
+                            join_chunks_expression(ast, value_parts),
+                            string_expr(ast, "\""),
+                        ]),
+                    )
                 }
             }
         }
@@ -93,13 +99,14 @@ fn render_named_expression_attribute<'a>(
     name: &str,
     value: Expression<'a>,
 ) -> Expression<'a> {
-    let mut out = string_expr(ast, &format!(" {}=\"", name));
-    out = concat_expr(
+    join_chunks_expression(
         ast,
-        out,
-        escape_attr_expression(ast, stringify_expression(ast, value)),
-    );
-    concat_expr(ast, out, string_expr(ast, "\""))
+        ast.vec_from_array([
+            string_expr(ast, &format!(" {}=\"", name)),
+            escape_attr_expression(ast, stringify_expression(ast, value)),
+            string_expr(ast, "\""),
+        ]),
+    )
 }
 
 fn render_class_directive_attribute_expression<'a>(
@@ -107,9 +114,14 @@ fn render_class_directive_attribute_expression<'a>(
     name: &str,
     value: Expression<'a>,
 ) -> Expression<'a> {
-    let mut class_attr = string_expr(ast, " class=\"");
-    class_attr = concat_expr(ast, class_attr, string_expr(ast, name));
-    class_attr = concat_expr(ast, class_attr, string_expr(ast, "\""));
+    let class_attr = join_chunks_expression(
+        ast,
+        ast.vec_from_array([
+            string_expr(ast, " class=\""),
+            string_expr(ast, name),
+            string_expr(ast, "\""),
+        ]),
+    );
     ast.expression_conditional(SPAN, value, class_attr, string_expr(ast, ""))
 }
 
@@ -120,21 +132,24 @@ fn render_style_directive_attribute_expression<'a>(
 ) -> Expression<'a> {
     let value = render_style_directive_value_expression(ast, directive, scope);
     let style_body = if directive.modifiers.contains(&StyleModifier::Important) {
-        concat_expr(
+        join_chunks_expression(
             ast,
-            value.clone_in(ast.allocator),
-            string_expr(ast, " !important"),
+            ast.vec_from_array([
+                value.clone_in(ast.allocator),
+                string_expr(ast, " !important"),
+            ]),
         )
     } else {
         value.clone_in(ast.allocator)
     };
-    let mut style_attr = string_expr(ast, &format!(" style=\"{}: ", directive.name));
-    style_attr = concat_expr(
+    let style_attr = join_chunks_expression(
         ast,
-        style_attr,
-        escape_attr_expression(ast, stringify_expression(ast, style_body)),
+        ast.vec_from_array([
+            string_expr(ast, &format!(" style=\"{}: ", directive.name)),
+            escape_attr_expression(ast, stringify_expression(ast, style_body)),
+            string_expr(ast, ";\""),
+        ]),
     );
-    style_attr = concat_expr(ast, style_attr, string_expr(ast, ";\""));
 
     let omit = is_falsy_attribute_value_expression(ast, value);
     ast.expression_conditional(SPAN, omit, string_expr(ast, ""), style_attr)
@@ -161,7 +176,7 @@ fn render_style_directive_value_expression<'a>(
             resolve_expression(ast, tag.expression.clone_in(ast.allocator), scope)
         }
         StyleDirectiveValue::Sequence(chunks) => {
-            let mut out = string_expr(ast, "");
+            let mut parts = ast.vec();
             for chunk in chunks {
                 let chunk_expression = match chunk {
                     TextOrExpressionTag::Text(text) => string_expr(ast, text.raw),
@@ -170,9 +185,9 @@ fn render_style_directive_value_expression<'a>(
                         resolve_expression(ast, tag.expression.clone_in(ast.allocator), scope),
                     ),
                 };
-                out = concat_expr(ast, out, chunk_expression);
+                parts.push(chunk_expression);
             }
-            out
+            join_chunks_expression(ast, parts)
         }
     }
 }
@@ -216,25 +231,27 @@ fn render_spread_attribute_expression<'a>(
     let omitted =
         is_falsy_attribute_value_expression(ast, value_expr.clone_in(ast.allocator).into());
 
-    let mut true_attr = string_expr(ast, " ");
-    true_attr = concat_expr(
+    let true_attr = join_chunks_expression(
         ast,
-        true_attr,
-        stringify_expression(ast, key_expr.clone_in(ast.allocator).into()),
+        ast.vec_from_array([
+            string_expr(ast, " "),
+            stringify_expression(ast, key_expr.clone_in(ast.allocator).into()),
+        ]),
     );
 
-    let mut value_attr = string_expr(ast, " ");
-    value_attr = concat_expr(ast, value_attr, stringify_expression(ast, key_expr.into()));
-    value_attr = concat_expr(ast, value_attr, string_expr(ast, "=\""));
-    value_attr = concat_expr(
+    let value_attr = join_chunks_expression(
         ast,
-        value_attr,
-        escape_attr_expression(
-            ast,
-            stringify_expression(ast, value_expr.clone_in(ast.allocator).into()),
-        ),
+        ast.vec_from_array([
+            string_expr(ast, " "),
+            stringify_expression(ast, key_expr.into()),
+            string_expr(ast, "=\""),
+            escape_attr_expression(
+                ast,
+                stringify_expression(ast, value_expr.clone_in(ast.allocator).into()),
+            ),
+            string_expr(ast, "\""),
+        ]),
     );
-    value_attr = concat_expr(ast, value_attr, string_expr(ast, "\""));
 
     let mapped_value = ast.expression_conditional(
         SPAN,

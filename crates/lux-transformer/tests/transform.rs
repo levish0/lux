@@ -98,7 +98,8 @@ fn transform_generates_expression_runtime_render() {
     assert!(result.js.contains("_props"));
     assert!(result.js.contains("function({ name })"));
     assert!(result.js.contains("return name;"));
-    assert!(result.js.contains("\"<p\" + \">\""));
+    assert!(result.js.contains("__lux_chunks.push(["));
+    assert!(result.js.contains("\"<p\","));
     assert!(result.js.contains("</p>"));
     assert!(!result.js.contains("<!--lux:dynamic:expression-->"));
 }
@@ -248,8 +249,10 @@ fn transform_generates_svelte_element_runtime_render_path() {
     assert!(result
         .js
         .contains("const __lux_tag = __lux_stringify(function({ tag })"));
-    assert!(result.js.contains("\"<\" + __lux_tag"));
-    assert!(result.js.contains("\"</\" + __lux_tag + \">\""));
+    assert!(result.js.contains("return ["));
+    assert!(result.js.contains("\"<\","));
+    assert!(result.js.contains("\"</\","));
+    assert!(result.js.contains("__lux_tag"));
     assert!(!result.js.contains("<!--lux:dynamic:svelte-element-->"));
 }
 
@@ -265,12 +268,12 @@ fn transform_generates_spread_and_directive_runtime_attributes() {
 
     assert!(result.js.contains("Object.entries("));
     assert!(result.js.contains("__lux_entry[1] === true"));
+    assert!(result.js.contains("\" class=\\\"\""));
+    assert!(result.js.contains("\"active\""));
+    assert!(result.js.contains("\" style=\\\"color: \""));
     assert!(result
         .js
-        .contains(" ? \" class=\\\"\" + \"active\" + \"\\\"\" : \"\""));
-    assert!(result
-        .js
-        .contains("\" style=\\\"color: \" + __lux_escape_attr(__lux_stringify("));
+        .contains("__lux_escape_attr(__lux_stringify(function({ color })"));
 }
 
 #[test]
