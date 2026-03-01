@@ -37,9 +37,13 @@ pub(crate) fn analyze(block: &EachBlock<'_>, context: &mut TemplateAnalyzerConte
     }
 
     context.enter_scope(each_scope);
-    fragment::analyze_fragment(&block.body, context);
+    context.with_nested_region(|context| {
+        fragment::analyze_fragment(&block.body, context);
+    });
     if let Some(fallback) = &block.fallback {
-        fragment::analyze_fragment(fallback, context);
+        context.with_nested_region(|context| {
+            fragment::analyze_fragment(fallback, context);
+        });
     }
     context.exit_scope();
 }

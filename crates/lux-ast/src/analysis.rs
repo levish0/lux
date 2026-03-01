@@ -64,6 +64,9 @@ pub enum AnalysisDiagnosticCode {
     RenderTagInvalidSpreadArgument,
     RenderTagInvalidCallExpression,
     TemplateRuneInvalidPlacement,
+    SvelteMetaInvalidPlacement,
+    SvelteMetaInvalidContent,
+    SvelteMetaDuplicate,
 }
 
 #[derive(Debug, Clone)]

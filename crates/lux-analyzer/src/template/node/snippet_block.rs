@@ -30,6 +30,8 @@ pub(crate) fn analyze(block: &SnippetBlock<'_>, context: &mut TemplateAnalyzerCo
     }
 
     context.enter_scope(snippet_scope);
-    fragment::analyze_fragment(&block.body, context);
+    context.with_nested_region(|context| {
+        fragment::analyze_fragment(&block.body, context);
+    });
     context.exit_scope();
 }

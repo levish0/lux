@@ -8,6 +8,12 @@ use lux_ast::common::Span;
 pub(super) struct TemplateAnalyzerContext<'a> {
     tables: &'a mut AnalysisTables,
     scope_stack: Vec<TemplateScopeId>,
+    nested_region_depth: u32,
+    seen_svelte_head: bool,
+    seen_svelte_body: bool,
+    seen_svelte_window: bool,
+    seen_svelte_document: bool,
+    seen_svelte_options: bool,
 }
 
 impl<'a> TemplateAnalyzerContext<'a> {
@@ -16,6 +22,12 @@ impl<'a> TemplateAnalyzerContext<'a> {
         Self {
             tables,
             scope_stack: vec![root_scope],
+            nested_region_depth: 0,
+            seen_svelte_head: false,
+            seen_svelte_body: false,
+            seen_svelte_window: false,
+            seen_svelte_document: false,
+            seen_svelte_options: false,
         }
     }
 
@@ -107,6 +119,47 @@ impl<'a> TemplateAnalyzerContext<'a> {
             message: message.into(),
             span,
         });
+    }
+
+    pub(super) fn with_nested_region<T>(&mut self, f: impl FnOnce(&mut Self) -> T) -> T {
+        self.nested_region_depth += 1;
+        let out = f(self);
+        self.nested_region_depth -= 1;
+        out
+    }
+
+    pub(super) fn is_inside_element_or_block(&self) -> bool {
+        self.nested_region_depth > 0
+    }
+
+    pub(super) fn mark_svelte_head_seen(&mut self) -> bool {
+        let already_seen = self.seen_svelte_head;
+        self.seen_svelte_head = true;
+        already_seen
+    }
+
+    pub(super) fn mark_svelte_body_seen(&mut self) -> bool {
+        let already_seen = self.seen_svelte_body;
+        self.seen_svelte_body = true;
+        already_seen
+    }
+
+    pub(super) fn mark_svelte_window_seen(&mut self) -> bool {
+        let already_seen = self.seen_svelte_window;
+        self.seen_svelte_window = true;
+        already_seen
+    }
+
+    pub(super) fn mark_svelte_document_seen(&mut self) -> bool {
+        let already_seen = self.seen_svelte_document;
+        self.seen_svelte_document = true;
+        already_seen
+    }
+
+    pub(super) fn mark_svelte_options_seen(&mut self) -> bool {
+        let already_seen = self.seen_svelte_options;
+        self.seen_svelte_options = true;
+        already_seen
     }
 }
 

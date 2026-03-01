@@ -120,7 +120,9 @@ pub(crate) fn analyze<'a>(
     validate_snippet_children(container_kind, attributes, children, context);
 
     context.enter_scope(element_scope);
-    fragment::analyze_fragment(children, context);
+    context.with_nested_region(|context| {
+        fragment::analyze_fragment(children, context);
+    });
     context.exit_scope();
 }
 

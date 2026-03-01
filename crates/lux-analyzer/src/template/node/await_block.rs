@@ -21,7 +21,9 @@ pub(crate) fn analyze(block: &AwaitBlock<'_>, context: &mut TemplateAnalyzerCont
     reference::analyze_expression(&block.expression, context);
 
     if let Some(pending) = &block.pending {
-        fragment::analyze_fragment(pending, context);
+        context.with_nested_region(|context| {
+            fragment::analyze_fragment(pending, context);
+        });
     }
 
     if let Some(then_fragment) = &block.then {
@@ -38,7 +40,9 @@ pub(crate) fn analyze(block: &AwaitBlock<'_>, context: &mut TemplateAnalyzerCont
         }
 
         context.enter_scope(then_scope);
-        fragment::analyze_fragment(then_fragment, context);
+        context.with_nested_region(|context| {
+            fragment::analyze_fragment(then_fragment, context);
+        });
         context.exit_scope();
     }
 
@@ -57,7 +61,9 @@ pub(crate) fn analyze(block: &AwaitBlock<'_>, context: &mut TemplateAnalyzerCont
         }
 
         context.enter_scope(catch_scope);
-        fragment::analyze_fragment(catch_fragment, context);
+        context.with_nested_region(|context| {
+            fragment::analyze_fragment(catch_fragment, context);
+        });
         context.exit_scope();
     }
 }

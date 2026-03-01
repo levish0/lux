@@ -476,6 +476,36 @@ fn analyze_reports_template_rune_invalid_placement() {
 }
 
 #[test]
+fn analyze_reports_svelte_meta_invalid_placement() {
+    let tables = analyze_source("<div><svelte:window /></div>");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::SvelteMetaInvalidPlacement
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_svelte_meta_invalid_content() {
+    let tables = analyze_source("<svelte:window><div /></svelte:window>");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::SvelteMetaInvalidContent
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
+fn analyze_reports_svelte_meta_duplicate() {
+    let tables = analyze_source("<svelte:window /><svelte:window />");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::SvelteMetaDuplicate
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
 fn analyze_reports_snippet_shadowing_component_prop() {
     let tables = analyze_source("<Comp foo=\"value\">{#snippet foo()}{/snippet}</Comp>");
 
