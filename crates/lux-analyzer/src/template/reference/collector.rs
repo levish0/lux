@@ -218,7 +218,9 @@ fn extract_rune_name(callee: &Expression<'_>) -> Option<String> {
             let object_name = extract_rune_name(&member.object)?;
             Some(format!("{object_name}.{}", member.property.name.as_str()))
         }
-        Expression::ParenthesizedExpression(expression) => extract_rune_name(&expression.expression),
+        Expression::ParenthesizedExpression(expression) => {
+            extract_rune_name(&expression.expression)
+        }
         _ => None,
     }
 }
