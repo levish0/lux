@@ -1,5 +1,5 @@
 import { stringify as __lux_stringify, escape as __lux_escape, escape_attr as __lux_escape_attr, attr as __lux_attr, attributes as __lux_attributes, is_boolean_attr as __lux_is_boolean_attr } from "lux/runtime/server";
-const __lux_template = "";
+const __lux_template = "<div></div>";
 const __lux_css = null;
 const __lux_css_hash = null;
 const __lux_css_scope = null;
@@ -13,10 +13,19 @@ export default {
 	hasDynamic: __lux_has_dynamic,
 	render: function __lux_render(_props = {}) {
 		_props.__lux_self == null && (_props.__lux_self = __lux_render);
-		let { value = undefined } = _props;
+		const id = "lux-" + Math.random().toString(36).slice(2);
 		return function() {
 			let __lux_chunks = [];
-			__lux_chunks.push(__lux_escape(__lux_stringify(value)));
+			__lux_chunks.push([
+				"<div",
+				__lux_attr("id", id, false),
+				">",
+				function() {
+					let __lux_chunks = [];
+					return __lux_chunks.join("");
+				}(),
+				"</div>"
+			].join(""));
 			return __lux_chunks.join("");
 		}();
 	}

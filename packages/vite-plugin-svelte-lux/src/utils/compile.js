@@ -106,15 +106,26 @@ export function createCompileSvelte() {
 		let compiled;
 		try {
 			if (shouldUseLuxCompiler(ssr)) {
-				const luxOutput = compileWithLux(finalCode, filename, isTypeScript);
-				writeLuxArtifactsIfEnabled(
-					luxOutput.result,
-					filename,
-					normalizedFilename,
-					ssr,
-					options
-				);
-				compiled = luxOutput.compiled;
+				try {
+					const luxOutput = compileWithLux(finalCode, filename, isTypeScript, ssr);
+					writeLuxArtifactsIfEnabled(
+						luxOutput.result,
+						filename,
+						normalizedFilename,
+						ssr,
+						options
+					);
+					compiled = luxOutput.compiled;
+				} catch (luxError) {
+					if (!ssr && shouldFallbackToSvelteClientCompile(luxError)) {
+						log.warn.once(
+							'lux client transform is not implemented yet; falling back to svelte/compiler for client output'
+						);
+						compiled = svelte.compile(finalCode, { ...finalCompileOptions, filename });
+					} else {
+						throw luxError;
+					}
+				}
 			} else {
 				compiled = svelte.compile(finalCode, { ...finalCompileOptions, filename });
 			}
@@ -171,17 +182,24 @@ export function createCompileSvelte() {
  * @param {boolean} ssr
  */
 function shouldUseLuxCompiler(ssr) {
-	return process.env.LUX_SVELTE === '1' && ssr;
+	if (process.env.LUX_SVELTE !== '1') {
+		return false;
+	}
+	if (ssr) {
+		return true;
+	}
+	return process.env.LUX_SVELTE_CLIENT === '1';
 }
 
 /**
  * @param {string} code
  * @param {string} filename
  * @param {boolean} isTypeScript
+ * @param {boolean} ssr
  * @returns {{ compiled: import('svelte/compiler').CompileResult, result: any }}
  */
-function compileWithLux(code, filename, isTypeScript) {
-	const result = luxCompile(code, { ts: isTypeScript });
+function compileWithLux(code, filename, isTypeScript, ssr) {
+	const result = luxCompile(code, { ts: isTypeScript, generate: ssr ? 'server' : 'client' });
 	for (const runtimeModule of result.runtimeModules ?? []) {
 		luxRuntimeModules.set(runtimeModule.specifier, runtimeModule.code);
 	}
@@ -218,6 +236,24 @@ function compileWithLux(code, filename, isTypeScript) {
 		ast: null
 	};
 	return { compiled, result };
+}
+
+/**
+ * @param {unknown} error
+ */
+function shouldFallbackToSvelteClientCompile(error) {
+	if (!error || typeof error !== 'object') {
+		return false;
+	}
+	const maybeCode = /** @type {{ code?: unknown }} */ (error).code;
+	if (maybeCode === 'client_transform_unimplemented') {
+		return true;
+	}
+	const maybeMessage = /** @type {{ message?: unknown }} */ (error).message;
+	return (
+		typeof maybeMessage === 'string' &&
+		maybeMessage.toLowerCase().includes('client transform')
+	);
 }
 
 /**

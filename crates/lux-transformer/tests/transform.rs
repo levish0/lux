@@ -444,8 +444,8 @@ fn transform_maps_props_id_rune_to_runtime_expression() {
     let result = transform(&parsed.root, &analysis);
 
     assert!(!result.js.contains("$props.id"));
-    assert!(result.js.contains("Math.random"));
-    assert!(result.js.contains("const id = \"lux-\" +"));
+    assert!(result.js.contains("props_id as __lux_props_id"));
+    assert!(result.js.contains("const id = __lux_props_id();"));
     assert_js_parses_as_module(&result.js);
 }
 

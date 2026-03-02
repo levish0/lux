@@ -17,8 +17,9 @@ pub(super) const LUX_ESCAPE_ATTR: &str = "__lux_escape_attr";
 pub(super) const LUX_ATTR: &str = "__lux_attr";
 pub(super) const LUX_ATTRIBUTES: &str = "__lux_attributes";
 pub(super) const LUX_IS_BOOLEAN_ATTR: &str = "__lux_is_boolean_attr";
+pub(super) const LUX_PROPS_ID: &str = "__lux_props_id";
 
-pub(super) const LUX_RUNTIME_IMPORT_SOURCE: &str = "import { stringify as __lux_stringify, escape as __lux_escape, escape_attr as __lux_escape_attr, attr as __lux_attr, attributes as __lux_attributes, is_boolean_attr as __lux_is_boolean_attr } from \"lux/runtime/server\";";
+pub(super) const LUX_RUNTIME_IMPORT_SOURCE: &str = "import { stringify as __lux_stringify, escape as __lux_escape, escape_attr as __lux_escape_attr, attr as __lux_attr, attributes as __lux_attributes, is_boolean_attr as __lux_is_boolean_attr, props_id as __lux_props_id } from \"lux/runtime/server\";";
 
 pub(super) fn push_const<'a>(
     ast: AstBuilder<'a>,

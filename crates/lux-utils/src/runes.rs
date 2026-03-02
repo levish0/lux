@@ -5,6 +5,7 @@ use phf::phf_set;
 
 pub static RUNES: phf::Set<&str> = phf_set! {
     "$state", "$state.raw",
+    "$state.snapshot",
     "$derived", "$derived.by",
     "$effect", "$effect.pre", "$effect.tracking", "$effect.root", "$effect.pending",
     "$props", "$props.id",
@@ -46,6 +47,7 @@ mod tests {
     fn test_runes() {
         assert!(is_rune("$state"));
         assert!(is_rune("$state.raw"));
+        assert!(is_rune("$state.snapshot"));
         assert!(is_rune("$derived"));
         assert!(is_rune("$derived.by"));
         assert!(is_rune("$effect"));

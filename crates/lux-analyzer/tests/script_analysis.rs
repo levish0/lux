@@ -1,5 +1,5 @@
 use lux_analyzer::analyze;
-use lux_ast::analysis::{ScriptRuneKind, ScriptTarget};
+use lux_ast::analysis::{AnalysisDiagnosticCode, ScriptRuneKind, ScriptTarget};
 use lux_parser::parse;
 use oxc_allocator::Allocator;
 
@@ -196,6 +196,50 @@ fn analyze_skips_type_only_imports_and_type_specifiers() {
         !instance_imports
             .iter()
             .any(|item| item.source.contains("import type { A } from './types';"))
+    );
+}
+
+#[test]
+fn analyze_reports_rune_argument_diagnostics() {
+    let source = r#"
+<script>
+  const derived = $derived();
+  const props = $props(1);
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::ScriptRuneInvalidArgumentsLength
+    }));
+    assert!(tables
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == AnalysisDiagnosticCode::ScriptRuneInvalidArguments));
+}
+
+#[test]
+fn analyze_reports_props_bindable_and_effect_placement() {
+    let source = r#"
+<script>
+  if (ok) {
+    const props = $props();
+  }
+  const bindable = $bindable();
+  const effect_value = $effect(() => {});
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    let invalid_placement_count = tables
+        .diagnostics
+        .iter()
+        .filter(|diagnostic| diagnostic.code == AnalysisDiagnosticCode::TemplateRuneInvalidPlacement)
+        .count();
+    assert!(
+        invalid_placement_count >= 3,
+        "expected at least 3 invalid placement diagnostics, got {}",
+        invalid_placement_count
     );
 }
 

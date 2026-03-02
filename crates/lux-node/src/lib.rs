@@ -1,4 +1,5 @@
 use lux_ast::analysis::AnalysisSeverity;
+use lux_transformer::TransformTarget;
 use napi::{Error, Result, Status};
 use napi_derive::napi;
 use oxc_allocator::Allocator;
@@ -6,6 +7,7 @@ use oxc_allocator::Allocator;
 #[napi(object)]
 pub struct CompileOptions {
     pub ts: Option<bool>,
+    pub generate: Option<String>,
 }
 
 #[napi(object)]
@@ -59,6 +61,9 @@ pub fn compile_strict_js(source: String, options: Option<CompileOptions>) -> Res
 }
 
 fn compile_internal(source: &str, options: Option<&CompileOptions>) -> CompileOutput {
+    let generate_target = options
+        .and_then(|o| o.generate.as_deref())
+        .unwrap_or("server");
     let allocator = Allocator::default();
     let parse_result = lux_parser::parse(
         source,
@@ -66,7 +71,6 @@ fn compile_internal(source: &str, options: Option<&CompileOptions>) -> CompileOu
         options.and_then(|o| o.ts).unwrap_or(false),
     );
     let analysis = lux_analyzer::analyze(&parse_result.root);
-    let transform = lux_transformer::transform(&parse_result.root, &analysis);
 
     let mut errors = Vec::new();
     let mut warnings = Vec::new();
@@ -113,6 +117,34 @@ fn compile_internal(source: &str, options: Option<&CompileOptions>) -> CompileOu
         }
     }
 
+    let transform_target = match generate_target {
+        "server" => TransformTarget::Server,
+        _ => {
+            errors.push(Diagnostic {
+                phase: "transform".to_string(),
+                severity: "error".to_string(),
+                code: Some("client_transform_unimplemented".to_string()),
+                message: format!(
+                    "Lux transform target `{generate_target}` is not implemented yet; only `server` is currently supported"
+                ),
+                start: 0,
+                end: 0,
+            });
+
+            return CompileOutput {
+                js: String::new(),
+                css: None,
+                css_hash: None,
+                css_scope: None,
+                runtime_modules: Vec::new(),
+                errors,
+                warnings,
+                ts: parse_result.root.ts,
+            };
+        }
+    };
+
+    let transform = lux_transformer::transform_for_target(&parse_result.root, &analysis, transform_target);
     let runtime_modules = transform
         .runtime_modules
         .into_iter()
@@ -147,7 +179,13 @@ mod tests {
 
     #[test]
     fn compile_emits_runtime_module_for_dynamic_expression() {
-        let output = compile_internal("<p>{name}</p>", Some(&CompileOptions { ts: Some(false) }));
+        let output = compile_internal(
+            "<p>{name}</p>",
+            Some(&CompileOptions {
+                ts: Some(false),
+                generate: None,
+            }),
+        );
         assert!(output.errors.is_empty());
         assert_eq!(output.runtime_modules.len(), 1);
         assert_eq!(output.runtime_modules[0].specifier, "lux/runtime/server");
@@ -157,12 +195,32 @@ mod tests {
     fn compile_respects_explicit_ts_option_without_lang_attribute() {
         let output = compile_internal(
             "<script>let count: number = 1;</script>{count}",
-            Some(&CompileOptions { ts: Some(true) }),
+            Some(&CompileOptions {
+                ts: Some(true),
+                generate: None,
+            }),
         );
         assert!(
             output.errors.is_empty(),
             "expected no parse errors with explicit ts option, got {}",
             output.errors.len()
+        );
+    }
+
+    #[test]
+    fn compile_reports_client_generate_target_as_unimplemented() {
+        let output = compile_internal(
+            "<p>ok</p>",
+            Some(&CompileOptions {
+                ts: Some(false),
+                generate: Some("client".to_string()),
+            }),
+        );
+        assert!(
+            output
+                .errors
+                .iter()
+                .any(|diagnostic| diagnostic.code.as_deref() == Some("client_transform_unimplemented"))
         );
     }
 }

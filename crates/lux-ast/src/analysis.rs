@@ -63,6 +63,8 @@ pub enum AnalysisDiagnosticCode {
     LetDirectiveInvalidPlacement,
     RenderTagInvalidSpreadArgument,
     RenderTagInvalidCallExpression,
+    ScriptRuneInvalidArgumentsLength,
+    ScriptRuneInvalidArguments,
     TemplateRuneInvalidPlacement,
     SvelteMetaInvalidPlacement,
     SvelteMetaInvalidContent,

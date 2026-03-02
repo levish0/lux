@@ -16,8 +16,8 @@ use oxc_span::{SPAN, SourceType};
 
 use self::consts::{
     LUX_ATTR, LUX_ATTRIBUTES, LUX_CSS, LUX_CSS_HASH, LUX_CSS_SCOPE, LUX_ESCAPE, LUX_ESCAPE_ATTR,
-    LUX_HAS_DYNAMIC, LUX_IS_BOOLEAN_ATTR, LUX_RUNTIME_IMPORT_SOURCE, LUX_STRINGIFY, LUX_TEMPLATE,
-    optional_string_expr, push_const,
+    LUX_HAS_DYNAMIC, LUX_IS_BOOLEAN_ATTR, LUX_PROPS_ID, LUX_RUNTIME_IMPORT_SOURCE, LUX_STRINGIFY,
+    LUX_TEMPLATE, optional_string_expr, push_const,
 };
 use self::exports::{default_export_statement, named_export_statement};
 use self::script::{
@@ -236,6 +236,7 @@ fn collect_instance_import_names(analysis: &AnalysisTables) -> Vec<String> {
     names.insert(LUX_ATTR.to_string());
     names.insert(LUX_ATTRIBUTES.to_string());
     names.insert(LUX_IS_BOOLEAN_ATTR.to_string());
+    names.insert(LUX_PROPS_ID.to_string());
     for import in &analysis.script_imports {
         if import.target != ScriptTarget::Instance {
             continue;

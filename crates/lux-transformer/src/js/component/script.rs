@@ -5,8 +5,8 @@ use oxc_allocator::CloneIn;
 use oxc_ast::AstBuilder;
 use oxc_ast::ast::{
     AccessorProperty, Argument, ArrowFunctionExpression, BindingPattern, CallExpression,
-    CatchParameter, Class, Declaration, ExportNamedDeclaration, Expression, FormalParameter,
-    Function, MethodDefinition, PropertyDefinition, Statement, VariableDeclarator,
+    CatchParameter, Class, Declaration, ExportNamedDeclaration, Expression, FormalParameter, Function,
+    MethodDefinition, PropertyDefinition, Statement, VariableDeclarator,
 };
 use oxc_ast_visit::{VisitMut, walk_mut};
 use oxc_span::SPAN;
@@ -251,7 +251,7 @@ fn rewrite_rune_call_expression<'a>(
 
     let name = extract_rune_name(&call.callee)?;
     match name.as_str() {
-        "$state" | "$state.raw" | "$derived" => Some(
+        "$state" | "$state.raw" | "$derived" | "$state.snapshot" => Some(
             first_call_argument_expression(ast, call)
                 .unwrap_or_else(|| ast.expression_identifier(SPAN, ast.ident("undefined"))),
         ),
@@ -261,7 +261,13 @@ fn rewrite_rune_call_expression<'a>(
             Some(ast.expression_call(SPAN, argument, oxc_ast::NONE, ast.vec(), false))
         }
         "$props" => Some(ast.expression_identifier(SPAN, ast.ident("_props"))),
-        "$props.id" => Some(build_props_id_expression(ast)),
+        "$props.id" => Some(ast.expression_call(
+            SPAN,
+            ast.expression_identifier(SPAN, ast.ident("__lux_props_id")),
+            oxc_ast::NONE,
+            ast.vec(),
+            false,
+        )),
         "$bindable" | "$effect" | "$effect.pre" | "$effect.tracking" | "$effect.root"
         | "$effect.pending" | "$inspect" | "$inspect.trace" | "$host" => {
             Some(ast.expression_identifier(SPAN, ast.ident("undefined")))
@@ -307,61 +313,6 @@ fn strip_typescript_expression_wrapper<'a>(
 fn strip_typescript_from_statement<'a>(ast: AstBuilder<'a>, statement: &mut Statement<'a>) {
     let mut eraser = TypeScriptEraser { ast };
     eraser.visit_statement(statement);
-}
-
-fn build_props_id_expression<'a>(ast: AstBuilder<'a>) -> Expression<'a> {
-    let math_random = ast.expression_call(
-        SPAN,
-        ast.member_expression_static(
-            SPAN,
-            ast.expression_identifier(SPAN, ast.ident("Math")),
-            ast.identifier_name(SPAN, ast.ident("random")),
-            false,
-        )
-        .into(),
-        oxc_ast::NONE,
-        ast.vec(),
-        false,
-    );
-    let random_string = ast.expression_call(
-        SPAN,
-        ast.member_expression_static(
-            SPAN,
-            math_random,
-            ast.identifier_name(SPAN, ast.ident("toString")),
-            false,
-        )
-        .into(),
-        oxc_ast::NONE,
-        ast.vec1(
-            ast.expression_numeric_literal(SPAN, 36.0, None, oxc_ast::ast::NumberBase::Decimal)
-                .into(),
-        ),
-        false,
-    );
-    let suffix = ast.expression_call(
-        SPAN,
-        ast.member_expression_static(
-            SPAN,
-            random_string,
-            ast.identifier_name(SPAN, ast.ident("slice")),
-            false,
-        )
-        .into(),
-        oxc_ast::NONE,
-        ast.vec1(
-            ast.expression_numeric_literal(SPAN, 2.0, None, oxc_ast::ast::NumberBase::Decimal)
-                .into(),
-        ),
-        false,
-    );
-
-    ast.expression_binary(
-        SPAN,
-        ast.expression_string_literal(SPAN, ast.atom("lux-"), None),
-        oxc_ast::ast::BinaryOperator::Addition,
-        suffix,
-    )
 }
 
 struct TypeScriptEraser<'a> {

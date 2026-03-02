@@ -40,6 +40,10 @@ fn parity_reference_rune_lowering_smoke() {
             name: "props_id",
             source: "<script>const id = $props.id();</script><div id={id}></div>",
         },
+        ParityCase {
+            name: "state_snapshot",
+            source: "<script>const snapshot = $state.snapshot(source);</script>{snapshot}",
+        },
     ];
 
     for case in cases {
@@ -65,6 +69,14 @@ fn parity_reference_rune_lowering_smoke() {
 
         assert_no_raw_runes(&actual_js);
         assert_js_parses_as_module(&actual_js);
+
+        let expected_declarations = normalize_relevant_declaration_lines(&reference_js);
+        let actual_declarations = normalize_relevant_declaration_lines(&actual_js);
+        assert_eq!(
+            actual_declarations, expected_declarations,
+            "rune lowering declaration mismatch for `{}`\nreference decls: {:?}\nactual decls: {:?}\nreference js:\n{}\nactual js:\n{}",
+            case.name, expected_declarations, actual_declarations, reference_js, actual_js
+        );
     }
 }
 
@@ -95,6 +107,26 @@ fn assert_js_parses_as_module(js: &str) {
         parsed.errors,
         js
     );
+}
+
+fn normalize_relevant_declaration_lines(js: &str) -> Vec<String> {
+    js.lines()
+        .map(str::trim)
+        .filter(|line| line.starts_with("let ") || line.starts_with("const "))
+        .filter(|line| !line.starts_with("let __lux_") && !line.starts_with("const __lux_"))
+        .map(canonicalize_declaration_line)
+        .collect()
+}
+
+fn canonicalize_declaration_line(line: &str) -> String {
+    line.replace("__lux_props_id()", "$PROPS_ID()")
+        .replace("$.props_id($$renderer)", "$PROPS_ID()")
+        .replace("$$props", "$PROPS")
+        .replace("_props", "$PROPS")
+        .replace("void 0", "undefined")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn npm_executable() -> &'static str {

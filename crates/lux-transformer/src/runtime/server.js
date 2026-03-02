@@ -28,6 +28,7 @@ const BOOLEAN_ATTRIBUTE_NAMES = new Set([
   "selected",
   "webkitdirectory"
 ]);
+let props_id_counter = 0;
 
 export function stringify(value) {
   if (typeof value === "string") return value;
@@ -92,4 +93,9 @@ export function attributes(attrs) {
       return attr(normalized_key, value, is_boolean_attr(normalized_key));
     })
     .join("");
+}
+
+export function props_id() {
+  props_id_counter += 1;
+  return "lux-" + props_id_counter.toString(36);
 }

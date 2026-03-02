@@ -129,6 +129,48 @@ fn parity_against_reference_analyzer_diagnostics_smoke() {
             severity: AnalysisSeverity::Error,
         },
         ParityCase {
+            name: "effect_invalid_placement",
+            source: "<script>const value = $effect(() => {});</script>",
+            reference_code: "effect_invalid_placement",
+            lux_code: AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "props_invalid_placement",
+            source: "<script>if (ok) { const value = $props(); }</script>",
+            reference_code: "props_invalid_placement",
+            lux_code: AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "bindable_invalid_location",
+            source: "<script>const value = $bindable();</script>",
+            reference_code: "bindable_invalid_location",
+            lux_code: AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "host_invalid_placement",
+            source: "<script>$host();</script>",
+            reference_code: "host_invalid_placement",
+            lux_code: AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "rune_invalid_arguments_length",
+            source: "<script>const value = $derived();</script>",
+            reference_code: "rune_invalid_arguments_length",
+            lux_code: AnalysisDiagnosticCode::ScriptRuneInvalidArgumentsLength,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "rune_invalid_arguments",
+            source: "<script>const value = $props(1);</script>",
+            reference_code: "rune_invalid_arguments",
+            lux_code: AnalysisDiagnosticCode::ScriptRuneInvalidArguments,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
             name: "window_invalid_content",
             source: "<svelte:window><div /></svelte:window>",
             reference_code: "svelte_meta_invalid_content",
@@ -420,6 +462,19 @@ fn map_reference_error_code_to_lux(
         )),
         "state_invalid_placement" => Some((
             AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+            AnalysisSeverity::Error,
+        )),
+        "effect_invalid_placement" | "props_invalid_placement" | "host_invalid_placement"
+        | "bindable_invalid_location" => Some((
+            AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+            AnalysisSeverity::Error,
+        )),
+        "rune_invalid_arguments_length" => Some((
+            AnalysisDiagnosticCode::ScriptRuneInvalidArgumentsLength,
+            AnalysisSeverity::Error,
+        )),
+        "rune_invalid_arguments" => Some((
+            AnalysisDiagnosticCode::ScriptRuneInvalidArguments,
             AnalysisSeverity::Error,
         )),
         _ => None,

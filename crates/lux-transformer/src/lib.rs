@@ -21,7 +21,21 @@ pub struct TransformResult {
     pub runtime_modules: Vec<RuntimeModule>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TransformTarget {
+    Server,
+    Client,
+}
+
 pub fn transform(root: &Root<'_>, analysis: &AnalysisTables) -> TransformResult {
+    transform_for_target(root, analysis, TransformTarget::Server)
+}
+
+pub fn transform_for_target(
+    root: &Root<'_>,
+    analysis: &AnalysisTables,
+    target: TransformTarget,
+) -> TransformResult {
     let (css, css_hash, css_scope) = match &root.css {
         Some(stylesheet) => {
             let css_hash = hash(stylesheet.content_styles);
@@ -39,9 +53,14 @@ pub fn transform(root: &Root<'_>, analysis: &AnalysisTables) -> TransformResult 
         css_hash.as_deref(),
         css_scope.as_deref(),
     );
+    let runtime_specifier = match target {
+        TransformTarget::Server => runtime::SERVER_RUNTIME_SPECIFIER,
+        // Client transform body is not implemented yet; keep runtime module wiring stable.
+        TransformTarget::Client => runtime::SERVER_RUNTIME_SPECIFIER,
+    };
     let runtime_modules = if component.needs_server_runtime {
         vec![RuntimeModule {
-            specifier: runtime::SERVER_RUNTIME_SPECIFIER.to_string(),
+            specifier: runtime_specifier.to_string(),
             code: runtime::server_runtime_source().to_string(),
         }]
     } else {

@@ -1,1 +1,1 @@
-<script>let { value = $bindable() } = $props();</script>{value}
+<script>const id = $props.id();</script><div id={id}></div>
