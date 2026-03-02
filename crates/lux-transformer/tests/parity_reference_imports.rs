@@ -49,6 +49,30 @@ fn parity_reference_server_imports_smoke() {
 {c}
 "#,
         },
+        ParityCase {
+            name: "module_reexports_and_type_exports",
+            source: r#"
+<script context="module" lang="ts">
+  export type { T } from './types';
+  export { value, type TypeOnly } from './mixed';
+  export { default as def } from './def';
+  export * from './all-values';
+</script>
+<p>ok</p>
+"#,
+        },
+        ParityCase {
+            name: "module_value_exports_with_typescript",
+            source: r#"
+<script context="module" lang="ts">
+  export const answer: number = 42;
+  export function greet(name: string): string {
+    return name;
+  }
+</script>
+<p>{answer}</p>
+"#,
+        },
     ];
 
     for case in cases {
@@ -58,7 +82,8 @@ fn parity_reference_server_imports_smoke() {
             .unwrap_or_else(|error| panic!("failed to write {}: {error}", input_path.display()));
 
         let reference_js = run_reference_compile(&runner_dir, &input_path, &output_path);
-        let expected_imports = normalize_relevant_import_lines(&reference_js);
+        let expected_module_lines = normalize_relevant_module_lines(&reference_js);
+        let expected_export_decls = normalize_relevant_export_declaration_lines(&reference_js);
 
         let allocator = Allocator::default();
         let parsed = parse(case.source, &allocator, false);
@@ -70,23 +95,52 @@ fn parity_reference_server_imports_smoke() {
         );
         let analysis = analyze(&parsed.root);
         let actual_js = transform(&parsed.root, &analysis).js;
-        let actual_imports = normalize_relevant_import_lines(&actual_js);
+        let actual_module_lines = normalize_relevant_module_lines(&actual_js);
+        let actual_export_decls = normalize_relevant_export_declaration_lines(&actual_js);
 
         assert_eq!(
-            actual_imports, expected_imports,
-            "import parity mismatch for `{}`\nreference imports: {:?}\nactual imports: {:?}\nreference js:\n{}\nactual js:\n{}",
-            case.name, expected_imports, actual_imports, reference_js, actual_js
+            actual_module_lines, expected_module_lines,
+            "module line parity mismatch for `{}`\nreference lines: {:?}\nactual lines: {:?}\nreference js:\n{}\nactual js:\n{}",
+            case.name, expected_module_lines, actual_module_lines, reference_js, actual_js
+        );
+        assert_eq!(
+            actual_export_decls, expected_export_decls,
+            "export declaration parity mismatch for `{}`\nreference exports: {:?}\nactual exports: {:?}\nreference js:\n{}\nactual js:\n{}",
+            case.name, expected_export_decls, actual_export_decls, reference_js, actual_js
         );
     }
 }
 
-fn normalize_relevant_import_lines(js: &str) -> Vec<String> {
+fn normalize_relevant_module_lines(js: &str) -> Vec<String> {
     js.lines()
         .map(str::trim)
-        .filter(|line| line.starts_with("import "))
+        .filter(|line| {
+            line.starts_with("import ") || (line.starts_with("export ") && line.contains(" from "))
+        })
         .filter(|line| !line.contains("svelte/internal/"))
         .filter(|line| !line.contains("lux/runtime/"))
-        .map(|line| line.replace('\'', "\""))
+        .map(canonicalize_module_line)
+        .collect()
+}
+
+fn canonicalize_module_line(line: &str) -> String {
+    line.replace('\'', "\"")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn normalize_relevant_export_declaration_lines(js: &str) -> Vec<String> {
+    js.lines()
+        .map(str::trim)
+        .filter(|line| {
+            line.starts_with("export const ")
+                || line.starts_with("export let ")
+                || line.starts_with("export var ")
+                || line.starts_with("export function ")
+                || line.starts_with("export class ")
+        })
+        .map(canonicalize_module_line)
         .collect()
 }
 

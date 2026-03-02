@@ -35,6 +35,8 @@ export function createCompileSvelte() {
 		const { emitCss = true } = options;
 		/** @type {import('svelte/compiler').Warning[]} */
 		const warnings = [];
+		const lang = detectScriptLang(code);
+		const isTypeScript = lang === 'ts' || lang === 'typescript';
 
 		if (options.stats) {
 			if (options.isBuild) {
@@ -104,7 +106,7 @@ export function createCompileSvelte() {
 		let compiled;
 		try {
 			if (shouldUseLuxCompiler(ssr)) {
-				const luxOutput = compileWithLux(finalCode, filename);
+				const luxOutput = compileWithLux(finalCode, filename, isTypeScript);
 				writeLuxArtifactsIfEnabled(
 					luxOutput.result,
 					filename,
@@ -154,14 +156,6 @@ export function createCompileSvelte() {
 			}
 		}
 
-		let lang = 'js';
-		for (const match of code.matchAll(scriptLangRE)) {
-			if (match[2]) {
-				lang = match[2];
-				break;
-			}
-		}
-
 		return {
 			filename,
 			normalizedFilename,
@@ -183,10 +177,11 @@ function shouldUseLuxCompiler(ssr) {
 /**
  * @param {string} code
  * @param {string} filename
+ * @param {boolean} isTypeScript
  * @returns {{ compiled: import('svelte/compiler').CompileResult, result: any }}
  */
-function compileWithLux(code, filename) {
-	const result = luxCompile(code);
+function compileWithLux(code, filename, isTypeScript) {
+	const result = luxCompile(code, { ts: isTypeScript });
 	for (const runtimeModule of result.runtimeModules ?? []) {
 		luxRuntimeModules.set(runtimeModule.specifier, runtimeModule.code);
 	}
@@ -261,6 +256,18 @@ function offsetToLocation(code, offset) {
 		column: safe - lineStart,
 		character: safe
 	};
+}
+
+/**
+ * @param {string} code
+ */
+function detectScriptLang(code) {
+	for (const match of code.matchAll(scriptLangRE)) {
+		if (match[2]) {
+			return String(match[2]).toLowerCase();
+		}
+	}
+	return 'js';
 }
 
 /**

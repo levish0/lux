@@ -187,6 +187,110 @@ fn parity_against_reference_analyzer_diagnostics_smoke() {
     }
 }
 
+#[test]
+fn parity_against_reference_compiler_errors_subset() {
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let workspace_root = manifest_dir
+        .parent()
+        .and_then(Path::parent)
+        .expect("failed to resolve workspace root");
+    let runner_dir = ensure_svelte_runner(workspace_root);
+    let samples_dir = workspace_root.join(
+        "svelte_reference/svelte-svelte-5.50.0/packages/svelte/tests/compiler-errors/samples",
+    );
+    assert!(samples_dir.exists(), "missing {}", samples_dir.display());
+
+    let generated_dir = manifest_dir.join("target/parity-reference-compiler-errors");
+    let _ = fs::create_dir_all(&generated_dir);
+
+    let mut sample_dirs: Vec<PathBuf> = fs::read_dir(&samples_dir)
+        .expect("failed to read compiler-errors samples")
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.path())
+        .filter(|path| path.is_dir())
+        .collect();
+    sample_dirs.sort();
+
+    let mut covered = 0usize;
+    let mut mismatches = Vec::new();
+
+    for sample_dir in sample_dirs {
+        let sample_name = sample_dir
+            .file_name()
+            .and_then(|name| name.to_str())
+            .expect("utf-8 sample directory name")
+            .to_owned();
+
+        let input_path = sample_dir.join("main.svelte");
+        let config_path = sample_dir.join("_config.js");
+        if !input_path.exists() || !config_path.exists() {
+            continue;
+        }
+
+        let config_raw = fs::read_to_string(&config_path)
+            .unwrap_or_else(|error| panic!("failed to read {}: {error}", config_path.display()));
+        let Some(reference_code) = parse_config_error_code(&config_raw) else {
+            continue;
+        };
+        let Some((lux_code, severity)) = map_reference_error_code_to_lux(&reference_code) else {
+            continue;
+        };
+
+        let output_path = generated_dir.join(format!("{sample_name}.reference.json"));
+        let reference = run_reference_analyze(&runner_dir, &input_path, &output_path);
+        let reference_codes = match severity {
+            AnalysisSeverity::Error => reference_codes(&reference, "errors"),
+            AnalysisSeverity::Warning => reference_codes(&reference, "warnings"),
+        };
+        if !reference_codes.iter().any(|code| code == &reference_code) {
+            mismatches.push(format!(
+                "{sample_name}: reference missing expected `{reference_code}` in {:?}",
+                reference_codes
+            ));
+            continue;
+        }
+
+        let source = fs::read_to_string(&input_path)
+            .unwrap_or_else(|error| panic!("failed to read {}: {error}", input_path.display()));
+
+        let allocator = Allocator::default();
+        let parsed = parse(&source, &allocator, false);
+        if !parsed.errors.is_empty() {
+            // This parity test targets analyzer diagnostics only.
+            // Parser-level incompatibilities are covered in parser parity tests.
+            continue;
+        }
+
+        let tables = analyze(&parsed.root);
+        let lux_codes: Vec<_> = tables
+            .diagnostics
+            .iter()
+            .filter(|diagnostic| diagnostic.severity == severity)
+            .map(|diagnostic| diagnostic.code)
+            .collect();
+        if !lux_codes.iter().any(|code| *code == lux_code) {
+            mismatches.push(format!(
+                "{sample_name}: expected {:?}/{:?}, got {:?}",
+                severity, lux_code, lux_codes
+            ));
+            continue;
+        }
+
+        covered += 1;
+    }
+
+    assert!(
+        covered >= 10,
+        "expected to cover at least 10 compiler-errors samples; covered {covered}"
+    );
+    assert!(
+        mismatches.is_empty(),
+        "compiler-errors parity mismatches ({}):\n{}",
+        mismatches.len(),
+        mismatches.join("\n")
+    );
+}
+
 fn npm_executable() -> &'static str {
     if cfg!(windows) { "npm.cmd" } else { "npm" }
 }
@@ -266,4 +370,58 @@ fn reference_codes(reference: &Value, key: &str) -> Vec<String> {
                 .collect()
         })
         .unwrap_or_default()
+}
+
+fn parse_config_error_code(config_source: &str) -> Option<String> {
+    let code_index = config_source.find("code")?;
+    let after_code = &config_source[code_index..];
+    let colon_index = after_code.find(':')?;
+    let after_colon = &after_code[colon_index + 1..];
+
+    let quote_index = after_colon.find(['"', '\''])?;
+    let quote = after_colon.as_bytes().get(quote_index).copied()? as char;
+    let remainder = &after_colon[quote_index + 1..];
+    let end_quote_index = remainder.find(quote)?;
+    Some(remainder[..end_quote_index].to_string())
+}
+
+fn map_reference_error_code_to_lux(
+    reference_code: &str,
+) -> Option<(AnalysisDiagnosticCode, AnalysisSeverity)> {
+    match reference_code {
+        "bind_invalid_target" => Some((
+            AnalysisDiagnosticCode::BindDirectiveInvalidTarget,
+            AnalysisSeverity::Error,
+        )),
+        "each_item_invalid_assignment" => Some((
+            AnalysisDiagnosticCode::TemplateAssignmentToBinding,
+            AnalysisSeverity::Error,
+        )),
+        "render_tag_invalid_call_expression" => Some((
+            AnalysisDiagnosticCode::RenderTagInvalidCallExpression,
+            AnalysisSeverity::Error,
+        )),
+        "snippet_invalid_rest_parameter" => Some((
+            AnalysisDiagnosticCode::SnippetInvalidRestParameter,
+            AnalysisSeverity::Error,
+        )),
+        "snippet_conflict" | "slot_snippet_conflict" => Some((
+            AnalysisDiagnosticCode::SnippetChildrenConflict,
+            AnalysisSeverity::Error,
+        )),
+        "svelte_meta_duplicate" => Some((AnalysisDiagnosticCode::SvelteMetaDuplicate, AnalysisSeverity::Error)),
+        "svelte_meta_invalid_content" => Some((
+            AnalysisDiagnosticCode::SvelteMetaInvalidContent,
+            AnalysisSeverity::Error,
+        )),
+        "svelte_meta_invalid_placement" => Some((
+            AnalysisDiagnosticCode::SvelteMetaInvalidPlacement,
+            AnalysisSeverity::Error,
+        )),
+        "state_invalid_placement" => Some((
+            AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+            AnalysisSeverity::Error,
+        )),
+        _ => None,
+    }
 }

@@ -33,8 +33,10 @@ pub(crate) fn validate_each_block(
             if name == "$state" || name == "$derived" {
                 context.add_diagnostic(
                     AnalysisSeverity::Error,
-                    AnalysisDiagnosticCode::EachInvalidContextIdentifier,
-                    format!("Invalid each context identifier `{name}`"),
+                    AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+                    format!(
+                        "`{name}(...)` can only be used as a variable declaration initializer, a class field declaration, or the first assignment to a class field at the top level of the constructor."
+                    ),
                     identifier.span,
                 );
             }

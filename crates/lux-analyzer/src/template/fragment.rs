@@ -1,5 +1,6 @@
 use lux_ast::analysis::{AnalysisDiagnosticCode, AnalysisSeverity};
 use lux_ast::template::root::{Fragment, FragmentNode};
+use oxc_ast::ast::Expression;
 
 use super::context::TemplateAnalyzerContext;
 use super::diagnostics::{self, BindDirectiveTarget};
@@ -8,6 +9,8 @@ use super::node::element::ElementContainerKind;
 use super::reference;
 
 pub(super) fn analyze_fragment(fragment: &Fragment<'_>, context: &mut TemplateAnalyzerContext<'_>) {
+    maybe_report_slot_render_conflict(fragment, context);
+
     for node in &fragment.nodes {
         analyze_node(node, context);
     }
@@ -303,5 +306,56 @@ fn maybe_report_meta_duplicate(
             format!("A component can only have one `<{name}>` element"),
             span,
         );
+    }
+}
+
+fn maybe_report_slot_render_conflict(
+    fragment: &Fragment<'_>,
+    context: &mut TemplateAnalyzerContext<'_>,
+) {
+    let has_slot = fragment
+        .nodes
+        .iter()
+        .any(|node| matches!(node, FragmentNode::SlotElement(_)));
+    if !has_slot {
+        return;
+    }
+
+    let render_children_span = fragment.nodes.iter().find_map(|node| match node {
+        FragmentNode::RenderTag(tag) if is_children_render_expression(&tag.expression) => {
+            Some(tag.span)
+        }
+        _ => None,
+    });
+
+    let Some(span) = render_children_span else {
+        return;
+    };
+
+    context.add_diagnostic(
+        AnalysisSeverity::Error,
+        AnalysisDiagnosticCode::SnippetChildrenConflict,
+        "Cannot use `<slot>` and `{@render children(...)}` in the same component",
+        span,
+    );
+}
+
+fn is_children_render_expression(expression: &Expression<'_>) -> bool {
+    match expression {
+        Expression::CallExpression(call) => is_children_identifier_expression(&call.callee),
+        Expression::ParenthesizedExpression(expression) => {
+            is_children_render_expression(&expression.expression)
+        }
+        _ => false,
+    }
+}
+
+fn is_children_identifier_expression(expression: &Expression<'_>) -> bool {
+    match expression {
+        Expression::Identifier(identifier) => identifier.name == "children",
+        Expression::ParenthesizedExpression(expression) => {
+            is_children_identifier_expression(&expression.expression)
+        }
+        _ => false,
     }
 }

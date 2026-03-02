@@ -1,12 +1,16 @@
 use rustc_hash::FxHashSet;
 
 use lux_ast::analysis::{
-    AnalysisTables, ScriptImportAnalysis, ScriptReferenceAnalysis, ScriptRuneAnalysis,
-    ScriptRuneKind, ScriptScopeAnalysis, ScriptSymbolAnalysis, ScriptTarget,
+    AnalysisDiagnostic, AnalysisDiagnosticCode, AnalysisSeverity, AnalysisTables,
+    ScriptImportAnalysis, ScriptReferenceAnalysis, ScriptRuneAnalysis, ScriptRuneKind,
+    ScriptScopeAnalysis, ScriptSymbolAnalysis, ScriptTarget,
 };
 use lux_utils::runes::{is_rune, is_state_creation_rune};
 use oxc_ast::AstKind;
-use oxc_ast::ast::{CallExpression, Expression, ImportDeclarationSpecifier, Program, Statement};
+use oxc_ast::ast::{
+    CallExpression, Class, ClassElement, Declaration, ExportDefaultDeclarationKind, Expression,
+    ImportDeclarationSpecifier, Program, Statement, VariableDeclaration,
+};
 use oxc_ast_visit::{Visit, walk};
 use oxc_semantic::{ReferenceId, Semantic, SemanticBuilder};
 use oxc_span::{GetSpan, Span};
@@ -23,6 +27,7 @@ pub(super) fn analyze_program(
     add_symbol_records(&semantic, target, tables);
     add_reference_records(&semantic, target, tables);
     add_rune_records(program, target, tables);
+    add_rune_placement_diagnostics(program, target, tables);
     add_import_records(program, target, tables);
 }
 
@@ -135,6 +140,35 @@ fn add_rune_records(program: &Program<'_>, target: ScriptTarget, tables: &mut An
     }
 }
 
+fn add_rune_placement_diagnostics(
+    program: &Program<'_>,
+    _target: ScriptTarget,
+    tables: &mut AnalysisTables,
+) {
+    let allowed_spans = collect_allowed_state_rune_spans(program);
+    let mut collector = ScriptRuneCollector::default();
+    collector.visit_program(program);
+
+    for rune in collector.runes {
+        if !is_state_creation_rune(&rune.name) {
+            continue;
+        }
+        if allowed_spans.contains(&(rune.span.start, rune.span.end)) {
+            continue;
+        }
+
+        tables.diagnostics.push(AnalysisDiagnostic {
+            severity: AnalysisSeverity::Error,
+            code: AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+            message: format!(
+                "`{}(...)` can only be used as a variable declaration initializer, a class field declaration, or the first assignment to a class field at the top level of the constructor.",
+                rune.name
+            ),
+            span: rune.callee_span,
+        });
+    }
+}
+
 fn add_import_records(program: &Program<'_>, target: ScriptTarget, tables: &mut AnalysisTables) {
     for statement in &program.body {
         let Statement::ImportDeclaration(declaration) = statement else {
@@ -182,6 +216,117 @@ fn add_import_records(program: &Program<'_>, target: ScriptTarget, tables: &mut 
             source: span_slice(program.source_text, declaration.span),
             local_names,
         });
+    }
+}
+
+fn collect_allowed_state_rune_spans(program: &Program<'_>) -> FxHashSet<(u32, u32)> {
+    let mut spans = FxHashSet::default();
+    for statement in &program.body {
+        collect_allowed_state_runes_in_statement(statement, &mut spans);
+    }
+    spans
+}
+
+fn collect_allowed_state_runes_in_statement(
+    statement: &Statement<'_>,
+    spans: &mut FxHashSet<(u32, u32)>,
+) {
+    match statement {
+        Statement::VariableDeclaration(declaration) => {
+            collect_allowed_state_runes_in_variable_declaration(declaration, spans);
+        }
+        Statement::ClassDeclaration(class) => {
+            collect_allowed_state_runes_in_class(class, spans);
+        }
+        Statement::ExportNamedDeclaration(declaration) => {
+            if let Some(declaration) = &declaration.declaration {
+                collect_allowed_state_runes_in_declaration(declaration, spans);
+            }
+        }
+        Statement::ExportDefaultDeclaration(declaration) => {
+            if let ExportDefaultDeclarationKind::ClassDeclaration(class) = &declaration.declaration {
+                collect_allowed_state_runes_in_class(class, spans);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn collect_allowed_state_runes_in_declaration(
+    declaration: &Declaration<'_>,
+    spans: &mut FxHashSet<(u32, u32)>,
+) {
+    match declaration {
+        Declaration::VariableDeclaration(declaration) => {
+            collect_allowed_state_runes_in_variable_declaration(declaration, spans);
+        }
+        Declaration::ClassDeclaration(class) => {
+            collect_allowed_state_runes_in_class(class, spans);
+        }
+        _ => {}
+    }
+}
+
+fn collect_allowed_state_runes_in_variable_declaration(
+    declaration: &VariableDeclaration<'_>,
+    spans: &mut FxHashSet<(u32, u32)>,
+) {
+    for declarator in &declaration.declarations {
+        let Some(init) = &declarator.init else {
+            continue;
+        };
+        if let Some(span) = extract_state_creation_rune_span(init) {
+            spans.insert((span.start, span.end));
+        }
+    }
+}
+
+fn collect_allowed_state_runes_in_class(class: &Class<'_>, spans: &mut FxHashSet<(u32, u32)>) {
+    for element in &class.body.body {
+        let ClassElement::PropertyDefinition(property) = element else {
+            continue;
+        };
+        if property.r#static {
+            continue;
+        }
+        let Some(value) = &property.value else {
+            continue;
+        };
+        if let Some(span) = extract_state_creation_rune_span(value) {
+            spans.insert((span.start, span.end));
+        }
+    }
+}
+
+fn extract_state_creation_rune_span(expression: &Expression<'_>) -> Option<Span> {
+    let expression = strip_typescript_expression_wrappers(expression);
+    let Expression::CallExpression(call) = expression else {
+        return None;
+    };
+    let name = extract_rune_name(&call.callee)?;
+    if is_state_creation_rune(&name) {
+        Some(call.span)
+    } else {
+        None
+    }
+}
+
+fn strip_typescript_expression_wrappers<'a>(expression: &'a Expression<'a>) -> &'a Expression<'a> {
+    match expression {
+        Expression::TSAsExpression(wrapper) => strip_typescript_expression_wrappers(&wrapper.expression),
+        Expression::TSSatisfiesExpression(wrapper) => {
+            strip_typescript_expression_wrappers(&wrapper.expression)
+        }
+        Expression::TSTypeAssertion(wrapper) => {
+            strip_typescript_expression_wrappers(&wrapper.expression)
+        }
+        Expression::TSNonNullExpression(wrapper) => {
+            strip_typescript_expression_wrappers(&wrapper.expression)
+        }
+        Expression::TSInstantiationExpression(wrapper) => {
+            strip_typescript_expression_wrappers(&wrapper.expression)
+        }
+        _ => expression,
     }
 }
 

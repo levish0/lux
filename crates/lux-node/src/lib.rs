@@ -152,4 +152,17 @@ mod tests {
         assert_eq!(output.runtime_modules.len(), 1);
         assert_eq!(output.runtime_modules[0].specifier, "lux/runtime/server");
     }
+
+    #[test]
+    fn compile_respects_explicit_ts_option_without_lang_attribute() {
+        let output = compile_internal(
+            "<script>let count: number = 1;</script>{count}",
+            Some(&CompileOptions { ts: Some(true) }),
+        );
+        assert!(
+            output.errors.is_empty(),
+            "expected no parse errors with explicit ts option, got {}",
+            output.errors.len()
+        );
+    }
 }
