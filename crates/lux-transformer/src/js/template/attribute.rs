@@ -12,8 +12,11 @@ pub(super) fn render_static_attribute(
             }
             serialize_attribute(attribute, has_dynamic)
         }
-        // bind:this is client-only; omit in SSR without forcing runtime path.
-        AttributeNode::BindDirective(directive) if directive.name == "this" => None,
+        // bind:this requires runtime wiring in client mode.
+        AttributeNode::BindDirective(directive) if directive.name == "this" => {
+            *has_dynamic = true;
+            None
+        }
         _ => {
             *has_dynamic = true;
             None

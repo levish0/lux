@@ -119,13 +119,14 @@ fn compile_internal(source: &str, options: Option<&CompileOptions>) -> CompileOu
 
     let transform_target = match generate_target {
         "server" => TransformTarget::Server,
+        "client" => TransformTarget::Client,
         _ => {
             errors.push(Diagnostic {
                 phase: "transform".to_string(),
                 severity: "error".to_string(),
-                code: Some("client_transform_unimplemented".to_string()),
+                code: Some("unsupported_generate_target".to_string()),
                 message: format!(
-                    "Lux transform target `{generate_target}` is not implemented yet; only `server` is currently supported"
+                    "Lux transform target `{generate_target}` is unsupported; expected `server` or `client`"
                 ),
                 start: 0,
                 end: 0,
@@ -144,7 +145,8 @@ fn compile_internal(source: &str, options: Option<&CompileOptions>) -> CompileOu
         }
     };
 
-    let transform = lux_transformer::transform_for_target(&parse_result.root, &analysis, transform_target);
+    let transform =
+        lux_transformer::transform_for_target(&parse_result.root, &analysis, transform_target);
     let runtime_modules = transform
         .runtime_modules
         .into_iter()
@@ -208,7 +210,7 @@ mod tests {
     }
 
     #[test]
-    fn compile_reports_client_generate_target_as_unimplemented() {
+    fn compile_supports_client_generate_target() {
         let output = compile_internal(
             "<p>ok</p>",
             Some(&CompileOptions {
@@ -216,11 +218,33 @@ mod tests {
                 generate: Some("client".to_string()),
             }),
         );
+        assert!(output.errors.is_empty());
+        assert!(
+            output.js.contains("from \"lux/runtime/client\";"),
+            "client transform should import lux/runtime/client"
+        );
+        assert!(
+            output
+                .runtime_modules
+                .iter()
+                .any(|module| module.specifier == "lux/runtime/client")
+        );
+    }
+
+    #[test]
+    fn compile_reports_unsupported_generate_target() {
+        let output = compile_internal(
+            "<p>ok</p>",
+            Some(&CompileOptions {
+                ts: Some(false),
+                generate: Some("edge".to_string()),
+            }),
+        );
         assert!(
             output
                 .errors
                 .iter()
-                .any(|diagnostic| diagnostic.code.as_deref() == Some("client_transform_unimplemented"))
+                .any(|diagnostic| diagnostic.code.as_deref() == Some("unsupported_generate_target"))
         );
     }
 }

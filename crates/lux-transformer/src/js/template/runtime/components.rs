@@ -1,5 +1,5 @@
 use lux_ast::template::attribute::{AttributeNode, AttributeValue};
-use lux_ast::template::directive::LetDirective;
+use lux_ast::template::directive::{EventModifier, LetDirective};
 use lux_ast::template::element::{Component, SvelteComponent, SvelteSelf};
 use lux_ast::template::root::{Fragment, FragmentNode};
 use lux_ast::template::tag::TextOrExpressionTag;
@@ -7,8 +7,8 @@ use oxc_allocator::CloneIn;
 use oxc_ast::{
     AstBuilder, NONE,
     ast::{
-        BinaryOperator, Expression, FormalParameterKind, FunctionType, LogicalOperator,
-        VariableDeclarationKind,
+        AssignmentOperator, BinaryOperator, Expression, FormalParameterKind, FunctionType,
+        LogicalOperator, PropertyKind, Statement, VariableDeclarationKind,
     },
 };
 use oxc_span::SPAN;
@@ -96,7 +96,8 @@ fn render_component_like_expression<'a>(
     fragment: &Fragment<'_>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
-    let props_expression = build_component_props_expression(ast, attributes, fragment, scope);
+    let (props_expression, bind_this_expression) =
+        build_component_props_expression(ast, attributes, fragment, scope);
 
     let component_ident = ast.expression_identifier(SPAN, ast.ident("__lux_component"));
     let props_ident = ast.expression_identifier(SPAN, ast.ident("__lux_component_props"));
@@ -152,11 +153,21 @@ fn render_component_like_expression<'a>(
         ast.expression_conditional(SPAN, is_callable, function_call, string_expr(ast, "")),
     );
 
-    let statements = ast.vec_from_array([
-        const_statement(ast, "__lux_component", callee),
-        const_statement(ast, "__lux_component_props", props_expression),
-        ast.statement_return(SPAN, Some(rendered)),
-    ]);
+    let mut statements = ast.vec_with_capacity(4);
+    statements.push(const_statement(ast, "__lux_component", callee));
+    statements.push(const_statement(
+        ast,
+        "__lux_component_props",
+        props_expression,
+    ));
+    if let Some(bind_expression) = bind_this_expression {
+        if let Some(bind_statement) =
+            build_component_bind_this_statement(ast, &bind_expression, scope)
+        {
+            statements.push(bind_statement);
+        }
+    }
+    statements.push(ast.statement_return(SPAN, Some(rendered)));
     stringify_expression(ast, call_iife(ast, statements))
 }
 
@@ -165,9 +176,10 @@ fn build_component_props_expression<'a>(
     attributes: &[AttributeNode<'_>],
     fragment: &Fragment<'_>,
     scope: &RuntimeScope,
-) -> Expression<'a> {
+) -> (Expression<'a>, Option<Expression<'a>>) {
     let mut properties = ast.vec();
     let mut event_handlers: Vec<(&str, Vec<Expression<'a>>)> = Vec::new();
+    let mut bind_this_expression: Option<Expression<'a>> = None;
 
     for attribute in attributes {
         match attribute {
@@ -185,17 +197,32 @@ fn build_component_props_expression<'a>(
             }
             AttributeNode::BindDirective(attribute) => {
                 if attribute.name == "this" {
+                    bind_this_expression = Some(attribute.expression.clone_in(ast.allocator));
                     continue;
                 }
-                let expression =
-                    resolve_expression(ast, attribute.expression.clone_in(ast.allocator), scope);
-                properties.push(object_init_property(ast, attribute.name, expression));
+                push_component_bind_properties(
+                    ast,
+                    &mut properties,
+                    attribute.name,
+                    attribute.expression.clone_in(ast.allocator),
+                    scope,
+                );
             }
             AttributeNode::OnDirective(attribute) => {
-                let Some(expression) = &attribute.expression else {
-                    continue;
+                let mut resolved = if let Some(expression) = &attribute.expression {
+                    resolve_expression(ast, expression.clone_in(ast.allocator), scope)
+                } else {
+                    build_component_event_forward_expression(ast, attribute.name)
                 };
-                let resolved = resolve_expression(ast, expression.clone_in(ast.allocator), scope);
+                if attribute.modifiers.contains(&EventModifier::Once) {
+                    resolved = ast.expression_call(
+                        SPAN,
+                        ast.expression_identifier(SPAN, ast.ident("__lux_once")),
+                        NONE,
+                        ast.vec1(resolved.into()),
+                        false,
+                    );
+                }
                 if let Some((_, handlers)) = event_handlers
                     .iter_mut()
                     .find(|(name, _)| *name == attribute.name)
@@ -278,7 +305,385 @@ fn build_component_props_expression<'a>(
         ));
     }
 
-    ast.expression_object(SPAN, properties)
+    (
+        ast.expression_object(SPAN, properties),
+        bind_this_expression,
+    )
+}
+
+fn push_component_bind_properties<'a>(
+    ast: AstBuilder<'a>,
+    properties: &mut oxc_allocator::Vec<'a, oxc_ast::ast::ObjectPropertyKind<'a>>,
+    bind_name: &str,
+    bind_expression: Expression<'a>,
+    scope: &RuntimeScope,
+) {
+    let (getter_expression, setter_statement) =
+        resolve_component_bind_getter_setter(ast, &bind_expression, scope);
+    properties.push(object_get_property(ast, bind_name, getter_expression));
+    properties.push(object_set_property(ast, bind_name, setter_statement));
+}
+
+fn resolve_component_bind_getter_setter<'a>(
+    ast: AstBuilder<'a>,
+    bind_expression: &Expression<'a>,
+    scope: &RuntimeScope,
+) -> (Expression<'a>, Statement<'a>) {
+    if let Expression::SequenceExpression(sequence) = strip_typescript_wrappers(bind_expression) {
+        if let (Some(getter), Some(setter), None) = (
+            sequence.expressions.first(),
+            sequence.expressions.get(1),
+            sequence.expressions.get(2),
+        ) {
+            let getter_expression = ast.expression_call(
+                SPAN,
+                resolve_expression(ast, getter.clone_in(ast.allocator), scope),
+                NONE,
+                ast.vec(),
+                false,
+            );
+            let setter_callee = resolve_expression(ast, setter.clone_in(ast.allocator), scope);
+            let setter_statement = ast.statement_expression(
+                SPAN,
+                ast.expression_call(
+                    SPAN,
+                    setter_callee,
+                    NONE,
+                    ast.vec1(ast.expression_identifier(SPAN, ast.ident("$$value")).into()),
+                    false,
+                ),
+            );
+            return (getter_expression, setter_statement);
+        }
+    }
+
+    let getter_expression = resolve_expression(ast, bind_expression.clone_in(ast.allocator), scope);
+    let setter_statement = build_component_bind_setter_statement(ast, bind_expression, scope)
+        .unwrap_or_else(|| {
+            ast.statement_expression(SPAN, ast.expression_identifier(SPAN, ast.ident("$$value")))
+        });
+    (getter_expression, setter_statement)
+}
+
+fn build_component_bind_setter_statement<'a>(
+    ast: AstBuilder<'a>,
+    expression: &Expression<'a>,
+    scope: &RuntimeScope,
+) -> Option<Statement<'a>> {
+    build_component_assignment_statement(
+        ast,
+        expression,
+        scope,
+        ast.expression_identifier(SPAN, ast.ident("$$value")),
+    )
+}
+
+fn build_component_bind_this_statement<'a>(
+    ast: AstBuilder<'a>,
+    expression: &Expression<'a>,
+    scope: &RuntimeScope,
+) -> Option<Statement<'a>> {
+    if let Expression::SequenceExpression(sequence) = strip_typescript_wrappers(expression) {
+        if let (Some(_getter), Some(setter), None) = (
+            sequence.expressions.first(),
+            sequence.expressions.get(1),
+            sequence.expressions.get(2),
+        ) {
+            let setter_callee = resolve_expression(ast, setter.clone_in(ast.allocator), scope);
+            return Some(
+                ast.statement_expression(
+                    SPAN,
+                    ast.expression_call(
+                        SPAN,
+                        setter_callee,
+                        NONE,
+                        ast.vec1(
+                            ast.expression_identifier(SPAN, ast.ident("__lux_component"))
+                                .into(),
+                        ),
+                        false,
+                    ),
+                ),
+            );
+        }
+    }
+
+    build_component_assignment_statement(
+        ast,
+        expression,
+        scope,
+        ast.expression_identifier(SPAN, ast.ident("__lux_component")),
+    )
+}
+
+fn build_component_assignment_statement<'a>(
+    ast: AstBuilder<'a>,
+    expression: &Expression<'a>,
+    scope: &RuntimeScope,
+    rhs: Expression<'a>,
+) -> Option<Statement<'a>> {
+    match strip_typescript_wrappers(expression) {
+        Expression::Identifier(identifier) => {
+            let assignment_target = if scope.contains(identifier.name.as_str()) {
+                ast.simple_assignment_target_assignment_target_identifier(
+                    SPAN,
+                    ast.ident(identifier.name.as_str()),
+                )
+                .into()
+            } else {
+                ast.member_expression_static(
+                    SPAN,
+                    ast.expression_identifier(SPAN, ast.ident("_props")),
+                    ast.identifier_name(SPAN, ast.ident(identifier.name.as_str())),
+                    false,
+                )
+                .into()
+            };
+            Some(ast.statement_expression(
+                SPAN,
+                ast.expression_assignment(SPAN, AssignmentOperator::Assign, assignment_target, rhs),
+            ))
+        }
+        Expression::StaticMemberExpression(member) => {
+            let Expression::Identifier(root) = strip_typescript_wrappers(&member.object) else {
+                return None;
+            };
+            if scope.contains(root.name.as_str()) {
+                return Some(
+                    ast.statement_expression(
+                        SPAN,
+                        ast.expression_assignment(
+                            SPAN,
+                            AssignmentOperator::Assign,
+                            ast.member_expression_static(
+                                SPAN,
+                                ast.expression_identifier(SPAN, ast.ident(root.name.as_str())),
+                                ast.identifier_name(SPAN, ast.ident(member.property.name.as_str())),
+                                false,
+                            )
+                            .into(),
+                            rhs,
+                        ),
+                    ),
+                );
+            }
+            build_component_member_assign_statement(
+                ast,
+                root.name.as_str(),
+                ast.member_expression_static(
+                    SPAN,
+                    ast.expression_identifier(SPAN, ast.ident("__lux_bind_target")),
+                    ast.identifier_name(SPAN, ast.ident(member.property.name.as_str())),
+                    false,
+                )
+                .into(),
+                rhs,
+            )
+        }
+        Expression::ComputedMemberExpression(member) => {
+            let Expression::Identifier(root) = strip_typescript_wrappers(&member.object) else {
+                return None;
+            };
+            let property = strip_typescript_wrappers(&member.expression).clone_in(ast.allocator);
+            if scope.contains(root.name.as_str()) {
+                return Some(
+                    ast.statement_expression(
+                        SPAN,
+                        ast.expression_assignment(
+                            SPAN,
+                            AssignmentOperator::Assign,
+                            ast.member_expression_computed(
+                                SPAN,
+                                ast.expression_identifier(SPAN, ast.ident(root.name.as_str())),
+                                property,
+                                false,
+                            )
+                            .into(),
+                            rhs,
+                        ),
+                    ),
+                );
+            }
+            build_component_member_assign_statement(
+                ast,
+                root.name.as_str(),
+                ast.member_expression_computed(
+                    SPAN,
+                    ast.expression_identifier(SPAN, ast.ident("__lux_bind_target")),
+                    property,
+                    false,
+                )
+                .into(),
+                rhs,
+            )
+        }
+        _ => None,
+    }
+}
+
+fn build_component_member_assign_statement<'a>(
+    ast: AstBuilder<'a>,
+    root_name: &str,
+    assignment_target: oxc_ast::ast::AssignmentTarget<'a>,
+    rhs: Expression<'a>,
+) -> Option<Statement<'a>> {
+    let target_decl = ast.variable_declarator(
+        SPAN,
+        VariableDeclarationKind::Const,
+        ast.binding_pattern_binding_identifier(SPAN, ast.ident("__lux_bind_target")),
+        NONE,
+        Some(
+            ast.member_expression_static(
+                SPAN,
+                ast.expression_identifier(SPAN, ast.ident("_props")),
+                ast.identifier_name(SPAN, ast.ident(root_name)),
+                false,
+            )
+            .into(),
+        ),
+        false,
+    );
+    let test = ast.expression_binary(
+        SPAN,
+        ast.expression_identifier(SPAN, ast.ident("__lux_bind_target")),
+        BinaryOperator::Inequality,
+        ast.expression_null_literal(SPAN),
+    );
+    let assignment =
+        ast.expression_assignment(SPAN, AssignmentOperator::Assign, assignment_target, rhs);
+    let consequent =
+        ast.statement_block(SPAN, ast.vec1(ast.statement_expression(SPAN, assignment)));
+    Some(
+        ast.statement_block(
+            SPAN,
+            ast.vec_from_array([
+                ast.declaration_variable(
+                    SPAN,
+                    VariableDeclarationKind::Const,
+                    ast.vec1(target_decl),
+                    false,
+                )
+                .into(),
+                ast.statement_if(SPAN, test, consequent, None),
+            ]),
+        ),
+    )
+}
+
+fn object_get_property<'a>(
+    ast: AstBuilder<'a>,
+    name: &str,
+    value_expression: Expression<'a>,
+) -> oxc_ast::ast::ObjectPropertyKind<'a> {
+    let (key, computed) = if super::scope::is_valid_js_identifier(name) {
+        (
+            ast.property_key_static_identifier(SPAN, ast.ident(name)),
+            false,
+        )
+    } else {
+        (string_expr(ast, name).into(), false)
+    };
+    let params =
+        ast.alloc_formal_parameters(SPAN, FormalParameterKind::FormalParameter, ast.vec(), NONE);
+    let body = ast.alloc_function_body(
+        SPAN,
+        ast.vec(),
+        ast.vec1(ast.statement_return(SPAN, Some(value_expression))),
+    );
+    let function_expression = ast.expression_function(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        NONE,
+        NONE,
+        params,
+        NONE,
+        Some(body),
+    );
+    ast.object_property_kind_object_property(
+        SPAN,
+        PropertyKind::Get,
+        key,
+        function_expression,
+        false,
+        false,
+        computed,
+    )
+}
+
+fn object_set_property<'a>(
+    ast: AstBuilder<'a>,
+    name: &str,
+    setter_statement: Statement<'a>,
+) -> oxc_ast::ast::ObjectPropertyKind<'a> {
+    let (key, computed) = if super::scope::is_valid_js_identifier(name) {
+        (
+            ast.property_key_static_identifier(SPAN, ast.ident(name)),
+            false,
+        )
+    } else {
+        (string_expr(ast, name).into(), false)
+    };
+    let params = ast.alloc_formal_parameters(
+        SPAN,
+        FormalParameterKind::FormalParameter,
+        ast.vec1(ast.formal_parameter(
+            SPAN,
+            ast.vec(),
+            ast.binding_pattern_binding_identifier(SPAN, ast.ident("$$value")),
+            NONE,
+            NONE,
+            false,
+            None,
+            false,
+            false,
+        )),
+        NONE,
+    );
+    let body = ast.alloc_function_body(SPAN, ast.vec(), ast.vec1(setter_statement));
+    let function_expression = ast.expression_function(
+        SPAN,
+        FunctionType::FunctionExpression,
+        None,
+        false,
+        false,
+        false,
+        NONE,
+        NONE,
+        params,
+        NONE,
+        Some(body),
+    );
+    ast.object_property_kind_object_property(
+        SPAN,
+        PropertyKind::Set,
+        key,
+        function_expression,
+        false,
+        false,
+        computed,
+    )
+}
+
+fn strip_typescript_wrappers<'a>(expression: &'a Expression<'a>) -> &'a Expression<'a> {
+    match expression {
+        Expression::TSAsExpression(wrapper) => strip_typescript_wrappers(&wrapper.expression),
+        Expression::TSSatisfiesExpression(wrapper) => {
+            strip_typescript_wrappers(&wrapper.expression)
+        }
+        Expression::TSTypeAssertion(wrapper) => strip_typescript_wrappers(&wrapper.expression),
+        Expression::TSNonNullExpression(wrapper) => strip_typescript_wrappers(&wrapper.expression),
+        Expression::TSInstantiationExpression(wrapper) => {
+            strip_typescript_wrappers(&wrapper.expression)
+        }
+        Expression::ParenthesizedExpression(wrapper) => {
+            strip_typescript_wrappers(&wrapper.expression)
+        }
+        _ => expression,
+    }
 }
 
 fn component_has_children_prop(attributes: &[AttributeNode<'_>]) -> bool {
@@ -287,6 +692,41 @@ fn component_has_children_prop(attributes: &[AttributeNode<'_>]) -> bool {
         AttributeNode::BindDirective(attribute) => attribute.name == "children",
         _ => false,
     })
+}
+
+fn build_component_event_forward_expression<'a>(
+    ast: AstBuilder<'a>,
+    event_name: &str,
+) -> Expression<'a> {
+    let events_object = ast.member_expression_static(
+        SPAN,
+        ast.expression_identifier(SPAN, ast.ident("_props")),
+        ast.identifier_name(SPAN, ast.ident("$$events")),
+        false,
+    );
+    let event_lookup: Expression<'a> = if super::scope::is_valid_js_identifier(event_name) {
+        ast.member_expression_static(
+            SPAN,
+            events_object.clone_in(ast.allocator).into(),
+            ast.identifier_name(SPAN, ast.ident(event_name)),
+            false,
+        )
+        .into()
+    } else {
+        ast.member_expression_computed(
+            SPAN,
+            events_object.clone_in(ast.allocator).into(),
+            string_expr(ast, event_name),
+            false,
+        )
+        .into()
+    };
+    ast.expression_logical(
+        SPAN,
+        events_object.into(),
+        LogicalOperator::And,
+        event_lookup,
+    )
 }
 
 fn collect_default_slot_let_bindings<'a>(

@@ -11,6 +11,7 @@ use oxc_ast::ast::PropertyKind;
 use oxc_ast::{AstBuilder, ast::Expression};
 use oxc_span::SPAN;
 
+use self::attributes::render_target_attribute_expression;
 use self::blocks::{
     render_await_block_expression, render_const_tag_declaration_statement,
     render_each_block_expression, render_if_block_expression, render_snippet_block_declaration,
@@ -30,12 +31,12 @@ use super::marker::sanitize_comment;
 
 pub(crate) use self::scope::RuntimeScope;
 
-pub(super) fn build_render_expression<'a>(
+pub(super) fn build_render_nodes_expression<'a>(
     ast: AstBuilder<'a>,
-    fragment: &Fragment<'_>,
+    nodes: &[&FragmentNode<'_>],
     scope: &RuntimeScope,
 ) -> Expression<'a> {
-    render_fragment_expression(ast, fragment, scope)
+    render_fragment_nodes_expression(ast, nodes, scope)
 }
 
 fn render_fragment_expression<'a>(
@@ -185,23 +186,52 @@ fn render_node_expression<'a>(
         FragmentNode::SvelteFragment(element) => {
             render_fragment_expression(ast, &element.fragment, scope)
         }
-        FragmentNode::SvelteHead(element) => {
-            render_fragment_expression(ast, &element.fragment, scope)
-        }
-        FragmentNode::SvelteBody(element) => {
-            render_fragment_expression(ast, &element.fragment, scope)
-        }
-        FragmentNode::SvelteWindow(element) => {
-            render_fragment_expression(ast, &element.fragment, scope)
-        }
-        FragmentNode::SvelteDocument(element) => {
-            render_fragment_expression(ast, &element.fragment, scope)
-        }
+        FragmentNode::SvelteHead(_) => string_expr(ast, ""),
+        FragmentNode::SvelteBody(element) => render_global_target_node_expression(
+            ast,
+            "body",
+            &element.attributes,
+            &element.fragment,
+            scope,
+        ),
+        FragmentNode::SvelteWindow(element) => render_global_target_node_expression(
+            ast,
+            "window",
+            &element.attributes,
+            &element.fragment,
+            scope,
+        ),
+        FragmentNode::SvelteDocument(element) => render_global_target_node_expression(
+            ast,
+            "document",
+            &element.attributes,
+            &element.fragment,
+            scope,
+        ),
         FragmentNode::SvelteBoundary(element) => {
             render_fragment_expression(ast, &element.fragment, scope)
         }
         FragmentNode::SvelteOptionsRaw(_) => string_expr(ast, ""),
     }
+}
+
+fn render_global_target_node_expression<'a>(
+    ast: AstBuilder<'a>,
+    target_name: &str,
+    attributes: &[lux_ast::template::attribute::AttributeNode<'_>],
+    fragment: &Fragment<'_>,
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    let mut statements = ast.vec_with_capacity(attributes.len() + 1);
+    for attribute in attributes {
+        statements.push(ast.statement_expression(
+            SPAN,
+            render_target_attribute_expression(ast, attribute, scope, target_name),
+        ));
+    }
+    statements
+        .push(ast.statement_return(SPAN, Some(render_fragment_expression(ast, fragment, scope))));
+    call_iife(ast, statements)
 }
 
 fn render_debug_tag_expression<'a>(

@@ -10,7 +10,7 @@ use oxc_ast::{
 };
 use oxc_span::SPAN;
 
-use super::attributes::render_attribute_expression;
+use super::attributes::render_element_attribute_chunks;
 use super::expr::{
     call_iife, const_statement, join_chunks_expression, string_expr, stringify_expression,
 };
@@ -27,8 +27,9 @@ pub(super) fn render_regular_element_expression<'a>(
     let mut chunks = ast.vec();
     chunks.push(string_expr(ast, &format!("<{name}")));
 
-    for attribute in attributes {
-        chunks.push(render_attribute_expression(ast, attribute, scope));
+    let rendered_attributes = render_element_attribute_chunks(ast, attributes, scope, Some(name));
+    for attribute in rendered_attributes {
+        chunks.push(attribute);
     }
     let (capture_onload, capture_onerror) = detect_load_error_captures(name, attributes);
     if capture_onload {
@@ -189,8 +190,10 @@ pub(super) fn render_svelte_element_expression<'a>(
     let mut chunks = ast.vec();
     chunks.push(string_expr(ast, "<"));
     chunks.push(tag_ident.clone_in(ast.allocator));
-    for attribute in &element.attributes {
-        chunks.push(render_attribute_expression(ast, attribute, scope));
+    let rendered_attributes =
+        render_element_attribute_chunks(ast, &element.attributes, scope, None);
+    for attribute in rendered_attributes {
+        chunks.push(attribute);
     }
     chunks.push(string_expr(ast, ">"));
     chunks.push(render_fragment_expression(ast, &element.fragment, scope));

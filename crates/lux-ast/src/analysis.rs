@@ -66,6 +66,7 @@ pub enum AnalysisDiagnosticCode {
     ScriptRuneInvalidArgumentsLength,
     ScriptRuneInvalidArguments,
     TemplateRuneInvalidPlacement,
+    SvelteHeadIllegalAttribute,
     SvelteMetaInvalidPlacement,
     SvelteMetaInvalidContent,
     SvelteMetaDuplicate,

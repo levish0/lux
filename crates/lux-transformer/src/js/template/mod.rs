@@ -3,7 +3,7 @@ mod marker;
 mod render;
 mod runtime;
 
-use lux_ast::template::root::Fragment;
+use lux_ast::template::root::FragmentNode;
 use oxc_ast::{AstBuilder, ast::Expression};
 pub(crate) use runtime::RuntimeScope;
 
@@ -12,17 +12,17 @@ pub(super) struct TemplateRenderResult {
     pub has_dynamic: bool,
 }
 
-pub(super) fn render_fragment_template(fragment: &Fragment<'_>) -> TemplateRenderResult {
+pub(super) fn render_nodes_template(nodes: &[&FragmentNode<'_>]) -> TemplateRenderResult {
     let mut html = String::new();
     let mut has_dynamic = false;
-    render::render_fragment(fragment, &mut html, &mut has_dynamic);
+    render::render_fragment_nodes(nodes, &mut html, &mut has_dynamic);
     TemplateRenderResult { html, has_dynamic }
 }
 
-pub(super) fn build_render_expression<'a>(
+pub(super) fn build_render_nodes_expression<'a>(
     ast: AstBuilder<'a>,
-    fragment: &Fragment<'_>,
+    nodes: &[&FragmentNode<'_>],
     scope: &RuntimeScope,
 ) -> Expression<'a> {
-    runtime::build_render_expression(ast, fragment, scope)
+    runtime::build_render_nodes_expression(ast, nodes, scope)
 }

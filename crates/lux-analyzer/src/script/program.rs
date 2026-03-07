@@ -12,12 +12,13 @@ use oxc_ast::AstKind;
 use oxc_ast::ast::{
     AssignmentTarget, AssignmentTargetMaybeDefault, AssignmentTargetProperty, BindingPattern,
     CallExpression, Class, ClassElement, Declaration, ExportDefaultDeclarationKind, Expression,
-    ImportDeclarationSpecifier, Program, SimpleAssignmentTarget, Statement, UpdateExpression,
-    VariableDeclaration,
+    ImportDeclarationSpecifier, MethodDefinition, MethodDefinitionKind, Program,
+    SimpleAssignmentTarget, Statement, UpdateExpression, VariableDeclaration,
 };
 use oxc_ast_visit::{Visit, walk};
 use oxc_semantic::{ReferenceId, Semantic, SemanticBuilder};
 use oxc_span::{GetSpan, Span};
+use oxc_syntax::operator::AssignmentOperator;
 
 pub(super) fn analyze_program(
     program: &Program<'_>,
@@ -211,7 +212,9 @@ fn add_rune_placement_diagnostics(
             "$state" | "$state.raw" | "$derived" | "$derived.by" => {
                 allowed_state_spans.contains(&(rune.span.start, rune.span.end))
             }
-            "$props" | "$props.id" => allowed_props_spans.contains(&(rune.span.start, rune.span.end)),
+            "$props" | "$props.id" => {
+                allowed_props_spans.contains(&(rune.span.start, rune.span.end))
+            }
             "$bindable" => allowed_bindable_spans.contains(&(rune.span.start, rune.span.end)),
             "$effect" | "$effect.pre" | "$effect.root" => {
                 allowed_effect_spans.contains(&(rune.span.start, rune.span.end))
@@ -260,8 +263,7 @@ fn rune_invalid_placement_message(rune_name: &str) -> String {
                 .to_string()
         }
         "$bindable" => {
-            "`$bindable()` can only be used inside a top-level `$props()` declaration."
-                .to_string()
+            "`$bindable()` can only be used inside a top-level `$props()` declaration.".to_string()
         }
         "$effect" | "$effect.pre" | "$effect.root" => {
             format!("`{rune_name}()` can only be used as an expression statement.")
@@ -607,7 +609,8 @@ fn collect_allowed_state_runes_in_statement(
             }
         }
         Statement::ExportDefaultDeclaration(declaration) => {
-            if let ExportDefaultDeclarationKind::ClassDeclaration(class) = &declaration.declaration {
+            if let ExportDefaultDeclarationKind::ClassDeclaration(class) = &declaration.declaration
+            {
                 collect_allowed_state_runes_in_class(class, spans);
             }
         }
@@ -645,19 +648,135 @@ fn collect_allowed_state_runes_in_variable_declaration(
 }
 
 fn collect_allowed_state_runes_in_class(class: &Class<'_>, spans: &mut FxHashSet<(u32, u32)>) {
+    let mut constructor = None;
+
     for element in &class.body.body {
-        let ClassElement::PropertyDefinition(property) = element else {
+        match element {
+            ClassElement::PropertyDefinition(property) => {
+                if property.r#static {
+                    continue;
+                }
+                let Some(value) = &property.value else {
+                    continue;
+                };
+                if let Some(span) = extract_state_creation_rune_span(value) {
+                    spans.insert((span.start, span.end));
+                }
+            }
+            ClassElement::MethodDefinition(method)
+                if method.kind == MethodDefinitionKind::Constructor && !method.r#static =>
+            {
+                constructor = Some(method);
+            }
+            _ => {}
+        }
+    }
+
+    if let Some(constructor) = constructor {
+        collect_allowed_state_runes_in_constructor(constructor, spans);
+    }
+}
+
+fn collect_allowed_state_runes_in_constructor(
+    constructor: &MethodDefinition<'_>,
+    spans: &mut FxHashSet<(u32, u32)>,
+) {
+    let Some(body) = &constructor.value.body else {
+        return;
+    };
+
+    for statement in &body.statements {
+        let Statement::ExpressionStatement(statement) = statement else {
             continue;
         };
-        if property.r#static {
+        let Expression::AssignmentExpression(expression) = &statement.expression else {
+            continue;
+        };
+        if expression.operator != AssignmentOperator::Assign {
             continue;
         }
-        let Some(value) = &property.value else {
+        if !is_constructor_state_field_assignment_target(&expression.left) {
             continue;
-        };
-        if let Some(span) = extract_state_creation_rune_span(value) {
+        }
+        if let Some(span) = extract_state_creation_rune_span(&expression.right) {
             spans.insert((span.start, span.end));
         }
+    }
+}
+
+fn is_constructor_state_field_assignment_target(target: &AssignmentTarget<'_>) -> bool {
+    match target {
+        AssignmentTarget::StaticMemberExpression(member) => {
+            matches!(
+                strip_typescript_expression_wrappers(&member.object),
+                Expression::ThisExpression(_)
+            )
+        }
+        AssignmentTarget::ComputedMemberExpression(member) => {
+            matches!(
+                strip_typescript_expression_wrappers(&member.object),
+                Expression::ThisExpression(_)
+            ) && matches!(
+                strip_typescript_expression_wrappers(&member.expression),
+                Expression::StringLiteral(_)
+                    | Expression::NumericLiteral(_)
+                    | Expression::BigIntLiteral(_)
+                    | Expression::BooleanLiteral(_)
+                    | Expression::NullLiteral(_)
+            )
+        }
+        AssignmentTarget::PrivateFieldExpression(member) => {
+            matches!(
+                strip_typescript_expression_wrappers(&member.object),
+                Expression::ThisExpression(_)
+            )
+        }
+        AssignmentTarget::TSAsExpression(target) => {
+            is_constructor_state_field_assignment_expression(&target.expression)
+        }
+        AssignmentTarget::TSSatisfiesExpression(target) => {
+            is_constructor_state_field_assignment_expression(&target.expression)
+        }
+        AssignmentTarget::TSNonNullExpression(target) => {
+            is_constructor_state_field_assignment_expression(&target.expression)
+        }
+        AssignmentTarget::TSTypeAssertion(target) => {
+            is_constructor_state_field_assignment_expression(&target.expression)
+        }
+        AssignmentTarget::AssignmentTargetIdentifier(_)
+        | AssignmentTarget::ObjectAssignmentTarget(_)
+        | AssignmentTarget::ArrayAssignmentTarget(_) => false,
+    }
+}
+
+fn is_constructor_state_field_assignment_expression(expression: &Expression<'_>) -> bool {
+    match strip_typescript_expression_wrappers(expression) {
+        Expression::StaticMemberExpression(member) => {
+            matches!(
+                strip_typescript_expression_wrappers(&member.object),
+                Expression::ThisExpression(_)
+            )
+        }
+        Expression::ComputedMemberExpression(member) => {
+            matches!(
+                strip_typescript_expression_wrappers(&member.object),
+                Expression::ThisExpression(_)
+            ) && matches!(
+                strip_typescript_expression_wrappers(&member.expression),
+                Expression::StringLiteral(_)
+                    | Expression::NumericLiteral(_)
+                    | Expression::BigIntLiteral(_)
+                    | Expression::BooleanLiteral(_)
+                    | Expression::NullLiteral(_)
+            )
+        }
+        Expression::PrivateFieldExpression(member) => {
+            matches!(
+                strip_typescript_expression_wrappers(&member.object),
+                Expression::ThisExpression(_)
+            )
+        }
+        _ => false,
     }
 }
 
@@ -676,7 +795,9 @@ fn extract_state_creation_rune_span(expression: &Expression<'_>) -> Option<Span>
 
 fn strip_typescript_expression_wrappers<'a>(expression: &'a Expression<'a>) -> &'a Expression<'a> {
     match expression {
-        Expression::TSAsExpression(wrapper) => strip_typescript_expression_wrappers(&wrapper.expression),
+        Expression::TSAsExpression(wrapper) => {
+            strip_typescript_expression_wrappers(&wrapper.expression)
+        }
         Expression::TSSatisfiesExpression(wrapper) => {
             strip_typescript_expression_wrappers(&wrapper.expression)
         }
@@ -702,7 +823,10 @@ fn extract_rune_call(expression: &Expression<'_>) -> Option<(String, Span)> {
     Some((name, call.span))
 }
 
-fn extract_specific_rune_call_span(expression: &Expression<'_>, expected_name: &str) -> Option<Span> {
+fn extract_specific_rune_call_span(
+    expression: &Expression<'_>,
+    expected_name: &str,
+) -> Option<Span> {
     let (name, span) = extract_rune_call(expression)?;
     if name == expected_name {
         Some(span)

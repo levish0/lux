@@ -52,16 +52,22 @@ pub fn transform_for_target(
         css.as_deref(),
         css_hash.as_deref(),
         css_scope.as_deref(),
+        target,
     );
-    let runtime_specifier = match target {
-        TransformTarget::Server => runtime::SERVER_RUNTIME_SPECIFIER,
-        // Client transform body is not implemented yet; keep runtime module wiring stable.
-        TransformTarget::Client => runtime::SERVER_RUNTIME_SPECIFIER,
+    let (runtime_specifier, runtime_source) = match target {
+        TransformTarget::Server => (
+            runtime::SERVER_RUNTIME_SPECIFIER,
+            runtime::server_runtime_source(),
+        ),
+        TransformTarget::Client => (
+            runtime::CLIENT_RUNTIME_SPECIFIER,
+            runtime::client_runtime_source(),
+        ),
     };
-    let runtime_modules = if component.needs_server_runtime {
+    let runtime_modules = if component.needs_runtime {
         vec![RuntimeModule {
             specifier: runtime_specifier.to_string(),
-            code: runtime::server_runtime_source().to_string(),
+            code: runtime_source.to_string(),
         }]
     } else {
         Vec::new()

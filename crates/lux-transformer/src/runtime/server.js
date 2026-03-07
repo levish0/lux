@@ -82,20 +82,182 @@ export function attr(name, value, is_boolean) {
   return " " + normalized_name + "=\"" + escape_attr(normalized_value) + "\"";
 }
 
-export function attributes(attrs) {
-  const pairs = Object.entries(attrs ?? {});
+export function class_attr(base, toggles) {
+  const tokens = [];
+  push_class_tokens(tokens, base);
+  if (toggles && typeof toggles === "object") {
+    for (const [name, enabled] of Object.entries(toggles)) {
+      if (enabled) {
+        push_class_tokens(tokens, name);
+      }
+    }
+  }
+  if (tokens.length === 0) {
+    return null;
+  }
+  return Array.from(new Set(tokens)).join(" ");
+}
+
+export function style_attr(base, styles) {
+  const entries = [];
+
+  if (base != null && base !== false) {
+    const text = stringify(base).trim();
+    if (text) {
+      entries.push(strip_trailing_semicolon(text));
+    }
+  }
+
+  if (styles && typeof styles === "object") {
+    for (const [name, value] of Object.entries(styles)) {
+      if (value == null || value === false) {
+        continue;
+      }
+      const text = stringify(value).trim();
+      if (!text) {
+        continue;
+      }
+      entries.push(`${name}: ${text}`);
+    }
+  }
+
+  if (entries.length === 0) {
+    return null;
+  }
+  return entries.join("; ");
+}
+
+export function attributes(
+  attrs,
+  class_toggles = null,
+  style_values = null,
+  class_base = null,
+  style_base = null
+) {
+  const source = attrs ?? {};
+  const merged_class = class_attr(
+    class_base != null ? class_base : source.class,
+    class_toggles
+  );
+  const merged_style = style_attr(
+    style_base != null ? style_base : source.style,
+    style_values
+  );
+  const pairs = Object.entries(source);
   return pairs
     .map(([key, value]) => {
-      if (typeof value === "function" || stringify(key).startsWith("$$")) {
+      const normalized_key = stringify(key);
+      if (
+        typeof value === "function" ||
+        normalized_key === "class" ||
+        normalized_key === "style" ||
+        normalized_key.startsWith("$$")
+      ) {
         return "";
       }
-      const normalized_key = stringify(key);
       return attr(normalized_key, value, is_boolean_attr(normalized_key));
     })
-    .join("");
+    .join("")
+    .concat(
+      attr("class", merged_class, false),
+      attr("style", merged_style, false)
+    );
 }
 
 export function props_id() {
   props_id_counter += 1;
   return "lux-" + props_id_counter.toString(36);
+}
+
+export function begin_render() {
+  return null;
+}
+
+export function end_render() {
+  return { events: [], bindings: [], actions: [], transitions: [], animations: [] };
+}
+
+export function event_attr() {
+  return "";
+}
+
+export function event_target_attr() {
+  return "";
+}
+
+export function bind_attr() {
+  return "";
+}
+
+export function bind_target_attr() {
+  return "";
+}
+
+export function use_attr() {
+  return "";
+}
+
+export function transition_attr() {
+  return "";
+}
+
+export function animate_attr() {
+  return "";
+}
+
+export function once(handler) {
+  if (typeof handler !== "function") {
+    return handler;
+  }
+  let called = false;
+  return function once_wrapper(...args) {
+    if (called) {
+      return undefined;
+    }
+    called = true;
+    return handler.apply(this, args);
+  };
+}
+
+export function is_mount_target() {
+  return false;
+}
+
+export function cleanup_mount() {}
+
+export function mount_html() {}
+
+export function mount_head() {}
+
+export function mount_events() {}
+
+export function mount_bindings() {}
+
+export function mount_actions() {}
+
+export function mount_transitions() {}
+
+export function mount_animations() {}
+
+function push_class_tokens(out, value) {
+  if (value == null || value === false) {
+    return;
+  }
+  const text = stringify(value).trim();
+  if (!text) {
+    return;
+  }
+  for (const token of text.split(/\s+/)) {
+    if (token) {
+      out.push(token);
+    }
+  }
+}
+
+function strip_trailing_semicolon(text) {
+  const trimmed = text.trim();
+  if (!trimmed.endsWith(";")) {
+    return trimmed;
+  }
+  return trimmed.slice(0, -1).trimEnd();
 }

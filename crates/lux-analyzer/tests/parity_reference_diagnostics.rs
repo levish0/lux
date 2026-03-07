@@ -177,6 +177,13 @@ fn parity_against_reference_analyzer_diagnostics_smoke() {
             lux_code: AnalysisDiagnosticCode::SvelteMetaInvalidContent,
             severity: AnalysisSeverity::Error,
         },
+        ParityCase {
+            name: "svelte_head_illegal_attribute",
+            source: "<svelte:head data-test=\"x\"></svelte:head>",
+            reference_code: "svelte_head_illegal_attribute",
+            lux_code: AnalysisDiagnosticCode::SvelteHeadIllegalAttribute,
+            severity: AnalysisSeverity::Error,
+        },
     ];
 
     for case in cases {
@@ -451,7 +458,10 @@ fn map_reference_error_code_to_lux(
             AnalysisDiagnosticCode::SnippetChildrenConflict,
             AnalysisSeverity::Error,
         )),
-        "svelte_meta_duplicate" => Some((AnalysisDiagnosticCode::SvelteMetaDuplicate, AnalysisSeverity::Error)),
+        "svelte_meta_duplicate" => Some((
+            AnalysisDiagnosticCode::SvelteMetaDuplicate,
+            AnalysisSeverity::Error,
+        )),
         "svelte_meta_invalid_content" => Some((
             AnalysisDiagnosticCode::SvelteMetaInvalidContent,
             AnalysisSeverity::Error,
@@ -464,7 +474,9 @@ fn map_reference_error_code_to_lux(
             AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
             AnalysisSeverity::Error,
         )),
-        "effect_invalid_placement" | "props_invalid_placement" | "host_invalid_placement"
+        "effect_invalid_placement"
+        | "props_invalid_placement"
+        | "host_invalid_placement"
         | "bindable_invalid_location" => Some((
             AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
             AnalysisSeverity::Error,

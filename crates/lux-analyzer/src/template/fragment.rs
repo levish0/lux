@@ -1,4 +1,6 @@
 use lux_ast::analysis::{AnalysisDiagnosticCode, AnalysisSeverity};
+use lux_ast::common::Span;
+use lux_ast::template::attribute::AttributeNode;
 use lux_ast::template::root::{Fragment, FragmentNode};
 use oxc_ast::ast::Expression;
 
@@ -133,6 +135,14 @@ fn analyze_node(node: &FragmentNode<'_>, context: &mut TemplateAnalyzerContext<'
             );
         }
         FragmentNode::SvelteHead(component) => {
+            for attribute in &component.attributes {
+                context.add_diagnostic(
+                    AnalysisSeverity::Error,
+                    AnalysisDiagnosticCode::SvelteHeadIllegalAttribute,
+                    "`<svelte:head>` cannot have attributes nor directives",
+                    attribute_node_span(attribute),
+                );
+            }
             maybe_report_meta_invalid_placement(context, "svelte:head", component.span);
             let head_seen = context.mark_svelte_head_seen();
             maybe_report_meta_duplicate(context, "svelte:head", component.span, head_seen);
@@ -357,5 +367,21 @@ fn is_children_identifier_expression(expression: &Expression<'_>) -> bool {
             is_children_identifier_expression(&expression.expression)
         }
         _ => false,
+    }
+}
+
+fn attribute_node_span(attribute: &AttributeNode<'_>) -> Span {
+    match attribute {
+        AttributeNode::Attribute(attribute) => attribute.span,
+        AttributeNode::SpreadAttribute(attribute) => attribute.span,
+        AttributeNode::BindDirective(attribute) => attribute.span,
+        AttributeNode::ClassDirective(attribute) => attribute.span,
+        AttributeNode::StyleDirective(attribute) => attribute.span,
+        AttributeNode::OnDirective(attribute) => attribute.span,
+        AttributeNode::TransitionDirective(attribute) => attribute.span,
+        AttributeNode::AnimateDirective(attribute) => attribute.span,
+        AttributeNode::UseDirective(attribute) => attribute.span,
+        AttributeNode::LetDirective(attribute) => attribute.span,
+        AttributeNode::AttachTag(attribute) => attribute.span,
     }
 }

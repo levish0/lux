@@ -5,8 +5,8 @@ use oxc_allocator::CloneIn;
 use oxc_ast::AstBuilder;
 use oxc_ast::ast::{
     AccessorProperty, Argument, ArrowFunctionExpression, BindingPattern, CallExpression,
-    CatchParameter, Class, Declaration, ExportNamedDeclaration, Expression, FormalParameter, Function,
-    MethodDefinition, PropertyDefinition, Statement, VariableDeclarator,
+    CatchParameter, Class, Declaration, ExportNamedDeclaration, Expression, FormalParameter,
+    Function, MethodDefinition, PropertyDefinition, Statement, VariableDeclarator,
 };
 use oxc_ast_visit::{VisitMut, walk_mut};
 use oxc_span::SPAN;

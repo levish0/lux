@@ -1,6 +1,6 @@
 use lux_analyzer::analyze;
 use lux_parser::parse;
-use lux_transformer::transform;
+use lux_transformer::{TransformTarget, transform, transform_for_target};
 use lux_utils::hash::hash;
 use oxc_allocator::Allocator;
 use oxc_parser::Parser;
@@ -109,6 +109,11 @@ fn transform_generates_expression_runtime_render() {
         result.runtime_modules[0]
             .code
             .contains("export function stringify")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function mount_head")
     );
 }
 
@@ -247,6 +252,40 @@ fn transform_component_props_group_duplicate_event_handlers() {
 }
 
 #[test]
+fn transform_component_props_wrap_once_event_handlers() {
+    let source = "<Child on:done|once={handle} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("$$events"));
+    assert!(result.js.contains("done: __lux_once("));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function once")
+    );
+}
+
+#[test]
+fn transform_component_props_forward_events_without_expression() {
+    let source = "<Child on:click />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("$$events"));
+    assert!(result.js.contains("_props.$$events"));
+    assert!(result.js.contains("click"));
+}
+
+#[test]
 fn transform_generates_svelte_element_runtime_render_path() {
     let source = "<svelte:element this={tag} foo={x}>ok</svelte:element>";
     let allocator = Allocator::default();
@@ -280,13 +319,74 @@ fn transform_generates_spread_and_directive_runtime_attributes() {
 
     assert!(result.js.contains("from \"lux/runtime/server\";"));
     assert!(result.js.contains("__lux_attributes("));
-    assert!(result.js.contains("\" class=\\\"\""));
-    assert!(result.js.contains("\"active\""));
-    assert!(result.js.contains("\" style=\\\"color: \""));
+    assert!(result.js.contains("active:"));
+    assert!(result.js.contains("color:"));
+    assert!(!result.js.contains("\" class=\\\"\""));
+    assert!(!result.js.contains("\" style=\\\"color: \""));
     assert!(
-        result
-            .js
-            .contains("__lux_escape_attr(__lux_stringify(function({ color })")
+        result.runtime_modules[0]
+            .code
+            .contains("export function class_attr")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function style_attr")
+    );
+}
+
+#[test]
+fn transform_merges_static_and_directive_class_style_into_single_spread_call() {
+    let source = "<div {...attrs} class=\"hero\" class:active={ok} style=\"color: red\" style:background={bg}></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("__lux_attributes("));
+    assert!(result.js.contains("\"hero\""));
+    assert!(result.js.contains("\"color: red\""));
+    assert!(result.js.contains("active:"));
+    assert!(result.js.contains("background:"));
+}
+
+#[test]
+fn transform_merges_class_directive_with_static_class_attribute() {
+    let source = "<div class=\"hero\" class:active={ok}></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("__lux_class_attr("));
+    assert!(result.js.contains("__lux_attr(\"class\""));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function class_attr")
+    );
+}
+
+#[test]
+fn transform_merges_style_directive_with_static_style_attribute() {
+    let source = "<div style=\"color: red\" style:background={bg}></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("__lux_style_attr("));
+    assert!(result.js.contains("__lux_attr(\"style\""));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function style_attr")
     );
 }
 
@@ -503,8 +603,24 @@ fn transform_keeps_svelte_head_static_when_children_are_static() {
     let result = transform(&parsed.root, &analysis);
 
     assert!(result.js.contains("const __lux_has_dynamic = false;"));
-    assert!(!result.js.contains("<!--lux:dynamic:svelte-head-->"));
-    assert!(result.js.contains("<title>t</title>"));
+    assert!(result.js.contains("const __lux_template = \"\";"));
+    assert!(result.js.contains("head: function"));
+    assert!(result.js.contains("return \"<title>t</title>\";"));
+}
+
+#[test]
+fn transform_excludes_svelte_head_from_body_template_when_dynamic() {
+    let source = "<script>let title = 't';</script><svelte:head><title>{title}</title></svelte:head><p>{title}</p>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("head: function"));
+    assert!(result.js.contains("const __lux_template = \"<p></p>\";"));
+    assert!(!result.js.contains("const __lux_template = \"<title>"));
 }
 
 #[test]
@@ -760,6 +876,746 @@ fn transform_omits_bind_this_from_component_props() {
 
     assert!(result.js.contains("foo: function({ x })"));
     assert!(!result.js.contains("this: function({ child })"));
+}
+
+#[test]
+fn transform_component_bind_emits_getter_and_setter_props() {
+    let source = "<Child bind:value={value} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("get value()"));
+    assert!(result.js.contains("set value($$value)"));
+    assert!(result.js.contains("_props.value = $$value"));
+}
+
+#[test]
+fn transform_component_bind_uses_local_setter_target_when_available() {
+    let source = "<script>let value = '';</script><Child bind:value={value} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("set value($$value)"));
+    assert!(result.js.contains("value = $$value"));
+    assert!(!result.js.contains("_props.value = $$value"));
+}
+
+#[test]
+fn transform_component_bind_sequence_expression_emits_accessor_calls() {
+    let source = "<script>let value = ''; const get = () => value; const set = (v) => value = v;</script><Child bind:value={get, set} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("get value()"));
+    assert!(result.js.contains("return get()"));
+    assert!(result.js.contains("set value($$value)"));
+    assert!(result.js.contains("set($$value)"));
+}
+
+#[test]
+fn transform_component_bind_this_emits_assignment_side_effect() {
+    let source = "<script>let child;</script><Child bind:this={child} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("this:"));
+    assert!(result.js.contains("child = __lux_component"));
+}
+
+#[test]
+fn transform_component_bind_this_falls_back_to_props_assignment_when_not_local() {
+    let source = "<Child bind:this={child} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("_props.child = __lux_component"));
+}
+
+#[test]
+fn transform_component_bind_this_sequence_expression_calls_setter() {
+    let source = "<script>let child; const get = () => child; const set = (v) => child = v;</script><Child bind:this={get, set} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(!result.js.contains("this:"));
+    assert!(result.js.contains("set(__lux_component)"));
+}
+
+#[test]
+fn transform_svelte_component_bind_this_emits_assignment_side_effect() {
+    let source =
+        "<script>let child; let Comp;</script><svelte:component this={Comp} bind:this={child} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("const __lux_component = Comp;"));
+    assert!(result.js.contains("child = __lux_component"));
+}
+
+#[test]
+fn transform_client_target_emits_mountable_default_export() {
+    let source = "<p>{name}</p>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("from \"lux/runtime/client\";"));
+    assert!(
+        result.js.contains("export default"),
+        "missing default function export in client js:\n{}",
+        result.js
+    );
+    assert!(result.js.contains("__lux_is_mount_target($$anchor)"));
+    assert!(result.js.contains("__lux_cleanup_mount($$anchor)"));
+    assert!(result.js.contains("__lux_mount_html($$anchor, __lux_html)"));
+    assert!(
+        result
+            .js
+            .contains("__lux_mount_actions($$anchor, __lux_actions)")
+    );
+    assert!(
+        result
+            .js
+            .contains("__lux_mount_transitions($$anchor, __lux_transitions)")
+    );
+    assert!(
+        result
+            .js
+            .contains("__lux_mount_animations($$anchor, __lux_animations)")
+    );
+    assert_eq!(result.runtime_modules.len(), 1);
+    assert_eq!(result.runtime_modules[0].specifier, "lux/runtime/client");
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function mount_html")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function mount_head")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function cleanup_mount")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function transition_attr")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function mount_transitions")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function animate_attr")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function mount_animations")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("const anchor_regions = new WeakMap();")
+    );
+    assert_js_parses_as_module(&result.js);
+}
+
+#[test]
+fn transform_client_target_mounts_svelte_head() {
+    let source = "<script>let title = 't';</script><svelte:head><title>{title}</title></svelte:head><p>{title}</p>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("const __lux_head_html = "));
+    assert!(
+        result
+            .js
+            .contains("__lux_mount_head($$anchor, __lux_head_html)")
+    );
+    assert!(result.js.contains("const __lux_html = "));
+    assert!(result.js.contains("__lux_mount_html($$anchor, __lux_html)"));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function mount_head")
+    );
+}
+
+#[test]
+fn transform_client_target_includes_runtime_module_for_static_templates() {
+    let source = "<h1>Hello</h1>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("from \"lux/runtime/client\";"));
+    assert_eq!(result.runtime_modules.len(), 1);
+    assert_eq!(result.runtime_modules[0].specifier, "lux/runtime/client");
+}
+
+#[test]
+fn transform_client_target_emits_event_runtime_hooks_for_on_directive() {
+    let source = "<button on:click={handle}>Tap</button>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_event_attr(\"click\""));
+    assert!(
+        result
+            .js
+            .contains("__lux_mount_events($$anchor, __lux_events)")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function mount_events")
+    );
+}
+
+#[test]
+fn transform_client_target_preserves_on_directive_modifiers() {
+    let source = "<button on:click|once|capture|preventDefault={handle}>Tap</button>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_event_attr(\"click\""));
+    assert!(result.js.contains("\"once\""));
+    assert!(result.js.contains("\"capture\""));
+    assert!(result.js.contains("\"preventDefault\""));
+}
+
+#[test]
+fn transform_client_target_emits_bind_runtime_hooks_for_value() {
+    let source = "<input bind:value={value}>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_bind_attr(\"value\""));
+    assert!(
+        result
+            .js
+            .contains("__lux_mount_bindings($$anchor, __lux_bindings)")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function mount_bindings")
+    );
+}
+
+#[test]
+fn transform_client_target_emits_bind_runtime_hooks_for_this() {
+    let source = "<input bind:this={el}>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_bind_attr(\"this\""));
+    assert!(
+        result
+            .js
+            .contains("__lux_mount_bindings($$anchor, __lux_bindings)")
+    );
+}
+
+#[test]
+fn transform_client_target_emits_bind_runtime_hooks_for_checked() {
+    let source = "<input type=\"checkbox\" bind:checked={done}>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_bind_attr(\"checked\""));
+}
+
+#[test]
+fn transform_client_target_emits_global_window_event_and_bind_hooks() {
+    let source = "<svelte:window on:resize={onResize} bind:innerWidth={width} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(
+        result
+            .js
+            .contains("__lux_event_target_attr(\"window\", \"resize\""),
+        "{}",
+        result.js
+    );
+    assert!(
+        result
+            .js
+            .contains("__lux_bind_target_attr(\"window\", \"innerWidth\""),
+        "{}",
+        result.js
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function event_target_attr")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function bind_target_attr")
+    );
+}
+
+#[test]
+fn transform_client_target_emits_global_document_event_and_bind_hooks() {
+    let source =
+        "<svelte:document on:visibilitychange={onVisibility} bind:visibilityState={state} />";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(
+        result
+            .js
+            .contains("__lux_event_target_attr(\"document\", \"visibilitychange\""),
+        "{}",
+        result.js
+    );
+    assert!(
+        result
+            .js
+            .contains("__lux_bind_target_attr(\"document\", \"visibilityState\""),
+        "{}",
+        result.js
+    );
+}
+
+#[test]
+fn transform_client_target_emits_bind_runtime_hooks_for_group() {
+    let source = "<input type=\"checkbox\" bind:group={selected} value=\"a\">";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_bind_attr(\"group\""));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("function apply_group_binding")
+    );
+}
+
+#[test]
+fn transform_client_target_emits_bind_runtime_hooks_for_files() {
+    let source = "<input type=\"file\" bind:files={files}>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_bind_attr(\"files\""));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("function set_element_files")
+    );
+}
+
+#[test]
+fn transform_client_target_bind_value_on_select_uses_runtime_select_path() {
+    let source = "<select bind:value={choice}><option value=\"a\">a</option></select>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_bind_attr(\"value\""));
+    assert!(!result.js.contains("<select value=\\\""));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("function set_select_value")
+    );
+}
+
+#[test]
+fn transform_client_target_bind_setter_assigns_local_identifier() {
+    let source = "<script>let value = '';</script><input bind:value={value}>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("value = __lux_value"));
+    assert!(!result.js.contains("_props.value = __lux_value"));
+}
+
+#[test]
+fn transform_client_target_bind_setter_assigns_local_member_expression() {
+    let source = "<script>let state = { value: '' };</script><input bind:value={state.value}>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("state.value = __lux_value"));
+}
+
+#[test]
+fn transform_client_target_bind_setter_assigns_local_computed_member_expression() {
+    let source = "<script>let state = { value: '' }; let key = 'value';</script><input bind:value={state[key]}>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("state[key] = __lux_value"));
+}
+
+#[test]
+fn transform_client_target_bind_sequence_expression_uses_explicit_getter_setter() {
+    let source = "<script>let value = ''; const get = () => value; const set = (v) => value = v;</script><input bind:value={get, set}>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_bind_attr(\"value\", get, set)"));
+}
+
+#[test]
+fn transform_client_target_emits_bind_runtime_hooks_for_open() {
+    let source = "<details bind:open={isOpen}></details>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_bind_attr(\"open\""));
+    assert!(result.js.contains("__lux_attr(\"open\""));
+}
+
+#[test]
+fn transform_client_target_emits_bind_runtime_hooks_for_indeterminate() {
+    let source = "<input type=\"checkbox\" bind:indeterminate={partial}>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_bind_attr(\"indeterminate\""));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("function set_element_indeterminate")
+    );
+}
+
+#[test]
+fn transform_client_target_emits_use_runtime_hooks() {
+    let source = "<script>const action = () => {};</script><div use:action></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_use_attr(\"action\""));
+    assert!(
+        result
+            .js
+            .contains("__lux_mount_actions($$anchor, __lux_actions)")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function use_attr")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function mount_actions")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("function apply_action")
+    );
+}
+
+#[test]
+fn transform_client_target_supports_dotted_use_directive_name() {
+    let source = "<script>const ns = { action: () => {} };</script><div use:ns.action></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_use_attr(\"ns.action\""));
+    assert!(result.js.contains("ns.action"));
+}
+
+#[test]
+fn transform_client_target_emits_attach_runtime_hooks() {
+    let source = "<script>const attach = () => {};</script><div {@attach attach}></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_use_attr(\"attach\""));
+    assert!(
+        result
+            .js
+            .contains("__lux_mount_actions($$anchor, __lux_actions)")
+    );
+}
+
+#[test]
+fn transform_client_target_emits_transition_runtime_hooks() {
+    let source = "<script>const fade = () => ({ in() {}, out() {}, destroy() {} });</script><div transition:fade></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_transition_attr(\"fade\""));
+    assert!(
+        result
+            .js
+            .contains("__lux_mount_transitions($$anchor, __lux_transitions)")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function transition_attr")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function mount_transitions")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("function apply_transition")
+    );
+}
+
+#[test]
+fn transform_client_target_emits_animate_runtime_hooks() {
+    let source = "<script>const flip = () => ({ destroy() {} });</script><div animate:flip></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_animate_attr(\"flip\""));
+    assert!(
+        result
+            .js
+            .contains("__lux_mount_animations($$anchor, __lux_animations)")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function animate_attr")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function mount_animations")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("function apply_animation")
+    );
+}
+
+#[test]
+fn transform_client_target_emits_bind_runtime_hooks_for_contenteditable_properties() {
+    let source = "<div contenteditable bind:textContent={value}></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_bind_attr(\"textContent\""));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("function set_element_text_property")
+    );
+}
+
+#[test]
+fn transform_client_target_runtime_includes_media_bind_handlers() {
+    let source = "<video bind:currentTime={t} bind:paused={p} bind:duration={d}></video>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_bind_attr(\"currentTime\""));
+    assert!(result.js.contains("__lux_bind_attr(\"paused\""));
+    assert!(result.js.contains("__lux_bind_attr(\"duration\""));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("function apply_media_binding")
+    );
+}
+
+#[test]
+fn transform_client_target_runtime_includes_size_bind_handlers() {
+    let source = "<div bind:clientWidth={w} bind:contentRect={rect}></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+
+    assert!(result.js.contains("__lux_bind_attr(\"clientWidth\""));
+    assert!(result.js.contains("__lux_bind_attr(\"contentRect\""));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("function apply_size_binding")
+    );
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("function apply_resize_observer_binding")
+    );
+}
+
+#[test]
+fn transform_client_target_runtime_tracks_mount_cleanup_state() {
+    let source = "<div on:click={handle} bind:this={el}></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+    let runtime = &result.runtime_modules[0].code;
+
+    assert!(runtime.contains("const anchor_mount_state = new WeakMap();"));
+    assert!(runtime.contains("clear_anchor_mount_state(anchor);"));
+    assert!(runtime.contains("function run_cleanup_list"));
+}
+
+#[test]
+fn transform_client_target_runtime_cleans_bind_this_with_null_on_teardown() {
+    let source = "<div bind:this={el}></div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Client);
+    let runtime = &result.runtime_modules[0].code;
+
+    assert!(runtime.contains("return () => setter(null);"));
 }
 
 fn assert_component_js_payload(js: &str) {

@@ -501,6 +501,16 @@ fn analyze_reports_svelte_meta_invalid_content_for_document_and_body() {
 }
 
 #[test]
+fn analyze_reports_svelte_head_illegal_attribute() {
+    let tables = analyze_source("<svelte:head data-test=\"x\"></svelte:head>");
+
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::SvelteHeadIllegalAttribute
+            && diagnostic.severity == AnalysisSeverity::Error
+    }));
+}
+
+#[test]
 fn analyze_reports_snippet_shadowing_component_prop() {
     let tables = analyze_source("<Comp foo=\"value\">{#snippet foo()}{/snippet}</Comp>");
 

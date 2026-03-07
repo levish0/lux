@@ -234,13 +234,54 @@ fn analyze_reports_props_bindable_and_effect_placement() {
     let invalid_placement_count = tables
         .diagnostics
         .iter()
-        .filter(|diagnostic| diagnostic.code == AnalysisDiagnosticCode::TemplateRuneInvalidPlacement)
+        .filter(|diagnostic| {
+            diagnostic.code == AnalysisDiagnosticCode::TemplateRuneInvalidPlacement
+        })
         .count();
     assert!(
         invalid_placement_count >= 3,
         "expected at least 3 invalid placement diagnostics, got {}",
         invalid_placement_count
     );
+}
+
+#[test]
+fn analyze_allows_state_rune_in_constructor_root_assignment() {
+    let source = r#"
+<script>
+  class Counter {
+    constructor() {
+      this.count = $state(0);
+      this.label = $derived.by(() => this.count + 1);
+    }
+  }
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(!tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::TemplateRuneInvalidPlacement
+    }));
+}
+
+#[test]
+fn analyze_rejects_state_rune_in_nested_constructor_assignment() {
+    let source = r#"
+<script>
+  class Counter {
+    constructor() {
+      if (ok) {
+        this.count = $state(0);
+      }
+    }
+  }
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::TemplateRuneInvalidPlacement
+    }));
 }
 
 fn analyze_source(source: &str) -> lux_ast::analysis::AnalysisTables {

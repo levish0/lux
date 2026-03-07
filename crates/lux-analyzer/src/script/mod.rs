@@ -4,7 +4,11 @@ use lux_ast::analysis::{AnalysisTables, ScriptTarget};
 use lux_ast::template::root::Root;
 
 pub(super) fn analyze_scripts(root: &Root, tables: &mut AnalysisTables) {
-    let is_custom_element = root.options.as_ref().and_then(|options| options.custom_element.as_ref()).is_some();
+    let is_custom_element = root
+        .options
+        .as_ref()
+        .and_then(|options| options.custom_element.as_ref())
+        .is_some();
 
     if let Some(module_script) = &root.module {
         program::analyze_program(
