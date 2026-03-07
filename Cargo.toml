@@ -30,7 +30,7 @@ oxc_span = { version = "0.115.0", features = ["serialize"] }
 oxc_syntax = "0.115.0"
 oxc_diagnostics = "0.115.0"
 oxc_estree = { version = "0.115.0", features = ["serialize"] }
-oxc_ast_visit = "0.115.0"
+oxc_ast_visit = "0.116.0"
 oxc_semantic = "0.115.0"
 oxc_codegen = "0.115.0"
 phf = { version = "0.13.1", features = ["macros"] }
