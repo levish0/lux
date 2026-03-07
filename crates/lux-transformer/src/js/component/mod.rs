@@ -2,6 +2,8 @@ mod consts;
 mod exports;
 mod script;
 
+pub(crate) use self::consts::LUX_RENDER_COMPONENT;
+
 use std::collections::BTreeSet;
 
 use lux_ast::analysis::{AnalysisTables, ScriptTarget};
@@ -27,11 +29,11 @@ use self::consts::{
     optional_string_expr, push_const,
 };
 use self::exports::{
-    client_default_export_statement, default_export_statement, named_export_statement,
+    client_default_export_statement, default_export_statements, named_export_statement,
 };
 use self::script::{
-    collect_instance_runtime_binding_names, collect_instance_runtime_statements,
-    collect_module_runtime_statements,
+    collect_instance_runtime_statements, collect_module_runtime_statements,
+    collect_runtime_binding_names,
 };
 use super::ComponentRenderOutput;
 use super::template::{RuntimeScope, build_render_nodes_expression, render_nodes_template};
@@ -65,6 +67,7 @@ pub(super) fn render(
     }
     push_import_declarations(ast, &mut body, root, analysis);
     let module_runtime = collect_module_runtime_statements(ast, root);
+    let module_runtime_binding_names = collect_runtime_binding_names(&module_runtime);
     body.extend(module_runtime);
 
     push_const(
@@ -98,8 +101,9 @@ pub(super) fn render(
 
     body.push(named_export_statement(ast));
     let instance_runtime = collect_instance_runtime_statements(ast, root);
-    let mut scope_names = collect_instance_import_names(analysis);
-    scope_names.extend(collect_instance_runtime_binding_names(&instance_runtime));
+    let mut scope_names = collect_scope_import_names(analysis);
+    scope_names.extend(module_runtime_binding_names);
+    scope_names.extend(collect_runtime_binding_names(&instance_runtime));
     let scope = RuntimeScope::from_names(scope_names);
     let render_expression = if template_result.has_dynamic || has_global_target_hooks {
         build_render_nodes_expression(ast, &partition.body_nodes, &scope)
@@ -115,7 +119,7 @@ pub(super) fn render(
         }
     });
     match target {
-        TransformTarget::Server => body.push(default_export_statement(
+        TransformTarget::Server => body.extend(default_export_statements(
             ast,
             render_expression,
             instance_runtime,
@@ -391,7 +395,7 @@ fn sanitize_import_statement<'a>(
     Some(Statement::ImportDeclaration(cloned))
 }
 
-fn collect_instance_import_names(analysis: &AnalysisTables) -> Vec<String> {
+fn collect_scope_import_names(analysis: &AnalysisTables) -> Vec<String> {
     let mut names = BTreeSet::new();
     // Runtime helper aliases are local bindings in generated module scope.
     names.insert(LUX_STRINGIFY.to_string());
@@ -421,9 +425,6 @@ fn collect_instance_import_names(analysis: &AnalysisTables) -> Vec<String> {
     names.insert(LUX_ANIMATE_ATTR.to_string());
     names.insert(LUX_MOUNT_ANIMATIONS.to_string());
     for import in &analysis.script_imports {
-        if import.target != ScriptTarget::Instance {
-            continue;
-        }
         for name in &import.local_names {
             names.insert(name.clone());
         }

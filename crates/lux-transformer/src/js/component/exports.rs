@@ -13,7 +13,7 @@ use super::consts::{
     LUX_BEGIN_RENDER, LUX_CLEANUP_MOUNT, LUX_CSS, LUX_CSS_HASH, LUX_CSS_SCOPE, LUX_END_RENDER,
     LUX_HAS_DYNAMIC, LUX_IS_MOUNT_TARGET, LUX_MOUNT_ACTIONS, LUX_MOUNT_ANIMATIONS,
     LUX_MOUNT_BINDINGS, LUX_MOUNT_EVENTS, LUX_MOUNT_HEAD, LUX_MOUNT_HTML, LUX_MOUNT_TRANSITIONS,
-    LUX_TEMPLATE,
+    LUX_RENDER_COMPONENT, LUX_TEMPLATE,
 };
 
 pub(super) fn named_export_statement(ast: AstBuilder) -> Statement {
@@ -35,42 +35,167 @@ pub(super) fn named_export_statement(ast: AstBuilder) -> Statement {
     .into()
 }
 
-pub(super) fn default_export_statement<'a>(
+pub(super) fn default_export_statements<'a>(
     ast: AstBuilder<'a>,
     render_expression: Expression<'a>,
     render_setup_statements: oxc_allocator::Vec<'a, Statement<'a>>,
     head_expression: Option<Expression<'a>>,
-    head_setup_statements: Option<oxc_allocator::Vec<'a, Statement<'a>>>,
+    _head_setup_statements: Option<oxc_allocator::Vec<'a, Statement<'a>>>,
+) -> oxc_allocator::Vec<'a, Statement<'a>> {
+    let mut statements = ast.vec_with_capacity(2);
+    statements.push(server_component_export_statement(
+        ast,
+        render_expression,
+        render_setup_statements,
+        head_expression,
+    ));
+    statements.push(server_component_metadata_statement(ast));
+    statements
+}
+
+fn server_component_export_statement<'a>(
+    ast: AstBuilder<'a>,
+    render_expression: Expression<'a>,
+    render_setup_statements: oxc_allocator::Vec<'a, Statement<'a>>,
+    head_expression: Option<Expression<'a>>,
 ) -> Statement<'a> {
-    let mut properties = ast.vec_with_capacity(if head_expression.is_some() { 7 } else { 6 });
+    let params = ast.alloc_formal_parameters(
+        SPAN,
+        FormalParameterKind::FormalParameter,
+        ast.vec_from_array([
+            ast.formal_parameter(
+                SPAN,
+                ast.vec(),
+                ast.binding_pattern_binding_identifier(SPAN, ast.ident("$$renderer")),
+                NONE,
+                NONE,
+                false,
+                None,
+                false,
+                false,
+            ),
+            default_props_formal_parameter(ast),
+        ]),
+        NONE,
+    );
+
+    let head_html_decl = ast.variable_declarator(
+        SPAN,
+        oxc_ast::ast::VariableDeclarationKind::Const,
+        ast.binding_pattern_binding_identifier(SPAN, ast.ident("__lux_head_html")),
+        NONE,
+        Some(head_expression.unwrap_or_else(|| {
+            ast.expression_string_literal(SPAN, ast.atom(""), None)
+        })),
+        false,
+    );
+    let html_decl = ast.variable_declarator(
+        SPAN,
+        oxc_ast::ast::VariableDeclarationKind::Const,
+        ast.binding_pattern_binding_identifier(SPAN, ast.ident("__lux_html")),
+        NONE,
+        Some(render_expression),
+        false,
+    );
+    let combined_head_decl = ast.variable_declarator(
+        SPAN,
+        oxc_ast::ast::VariableDeclarationKind::Const,
+        ast.binding_pattern_binding_identifier(SPAN, ast.ident("__lux_combined_head")),
+        NONE,
+        Some(ast.expression_binary(
+            SPAN,
+            ast.expression_identifier(SPAN, ast.ident("__lux_head_html")),
+            BinaryOperator::Addition,
+            ast.member_expression_static(
+                SPAN,
+                ast.expression_identifier(SPAN, ast.ident("__lux_render_result")),
+                ast.identifier_name(SPAN, ast.ident("head")),
+                false,
+            )
+            .into(),
+        )),
+        false,
+    );
+
+    let mut statements = ast.vec_with_capacity(render_setup_statements.len() + 8);
+    statements.push(ast.statement_expression(
+        SPAN,
+        init_self_expression(ast, "__lux_component"),
+    ));
+    statements.extend(render_setup_statements);
+    statements.push(const_declaration_statement(ast, render_state_declarator(ast)));
+    statements.push(const_declaration_statement(ast, head_html_decl));
+    statements.push(const_declaration_statement(ast, html_decl));
+    statements.push(const_declaration_statement(ast, render_result_declarator(ast)));
+    statements.push(const_declaration_statement(ast, combined_head_decl));
+    statements.push(server_head_mount_statement(ast));
+    statements.push(ast.statement_expression(
+        SPAN,
+        ast.expression_call(
+            SPAN,
+            ast.member_expression_static(
+                SPAN,
+                ast.expression_identifier(SPAN, ast.ident("$$renderer")),
+                ast.identifier_name(SPAN, ast.ident("push")),
+                false,
+            )
+            .into(),
+            NONE,
+            ast.vec1(ast.expression_identifier(SPAN, ast.ident("__lux_html")).into()),
+            false,
+        ),
+    ));
+
+    ast.module_declaration_export_default_declaration(
+        SPAN,
+        ast.export_default_declaration_kind_function_declaration(
+            SPAN,
+            FunctionType::FunctionDeclaration,
+            Some(ast.binding_identifier(SPAN, ast.ident("__lux_component"))),
+            false,
+            false,
+            false,
+            NONE,
+            NONE,
+            params,
+            NONE,
+            Some(ast.alloc_function_body(SPAN, ast.vec(), statements)),
+        ),
+    )
+    .into()
+}
+
+fn server_component_metadata_statement<'a>(ast: AstBuilder<'a>) -> Statement<'a> {
+    let mut properties = ast.vec_with_capacity(7);
     properties.push(named_property(ast, "template", LUX_TEMPLATE));
     properties.push(named_property(ast, "css", LUX_CSS));
     properties.push(named_property(ast, "cssHash", LUX_CSS_HASH));
     properties.push(named_property(ast, "cssScope", LUX_CSS_SCOPE));
     properties.push(named_property(ast, "hasDynamic", LUX_HAS_DYNAMIC));
-    properties.push(function_property(
-        ast,
-        "render",
-        render_expression,
-        render_setup_statements,
-    ));
-    if let (Some(head_expression), Some(head_setup_statements)) =
-        (head_expression, head_setup_statements)
-    {
-        properties.push(function_property(
-            ast,
-            "head",
-            head_expression,
-            head_setup_statements,
-        ));
-    }
+    properties.push(function_property(ast, "render", "__lux_render", false));
+    properties.push(function_property(ast, "head", "__lux_head", true));
 
     let object_expression = ast.expression_object(SPAN, properties);
-    ast.module_declaration_export_default_declaration(
+    ast.statement_expression(
         SPAN,
-        ExportDefaultDeclarationKind::from(object_expression),
+        ast.expression_call(
+            SPAN,
+            ast.member_expression_static(
+                SPAN,
+                ast.expression_identifier(SPAN, ast.ident("Object")),
+                ast.identifier_name(SPAN, ast.ident("assign")),
+                false,
+            )
+            .into(),
+            NONE,
+            ast.vec_from_array([
+                ast.expression_identifier(SPAN, ast.ident("__lux_component"))
+                    .into(),
+                object_expression.into(),
+            ]),
+            false,
+        ),
     )
-    .into()
 }
 
 pub(super) fn client_default_export_statement<'a>(
@@ -595,31 +720,118 @@ fn named_property<'a>(
 fn function_property<'a>(
     ast: AstBuilder<'a>,
     key: &str,
-    render_expression: Expression<'a>,
-    render_setup_statements: oxc_allocator::Vec<'a, Statement<'a>>,
+    function_name: &str,
+    return_head: bool,
 ) -> oxc_ast::ast::ObjectPropertyKind<'a> {
+    ast.object_property_kind_object_property(
+        SPAN,
+        PropertyKind::Init,
+        ast.property_key_static_identifier(SPAN, ast.ident(key)),
+        compatibility_function_expression(ast, function_name, return_head),
+        false,
+        false,
+        false,
+    )
+}
+
+fn compatibility_function_expression<'a>(
+    ast: AstBuilder<'a>,
+    function_name: &str,
+    return_head: bool,
+) -> Expression<'a> {
+    let params = ast.alloc_formal_parameters(
+        SPAN,
+        FormalParameterKind::FormalParameter,
+        ast.vec1(default_props_formal_parameter(ast)),
+        NONE,
+    );
+    let mut statements = ast.vec_with_capacity(if return_head { 4 } else { 1 });
+    if return_head {
+        let render_component_call = ast.expression_call(
+            SPAN,
+            ast.expression_identifier(SPAN, ast.ident(LUX_RENDER_COMPONENT)),
+            NONE,
+            ast.vec_from_array([
+                ast.expression_identifier(SPAN, ast.ident("__lux_component"))
+                    .into(),
+                ast.expression_identifier(SPAN, ast.ident("_props")).into(),
+                ast.expression_identifier(SPAN, ast.ident("__lux_render_state"))
+                    .into(),
+            ]),
+            false,
+        );
+        statements.push(const_declaration_statement(ast, render_state_declarator(ast)));
+        statements.push(ast.statement_expression(SPAN, render_component_call));
+        statements.push(const_declaration_statement(ast, render_result_declarator(ast)));
+        statements.push(ast.statement_return(
+            SPAN,
+            Some(
+                ast.member_expression_static(
+                    SPAN,
+                    ast.expression_identifier(SPAN, ast.ident("__lux_render_result")),
+                    ast.identifier_name(SPAN, ast.ident("head")),
+                    false,
+                )
+                .into(),
+            ),
+        ));
+    } else {
+        statements.push(ast.statement_return(
+            SPAN,
+            Some(
+                ast.expression_call(
+                    SPAN,
+                    ast.expression_identifier(SPAN, ast.ident(LUX_RENDER_COMPONENT)),
+                    NONE,
+                    ast.vec_from_array([
+                        ast.expression_identifier(SPAN, ast.ident("__lux_component"))
+                            .into(),
+                        ast.expression_identifier(SPAN, ast.ident("_props")).into(),
+                    ]),
+                    false,
+                ),
+            ),
+        ));
+    }
+
+    let function_body = ast.alloc_function_body(SPAN, ast.vec(), statements);
+    ast.expression_function(
+        SPAN,
+        FunctionType::FunctionExpression,
+        Some(ast.binding_identifier(SPAN, ast.ident(function_name))),
+        false,
+        false,
+        false,
+        NONE,
+        NONE,
+        params,
+        NONE,
+        Some(function_body),
+    )
+}
+
+fn default_props_formal_parameter<'a>(
+    ast: AstBuilder<'a>,
+) -> oxc_ast::ast::FormalParameter<'a> {
     let props_pattern = ast.binding_pattern_assignment_pattern(
         SPAN,
         ast.binding_pattern_binding_identifier(SPAN, ast.ident("_props")),
         ast.expression_object(SPAN, ast.vec()),
     );
-    let params = ast.alloc_formal_parameters(
+    ast.formal_parameter(
         SPAN,
-        FormalParameterKind::FormalParameter,
-        ast.vec1(ast.formal_parameter(
-            SPAN,
-            ast.vec(),
-            props_pattern,
-            NONE,
-            NONE,
-            false,
-            None,
-            false,
-            false,
-        )),
+        ast.vec(),
+        props_pattern,
         NONE,
-    );
+        NONE,
+        false,
+        None,
+        false,
+        false,
+    )
+}
 
+fn init_self_expression<'a>(ast: AstBuilder<'a>, target_ident: &str) -> Expression<'a> {
     let self_member = ast.member_expression_static(
         SPAN,
         ast.expression_identifier(SPAN, ast.ident("_props")),
@@ -636,37 +848,135 @@ fn function_property<'a>(
         SPAN,
         AssignmentOperator::Assign,
         self_member.into(),
-        ast.expression_identifier(SPAN, ast.ident("__lux_render")),
+        ast.expression_identifier(SPAN, ast.ident(target_ident)),
     );
-    let init_self = ast.expression_logical(SPAN, self_missing, LogicalOperator::And, self_assign);
-    let mut statements = ast.vec_with_capacity(render_setup_statements.len() + 2);
-    statements.push(ast.statement_expression(SPAN, init_self));
-    statements.extend(render_setup_statements);
-    statements.push(ast.statement_return(SPAN, Some(render_expression)));
+    ast.expression_logical(SPAN, self_missing, LogicalOperator::And, self_assign)
+}
 
-    let function_body = ast.alloc_function_body(SPAN, ast.vec(), statements);
+fn const_declaration_statement<'a>(
+    ast: AstBuilder<'a>,
+    declarator: oxc_ast::ast::VariableDeclarator<'a>,
+) -> Statement<'a> {
+    ast.declaration_variable(
+        SPAN,
+        oxc_ast::ast::VariableDeclarationKind::Const,
+        ast.vec1(declarator),
+        false,
+    )
+    .into()
+}
 
-    let function_expression = ast.expression_function(
+fn render_state_declarator<'a>(ast: AstBuilder<'a>) -> oxc_ast::ast::VariableDeclarator<'a> {
+    ast.variable_declarator(
+        SPAN,
+        oxc_ast::ast::VariableDeclarationKind::Const,
+        ast.binding_pattern_binding_identifier(SPAN, ast.ident("__lux_render_state")),
+        NONE,
+        Some(ast.expression_call(
+            SPAN,
+            ast.expression_identifier(SPAN, ast.ident(LUX_BEGIN_RENDER)),
+            NONE,
+            ast.vec(),
+            false,
+        )),
+        false,
+    )
+}
+
+fn render_result_declarator<'a>(ast: AstBuilder<'a>) -> oxc_ast::ast::VariableDeclarator<'a> {
+    ast.variable_declarator(
+        SPAN,
+        oxc_ast::ast::VariableDeclarationKind::Const,
+        ast.binding_pattern_binding_identifier(SPAN, ast.ident("__lux_render_result")),
+        NONE,
+        Some(ast.expression_call(
+            SPAN,
+            ast.expression_identifier(SPAN, ast.ident(LUX_END_RENDER)),
+            NONE,
+            ast.vec1(
+                ast.expression_identifier(SPAN, ast.ident("__lux_render_state"))
+                    .into(),
+            ),
+            false,
+        )),
+        false,
+    )
+}
+
+fn server_head_mount_statement<'a>(ast: AstBuilder<'a>) -> Statement<'a> {
+    let push_head_statement = ast.statement_expression(
+        SPAN,
+        ast.expression_call(
+            SPAN,
+            ast.member_expression_static(
+                SPAN,
+                ast.expression_identifier(SPAN, ast.ident("__lux_head_renderer")),
+                ast.identifier_name(SPAN, ast.ident("push")),
+                false,
+            )
+            .into(),
+            NONE,
+            ast.vec1(
+                ast.expression_identifier(SPAN, ast.ident("__lux_combined_head"))
+                    .into(),
+            ),
+            false,
+        ),
+    );
+    let head_callback = ast.expression_function(
         SPAN,
         FunctionType::FunctionExpression,
-        Some(ast.binding_identifier(SPAN, ast.ident("__lux_render"))),
+        None,
         false,
         false,
         false,
         NONE,
         NONE,
-        params,
+        ast.alloc_formal_parameters(
+            SPAN,
+            FormalParameterKind::FormalParameter,
+            ast.vec1(ast.formal_parameter(
+                SPAN,
+                ast.vec(),
+                ast.binding_pattern_binding_identifier(
+                    SPAN,
+                    ast.ident("__lux_head_renderer"),
+                ),
+                NONE,
+                NONE,
+                false,
+                None,
+                false,
+                false,
+            )),
+            NONE,
+        ),
         NONE,
-        Some(function_body),
+        Some(ast.alloc_function_body(
+            SPAN,
+            ast.vec(),
+            ast.vec1(push_head_statement),
+        )),
     );
-
-    ast.object_property_kind_object_property(
+    ast.statement_expression(
         SPAN,
-        PropertyKind::Init,
-        ast.property_key_static_identifier(SPAN, ast.ident(key)),
-        function_expression,
-        false,
-        false,
-        false,
+        ast.expression_logical(
+            SPAN,
+            ast.expression_identifier(SPAN, ast.ident("__lux_combined_head")),
+            LogicalOperator::And,
+            ast.expression_call(
+                SPAN,
+                ast.member_expression_static(
+                    SPAN,
+                    ast.expression_identifier(SPAN, ast.ident("$$renderer")),
+                    ast.identifier_name(SPAN, ast.ident("head")),
+                    false,
+                )
+                .into(),
+                NONE,
+                ast.vec1(head_callback.into()),
+                false,
+            ),
+        ),
     )
 }

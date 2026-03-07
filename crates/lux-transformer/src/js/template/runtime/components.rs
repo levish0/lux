@@ -17,6 +17,7 @@ use super::elements::{attribute_value_to_component_prop_expression, object_init_
 use super::expr::{call_iife, const_statement, string_expr, stringify_expression};
 use super::render_fragment_nodes_expression;
 use super::scope::{RuntimeScope, resolve_expression};
+use crate::js::component::LUX_RENDER_COMPONENT;
 
 pub(super) fn render_component_expression<'a>(
     ast: AstBuilder<'a>,
@@ -101,56 +102,17 @@ fn render_component_like_expression<'a>(
 
     let component_ident = ast.expression_identifier(SPAN, ast.ident("__lux_component"));
     let props_ident = ast.expression_identifier(SPAN, ast.ident("__lux_component_props"));
-    let render_member = ast.member_expression_static(
+    let rendered = ast.expression_call(
         SPAN,
-        component_ident.clone_in(ast.allocator),
-        ast.identifier_name(SPAN, ast.ident("render")),
-        false,
-    );
-    let has_render = ast.expression_logical(
-        SPAN,
-        component_ident.clone_in(ast.allocator),
-        LogicalOperator::And,
-        ast.expression_binary(
-            SPAN,
-            ast.expression_unary(
-                SPAN,
-                oxc_ast::ast::UnaryOperator::Typeof,
-                render_member.clone_in(ast.allocator).into(),
-            ),
-            BinaryOperator::StrictEquality,
-            string_expr(ast, "function"),
-        ),
-    );
-    let render_call = ast.expression_call(
-        SPAN,
-        render_member.into(),
+        ast.expression_identifier(SPAN, ast.ident(LUX_RENDER_COMPONENT)),
         NONE,
-        ast.vec1(props_ident.clone_in(ast.allocator).into()),
+        ast.vec_from_array([
+            component_ident.clone_in(ast.allocator).into(),
+            props_ident.clone_in(ast.allocator).into(),
+            ast.expression_identifier(SPAN, ast.ident("__lux_render_state"))
+                .into(),
+        ]),
         false,
-    );
-    let function_call = ast.expression_call(
-        SPAN,
-        component_ident.clone_in(ast.allocator),
-        NONE,
-        ast.vec1(props_ident.clone_in(ast.allocator).into()),
-        false,
-    );
-    let is_callable = ast.expression_binary(
-        SPAN,
-        ast.expression_unary(
-            SPAN,
-            oxc_ast::ast::UnaryOperator::Typeof,
-            component_ident.clone_in(ast.allocator),
-        ),
-        BinaryOperator::StrictEquality,
-        string_expr(ast, "function"),
-    );
-    let rendered = ast.expression_conditional(
-        SPAN,
-        has_render,
-        render_call,
-        ast.expression_conditional(SPAN, is_callable, function_call, string_expr(ast, "")),
     );
 
     let mut statements = ast.vec_with_capacity(4);

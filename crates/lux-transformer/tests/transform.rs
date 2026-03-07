@@ -209,15 +209,16 @@ fn transform_generates_component_runtime_render_path() {
     let analysis = analyze(&parsed.root);
     let result = transform(&parsed.root, &analysis);
 
-    assert!(
-        result
-            .js
-            .contains("typeof __lux_component.render === \"function\"")
-    );
+    assert!(result.js.contains("__lux_render_component("));
     assert!(result.js.contains("const __lux_component_props = {"));
     assert!(result.js.contains("msg: function({ name })"));
     assert!(result.js.contains("children: function()"));
     assert!(!result.js.contains("<!--lux:dynamic:component-->"));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function render_component")
+    );
 }
 
 #[test]
@@ -581,6 +582,28 @@ fn transform_emits_module_script_statements() {
 }
 
 #[test]
+fn transform_resolves_module_script_bindings_in_template_scope() {
+    let source = r#"
+<script context="module">
+  export const buttonVariants = (options) => options.variant;
+</script>
+<p>{buttonVariants({ variant: 'ok' })}</p>
+"#;
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("export const buttonVariants"));
+    assert!(result.js.contains("options.variant"));
+    assert!(result.js.contains("buttonVariants({"));
+    assert!(!result.js.contains("function({ buttonVariants })"));
+    assert!(!result.js.contains("_props.buttonVariants"));
+}
+
+#[test]
 fn transform_ts_instance_script_output_is_valid_javascript() {
     let source = "<script lang=\"ts\">let x: number = 1;</script>{x}";
     let allocator = Allocator::default();
@@ -605,7 +628,7 @@ fn transform_keeps_svelte_head_static_when_children_are_static() {
     assert!(result.js.contains("const __lux_has_dynamic = false;"));
     assert!(result.js.contains("const __lux_template = \"\";"));
     assert!(result.js.contains("head: function"));
-    assert!(result.js.contains("return \"<title>t</title>\";"));
+    assert!(result.js.contains("const __lux_head_html = \"<title>t</title>\";"));
 }
 
 #[test]
@@ -1641,8 +1664,12 @@ fn assert_component_js_payload(js: &str) {
         "missing named export: {js}"
     );
     assert!(
-        js.contains("export default {"),
+        js.contains("export default function __lux_component"),
         "missing default export: {js}"
+    );
+    assert!(
+        js.contains("Object.assign(__lux_component, {"),
+        "missing metadata assignment: {js}"
     );
     assert!(
         js.contains("render: function") && js.contains("_props = {}"),

@@ -206,6 +206,16 @@ export function end_render(state) {
   };
 }
 
+export function render_component(component, props) {
+  if (component && typeof component.render === "function") {
+    return component.render(props ?? {});
+  }
+  if (typeof component === "function") {
+    return component(props ?? {});
+  }
+  return "";
+}
+
 export function event_attr(name, handler, modifiers = []) {
   if (!current_render_state || typeof handler !== "function") {
     return "";

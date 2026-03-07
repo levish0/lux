@@ -1,3 +1,5 @@
+import { render as svelteRender } from "svelte/server";
+
 const BOOLEAN_ATTRIBUTE_NAMES = new Set([
   "allowfullscreen",
   "async",
@@ -170,11 +172,42 @@ export function props_id() {
 }
 
 export function begin_render() {
-  return null;
+  return { head: "" };
 }
 
-export function end_render() {
-  return { events: [], bindings: [], actions: [], transitions: [], animations: [] };
+export function end_render(state) {
+  return {
+    head: state?.head ?? "",
+    events: [],
+    bindings: [],
+    actions: [],
+    transitions: [],
+    animations: []
+  };
+}
+
+export function render_component(component, props, render_state = null) {
+  if (typeof component === "function") {
+    const result = svelteRender(component, { props: props ?? {} });
+    const body = result?.body ?? result?.html ?? "";
+    if (render_state && result?.head) {
+      render_state.head += result.head;
+    }
+    return body;
+  }
+
+  if (component && typeof component.render === "function") {
+    const normalized_props = props ?? {};
+    const body = component.render(normalized_props) ?? "";
+    const head =
+      typeof component.head === "function" ? component.head(normalized_props) ?? "" : "";
+    if (render_state && head) {
+      render_state.head += head;
+    }
+    return body;
+  }
+
+  return "";
 }
 
 export function event_attr() {

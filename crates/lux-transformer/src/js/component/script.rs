@@ -59,7 +59,7 @@ pub(super) fn collect_instance_runtime_statements<'a>(
     statements
 }
 
-pub(super) fn collect_instance_runtime_binding_names(statements: &[Statement<'_>]) -> Vec<String> {
+pub(super) fn collect_runtime_binding_names(statements: &[Statement<'_>]) -> Vec<String> {
     let mut names = BTreeSet::new();
     for statement in statements {
         collect_statement_binding_names(statement, &mut names);
@@ -417,22 +417,54 @@ impl<'a> VisitMut<'a> for TypeScriptEraser<'a> {
 
 fn collect_statement_binding_names(statement: &Statement<'_>, names: &mut BTreeSet<String>) {
     match statement {
+        Statement::ExportNamedDeclaration(declaration) => {
+            if let Some(inner) = &declaration.declaration {
+                collect_declaration_binding_names(inner, names);
+            }
+        }
         Statement::VariableDeclaration(declaration) => {
-            for declarator in &declaration.declarations {
-                collect_binding_pattern_names(&declarator.id, names);
-            }
+            collect_variable_declaration_binding_names(declaration, names);
         }
-        Statement::FunctionDeclaration(function) => {
-            if let Some(id) = &function.id {
-                names.insert(id.name.as_str().to_owned());
-            }
-        }
-        Statement::ClassDeclaration(class) => {
-            if let Some(id) = &class.id {
-                names.insert(id.name.as_str().to_owned());
-            }
-        }
+        Statement::FunctionDeclaration(function) => collect_function_binding_name(function, names),
+        Statement::ClassDeclaration(class) => collect_class_binding_name(class, names),
         _ => {}
+    }
+}
+
+fn collect_declaration_binding_names(declaration: &Declaration<'_>, names: &mut BTreeSet<String>) {
+    match declaration {
+        Declaration::VariableDeclaration(declaration) => {
+            collect_variable_declaration_binding_names(declaration, names);
+        }
+        Declaration::FunctionDeclaration(function) => collect_function_binding_name(function, names),
+        Declaration::ClassDeclaration(class) => collect_class_binding_name(class, names),
+        Declaration::TSTypeAliasDeclaration(_)
+        | Declaration::TSInterfaceDeclaration(_)
+        | Declaration::TSModuleDeclaration(_)
+        | Declaration::TSImportEqualsDeclaration(_)
+        | Declaration::TSGlobalDeclaration(_)
+        | Declaration::TSEnumDeclaration(_) => {}
+    }
+}
+
+fn collect_variable_declaration_binding_names(
+    declaration: &oxc_allocator::Box<'_, oxc_ast::ast::VariableDeclaration<'_>>,
+    names: &mut BTreeSet<String>,
+) {
+    for declarator in &declaration.declarations {
+        collect_binding_pattern_names(&declarator.id, names);
+    }
+}
+
+fn collect_function_binding_name(function: &oxc_allocator::Box<'_, Function<'_>>, names: &mut BTreeSet<String>) {
+    if let Some(id) = &function.id {
+        names.insert(id.name.as_str().to_owned());
+    }
+}
+
+fn collect_class_binding_name(class: &oxc_allocator::Box<'_, Class<'_>>, names: &mut BTreeSet<String>) {
+    if let Some(id) = &class.id {
+        names.insert(id.name.as_str().to_owned());
     }
 }
 
