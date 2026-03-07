@@ -33,6 +33,12 @@ pub fn parse_attributes<'a>(input: &mut Input<'a>) -> Result<Vec<AttributeNode<'
         }
 
         if first == b'{' {
+            let rest = &remaining[1..];
+            let trimmed = rest.trim_start_matches(|c: char| c.is_ascii_whitespace());
+            if trimmed.starts_with('#') || trimmed.starts_with('/') || trimmed.starts_with(':') {
+                break;
+            }
+
             let node = brace::parse_brace_attribute(input)?;
             attrs.push(node);
             continue;
@@ -77,6 +83,7 @@ pub fn is_attr_name_char(c: char) -> bool {
     !c.is_ascii_whitespace()
         && c != '='
         && c != '>'
+        && c != '<'
         && c != '/'
         && c != '"'
         && c != '\''

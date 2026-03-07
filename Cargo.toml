@@ -19,6 +19,7 @@ lux-analyzer = { path = "crates/lux-analyzer"}
 lux-transformer = { path = "crates/lux-transformer" }
 lux-utils = { path="crates/lux-utils" }
 lux-metadata = { path="crates/lux-metadata" }
+lux-test-support = { path="crates/lux-test-support" }
 
 # External dependencies
 serde = { version = "1.0.228", features = ["derive"] }

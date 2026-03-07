@@ -1,6 +1,6 @@
 use lux_analyzer::analyze;
 use lux_parser::parse;
-use lux_transformer::{TransformTarget, transform, transform_for_target};
+use lux_transformer::{TransformTarget, transform, transform_for_target, transform_with_filename};
 use lux_utils::hash::hash;
 use oxc_allocator::Allocator;
 use oxc_parser::Parser;
@@ -31,6 +31,27 @@ fn transform_includes_css_hash_and_scope_for_style_blocks() {
     assert_eq!(result.css_hash.as_deref(), Some(expected_hash.as_str()));
     assert_eq!(result.css_scope.as_deref(), Some(expected_scope.as_str()));
     assert_component_js_payload(&result.js);
+}
+
+#[test]
+fn transform_uses_filename_for_css_hash_when_available() {
+    let source = "<style>h1 { color: red; }</style><h1>Hello</h1>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let filename = "src/routes/+page.svelte";
+    let result = transform_with_filename(&parsed.root, &analysis, Some(filename));
+
+    let expected_hash = hash(filename);
+    let expected_scope = format!("svelte-{expected_hash}");
+
+    let rendered_css = result.css.as_deref().expect("expected transformed css");
+    assert!(rendered_css.contains("color: red;"));
+    assert!(rendered_css.contains(&format!("h1.{expected_scope}")));
+    assert_eq!(result.css_hash.as_deref(), Some(expected_hash.as_str()));
+    assert_eq!(result.css_scope.as_deref(), Some(expected_scope.as_str()));
 }
 
 #[test]
@@ -146,6 +167,22 @@ fn transform_generates_each_runtime_render() {
     assert!(result.js.contains("_props"));
     assert!(result.js.contains(".map(function(item)"));
     assert!(result.js.contains(".join(\"\")"));
+}
+
+#[test]
+fn transform_typescript_each_block_preserves_context_index_and_key_bindings() {
+    let source = "{#each text as line, i (i)}<p>{line}</p>{/each}";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, true);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("return text;"));
+    assert!(result.js.contains(".map(function(line, i)"));
+    assert!(!result.js.contains("return i(i);"));
+    assert!(!result.js.contains("function({ line })"));
 }
 
 #[test]
@@ -334,6 +371,21 @@ fn transform_generates_spread_and_directive_runtime_attributes() {
             .code
             .contains("export function style_attr")
     );
+}
+
+#[test]
+fn transform_renders_textarea_value_as_body_content_in_ssr() {
+    let source = "<script>export let foo = 42;</script><textarea value={foo}/>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("<textarea"));
+    assert!(result.js.contains("</textarea>"));
+    assert!(!result.js.contains("__lux_attr(\"value\""));
 }
 
 #[test]
@@ -604,6 +656,72 @@ fn transform_resolves_module_script_bindings_in_template_scope() {
 }
 
 #[test]
+fn transform_legacy_export_let_reads_from_props() {
+    let source = "<script>export let src; export let solid = false;</script><p>{src}{solid}</p>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("let src = _props.src;"));
+    assert!(
+        result
+            .js
+            .contains("_props.solid === undefined ? false : _props.solid")
+    );
+}
+
+#[test]
+fn transform_reactive_assignment_declares_local_binding() {
+    let source = "<script>export let src; export let solid = false; $: icon = src?.[solid ? 'solid' : 'default'];</script><svg {...icon?.a}></svg>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("let icon;"));
+    assert!(
+        result
+            .js
+            .contains("icon = src?.[solid ? \"solid\" : \"default\"];")
+    );
+    assert!(!result.js.contains("function({ icon })"));
+    assert!(!result.js.contains("_props.icon"));
+}
+
+#[test]
+fn transform_legacy_rest_props_uses_runtime_helper() {
+    let source =
+        "<script>export let src; export let solid = false;</script><svg {...$$restProps}></svg>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform(&parsed.root, &analysis);
+
+    assert!(result.js.contains("const $$props = _props;"));
+    assert!(
+        result
+            .js
+            .contains("const $$restProps = __lux_rest_props(_props, [\"solid\", \"src\"]);")
+            || result
+                .js
+                .contains("const $$restProps = __lux_rest_props(_props, [\"src\", \"solid\"]);")
+    );
+    assert!(!result.js.contains("_props.$$restProps"));
+    assert!(
+        result.runtime_modules[0]
+            .code
+            .contains("export function rest_props")
+    );
+}
+
+#[test]
 fn transform_ts_instance_script_output_is_valid_javascript() {
     let source = "<script lang=\"ts\">let x: number = 1;</script>{x}";
     let allocator = Allocator::default();
@@ -627,8 +745,12 @@ fn transform_keeps_svelte_head_static_when_children_are_static() {
 
     assert!(result.js.contains("const __lux_has_dynamic = false;"));
     assert!(result.js.contains("const __lux_template = \"\";"));
-    assert!(result.js.contains("head: function"));
-    assert!(result.js.contains("const __lux_head_html = \"<title>t</title>\";"));
+    assert!(!result.js.contains("__lux_begin_render"));
+    assert!(
+        result
+            .js
+            .contains("const __lux_head_html = \"<title>t</title>\";")
+    );
 }
 
 #[test]
@@ -1297,6 +1419,62 @@ fn transform_client_target_emits_bind_runtime_hooks_for_group() {
 }
 
 #[test]
+fn transform_server_target_renders_checked_attribute_for_group_bindings() {
+    let source = "<script>let selected = ['a']; let choice = 'x';</script><input type=\"checkbox\" bind:group={selected} value=\"a\"><input type=\"radio\" bind:group={choice} value=\"x\">";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Server);
+
+    assert!(
+        result.js.contains("__lux_attr(\"checked\"") && result.js.contains("selected.includes"),
+        "{}",
+        result.js
+    );
+    assert!(
+        result.js.contains("__lux_attr(\"checked\"") && result.js.contains("choice ==="),
+        "{}",
+        result.js
+    );
+}
+
+#[test]
+fn transform_server_target_omits_value_attribute_for_file_input_binding() {
+    let source = "<script>let value = '/tmp/file';</script><input type=\"file\" bind:value={value}>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Server);
+
+    assert!(!result.js.contains("__lux_attr(\"value\""), "{}", result.js);
+    assert!(result.js.contains("__lux_bind_attr(\"value\""), "{}", result.js);
+}
+
+#[test]
+fn transform_server_target_imports_rest_props_helper_for_exported_props() {
+    let source = "<script>export let x = 1;</script><div>{x}</div>";
+    let allocator = Allocator::default();
+    let parsed = parse(source, &allocator, false);
+    assert!(parsed.errors.is_empty(), "parse should succeed");
+
+    let analysis = analyze(&parsed.root);
+    let result = transform_for_target(&parsed.root, &analysis, TransformTarget::Server);
+
+    assert!(
+        result
+            .js
+            .contains("rest_props as __lux_rest_props"),
+        "{}",
+        result.js
+    );
+    assert!(result.js.contains("const $$restProps = __lux_rest_props"), "{}", result.js);
+}
+
+#[test]
 fn transform_client_target_emits_bind_runtime_hooks_for_files() {
     let source = "<input type=\"file\" bind:files={files}>";
     let allocator = Allocator::default();
@@ -1670,10 +1848,6 @@ fn assert_component_js_payload(js: &str) {
     assert!(
         js.contains("Object.assign(__lux_component, {"),
         "missing metadata assignment: {js}"
-    );
-    assert!(
-        js.contains("render: function") && js.contains("_props = {}"),
-        "missing render parameter default: {js}"
     );
     assert_js_parses_as_module(js);
 }

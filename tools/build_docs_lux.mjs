@@ -12,6 +12,7 @@ const tempBaseDir = resolve(workspaceRoot, "docs_lux");
 const runId = new Date().toISOString().replace(/[:.]/g, "-");
 const tempRootDir = resolve(tempBaseDir, runId);
 const tempDocsDir = resolve(tempRootDir, "docs");
+const tempBindingPath = resolve(tempRootDir, "lux_node.node");
 const cleanTemp = process.argv.includes("--clean-temp");
 const passthroughArgs = process.argv.filter((arg) => arg !== "--clean-temp").slice(2);
 
@@ -31,7 +32,8 @@ if (!existsSync(localPluginDir)) {
 const env = {
   ...process.env,
   LUX_SVELTE: "1",
-  LUX_NODE_BINDING: resolve(localCompilerDir, "lux_node.node"),
+  LUX_NODE_BINDING: tempBindingPath,
+  LUX_NODE_BINDING_OUT: tempBindingPath,
   LUX_ARTIFACTS_DIR: resolve(tempDocsDir, ".lux_artifacts"),
 };
 

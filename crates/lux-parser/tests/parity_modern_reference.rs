@@ -4,17 +4,31 @@ use std::process::Command;
 
 use lux_ast::template::attribute::AttributeNode;
 use lux_ast::template::root::FragmentNode;
-use lux_parser::parse;
+use lux_parser::{parse, parse_with_options, ParseOptions};
+use lux_test_support::{
+    ensure_svelte_runner, is_loose_parser_sample, node_executable, reference_root,
+    workspace_root_from_manifest_dir,
+};
 use oxc_allocator::Allocator;
 use oxc_span::GetSpan;
 use serde_json::Value;
 
 #[test]
 fn parity_against_reference_parser_modern_strict() {
+    parity_against_reference_parser_modern(false);
+}
+
+#[test]
+fn parity_against_reference_parser_modern_loose() {
+    parity_against_reference_parser_modern(true);
+}
+
+fn parity_against_reference_parser_modern(loose: bool) {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let samples_dir = manifest_dir.join("tests/fixtures/parser-modern/samples");
+    let workspace_root = workspace_root_from_manifest_dir(&manifest_dir);
+    let samples_dir = reference_root(&workspace_root).join("parser-modern/samples");
     assert!(samples_dir.exists(), "missing {}", samples_dir.display());
-    let runner_dir = ensure_svelte_runner(&manifest_dir);
+    let runner_dir = ensure_svelte_runner(&workspace_root);
     let generated_dir = manifest_dir.join("target/parity-modern-reference");
     let _ = fs::create_dir_all(&generated_dir);
 
@@ -34,8 +48,11 @@ fn parity_against_reference_parser_modern_strict() {
             .and_then(|name| name.to_str())
             .expect("utf-8 directory name");
 
-        // strict-only target
-        if sample_name.starts_with("loose-") {
+        if !loose && is_loose_parser_sample(sample_name) {
+            continue;
+        }
+
+        if loose && !is_loose_parser_sample(sample_name) {
             continue;
         }
 
@@ -48,11 +65,27 @@ fn parity_against_reference_parser_modern_strict() {
             .unwrap_or_else(|err| panic!("failed to read {}: {err}", input_path.display()));
         let input = normalize_reference_input(&input_raw);
 
-        let expected_json =
-            parse_reference_with_svelte(&runner_dir, &input_path, &generated_dir, sample_name);
+        let expected_json = parse_reference_with_svelte(
+            &runner_dir,
+            &input_path,
+            &generated_dir,
+            sample_name,
+            loose,
+        );
 
         let allocator = Allocator::default();
-        let actual = parse(&input, &allocator, false);
+        let actual = if loose {
+            parse_with_options(
+                &input,
+                &allocator,
+                ParseOptions {
+                    ts: false,
+                    loose: true,
+                },
+            )
+        } else {
+            parse(&input, &allocator, false)
+        };
 
         let mut expected_lines = Vec::new();
         emit_reference_root(&mut expected_lines, &expected_json, &input, "root");
@@ -90,64 +123,23 @@ fn normalize_reference_input(input: &str) -> String {
     input.replace('\r', "").trim_end().to_string()
 }
 
-fn npm_executable() -> &'static str {
-    if cfg!(windows) { "npm.cmd" } else { "npm" }
-}
-
-fn node_executable() -> &'static str {
-    if cfg!(windows) { "node.exe" } else { "node" }
-}
-
-fn ensure_svelte_runner(manifest_dir: &Path) -> PathBuf {
-    let workspace_root = manifest_dir
-        .parent()
-        .and_then(Path::parent)
-        .expect("failed to resolve workspace root");
-    let runner_dir = workspace_root.join("tools/svelte_runner");
-    let script_path = runner_dir.join("parse_ast.mjs");
-    assert!(script_path.exists(), "missing {}", script_path.display());
-
-    let svelte_module = runner_dir.join("node_modules/svelte/package.json");
-    if svelte_module.exists() {
-        return runner_dir;
-    }
-
-    let install = Command::new(npm_executable())
-        .arg("install")
-        .arg("--silent")
-        .arg("--no-fund")
-        .arg("--no-audit")
-        .current_dir(&runner_dir)
-        .output()
-        .unwrap_or_else(|err| {
-            panic!(
-                "failed to run npm install in {}: {err}",
-                runner_dir.display()
-            )
-        });
-
-    assert!(
-        install.status.success(),
-        "npm install failed in {}\nstdout:\n{}\nstderr:\n{}",
-        runner_dir.display(),
-        String::from_utf8_lossy(&install.stdout),
-        String::from_utf8_lossy(&install.stderr),
-    );
-
-    runner_dir
-}
-
 fn parse_reference_with_svelte(
     runner_dir: &Path,
     input_path: &Path,
     generated_dir: &Path,
     sample_name: &str,
+    loose: bool,
 ) -> Value {
     let script_path = runner_dir.join("parse_ast.mjs");
-    let output_path = generated_dir.join(format!("{sample_name}.reference.json"));
+    let suffix = if loose { "loose" } else { "strict" };
+    let output_path = generated_dir.join(format!("{sample_name}.{suffix}.reference.json"));
 
-    let run = Command::new(node_executable())
-        .arg(&script_path)
+    let mut command = Command::new(node_executable());
+    command.arg(&script_path);
+    if loose {
+        command.arg("--loose");
+    }
+    let run = command
         .arg(input_path)
         .arg(&output_path)
         .current_dir(runner_dir)
@@ -925,7 +917,13 @@ fn emit_lux_element(
 
 fn norm_attr_kind(attribute: &AttributeNode<'_>) -> String {
     match attribute {
-        AttributeNode::Attribute(attribute) => format!("Attribute:{}", attribute.name),
+        AttributeNode::Attribute(attribute) => {
+            if attribute.name.is_empty() {
+                "Attribute".into()
+            } else {
+                format!("Attribute:{}", attribute.name)
+            }
+        }
         AttributeNode::SpreadAttribute(_) => "SpreadAttribute".into(),
         AttributeNode::BindDirective(d) => format!("BindDirective:{}", d.name),
         AttributeNode::ClassDirective(d) => format!("ClassDirective:{}", d.name),

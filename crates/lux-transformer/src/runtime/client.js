@@ -28,6 +28,8 @@ const BOOLEAN_ATTRIBUTE_NAMES = new Set([
   "selected",
   "webkitdirectory"
 ]);
+const INVALID_ATTR_NAME_CHAR_REGEX =
+  /[\s'">/=\u{FDD0}-\u{FDEF}\u{FFFE}\u{FFFF}\u{1FFFE}\u{1FFFF}\u{2FFFE}\u{2FFFF}\u{3FFFE}\u{3FFFF}\u{4FFFE}\u{4FFFF}\u{5FFFE}\u{5FFFF}\u{6FFFE}\u{6FFFF}\u{7FFFE}\u{7FFFF}\u{8FFFE}\u{8FFFF}\u{9FFFE}\u{9FFFF}\u{AFFFE}\u{AFFFF}\u{BFFFE}\u{BFFFF}\u{CFFFE}\u{CFFFF}\u{DFFFE}\u{DFFFF}\u{EFFFE}\u{EFFFF}\u{FFFFE}\u{FFFFF}\u{10FFFE}\u{10FFFF}]/u;
 let props_id_counter = 0;
 const anchor_regions = new WeakMap();
 const anchor_head_state = new WeakMap();
@@ -155,7 +157,8 @@ export function attributes(
         typeof value === "function" ||
         normalized_key === "class" ||
         normalized_key === "style" ||
-        normalized_key.startsWith("$$")
+        normalized_key.startsWith("$$") ||
+        INVALID_ATTR_NAME_CHAR_REGEX.test(normalized_key)
       ) {
         return "";
       }
@@ -169,8 +172,32 @@ export function attributes(
 }
 
 export function props_id() {
-  props_id_counter += 1;
-  return "lux-" + props_id_counter.toString(36);
+  const root = typeof window === "undefined" ? globalThis : window;
+  if (!root.__svelte) {
+    root.__svelte = {};
+  }
+  if (typeof root.__svelte.uid !== "number") {
+    root.__svelte.uid = 1;
+  }
+  return "c" + root.__svelte.uid++;
+}
+
+export function rest_props(props, exclude = []) {
+  const source = props ?? {};
+  const exclusions = new Set([
+    "__lux_self",
+    "$$slots",
+    "$$events",
+    "children",
+    ...exclude.map((value) => stringify(value))
+  ]);
+  const result = {};
+  for (const [key, value] of Object.entries(source)) {
+    if (!exclusions.has(key)) {
+      result[key] = value;
+    }
+  }
+  return result;
 }
 
 export function begin_render() {

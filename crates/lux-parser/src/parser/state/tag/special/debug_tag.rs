@@ -8,7 +8,7 @@ use winnow::stream::Location as StreamLocation;
 use winnow::token::literal;
 
 use crate::input::Input;
-use crate::parser::read::expression::read_expression;
+use crate::parser::read::expression::read_expression_until;
 use crate::parser::utils::helpers::skip_whitespace;
 
 /// Parse `{@debug}` or `{@debug id1, id2, ...}`.
@@ -23,7 +23,7 @@ pub fn parse_debug_tag<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragme
         Vec::new()
     } else {
         // {@debug expr} — parse and extract identifiers
-        let expression = read_expression(input)?;
+        let expression = read_expression_until(input, b"")?;
         skip_whitespace(input);
         extract_identifiers(expression)
     };

@@ -6,4 +6,5 @@ mod source_type;
 mod tests;
 
 pub use each::read_each_expression;
-pub use parse::{read_expression, read_expression_until};
+pub(crate) use parse::empty_identifier_reference;
+pub use parse::{read_await_expression, read_expression, read_expression_until};

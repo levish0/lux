@@ -1,0 +1,1 @@
+{"js":"import 'svelte/internal/flags/async';\nimport * as $ from 'svelte/internal/server';\n\nconst $$css = {\n\thash: 'svelte-1iib7mn',\n\tcode: '.foo.svelte-1iib7mn {color:red;}'\n};\n\nexport default function Main($$renderer) {\n\t$$renderer.global.css.add($$css);\n\t$$renderer.push(`<div class=\"foo svelte-1iib7mn\">foo</div>`);\n}","css":null,"warnings":[],"error":null}

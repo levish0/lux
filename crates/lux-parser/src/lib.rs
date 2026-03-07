@@ -3,5 +3,4 @@ pub mod error;
 pub mod input;
 pub mod parser;
 
-pub use parser::ParseResult;
-pub use parser::parse;
+pub use parser::{ParseOptions, ParseResult, parse, parse_with_options};

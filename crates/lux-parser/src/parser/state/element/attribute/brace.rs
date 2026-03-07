@@ -8,7 +8,7 @@ use winnow::stream::Location as StreamLocation;
 use winnow::token::literal;
 
 use crate::input::Input;
-use crate::parser::read::expression::read_expression;
+use crate::parser::read::expression::read_expression_until;
 use crate::parser::utils::helpers::{require_whitespace, skip_whitespace};
 
 pub fn parse_brace_attribute<'a>(input: &mut Input<'a>) -> Result<AttributeNode<'a>> {
@@ -31,7 +31,7 @@ pub fn parse_brace_attribute<'a>(input: &mut Input<'a>) -> Result<AttributeNode<
 
 fn parse_spread<'a>(input: &mut Input<'a>, start: usize) -> Result<AttributeNode<'a>> {
     literal("...").parse_next(input)?;
-    let expression = read_expression(input)?;
+    let expression = read_expression_until(input, b"")?;
     skip_whitespace(input);
     literal("}").parse_next(input)?;
     let end = input.previous_token_end();
@@ -45,7 +45,7 @@ fn parse_spread<'a>(input: &mut Input<'a>, start: usize) -> Result<AttributeNode
 fn parse_attach<'a>(input: &mut Input<'a>, start: usize) -> Result<AttributeNode<'a>> {
     literal("@attach").parse_next(input)?;
     require_whitespace(input)?;
-    let expression = read_expression(input)?;
+    let expression = read_expression_until(input, b"")?;
     skip_whitespace(input);
     literal("}").parse_next(input)?;
     let end = input.previous_token_end();
@@ -57,7 +57,7 @@ fn parse_attach<'a>(input: &mut Input<'a>, start: usize) -> Result<AttributeNode
 }
 
 fn parse_shorthand<'a>(input: &mut Input<'a>, start: usize) -> Result<AttributeNode<'a>> {
-    let expression = read_expression(input)?;
+    let expression = read_expression_until(input, b"")?;
     let name = get_expression_name(&expression);
     skip_whitespace(input);
     literal("}").parse_next(input)?;

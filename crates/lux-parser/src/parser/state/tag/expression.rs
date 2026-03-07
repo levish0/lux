@@ -7,13 +7,13 @@ use winnow::stream::Location as StreamLocation;
 use winnow::token::literal;
 
 use crate::input::Input;
-use crate::parser::read::expression::read_expression;
+use crate::parser::read::expression::read_expression_until;
 use crate::parser::utils::helpers::skip_whitespace;
 
 /// Parse `{expression}`.
 /// Assumes `{` already consumed and whitespace skipped.
 pub fn parse_expression_tag<'a>(input: &mut Input<'a>, start: usize) -> Result<FragmentNode<'a>> {
-    let expression = read_expression(input)?;
+    let expression = read_expression_until(input, b"")?;
     skip_whitespace(input);
     literal("}").parse_next(input)?;
 

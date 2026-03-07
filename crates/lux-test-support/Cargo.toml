@@ -1,0 +1,12 @@
+[package]
+name = "lux-test-support"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Reference test utilities for Lux"
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde_json = { workspace = true }

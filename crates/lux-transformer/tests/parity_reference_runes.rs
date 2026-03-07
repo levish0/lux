@@ -4,6 +4,7 @@ use std::process::Command;
 
 use lux_analyzer::analyze;
 use lux_parser::parse;
+use lux_test_support::{ensure_svelte_runner, node_executable, workspace_root_from_manifest_dir};
 use lux_transformer::transform;
 use oxc_allocator::Allocator;
 use oxc_parser::Parser;
@@ -19,11 +20,8 @@ struct ParityCase<'a> {
 #[test]
 fn parity_reference_rune_lowering_smoke() {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let workspace_root = manifest_dir
-        .parent()
-        .and_then(Path::parent)
-        .expect("failed to resolve workspace root");
-    let runner_dir = ensure_svelte_runner(workspace_root);
+    let workspace_root = workspace_root_from_manifest_dir(&manifest_dir);
+    let runner_dir = ensure_svelte_runner(&workspace_root);
     let generated_dir = manifest_dir.join("target/parity-reference-transform-runes");
     let _ = fs::create_dir_all(&generated_dir);
 
@@ -127,49 +125,6 @@ fn canonicalize_declaration_line(line: &str) -> String {
         .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ")
-}
-
-fn npm_executable() -> &'static str {
-    if cfg!(windows) { "npm.cmd" } else { "npm" }
-}
-
-fn node_executable() -> &'static str {
-    if cfg!(windows) { "node.exe" } else { "node" }
-}
-
-fn ensure_svelte_runner(workspace_root: &Path) -> PathBuf {
-    let runner_dir = workspace_root.join("tools/svelte_runner");
-    let script_path = runner_dir.join("compile_server.mjs");
-    assert!(script_path.exists(), "missing {}", script_path.display());
-
-    let svelte_module = runner_dir.join("node_modules/svelte/package.json");
-    if svelte_module.exists() {
-        return runner_dir;
-    }
-
-    let install = Command::new(npm_executable())
-        .arg("install")
-        .arg("--silent")
-        .arg("--no-fund")
-        .arg("--no-audit")
-        .current_dir(&runner_dir)
-        .output()
-        .unwrap_or_else(|error| {
-            panic!(
-                "failed to run npm install in {}: {error}",
-                runner_dir.display()
-            )
-        });
-
-    assert!(
-        install.status.success(),
-        "npm install failed in {}\nstdout:\n{}\nstderr:\n{}",
-        runner_dir.display(),
-        String::from_utf8_lossy(&install.stdout),
-        String::from_utf8_lossy(&install.stderr),
-    );
-
-    runner_dir
 }
 
 fn run_reference_compile(runner_dir: &Path, input_path: &Path, output_path: &Path) -> String {

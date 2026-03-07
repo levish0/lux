@@ -21,9 +21,23 @@ pub struct ParseResult<'a> {
     pub warnings: Vec<ParseWarning>,
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ParseOptions {
+    pub ts: bool,
+    pub loose: bool,
+}
+
 pub fn parse<'a>(template: &'a str, allocator: &'a Allocator, ts: bool) -> ParseResult<'a> {
-    let effective_ts = ts || detect_typescript_lang(template);
-    let state = ParserState::new(allocator, template, effective_ts);
+    parse_with_options(template, allocator, ParseOptions { ts, loose: false })
+}
+
+pub fn parse_with_options<'a>(
+    template: &'a str,
+    allocator: &'a Allocator,
+    options: ParseOptions,
+) -> ParseResult<'a> {
+    let effective_ts = options.ts || detect_typescript_lang(template);
+    let state = ParserState::new(allocator, template, effective_ts, options.loose);
     let mut input = Stateful {
         input: LocatingSlice::new(template),
         state,

@@ -24,6 +24,7 @@ phf = { workspace = true }
 rustc-hash = {workspace = true}
 
 [dev-dependencies]
+lux-test-support = { workspace = true }
 serde_json = { workspace = true }
 criterion = { workspace = true }
 

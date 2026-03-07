@@ -8,7 +8,7 @@ use winnow::stream::Location as StreamLocation;
 use winnow::token::literal;
 
 use crate::input::Input;
-use crate::parser::read::expression::read_expression;
+use crate::parser::read::expression::read_await_expression;
 use crate::parser::state::fragment::parse_block_fragment;
 use crate::parser::utils::helpers::{
     at_block_continuation, eat_block_close, eat_block_continuation, require_whitespace,
@@ -25,7 +25,7 @@ pub fn parse_await_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Frag
     literal("await").parse_next(input)?;
     require_whitespace(input)?;
 
-    let expression = read_expression(input)?;
+    let expression = read_await_expression(input)?;
     skip_whitespace(input);
 
     let mut value = None;

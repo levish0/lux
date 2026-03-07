@@ -15,11 +15,17 @@ use rustc_hash::FxHashSet;
 #[derive(Default, Clone)]
 pub(crate) struct RuntimeScope {
     local_bindings: FxHashSet<String>,
+    css_scope: Option<String>,
+    store_subscriptions: bool,
 }
 
 impl RuntimeScope {
     pub(super) fn contains(&self, name: &str) -> bool {
         self.local_bindings.contains(name)
+    }
+
+    pub(super) fn css_scope(&self) -> Option<&str> {
+        self.css_scope.as_deref()
     }
 
     pub(crate) fn from_names<I, S>(names: I) -> Self
@@ -45,6 +51,18 @@ impl RuntimeScope {
         next.local_bindings.insert(name.to_string());
         next
     }
+
+    pub(crate) fn with_css_scope(&self, css_scope: Option<&str>) -> Self {
+        let mut next = self.clone();
+        next.css_scope = css_scope.map(ToOwned::to_owned);
+        next
+    }
+
+    pub(crate) fn with_store_subscriptions(&self, enabled: bool) -> Self {
+        let mut next = self.clone();
+        next.store_subscriptions = enabled;
+        next
+    }
 }
 
 pub(super) fn resolve_expression<'a>(
@@ -53,6 +71,11 @@ pub(super) fn resolve_expression<'a>(
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let expression = strip_typescript_expression(ast, expression);
+    let expression = if scope.store_subscriptions {
+        rewrite_store_subscriptions(ast, expression, scope)
+    } else {
+        expression
+    };
     let mut collector = IdentifierCollector::default();
     collector.visit_expression(&expression);
 
@@ -126,6 +149,16 @@ pub(super) fn resolve_expression<'a>(
     )
 }
 
+fn rewrite_store_subscriptions<'a>(
+    ast: AstBuilder<'a>,
+    mut expression: Expression<'a>,
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    let mut rewriter = StoreSubscriptionRewriter { ast, scope };
+    rewriter.visit_expression(&mut expression);
+    expression
+}
+
 #[derive(Default)]
 struct IdentifierCollector<'a> {
     names: FxHashSet<&'a str>,
@@ -177,6 +210,8 @@ fn is_runtime_global(name: &str) -> bool {
     matches!(
         name,
         "_props"
+            | "__lux_store_get"
+            | "__lux_store_values"
             | "undefined"
             | "Infinity"
             | "NaN"
@@ -247,6 +282,49 @@ fn strip_typescript_expression_wrapper<'a>(
 
 struct TypeScriptExpressionStripper<'a> {
     ast: AstBuilder<'a>,
+}
+
+struct StoreSubscriptionRewriter<'ast, 'scope> {
+    ast: AstBuilder<'ast>,
+    scope: &'scope RuntimeScope,
+}
+
+impl<'ast> VisitMut<'ast> for StoreSubscriptionRewriter<'ast, '_> {
+    fn visit_expression(&mut self, expression: &mut Expression<'ast>) {
+        walk_mut::walk_expression(self, expression);
+
+        let Expression::Identifier(identifier) = expression else {
+            return;
+        };
+        let name = identifier.name.as_str();
+        if !name.starts_with('$') || name.starts_with("$$") || name.len() < 2 {
+            return;
+        }
+
+        let store_name = &name[1..];
+        if !self.scope.contains(store_name) {
+            return;
+        }
+
+        *expression = self.ast.expression_call(
+            SPAN,
+            self.ast
+                .expression_identifier(SPAN, self.ast.ident("__lux_store_get")),
+            NONE,
+            self.ast.vec_from_array([
+                self.ast
+                    .expression_identifier(SPAN, self.ast.ident("__lux_store_values"))
+                    .into(),
+                self.ast
+                    .expression_string_literal(SPAN, self.ast.atom(name), None)
+                    .into(),
+                self.ast
+                    .expression_identifier(SPAN, self.ast.ident(store_name))
+                    .into(),
+            ]),
+            false,
+        );
+    }
 }
 
 impl<'a> VisitMut<'a> for TypeScriptExpressionStripper<'a> {

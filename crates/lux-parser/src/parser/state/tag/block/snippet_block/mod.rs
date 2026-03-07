@@ -8,6 +8,7 @@ use winnow::stream::Location as StreamLocation;
 use winnow::token::{literal, take_while};
 
 use crate::input::Input;
+use crate::parser::read::expression::empty_identifier_reference;
 use crate::parser::state::fragment::parse_block_fragment;
 use crate::parser::utils::helpers::{eat_block_close, require_whitespace, skip_whitespace};
 
@@ -67,10 +68,18 @@ pub fn parse_snippet_block<'a>(input: &mut Input<'a>, start: usize) -> Result<Fr
 
 fn parse_snippet_name<'a>(input: &mut Input<'a>) -> Result<oxc_ast::ast::IdentifierReference<'a>> {
     let name_start = input.current_token_start();
-    let name: &str = take_while(1.., |c: char| {
+    let name: Result<&str, winnow::error::ContextError> = take_while(1.., |c: char| {
         c.is_ascii_alphanumeric() || c == '_' || c == '$'
     })
-    .parse_next(input)?;
+    .parse_next(input);
+
+    let Ok(name) = name else {
+        if input.state.loose {
+            let pos = name_start as u32;
+            return Ok(empty_identifier_reference(input.state.allocator, pos, pos));
+        }
+        return Err(winnow::error::ContextError::new());
+    };
     let name_end = input.previous_token_end();
 
     Ok(oxc_ast::ast::IdentifierReference {

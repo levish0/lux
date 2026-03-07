@@ -173,8 +173,13 @@ fn compile_internal(source: &str, options: Option<&CompileOptions>) -> CompileOu
         }
     };
 
-    let transform =
-        lux_transformer::transform_for_target(&parse_result.root, &analysis, transform_target);
+    let source_filename = options.and_then(|o| o.filename.as_deref());
+    let transform = lux_transformer::transform_for_target_with_filename(
+        &parse_result.root,
+        &analysis,
+        transform_target,
+        source_filename,
+    );
     let runtime_modules = transform
         .runtime_modules
         .into_iter()
@@ -183,7 +188,6 @@ fn compile_internal(source: &str, options: Option<&CompileOptions>) -> CompileOu
             code: module.code,
         })
         .collect::<Vec<_>>();
-    let source_filename = options.and_then(|o| o.filename.as_deref());
     let js_map = Some(build_placeholder_sourcemap_json(
         source,
         source_filename,

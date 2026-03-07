@@ -7,7 +7,7 @@ use winnow::stream::Location as StreamLocation;
 use winnow::token::{any, literal};
 
 use crate::input::Input;
-use crate::parser::read::expression::read_expression;
+use crate::parser::read::expression::read_expression_until;
 use crate::parser::utils::helpers::skip_whitespace;
 
 use super::text_node::flush_text_node;
@@ -37,7 +37,7 @@ pub(in crate::parser::state::element::element_body) fn read_textarea_content<'a>
             let expr_start = input.current_token_start();
             literal("{").parse_next(input)?;
             skip_whitespace(input);
-            let expression = read_expression(input)?;
+            let expression = read_expression_until(input, b"")?;
             skip_whitespace(input);
             literal("}").parse_next(input)?;
             let expr_end = input.previous_token_end();
@@ -58,8 +58,8 @@ pub(in crate::parser::state::element::element_body) fn read_textarea_content<'a>
 }
 
 fn starts_with_case_insensitive_textarea_close(remaining: &str) -> bool {
-    remaining.len() >= 11
+    remaining.len() >= 10
         && remaining.as_bytes()[0] == b'<'
         && remaining.as_bytes()[1] == b'/'
-        && remaining[..11].eq_ignore_ascii_case("</textarea")
+        && remaining[..10].eq_ignore_ascii_case("</textarea")
 }

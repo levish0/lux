@@ -1,6 +1,6 @@
 use lux_ast::template::attribute::{Attribute, AttributeNode, AttributeValue};
 use lux_ast::template::directive::{
-    AnimateDirective, ClassDirective, EventModifier, OnDirective, StyleDirective,
+    AnimateDirective, BindDirective, ClassDirective, EventModifier, OnDirective, StyleDirective,
     StyleDirectiveValue, StyleModifier, TransitionDirective, UseDirective,
 };
 use lux_ast::template::tag::TextOrExpressionTag;
@@ -16,7 +16,8 @@ use oxc_ast::{
 use oxc_span::SPAN;
 
 use super::expr::{
-    escape_attr_expression, join_chunks_expression, string_expr, stringify_expression,
+    call_static_method, escape_attr_expression, join_chunks_expression, string_expr,
+    stringify_expression,
 };
 use super::scope::{RuntimeScope, is_valid_js_identifier, resolve_expression};
 
@@ -101,9 +102,10 @@ pub(super) fn render_attribute_expression<'a>(
 
 pub(super) fn render_element_attribute_chunks<'a>(
     ast: AstBuilder<'a>,
-    attributes: &[AttributeNode<'_>],
+    attributes: &[AttributeNode<'a>],
     scope: &RuntimeScope,
     element_name: Option<&str>,
+    scope_class: Option<&str>,
 ) -> oxc_allocator::Vec<'a, Expression<'a>> {
     let mut class_attributes: Vec<&Attribute<'_>> = Vec::new();
     let mut class_directives: Vec<&ClassDirective<'_>> = Vec::new();
@@ -112,6 +114,12 @@ pub(super) fn render_element_attribute_chunks<'a>(
     let mut spread_count = 0usize;
 
     for attribute in attributes {
+        if element_name == Some("textarea") && is_textarea_value_binding(attribute) {
+            continue;
+        }
+        if element_name == Some("select") && is_select_value_attribute(attribute) {
+            continue;
+        }
         match attribute {
             AttributeNode::Attribute(attribute) if attribute.name == "class" => {
                 class_attributes.push(attribute);
@@ -133,10 +141,11 @@ pub(super) fn render_element_attribute_chunks<'a>(
         && (!class_attributes.is_empty()
             || !class_directives.is_empty()
             || !style_attributes.is_empty()
-            || !style_directives.is_empty());
+            || !style_directives.is_empty()
+            || scope_class.is_some());
     let can_merge_class = !can_merge_into_spread
         && !has_spread
-        && !class_directives.is_empty()
+        && (scope_class.is_some() || !class_directives.is_empty())
         && class_attributes.len() <= 1;
     let can_merge_style = !can_merge_into_spread
         && !has_spread
@@ -146,6 +155,13 @@ pub(super) fn render_element_attribute_chunks<'a>(
     let mut chunks = ast.vec_with_capacity(attributes.len() + 2);
     let mut emitted_merged_spread = false;
     for attribute in attributes {
+        if element_name == Some("textarea") && is_textarea_value_binding(attribute) {
+            continue;
+        }
+        if element_name == Some("select") && is_select_value_attribute(attribute) {
+            continue;
+        }
+
         if can_merge_into_spread {
             match attribute {
                 AttributeNode::SpreadAttribute(spread) => {
@@ -162,6 +178,7 @@ pub(super) fn render_element_attribute_chunks<'a>(
                             style_attributes.first().copied(),
                             &style_directives,
                             scope,
+                            scope_class,
                         ));
                         emitted_merged_spread = true;
                     }
@@ -191,6 +208,18 @@ pub(super) fn render_element_attribute_chunks<'a>(
                 _ => {}
             }
         }
+
+        if let AttributeNode::BindDirective(directive) = attribute {
+            chunks.push(render_bind_directive_for_element_expression(
+                ast,
+                directive,
+                attributes,
+                scope,
+                element_name,
+            ));
+            continue;
+        }
+
         chunks.push(render_attribute_expression(
             ast,
             attribute,
@@ -205,6 +234,7 @@ pub(super) fn render_element_attribute_chunks<'a>(
             class_attributes.first().copied(),
             &class_directives,
             scope,
+            scope_class,
         ));
     }
     if can_merge_style {
@@ -266,16 +296,25 @@ fn render_merged_class_attribute_expression<'a>(
     class_attribute: Option<&Attribute<'_>>,
     class_directives: &[&ClassDirective<'_>],
     scope: &RuntimeScope,
+    scope_class: Option<&str>,
 ) -> Expression<'a> {
     let base_class = class_attribute.map_or_else(
         || ast.expression_null_literal(SPAN),
         |attribute| attribute_value_expression(ast, &attribute.value, scope),
     );
 
-    let mut toggles = ast.vec_with_capacity(class_directives.len());
+    let mut toggles =
+        ast.vec_with_capacity(class_directives.len() + usize::from(scope_class.is_some()));
     for directive in class_directives {
         let value = resolve_expression(ast, directive.expression.clone_in(ast.allocator), scope);
         toggles.push(object_init_property(ast, directive.name, value));
+    }
+    if let Some(scope_class) = scope_class {
+        toggles.push(object_init_property(
+            ast,
+            scope_class,
+            ast.expression_boolean_literal(SPAN, true),
+        ));
     }
 
     let merged = ast.expression_call(
@@ -491,11 +530,12 @@ fn render_merged_spread_attribute_expression<'a>(
     style_attribute: Option<&Attribute<'_>>,
     style_directives: &[&StyleDirective<'_>],
     scope: &RuntimeScope,
+    scope_class: Option<&str>,
 ) -> Expression<'a> {
-    let class_toggles = if class_directives.is_empty() {
+    let class_toggles = if class_directives.is_empty() && scope_class.is_none() {
         ast.expression_null_literal(SPAN)
     } else {
-        build_class_directive_object_expression(ast, class_directives, scope)
+        build_class_directive_object_expression(ast, class_directives, scope, scope_class)
     };
     let style_values = if style_directives.is_empty() {
         ast.expression_null_literal(SPAN)
@@ -530,11 +570,20 @@ fn build_class_directive_object_expression<'a>(
     ast: AstBuilder<'a>,
     class_directives: &[&ClassDirective<'_>],
     scope: &RuntimeScope,
+    scope_class: Option<&str>,
 ) -> Expression<'a> {
-    let mut toggles = ast.vec_with_capacity(class_directives.len());
+    let mut toggles =
+        ast.vec_with_capacity(class_directives.len() + usize::from(scope_class.is_some()));
     for directive in class_directives {
         let value = resolve_expression(ast, directive.expression.clone_in(ast.allocator), scope);
         toggles.push(object_init_property(ast, directive.name, value));
+    }
+    if let Some(scope_class) = scope_class {
+        toggles.push(object_init_property(
+            ast,
+            scope_class,
+            ast.expression_boolean_literal(SPAN, true),
+        ));
     }
     ast.expression_object(SPAN, toggles)
 }
@@ -587,13 +636,108 @@ fn render_bind_directive_attribute_expression<'a>(
         false,
     );
 
-    if !bind_name_emits_html_attribute(bind_name.as_str(), element_name) {
+    if !bind_name_emits_html_attribute(bind_name.as_str(), element_name, &[]) {
         return bind_marker;
     }
 
     let rendered_attr =
         render_named_expression_attribute(ast, bind_name.as_str(), getter_expression);
     join_chunks_expression(ast, ast.vec_from_array([rendered_attr, bind_marker]))
+}
+
+fn render_bind_directive_for_element_expression<'a>(
+    ast: AstBuilder<'a>,
+    directive: &BindDirective<'a>,
+    attributes: &[AttributeNode<'a>],
+    scope: &RuntimeScope,
+    element_name: Option<&str>,
+) -> Expression<'a> {
+    if directive.name == "group" {
+        return render_group_bind_directive_attribute_expression(ast, directive, attributes, scope);
+    }
+
+    let bind_marker = render_bind_marker_expression(
+        ast,
+        directive.name.to_string(),
+        directive.expression.clone_in(ast.allocator),
+        scope,
+    );
+
+    if !bind_name_emits_html_attribute(directive.name, element_name, attributes) {
+        return bind_marker;
+    }
+
+    let (getter_expression, _) = resolve_bind_getter_setter_expression(ast, &directive.expression, scope);
+    let rendered_attr = render_named_expression_attribute(ast, directive.name, getter_expression);
+    join_chunks_expression(ast, ast.vec_from_array([rendered_attr, bind_marker]))
+}
+
+fn render_group_bind_directive_attribute_expression<'a>(
+    ast: AstBuilder<'a>,
+    directive: &BindDirective<'a>,
+    attributes: &[AttributeNode<'a>],
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    let bind_marker = render_bind_directive_attribute_expression(
+        ast,
+        directive.name.to_string(),
+        directive.expression.clone_in(ast.allocator),
+        scope,
+        Some("input"),
+    );
+
+    if matches!(
+        strip_typescript_wrappers(&directive.expression),
+        Expression::SequenceExpression(_)
+    ) {
+        return bind_marker;
+    }
+
+    let Some(value_attribute) = find_named_attribute(attributes, "value") else {
+        return bind_marker;
+    };
+
+    let (getter_expression, _) = resolve_bind_getter_setter_expression(ast, &directive.expression, scope);
+    let value_expression = attribute_value_expression(ast, &value_attribute.value, scope);
+    let checked_expression = if is_checkbox_input(attributes) {
+        call_static_method(
+            ast,
+            getter_expression.clone_in(ast.allocator),
+            "includes",
+            ast.vec1(value_expression.into()),
+        )
+    } else {
+        ast.expression_binary(
+            SPAN,
+            getter_expression.clone_in(ast.allocator),
+            BinaryOperator::StrictEquality,
+            value_expression,
+        )
+    };
+
+    let checked_attr = render_named_expression_attribute(ast, "checked", checked_expression);
+    join_chunks_expression(ast, ast.vec_from_array([checked_attr, bind_marker]))
+}
+
+fn render_bind_marker_expression<'a>(
+    ast: AstBuilder<'a>,
+    bind_name: String,
+    bind_expression: Expression<'a>,
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    let (getter_expression, setter_expression) =
+        resolve_bind_getter_setter_expression(ast, &bind_expression, scope);
+    ast.expression_call(
+        SPAN,
+        ast.expression_identifier(SPAN, ast.ident("__lux_bind_attr")),
+        NONE,
+        ast.vec_from_array([
+            string_expr(ast, bind_name.as_str()).into(),
+            getter_expression.into(),
+            setter_expression.into(),
+        ]),
+        false,
+    )
 }
 
 fn resolve_bind_getter_setter_expression<'a>(
@@ -620,9 +764,16 @@ fn resolve_bind_getter_setter_expression<'a>(
     )
 }
 
-fn bind_name_emits_html_attribute(bind_name: &str, element_name: Option<&str>) -> bool {
+fn bind_name_emits_html_attribute(
+    bind_name: &str,
+    element_name: Option<&str>,
+    attributes: &[AttributeNode<'_>],
+) -> bool {
     match bind_name {
-        "value" => !matches!(element_name, Some("select")),
+        "value" => {
+            !matches!(element_name, Some("select"))
+                && !(matches!(element_name, Some("input")) && is_file_input(attributes))
+        }
         "checked" => true,
         "open" => true,
         _ => false,
@@ -1104,4 +1255,52 @@ fn is_falsy_attribute_value_expression<'a>(
 
 fn is_event_attribute_name(name: &str) -> bool {
     name.len() > 2 && name.starts_with("on")
+}
+
+fn find_named_attribute<'a>(
+    attributes: &'a [AttributeNode<'a>],
+    name: &str,
+) -> Option<&'a Attribute<'a>> {
+    attributes.iter().find_map(|attribute| match attribute {
+        AttributeNode::Attribute(attribute) if attribute.name == name => Some(attribute),
+        _ => None,
+    })
+}
+
+fn is_checkbox_input(attributes: &[AttributeNode<'_>]) -> bool {
+    has_static_input_type(attributes, "checkbox")
+}
+
+fn is_file_input(attributes: &[AttributeNode<'_>]) -> bool {
+    has_static_input_type(attributes, "file")
+}
+
+fn has_static_input_type(attributes: &[AttributeNode<'_>], expected: &str) -> bool {
+    let Some(attribute) = find_named_attribute(attributes, "type") else {
+        return false;
+    };
+
+    match &attribute.value {
+        AttributeValue::Sequence(chunks) if chunks.len() == 1 => matches!(
+            &chunks[0],
+            TextOrExpressionTag::Text(text) if text.raw.eq_ignore_ascii_case(expected)
+        ),
+        _ => false,
+    }
+}
+
+fn is_textarea_value_binding(attribute: &AttributeNode<'_>) -> bool {
+    match attribute {
+        AttributeNode::Attribute(attribute) => attribute.name == "value",
+        AttributeNode::BindDirective(attribute) => attribute.name == "value",
+        _ => false,
+    }
+}
+
+fn is_select_value_attribute(attribute: &AttributeNode<'_>) -> bool {
+    match attribute {
+        AttributeNode::Attribute(attribute) => attribute.name == "value",
+        AttributeNode::BindDirective(attribute) => attribute.name == "value",
+        _ => false,
+    }
 }

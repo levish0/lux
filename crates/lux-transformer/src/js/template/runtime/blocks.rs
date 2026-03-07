@@ -18,7 +18,7 @@ use super::scope::{RuntimeScope, resolve_expression};
 
 pub(super) fn render_if_block_expression<'a>(
     ast: AstBuilder<'a>,
-    block: &IfBlock<'_>,
+    block: &'a IfBlock<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let test = resolve_expression(ast, block.test.clone_in(ast.allocator), scope);
@@ -33,7 +33,7 @@ pub(super) fn render_if_block_expression<'a>(
 
 pub(super) fn render_each_block_expression<'a>(
     ast: AstBuilder<'a>,
-    block: &EachBlock<'_>,
+    block: &'a EachBlock<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let source = resolve_expression(ast, block.expression.clone_in(ast.allocator), scope);
@@ -144,7 +144,7 @@ pub(super) fn render_each_block_expression<'a>(
 
 pub(super) fn render_await_block_expression<'a>(
     ast: AstBuilder<'a>,
-    block: &AwaitBlock<'_>,
+    block: &'a AwaitBlock<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let awaited_expression =
@@ -224,12 +224,12 @@ pub(super) fn render_await_block_expression<'a>(
 
 pub(super) fn render_snippet_block_declaration<'a>(
     ast: AstBuilder<'a>,
-    block: &SnippetBlock<'_>,
+    block: &'a SnippetBlock<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let name = block.expression.name.as_str();
 
-    let mut snippet_scope = scope.with_name(name);
+    let mut snippet_scope = scope.clone();
     for parameter in &block.parameters {
         snippet_scope = snippet_scope.with_binding_pattern(parameter);
     }

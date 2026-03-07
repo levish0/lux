@@ -8,16 +8,15 @@ use crate::TransformTarget;
 
 pub(super) struct ComponentRenderOutput {
     pub(super) js: String,
-    pub(super) needs_runtime: bool,
+    pub(super) needs_runtime_import: bool,
 }
 
 pub(super) fn render_component(
     root: &Root<'_>,
     analysis: &AnalysisTables,
-    css: Option<&str>,
     css_hash: Option<&str>,
     css_scope: Option<&str>,
     target: TransformTarget,
 ) -> ComponentRenderOutput {
-    component::render(root, analysis, css, css_hash, css_scope, target)
+    component::render(root, analysis, css_hash, css_scope, target)
 }

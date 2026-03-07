@@ -475,6 +475,7 @@ dependencies = [
  "lux-ast",
  "lux-metadata",
  "lux-parser",
+ "lux-test-support",
  "lux-utils",
  "oxc_allocator",
  "oxc_ast",
@@ -524,6 +525,7 @@ version = "0.1.0"
 dependencies = [
  "criterion",
  "lux-ast",
+ "lux-test-support",
  "lux-utils",
  "oxc_allocator",
  "oxc_ast",
@@ -540,6 +542,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "lux-test-support"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
 name = "lux-transformer"
 version = "0.1.0"
 dependencies = [
@@ -547,6 +556,7 @@ dependencies = [
  "lux-analyzer",
  "lux-ast",
  "lux-parser",
+ "lux-test-support",
  "lux-utils",
  "oxc_allocator",
  "oxc_ast",

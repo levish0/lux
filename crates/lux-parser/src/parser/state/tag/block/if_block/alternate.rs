@@ -7,7 +7,7 @@ use winnow::stream::Location as StreamLocation;
 use winnow::token::literal;
 
 use crate::input::Input;
-use crate::parser::read::expression::read_expression;
+use crate::parser::read::expression::read_expression_until;
 use crate::parser::state::fragment::parse_block_fragment;
 use crate::parser::utils::helpers::{
     at_block_continuation, eat_block_continuation, require_whitespace, skip_whitespace,
@@ -51,7 +51,7 @@ fn parse_else_if<'a>(input: &mut Input<'a>, elseif_start: usize) -> Result<Optio
     literal("if").parse_next(input)?;
     require_whitespace(input)?;
 
-    let test = read_expression(input)?;
+    let test = read_expression_until(input, b"")?;
     skip_whitespace(input);
     literal("}").parse_next(input)?;
 

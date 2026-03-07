@@ -1,3 +1,4 @@
+import { getAllContexts } from "svelte";
 import { render as svelteRender } from "svelte/server";
 
 const BOOLEAN_ATTRIBUTE_NAMES = new Set([
@@ -30,7 +31,12 @@ const BOOLEAN_ATTRIBUTE_NAMES = new Set([
   "selected",
   "webkitdirectory"
 ]);
+const INVALID_ATTR_NAME_CHAR_REGEX =
+  /[\s'">/=\u{FDD0}-\u{FDEF}\u{FFFE}\u{FFFF}\u{1FFFE}\u{1FFFF}\u{2FFFE}\u{2FFFF}\u{3FFFE}\u{3FFFF}\u{4FFFE}\u{4FFFF}\u{5FFFE}\u{5FFFF}\u{6FFFE}\u{6FFFF}\u{7FFFE}\u{7FFFF}\u{8FFFE}\u{8FFFF}\u{9FFFE}\u{9FFFF}\u{AFFFE}\u{AFFFF}\u{BFFFE}\u{BFFFF}\u{CFFFE}\u{CFFFF}\u{DFFFE}\u{DFFFF}\u{EFFFE}\u{EFFFF}\u{FFFFE}\u{FFFFF}\u{10FFFE}\u{10FFFF}]/u;
 let props_id_counter = 0;
+const TITLE_REGEX = /<title(?:\s[^>]*)?>[\s\S]*?<\/title>/gi;
+const VOID_TAG_NAME_REGEX =
+  /<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\b([^>]*)>/gi;
 
 export function stringify(value) {
   if (typeof value === "string") return value;
@@ -39,20 +45,17 @@ export function stringify(value) {
 }
 
 export function escape(value) {
-  return stringify(value).replace(/[&<>]/g, (ch) => {
+  return stringify(value).replace(/[&<]/g, (ch) => {
     if (ch === "&") return "&amp;";
-    if (ch === "<") return "&lt;";
-    return "&gt;";
+    return "&lt;";
   });
 }
 
 export function escape_attr(value) {
-  return stringify(value).replace(/[&<>"']/g, (ch) => {
+  return stringify(value).replace(/[&<"]/g, (ch) => {
     if (ch === "&") return "&amp;";
     if (ch === "<") return "&lt;";
-    if (ch === ">") return "&gt;";
-    if (ch === "\"") return "&quot;";
-    return "&#39;";
+    return "&quot;";
   });
 }
 
@@ -153,7 +156,8 @@ export function attributes(
         typeof value === "function" ||
         normalized_key === "class" ||
         normalized_key === "style" ||
-        normalized_key.startsWith("$$")
+        normalized_key.startsWith("$$") ||
+        INVALID_ATTR_NAME_CHAR_REGEX.test(normalized_key)
       ) {
         return "";
       }
@@ -167,8 +171,96 @@ export function attributes(
 }
 
 export function props_id() {
+  const renderer = arguments[0];
+  if (
+    renderer &&
+    renderer.global &&
+    typeof renderer.global.uid === "function" &&
+    typeof renderer.push === "function"
+  ) {
+    const uid = renderer.global.uid();
+    renderer.push("<!--$" + uid + "-->");
+    return uid;
+  }
+
   props_id_counter += 1;
-  return "lux-" + props_id_counter.toString(36);
+  return "s" + props_id_counter.toString(36);
+}
+
+export function rest_props(props, exclude = []) {
+  const source = props ?? {};
+  const exclusions = new Set([
+    "__lux_self",
+    "$$slots",
+    "$$events",
+    "children",
+    ...exclude.map((value) => stringify(value))
+  ]);
+  const result = {};
+  for (const [key, value] of Object.entries(source)) {
+    if (!exclusions.has(key)) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+export function finalize_head(value) {
+  const html = stringify(value);
+  if (!html) {
+    return "";
+  }
+
+  let last_title = "";
+  const without_titles = html.replace(TITLE_REGEX, (match) => {
+    last_title = match;
+    return "";
+  });
+  const compact = self_close_void_tags(
+    without_titles.replace(/>\s+</g, "> <").trim()
+  );
+
+  return last_title ? compact + last_title : compact;
+}
+
+export function store_get(store_values, store_name, store) {
+  if (
+    store_values &&
+    store_name in store_values &&
+    store_values[store_name][0] === store
+  ) {
+    return store_values[store_name][2];
+  }
+
+  store_values?.[store_name]?.[1]?.();
+
+  let value;
+  let unsubscribe = () => {};
+  if (store && typeof store.subscribe === "function") {
+    const result = store.subscribe((next) => {
+      value = next;
+    });
+    unsubscribe =
+      typeof result === "function"
+        ? result
+        : typeof result?.unsubscribe === "function"
+        ? result.unsubscribe.bind(result)
+        : () => {};
+  }
+
+  if (store_values) {
+    store_values[store_name] = [store, unsubscribe, value];
+  }
+  return value;
+}
+
+export function unsubscribe_stores(store_values) {
+  if (!store_values) {
+    return;
+  }
+  for (const store_name in store_values) {
+    store_values[store_name]?.[1]?.();
+  }
 }
 
 export function begin_render() {
@@ -188,7 +280,12 @@ export function end_render(state) {
 
 export function render_component(component, props, render_state = null) {
   if (typeof component === "function") {
-    const result = svelteRender(component, { props: props ?? {} });
+    const options = { props: props ?? {} };
+    const context = current_render_context();
+    if (context) {
+      options.context = context;
+    }
+    const result = svelteRender(component, options);
     const body = result?.body ?? result?.html ?? "";
     if (render_state && result?.head) {
       render_state.head += result.head;
@@ -293,4 +390,22 @@ function strip_trailing_semicolon(text) {
     return trimmed;
   }
   return trimmed.slice(0, -1).trimEnd();
+}
+
+function self_close_void_tags(html) {
+  return html.replace(VOID_TAG_NAME_REGEX, (match, tag, attrs) => {
+    const trimmed_attrs = attrs ?? "";
+    if (trimmed_attrs.trimEnd().endsWith("/")) {
+      return match;
+    }
+    return `<${tag}${trimmed_attrs}/>`;
+  });
+}
+
+function current_render_context() {
+  try {
+    return new Map(getAllContexts());
+  } catch {
+    return null;
+  }
 }

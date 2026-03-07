@@ -60,7 +60,6 @@ fn escape_attribute_value(value: &str) -> String {
             '&' => escaped.push_str("&amp;"),
             '"' => escaped.push_str("&quot;"),
             '<' => escaped.push_str("&lt;"),
-            '>' => escaped.push_str("&gt;"),
             _ => escaped.push(ch),
         }
     }

@@ -15,6 +15,7 @@ pub(super) enum TopLevelStop<'a> {
     None,
     Expression(&'a [u8]),
     EachAs,
+    AwaitClause,
 }
 
 pub fn scan_expression_boundary(source: &str, extra_stops: &[u8]) -> Option<usize> {
@@ -33,6 +34,16 @@ pub fn scan_each_expression_boundary(source: &str) -> Option<usize> {
         0,
         None,
         TopLevelStop::EachAs,
+        EXPRESSION_NESTING_PAIRS,
+    )
+}
+
+pub fn scan_await_expression_boundary(source: &str) -> Option<usize> {
+    scan(
+        source,
+        0,
+        None,
+        TopLevelStop::AwaitClause,
         EXPRESSION_NESTING_PAIRS,
     )
 }

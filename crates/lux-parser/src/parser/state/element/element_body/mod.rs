@@ -22,7 +22,20 @@ pub fn parse_element_body<'a>(input: &mut Input<'a>, name: &str) -> Result<(Frag
 
     let self_closing = opt(literal("/>")).parse_next(input)?.is_some();
     if !self_closing {
-        literal(">").parse_next(input)?;
+        let has_open_close = opt(literal(">")).parse_next(input)?.is_some();
+        if !has_open_close {
+            if input.state.loose {
+                return Ok((
+                    Fragment {
+                        nodes: Vec::new(),
+                        transparent: true,
+                        dynamic: false,
+                    },
+                    input.current_token_start(),
+                ));
+            }
+            literal(">").parse_next(input)?;
+        }
     }
 
     let fragment = if self_closing || lux_utils::elements::is_void(name) {

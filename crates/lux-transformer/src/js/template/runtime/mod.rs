@@ -33,24 +33,25 @@ pub(crate) use self::scope::RuntimeScope;
 
 pub(super) fn build_render_nodes_expression<'a>(
     ast: AstBuilder<'a>,
-    nodes: &[&FragmentNode<'_>],
+    nodes: &[&'a FragmentNode<'a>],
     scope: &RuntimeScope,
 ) -> Expression<'a> {
-    render_fragment_nodes_expression(ast, nodes, scope)
+    let trimmed = trim_edge_whitespace_nodes(nodes);
+    render_fragment_nodes_expression(ast, &trimmed, scope)
 }
 
 fn render_fragment_expression<'a>(
     ast: AstBuilder<'a>,
-    fragment: &Fragment<'_>,
+    fragment: &'a Fragment<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
-    let nodes = fragment.nodes.iter().collect::<Vec<_>>();
+    let nodes = trim_edge_whitespace_nodes(&fragment.nodes.iter().collect::<Vec<_>>());
     render_fragment_nodes_expression(ast, &nodes, scope)
 }
 
 fn render_fragment_nodes_expression<'a>(
     ast: AstBuilder<'a>,
-    nodes: &[&FragmentNode<'_>],
+    nodes: &[&'a FragmentNode<'a>],
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let mut statements = ast.vec();
@@ -73,7 +74,27 @@ fn render_fragment_nodes_expression<'a>(
         .into(),
     );
 
+    let snippet_blocks = nodes
+        .iter()
+        .filter_map(|node| match node {
+            FragmentNode::SnippetBlock(block) => Some(block),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
     let mut current_scope = scope.clone();
+
+    for block in &snippet_blocks {
+        let rendered = render_snippet_block_declaration(ast, block, &current_scope);
+        statements.push(ast.statement_expression(
+            SPAN,
+            call_static_method(
+                ast,
+                chunks_ident.clone_in(ast.allocator),
+                "push",
+                ast.vec1(rendered.into()),
+            ),
+        ));
+    }
 
     for node in nodes {
         match node {
@@ -85,19 +106,7 @@ fn render_fragment_nodes_expression<'a>(
                 ));
                 current_scope = current_scope.with_binding_pattern(&tag.declaration.id);
             }
-            FragmentNode::SnippetBlock(block) => {
-                let rendered = render_snippet_block_declaration(ast, block, &current_scope);
-                statements.push(ast.statement_expression(
-                    SPAN,
-                    call_static_method(
-                        ast,
-                        chunks_ident.clone_in(ast.allocator),
-                        "push",
-                        ast.vec1(rendered.into()),
-                    ),
-                ));
-                current_scope = current_scope.with_name(block.expression.name.as_str());
-            }
+            FragmentNode::SnippetBlock(_) => {}
             _ => {
                 let rendered = render_node_expression(ast, node, &current_scope);
                 statements.push(ast.statement_expression(
@@ -123,9 +132,30 @@ fn render_fragment_nodes_expression<'a>(
     call_iife(ast, statements)
 }
 
+fn trim_edge_whitespace_nodes<'a>(nodes: &[&'a FragmentNode<'a>]) -> Vec<&'a FragmentNode<'a>> {
+    let start = nodes
+        .iter()
+        .position(|node| !is_whitespace_text_node(node))
+        .unwrap_or(nodes.len());
+    let end = nodes
+        .iter()
+        .rposition(|node| !is_whitespace_text_node(node))
+        .map(|index| index + 1)
+        .unwrap_or(start);
+
+    nodes[start..end].to_vec()
+}
+
+fn is_whitespace_text_node(node: &FragmentNode<'_>) -> bool {
+    match node {
+        FragmentNode::Text(text) => text.raw.trim().is_empty(),
+        _ => false,
+    }
+}
+
 fn render_node_expression<'a>(
     ast: AstBuilder<'a>,
-    node: &FragmentNode<'_>,
+    node: &'a FragmentNode<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     match node {
@@ -218,8 +248,8 @@ fn render_node_expression<'a>(
 fn render_global_target_node_expression<'a>(
     ast: AstBuilder<'a>,
     target_name: &str,
-    attributes: &[lux_ast::template::attribute::AttributeNode<'_>],
-    fragment: &Fragment<'_>,
+    attributes: &[lux_ast::template::attribute::AttributeNode<'a>],
+    fragment: &'a Fragment<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let mut statements = ast.vec_with_capacity(attributes.len() + 1);

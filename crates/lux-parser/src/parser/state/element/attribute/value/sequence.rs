@@ -6,7 +6,7 @@ use winnow::stream::Location as StreamLocation;
 use winnow::token::{any, literal};
 
 use crate::input::Input;
-use crate::parser::read::expression::read_expression;
+use crate::parser::read::expression::read_expression_until;
 use crate::parser::utils::helpers::skip_whitespace;
 
 use super::decode::decode_attr_text;
@@ -39,7 +39,7 @@ pub(super) fn read_sequence<'a>(
             let expr_start = input.current_token_start();
             literal("{").parse_next(input)?;
             skip_whitespace(input);
-            let expression = read_expression(input)?;
+            let expression = read_expression_until(input, b"")?;
             skip_whitespace(input);
             literal("}").parse_next(input)?;
             let expr_end = input.previous_token_end();

@@ -2,18 +2,19 @@ mod consts;
 mod exports;
 mod script;
 
-pub(crate) use self::consts::LUX_RENDER_COMPONENT;
+pub(crate) use self::consts::{LUX_RENDER_COMPONENT, LUX_REST_PROPS};
 
 use std::collections::BTreeSet;
 
 use lux_ast::analysis::{AnalysisTables, ScriptTarget};
 use lux_ast::template::attribute::AttributeNode;
+use lux_ast::template::root::CssOption;
 use lux_ast::template::root::FragmentNode;
 use lux_ast::template::root::Root;
 use oxc_allocator::Allocator;
 use oxc_allocator::CloneIn;
 use oxc_ast::AstBuilder;
-use oxc_ast::ast::{ImportDeclaration, ImportDeclarationSpecifier, Statement};
+use oxc_ast::ast::{BinaryOperator, ImportDeclaration, ImportDeclarationSpecifier, Statement};
 use oxc_codegen::Codegen;
 use oxc_parser::Parser;
 use oxc_span::{SPAN, SourceType};
@@ -33,40 +34,65 @@ use self::exports::{
 };
 use self::script::{
     collect_instance_runtime_statements, collect_module_runtime_statements,
-    collect_runtime_binding_names,
+    collect_runtime_binding_names, needs_rest_props_runtime, rewrite_server_store_subscriptions,
 };
 use super::ComponentRenderOutput;
-use super::template::{RuntimeScope, build_render_nodes_expression, render_nodes_template};
+use super::template::{
+    RuntimeScope, StaticRenderContext, build_render_nodes_expression, render_nodes_template,
+};
 use crate::TransformTarget;
+use crate::css;
 
 pub(super) fn render(
     root: &Root<'_>,
     analysis: &AnalysisTables,
-    css: Option<&str>,
     css_hash: Option<&str>,
     css_scope: Option<&str>,
     target: TransformTarget,
 ) -> ComponentRenderOutput {
     let partition = partition_top_level_nodes(&root.fragment.nodes);
-    let template_result = render_nodes_template(&partition.body_nodes);
-    let head_result = render_nodes_template(&partition.head_nodes);
+    let static_render_context = StaticRenderContext {
+        stylesheet: root.css.as_ref(),
+        analysis,
+        css_scope,
+    };
+    let embedded_css = root.css.as_ref().and_then(|stylesheet| {
+        css_scope.map(|scope| {
+            css::render_stylesheet_embedded(stylesheet, analysis, scope, &root.fragment)
+        })
+    });
+    let template_result = render_nodes_template(&partition.body_nodes, &static_render_context);
+    let head_result = render_nodes_template(&partition.head_nodes, &static_render_context);
+    let injected_css_head_html = injected_css_head_html(root, embedded_css.as_deref(), css_scope);
     let has_global_target_hooks = target == TransformTarget::Client
         && partition
             .body_nodes
             .iter()
             .any(|node| node_has_global_target_hooks(node));
-    let needs_runtime =
-        template_result.has_dynamic || head_result.has_dynamic || target == TransformTarget::Client;
+    let has_head = !partition.head_nodes.is_empty() || injected_css_head_html.is_some();
+    let needs_props_id_runtime = analysis
+        .script_runes
+        .iter()
+        .any(|rune| rune.target == ScriptTarget::Instance && rune.name == "$props.id");
+    let needs_runtime = template_result.has_dynamic
+        || head_result.has_dynamic
+        || needs_props_id_runtime
+        || target == TransformTarget::Client;
+    let needs_runtime_import =
+        needs_runtime || needs_rest_props_runtime(root) || (target == TransformTarget::Server && has_head);
 
     let allocator = Allocator::default();
     let ast = AstBuilder::new(&allocator);
 
     let mut body = ast.vec_with_capacity(16);
-    if needs_runtime {
+    if needs_runtime_import {
         push_runtime_helper_import(ast, &mut body, target);
     }
     push_import_declarations(ast, &mut body, root, analysis);
-    let module_runtime = collect_module_runtime_statements(ast, root);
+    let mut module_runtime = collect_module_runtime_statements(ast, root);
+    if target == TransformTarget::Server {
+        rewrite_server_store_subscriptions(ast, &mut module_runtime);
+    }
     let module_runtime_binding_names = collect_runtime_binding_names(&module_runtime);
     body.extend(module_runtime);
 
@@ -76,7 +102,12 @@ pub(super) fn render(
         LUX_TEMPLATE,
         ast.expression_string_literal(SPAN, ast.atom(template_result.html.as_str()), None),
     );
-    push_const(ast, &mut body, LUX_CSS, optional_string_expr(ast, css));
+    push_const(
+        ast,
+        &mut body,
+        LUX_CSS,
+        optional_string_expr(ast, embedded_css.as_deref()),
+    );
     push_const(
         ast,
         &mut body,
@@ -100,27 +131,46 @@ pub(super) fn render(
     );
 
     body.push(named_export_statement(ast));
-    let instance_runtime = collect_instance_runtime_statements(ast, root);
+    let mut instance_runtime = collect_instance_runtime_statements(ast, root);
+    if target == TransformTarget::Server {
+        rewrite_server_store_subscriptions(ast, &mut instance_runtime);
+    }
     let mut scope_names = collect_scope_import_names(analysis);
     scope_names.extend(module_runtime_binding_names);
     scope_names.extend(collect_runtime_binding_names(&instance_runtime));
-    let scope = RuntimeScope::from_names(scope_names);
+    let scope = RuntimeScope::from_names(scope_names)
+        .with_css_scope(css_scope)
+        .with_store_subscriptions(target == TransformTarget::Server);
     let render_expression = if template_result.has_dynamic || has_global_target_hooks {
         build_render_nodes_expression(ast, &partition.body_nodes, &scope)
     } else {
         ast.expression_identifier(SPAN, ast.ident(LUX_TEMPLATE))
     };
-    let has_head = !partition.head_nodes.is_empty();
     let head_expression = has_head.then(|| {
         if head_result.has_dynamic {
-            build_render_nodes_expression(ast, &partition.head_nodes, &scope)
+            let dynamic_head = build_render_nodes_expression(ast, &partition.head_nodes, &scope);
+            if let Some(css_head_html) = injected_css_head_html.as_deref() {
+                ast.expression_binary(
+                    SPAN,
+                    ast.expression_string_literal(SPAN, ast.atom(css_head_html), None),
+                    BinaryOperator::Addition,
+                    dynamic_head,
+                )
+            } else {
+                dynamic_head
+            }
         } else {
-            ast.expression_string_literal(SPAN, ast.atom(head_result.html.as_str()), None)
+            let head_html = match injected_css_head_html.as_deref() {
+                Some(css_head_html) => format!("{css_head_html}{}", head_result.html),
+                None => head_result.html.clone(),
+            };
+            ast.expression_string_literal(SPAN, ast.atom(head_html.as_str()), None)
         }
     });
     match target {
         TransformTarget::Server => body.extend(default_export_statements(
             ast,
+            needs_runtime,
             render_expression,
             instance_runtime,
             head_expression,
@@ -145,8 +195,22 @@ pub(super) fn render(
     );
     ComponentRenderOutput {
         js: Codegen::new().build(&program).code,
-        needs_runtime,
+        needs_runtime_import,
     }
+}
+
+fn injected_css_head_html(
+    root: &Root<'_>,
+    css: Option<&str>,
+    css_scope: Option<&str>,
+) -> Option<String> {
+    if root.options.as_ref().and_then(|options| options.css) != Some(CssOption::Injected) {
+        return None;
+    }
+
+    let css = css?;
+    let css_scope = css_scope?;
+    Some(format!("<style id=\"{css_scope}\">{css}</style>"))
 }
 
 struct TopLevelNodePartition<'a> {
@@ -407,6 +471,7 @@ fn collect_scope_import_names(analysis: &AnalysisTables) -> Vec<String> {
     names.insert(LUX_ATTRIBUTES.to_string());
     names.insert(LUX_IS_BOOLEAN_ATTR.to_string());
     names.insert(LUX_PROPS_ID.to_string());
+    names.insert(LUX_REST_PROPS.to_string());
     names.insert(LUX_MOUNT_HTML.to_string());
     names.insert(LUX_CLEANUP_MOUNT.to_string());
     names.insert(LUX_BEGIN_RENDER.to_string());

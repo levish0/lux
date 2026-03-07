@@ -68,9 +68,9 @@ pub(super) fn escape_attr_expression<'a>(
 
 pub(super) fn bind_pattern_value_expression<'a>(
     ast: AstBuilder<'a>,
-    pattern: Option<&BindingPattern<'_>>,
+    pattern: Option<&BindingPattern<'a>>,
     value_ident_name: &str,
-    fragment: &Fragment<'_>,
+    fragment: &'a Fragment<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let Some(pattern) = pattern else {

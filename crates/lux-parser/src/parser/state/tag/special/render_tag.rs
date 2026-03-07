@@ -7,7 +7,7 @@ use winnow::stream::Location as StreamLocation;
 use winnow::token::literal;
 
 use crate::input::Input;
-use crate::parser::read::expression::read_expression;
+use crate::parser::read::expression::read_expression_until;
 use crate::parser::utils::helpers::{require_whitespace, skip_whitespace};
 
 /// Parse `{@render snippet(...)}`.
@@ -16,7 +16,7 @@ pub fn parse_render_tag<'a>(input: &mut Input<'a>, start: usize) -> Result<Fragm
     literal("@render").parse_next(input)?;
     require_whitespace(input)?;
 
-    let expression = read_expression(input)?;
+    let expression = read_expression_until(input, b"")?;
     skip_whitespace(input);
     literal("}").parse_next(input)?;
 

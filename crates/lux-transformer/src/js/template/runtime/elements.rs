@@ -12,22 +12,34 @@ use oxc_span::SPAN;
 
 use super::attributes::render_element_attribute_chunks;
 use super::expr::{
-    call_iife, const_statement, join_chunks_expression, string_expr, stringify_expression,
+    call_iife, const_statement, escape_html_expression, join_chunks_expression, string_expr,
+    stringify_expression,
 };
-use super::render_fragment_expression;
+use super::{render_fragment_expression, render_fragment_nodes_expression, render_node_expression};
 use super::scope::{RuntimeScope, is_valid_js_identifier, resolve_expression};
 
 pub(super) fn render_regular_element_expression<'a>(
     ast: AstBuilder<'a>,
     name: &str,
-    attributes: &[AttributeNode<'_>],
-    children: &Fragment<'_>,
+    attributes: &[AttributeNode<'a>],
+    children: &'a Fragment<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
+    let textarea_value = if name == "textarea" {
+        find_textarea_value_expression(ast, attributes, scope)
+    } else {
+        None
+    };
+    let select_value_expression = if name == "select" {
+        find_select_value_expression(ast, attributes, scope)
+    } else {
+        None
+    };
     let mut chunks = ast.vec();
     chunks.push(string_expr(ast, &format!("<{name}")));
 
-    let rendered_attributes = render_element_attribute_chunks(ast, attributes, scope, Some(name));
+    let rendered_attributes =
+        render_element_attribute_chunks(ast, attributes, scope, Some(name), scope.css_scope());
     for attribute in rendered_attributes {
         chunks.push(attribute);
     }
@@ -41,11 +53,214 @@ pub(super) fn render_regular_element_expression<'a>(
 
     chunks.push(string_expr(ast, ">"));
     if !is_void(name) {
-        chunks.push(render_fragment_expression(ast, children, scope));
+        if let Some(value) = textarea_value {
+            chunks.push(escape_html_expression(ast, value));
+        } else if let Some(select_value_expression) = &select_value_expression {
+            chunks.push(render_select_children_expression(
+                ast,
+                children,
+                scope,
+                select_value_expression.clone_in(ast.allocator),
+            ));
+        } else {
+            chunks.push(render_child_fragment_expression(
+                ast, name, children, scope,
+            ));
+        }
         chunks.push(string_expr(ast, &format!("</{name}>")));
     }
 
     join_chunks_expression(ast, chunks)
+}
+
+fn find_textarea_value_expression<'a>(
+    ast: AstBuilder<'a>,
+    attributes: &[AttributeNode<'a>],
+    scope: &RuntimeScope,
+) -> Option<Expression<'a>> {
+    for attribute in attributes {
+        match attribute {
+            AttributeNode::Attribute(attribute) if attribute.name == "value" => {
+                return Some(attribute_value_expression(ast, &attribute.value, scope));
+            }
+            AttributeNode::BindDirective(directive) if directive.name == "value" => {
+                return Some(resolve_bind_getter_expression(
+                    ast,
+                    &directive.expression,
+                    scope,
+                ));
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+fn find_select_value_expression<'a>(
+    ast: AstBuilder<'a>,
+    attributes: &[AttributeNode<'a>],
+    scope: &RuntimeScope,
+) -> Option<Expression<'a>> {
+    for attribute in attributes {
+        match attribute {
+            AttributeNode::Attribute(attribute) if attribute.name == "value" => {
+                return Some(attribute_value_expression(ast, &attribute.value, scope));
+            }
+            AttributeNode::BindDirective(directive) if directive.name == "value" => {
+                return Some(resolve_bind_getter_expression(
+                    ast,
+                    &directive.expression,
+                    scope,
+                ));
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+fn render_select_children_expression<'a>(
+    ast: AstBuilder<'a>,
+    children: &'a Fragment<'a>,
+    scope: &RuntimeScope,
+    select_value_expression: Expression<'a>,
+) -> Expression<'a> {
+    let nodes = children
+        .nodes
+        .iter()
+        .filter(|node| !is_whitespace_text_node(node))
+        .collect::<Vec<_>>();
+    let mut chunks = ast.vec_with_capacity(nodes.len());
+    for node in nodes {
+        let rendered = match node {
+            lux_ast::template::root::FragmentNode::RegularElement(element)
+                if element.name == "option" =>
+            {
+                render_option_element_expression(
+                    ast,
+                    &element.attributes,
+                    &element.fragment,
+                    scope,
+                    select_value_expression.clone_in(ast.allocator),
+                )
+            }
+            _ => render_node_expression(ast, node, scope),
+        };
+        chunks.push(rendered);
+    }
+    join_chunks_expression(ast, chunks)
+}
+
+fn render_option_element_expression<'a>(
+    ast: AstBuilder<'a>,
+    attributes: &[AttributeNode<'a>],
+    children: &'a Fragment<'a>,
+    scope: &RuntimeScope,
+    select_value_expression: Expression<'a>,
+) -> Expression<'a> {
+    let mut chunks = ast.vec();
+    chunks.push(string_expr(ast, "<option"));
+
+    let rendered_attributes =
+        render_element_attribute_chunks(ast, attributes, scope, Some("option"), scope.css_scope());
+    for attribute in rendered_attributes {
+        chunks.push(attribute);
+    }
+
+    let option_value_expression = find_option_value_expression(ast, attributes, scope)
+        .unwrap_or_else(|| render_fragment_expression(ast, children, scope));
+    let selected_expression = ast.expression_binary(
+        SPAN,
+        option_value_expression,
+        BinaryOperator::StrictEquality,
+        select_value_expression,
+    );
+    chunks.push(ast.expression_conditional(
+        SPAN,
+        selected_expression,
+        string_expr(ast, " selected"),
+        string_expr(ast, ""),
+    ));
+
+    chunks.push(string_expr(ast, ">"));
+    chunks.push(render_fragment_expression(ast, children, scope));
+    chunks.push(string_expr(ast, "</option>"));
+    join_chunks_expression(ast, chunks)
+}
+
+fn find_option_value_expression<'a>(
+    ast: AstBuilder<'a>,
+    attributes: &[AttributeNode<'a>],
+    scope: &RuntimeScope,
+) -> Option<Expression<'a>> {
+    attributes.iter().find_map(|attribute| match attribute {
+        AttributeNode::Attribute(attribute) if attribute.name == "value" => {
+            Some(attribute_value_expression(ast, &attribute.value, scope))
+        }
+        _ => None,
+    })
+}
+
+fn attribute_value_expression<'a>(
+    ast: AstBuilder<'a>,
+    value: &AttributeValue<'a>,
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    match value {
+        AttributeValue::True => string_expr(ast, ""),
+        AttributeValue::ExpressionTag(tag) => {
+            resolve_expression(ast, tag.expression.clone_in(ast.allocator), scope)
+        }
+        AttributeValue::Sequence(chunks) => {
+            let mut parts = ast.vec_with_capacity(chunks.len());
+            for chunk in chunks {
+                let expression = match chunk {
+                    TextOrExpressionTag::Text(text) => string_expr(ast, text.raw),
+                    TextOrExpressionTag::ExpressionTag(tag) => stringify_expression(
+                        ast,
+                        resolve_expression(ast, tag.expression.clone_in(ast.allocator), scope),
+                    ),
+                };
+                parts.push(expression);
+            }
+            join_chunks_expression(ast, parts)
+        }
+    }
+}
+
+fn resolve_bind_getter_expression<'a>(
+    ast: AstBuilder<'a>,
+    expression: &Expression<'a>,
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    if let Expression::SequenceExpression(sequence) = expression {
+        if let (Some(getter), Some(_setter), None) = (
+            sequence.expressions.first(),
+            sequence.expressions.get(1),
+            sequence.expressions.get(2),
+        ) {
+            return resolve_expression(ast, getter.clone_in(ast.allocator), scope);
+        }
+    }
+    resolve_expression(ast, expression.clone_in(ast.allocator), scope)
+}
+
+fn render_child_fragment_expression<'a>(
+    ast: AstBuilder<'a>,
+    parent_name: &str,
+    children: &'a Fragment<'a>,
+    scope: &RuntimeScope,
+) -> Expression<'a> {
+    if parent_name != "select" {
+        return render_fragment_expression(ast, children, scope);
+    }
+
+    let nodes = children
+        .nodes
+        .iter()
+        .filter(|node| !is_whitespace_text_node(node))
+        .collect::<Vec<_>>();
+    render_fragment_nodes_expression(ast, &nodes, scope)
 }
 
 fn detect_load_error_captures(name: &str, attributes: &[AttributeNode<'_>]) -> (bool, bool) {
@@ -79,9 +294,13 @@ fn detect_load_error_captures(name: &str, attributes: &[AttributeNode<'_>]) -> (
     (onload, onerror)
 }
 
+fn is_whitespace_text_node(node: &lux_ast::template::root::FragmentNode<'_>) -> bool {
+    matches!(node, lux_ast::template::root::FragmentNode::Text(text) if text.raw.trim().is_empty())
+}
+
 pub(super) fn render_slot_element_expression<'a>(
     ast: AstBuilder<'a>,
-    element: &SlotElement<'_>,
+    element: &'a SlotElement<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let slot_name = slot_name_expression(ast, &element.attributes, scope);
@@ -175,7 +394,7 @@ pub(super) fn render_slot_element_expression<'a>(
 
 pub(super) fn render_svelte_element_expression<'a>(
     ast: AstBuilder<'a>,
-    element: &SvelteElement<'_>,
+    element: &'a SvelteElement<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let tag_expression = stringify_expression(
@@ -187,22 +406,108 @@ pub(super) fn render_svelte_element_expression<'a>(
     statements.push(const_statement(ast, "__lux_tag", tag_expression));
 
     let tag_ident = ast.expression_identifier(SPAN, ast.ident("__lux_tag"));
+    let is_void_ident = ast.expression_identifier(SPAN, ast.ident("__lux_is_void"));
+    let is_raw_text_ident = ast.expression_identifier(SPAN, ast.ident("__lux_is_raw_text"));
     let mut chunks = ast.vec();
-    chunks.push(string_expr(ast, "<"));
+    chunks.push(string_expr(ast, "<!----><"));
     chunks.push(tag_ident.clone_in(ast.allocator));
     let rendered_attributes =
-        render_element_attribute_chunks(ast, &element.attributes, scope, None);
+        render_element_attribute_chunks(ast, &element.attributes, scope, None, scope.css_scope());
     for attribute in rendered_attributes {
         chunks.push(attribute);
     }
     chunks.push(string_expr(ast, ">"));
-    chunks.push(render_fragment_expression(ast, &element.fragment, scope));
-    chunks.push(string_expr(ast, "</"));
-    chunks.push(tag_ident);
-    chunks.push(string_expr(ast, ">"));
 
+    let children_and_close = join_chunks_expression(
+        ast,
+        ast.vec_from_array([
+            render_fragment_expression(ast, &element.fragment, scope),
+            ast.expression_conditional(
+                SPAN,
+                is_raw_text_ident.clone_in(ast.allocator),
+                string_expr(ast, ""),
+                string_expr(ast, "<!---->"),
+            ),
+            string_expr(ast, "</"),
+            tag_ident.clone_in(ast.allocator),
+            string_expr(ast, ">"),
+        ]),
+    );
+    chunks.push(ast.expression_conditional(
+        SPAN,
+        is_void_ident.clone_in(ast.allocator),
+        string_expr(ast, ""),
+        children_and_close,
+    ));
+    chunks.push(string_expr(ast, "<!---->"));
+
+    statements.push(const_statement(
+        ast,
+        "__lux_is_void",
+        build_tag_name_match_expression(ast, tag_ident.clone_in(ast.allocator), VOID_ELEMENT_NAMES),
+    ));
+    statements.push(const_statement(
+        ast,
+        "__lux_is_raw_text",
+        build_tag_name_match_expression(
+            ast,
+            tag_ident.clone_in(ast.allocator),
+            RAW_TEXT_ELEMENT_NAMES,
+        ),
+    ));
     statements.push(ast.statement_return(SPAN, Some(join_chunks_expression(ast, chunks))));
     call_iife(ast, statements)
+}
+
+const VOID_ELEMENT_NAMES: &[&str] = &[
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "param",
+    "source",
+    "track",
+    "wbr",
+];
+
+const RAW_TEXT_ELEMENT_NAMES: &[&str] = &["script", "style", "textarea", "title"];
+
+fn build_tag_name_match_expression<'a>(
+    ast: AstBuilder<'a>,
+    tag_expression: Expression<'a>,
+    names: &[&str],
+) -> Expression<'a> {
+    let mut iter = names.iter();
+    let Some(first) = iter.next() else {
+        return ast.expression_boolean_literal(SPAN, false);
+    };
+
+    let mut expression = ast.expression_binary(
+        SPAN,
+        tag_expression.clone_in(ast.allocator),
+        BinaryOperator::StrictEquality,
+        string_expr(ast, first),
+    );
+    for name in iter {
+        expression = ast.expression_logical(
+            SPAN,
+            expression,
+            LogicalOperator::Or,
+            ast.expression_binary(
+                SPAN,
+                tag_expression.clone_in(ast.allocator),
+                BinaryOperator::StrictEquality,
+                string_expr(ast, name),
+            ),
+        );
+    }
+    expression
 }
 
 fn slot_name_expression<'a>(

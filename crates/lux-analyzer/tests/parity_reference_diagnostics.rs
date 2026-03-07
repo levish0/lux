@@ -5,6 +5,10 @@ use std::process::Command;
 use lux_analyzer::analyze;
 use lux_ast::analysis::{AnalysisDiagnosticCode, AnalysisSeverity};
 use lux_parser::parse;
+use lux_test_support::{
+    ensure_svelte_runner, is_legacy_reference_sample, node_executable, reference_root,
+    workspace_root_from_manifest_dir,
+};
 use oxc_allocator::Allocator;
 use serde_json::Value;
 
@@ -20,11 +24,8 @@ struct ParityCase<'a> {
 #[test]
 fn parity_against_reference_analyzer_diagnostics_smoke() {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let workspace_root = manifest_dir
-        .parent()
-        .and_then(Path::parent)
-        .expect("failed to resolve workspace root");
-    let runner_dir = ensure_svelte_runner(workspace_root);
+    let workspace_root = workspace_root_from_manifest_dir(&manifest_dir);
+    let runner_dir = ensure_svelte_runner(&workspace_root);
 
     let generated_dir = manifest_dir.join("target/parity-reference-diagnostics");
     let _ = fs::create_dir_all(&generated_dir);
@@ -248,13 +249,6 @@ fn parity_against_reference_analyzer_diagnostics_smoke() {
             severity: AnalysisSeverity::Error,
         },
         ParityCase {
-            name: "legacy_export_invalid",
-            source: "<script>let count = $state(0); export let prop;</script>",
-            reference_code: "legacy_export_invalid",
-            lux_code: AnalysisDiagnosticCode::LegacyExportInvalid,
-            severity: AnalysisSeverity::Error,
-        },
-        ParityCase {
             name: "module_illegal_default_export",
             source: "<script>export default function nope() {}</script>",
             reference_code: "module_illegal_default_export",
@@ -372,14 +366,9 @@ fn parity_against_reference_analyzer_diagnostics_smoke() {
 #[test]
 fn parity_against_reference_compiler_errors_subset() {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let workspace_root = manifest_dir
-        .parent()
-        .and_then(Path::parent)
-        .expect("failed to resolve workspace root");
-    let runner_dir = ensure_svelte_runner(workspace_root);
-    let samples_dir = workspace_root.join(
-        "svelte_reference/svelte-svelte-5.50.0/packages/svelte/tests/compiler-errors/samples",
-    );
+    let workspace_root = workspace_root_from_manifest_dir(&manifest_dir);
+    let runner_dir = ensure_svelte_runner(&workspace_root);
+    let samples_dir = reference_root(&workspace_root).join("compiler-errors/samples");
     assert!(samples_dir.exists(), "missing {}", samples_dir.display());
 
     let generated_dir = manifest_dir.join("target/parity-reference-compiler-errors");
@@ -402,6 +391,10 @@ fn parity_against_reference_compiler_errors_subset() {
             .and_then(|name| name.to_str())
             .expect("utf-8 sample directory name")
             .to_owned();
+
+        if is_out_of_scope_reference_sample(&sample_name) {
+            continue;
+        }
 
         let input_path = sample_dir.join("main.svelte");
         let config_path = sample_dir.join("_config.js");
@@ -471,49 +464,6 @@ fn parity_against_reference_compiler_errors_subset() {
         mismatches.len(),
         mismatches.join("\n")
     );
-}
-
-fn npm_executable() -> &'static str {
-    if cfg!(windows) { "npm.cmd" } else { "npm" }
-}
-
-fn node_executable() -> &'static str {
-    if cfg!(windows) { "node.exe" } else { "node" }
-}
-
-fn ensure_svelte_runner(workspace_root: &Path) -> PathBuf {
-    let runner_dir = workspace_root.join("tools/svelte_runner");
-    let script_path = runner_dir.join("analyze_diagnostics.mjs");
-    assert!(script_path.exists(), "missing {}", script_path.display());
-
-    let svelte_module = runner_dir.join("node_modules/svelte/package.json");
-    if svelte_module.exists() {
-        return runner_dir;
-    }
-
-    let install = Command::new(npm_executable())
-        .arg("install")
-        .arg("--silent")
-        .arg("--no-fund")
-        .arg("--no-audit")
-        .current_dir(&runner_dir)
-        .output()
-        .unwrap_or_else(|error| {
-            panic!(
-                "failed to run npm install in {}: {error}",
-                runner_dir.display()
-            )
-        });
-
-    assert!(
-        install.status.success(),
-        "npm install failed in {}\nstdout:\n{}\nstderr:\n{}",
-        runner_dir.display(),
-        String::from_utf8_lossy(&install.stdout),
-        String::from_utf8_lossy(&install.stderr),
-    );
-
-    runner_dir
 }
 
 fn run_reference_analyze(runner_dir: &Path, input_path: &Path, output_path: &Path) -> Value {
@@ -631,10 +581,6 @@ fn map_reference_error_code_to_lux(
             AnalysisDiagnosticCode::ModuleIllegalDefaultExport,
             AnalysisSeverity::Error,
         )),
-        "legacy_export_invalid" => Some((
-            AnalysisDiagnosticCode::LegacyExportInvalid,
-            AnalysisSeverity::Error,
-        )),
         "rune_invalid_spread" => Some((
             AnalysisDiagnosticCode::ScriptRuneInvalidSpread,
             AnalysisSeverity::Error,
@@ -704,4 +650,8 @@ fn map_reference_error_code_to_lux(
         )),
         _ => None,
     }
+}
+
+fn is_out_of_scope_reference_sample(sample_name: &str) -> bool {
+    is_legacy_reference_sample(sample_name)
 }

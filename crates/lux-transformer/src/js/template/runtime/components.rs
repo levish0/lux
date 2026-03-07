@@ -21,7 +21,7 @@ use crate::js::component::LUX_RENDER_COMPONENT;
 
 pub(super) fn render_component_expression<'a>(
     ast: AstBuilder<'a>,
-    component: &Component<'_>,
+    component: &'a Component<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let callee = resolve_expression(ast, component_name_expression(ast, component.name), scope);
@@ -57,7 +57,7 @@ fn component_name_expression<'a>(ast: AstBuilder<'a>, name: &str) -> Expression<
 
 pub(super) fn render_svelte_component_expression<'a>(
     ast: AstBuilder<'a>,
-    component: &SvelteComponent<'_>,
+    component: &'a SvelteComponent<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let callee = resolve_expression(ast, component.expression.clone_in(ast.allocator), scope);
@@ -72,7 +72,7 @@ pub(super) fn render_svelte_component_expression<'a>(
 
 pub(super) fn render_svelte_self_expression<'a>(
     ast: AstBuilder<'a>,
-    component: &SvelteSelf<'_>,
+    component: &'a SvelteSelf<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let callee = ast.member_expression_static(
@@ -93,8 +93,8 @@ pub(super) fn render_svelte_self_expression<'a>(
 fn render_component_like_expression<'a>(
     ast: AstBuilder<'a>,
     callee: Expression<'a>,
-    attributes: &[AttributeNode<'_>],
-    fragment: &Fragment<'_>,
+    attributes: &[AttributeNode<'a>],
+    fragment: &'a Fragment<'a>,
     scope: &RuntimeScope,
 ) -> Expression<'a> {
     let (props_expression, bind_this_expression) =
@@ -135,8 +135,8 @@ fn render_component_like_expression<'a>(
 
 fn build_component_props_expression<'a>(
     ast: AstBuilder<'a>,
-    attributes: &[AttributeNode<'_>],
-    fragment: &Fragment<'_>,
+    attributes: &[AttributeNode<'a>],
+    fragment: &'a Fragment<'a>,
     scope: &RuntimeScope,
 ) -> (Expression<'a>, Option<Expression<'a>>) {
     let mut properties = ast.vec();
@@ -714,7 +714,7 @@ fn collect_default_slot_let_bindings<'a>(
 
 fn build_slot_function_for_nodes<'a>(
     ast: AstBuilder<'a>,
-    nodes: &[&FragmentNode<'_>],
+    nodes: &[&'a FragmentNode<'a>],
     let_bindings: &[SlotLetBinding<'_>],
     scope: &RuntimeScope,
 ) -> Expression<'a> {

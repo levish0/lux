@@ -28,7 +28,15 @@ pub enum TransformTarget {
 }
 
 pub fn transform(root: &Root<'_>, analysis: &AnalysisTables) -> TransformResult {
-    transform_for_target(root, analysis, TransformTarget::Server)
+    transform_with_filename(root, analysis, None)
+}
+
+pub fn transform_with_filename(
+    root: &Root<'_>,
+    analysis: &AnalysisTables,
+    filename: Option<&str>,
+) -> TransformResult {
+    transform_for_target_with_filename(root, analysis, TransformTarget::Server, filename)
 }
 
 pub fn transform_for_target(
@@ -36,11 +44,21 @@ pub fn transform_for_target(
     analysis: &AnalysisTables,
     target: TransformTarget,
 ) -> TransformResult {
+    transform_for_target_with_filename(root, analysis, target, None)
+}
+
+pub fn transform_for_target_with_filename(
+    root: &Root<'_>,
+    analysis: &AnalysisTables,
+    target: TransformTarget,
+    filename: Option<&str>,
+) -> TransformResult {
     let (css, css_hash, css_scope) = match &root.css {
         Some(stylesheet) => {
-            let css_hash = hash(stylesheet.content_styles);
+            let css_hash_input = css_hash_input(stylesheet.content_styles, filename);
+            let css_hash = hash(&css_hash_input);
             let css_scope = format!("svelte-{css_hash}");
-            let css = css::render_stylesheet(stylesheet, analysis, &css_scope);
+            let css = css::render_stylesheet(stylesheet, analysis, &css_scope, &root.fragment);
             (Some(css), Some(css_hash), Some(css_scope))
         }
         None => (None, None, None),
@@ -49,7 +67,6 @@ pub fn transform_for_target(
     let component = js::render_component(
         root,
         analysis,
-        css.as_deref(),
         css_hash.as_deref(),
         css_scope.as_deref(),
         target,
@@ -64,7 +81,7 @@ pub fn transform_for_target(
             runtime::client_runtime_source(),
         ),
     };
-    let runtime_modules = if component.needs_runtime {
+    let runtime_modules = if component.needs_runtime_import {
         vec![RuntimeModule {
             specifier: runtime_specifier.to_string(),
             code: runtime_source.to_string(),
@@ -79,5 +96,12 @@ pub fn transform_for_target(
         css_hash,
         css_scope,
         runtime_modules,
+    }
+}
+
+fn css_hash_input(css: &str, filename: Option<&str>) -> String {
+    match filename {
+        Some("(unknown)") | None => css.to_string(),
+        Some(filename) => filename.replace('\\', "/"),
     }
 }
