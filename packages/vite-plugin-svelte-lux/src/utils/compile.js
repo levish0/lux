@@ -107,7 +107,13 @@ export function createCompileSvelte() {
 		try {
 			if (shouldUseLuxCompiler(ssr)) {
 				try {
-					const luxOutput = compileWithLux(finalCode, filename, isTypeScript, ssr);
+					const luxOutput = compileWithLux(
+						finalCode,
+						filename,
+						isTypeScript,
+						ssr,
+						finalCompileOptions
+					);
 					writeLuxArtifactsIfEnabled(
 						luxOutput.result,
 						filename,
@@ -196,10 +202,11 @@ function shouldUseLuxCompiler(ssr) {
  * @param {string} filename
  * @param {boolean} isTypeScript
  * @param {boolean} ssr
+ * @param {import('svelte/compiler').CompileOptions} compileOptions
  * @returns {{ compiled: import('svelte/compiler').CompileResult, result: any }}
  */
-function compileWithLux(code, filename, isTypeScript, ssr) {
-	const result = luxCompile(code, { ts: isTypeScript, generate: ssr ? 'server' : 'client' });
+function compileWithLux(code, filename, isTypeScript, ssr, compileOptions) {
+	const result = luxCompile(code, toLuxCompileOptions(compileOptions, isTypeScript, ssr));
 	for (const runtimeModule of result.runtimeModules ?? []) {
 		luxRuntimeModules.set(runtimeModule.specifier, runtimeModule.code);
 	}
@@ -223,19 +230,72 @@ function compileWithLux(code, filename, isTypeScript, ssr) {
 	const compiled = {
 		js: {
 			code: result.js,
-			map: null
+			map: parseLuxJson(result.jsMap)
 		},
 		css: result.css
 			? {
 					code: result.css,
-					map: null
+					map: parseLuxJson(result.cssMap),
+					hasGlobal: false
 				}
 			: null,
 		warnings,
-		metadata: {},
-		ast: null
+		metadata: {
+			runes: result.metadataRunes ?? false
+		},
+		ast: parseLuxJson(result.astJson)
 	};
 	return { compiled, result };
+}
+
+/**
+ * @param {import('svelte/compiler').CompileOptions} compileOptions
+ * @param {boolean} isTypeScript
+ * @param {boolean} ssr
+ */
+function toLuxCompileOptions(compileOptions, isTypeScript, ssr) {
+	/** @type {Record<string, unknown>} */
+	const options = {
+		ts: isTypeScript,
+		generate: ssr ? 'server' : 'client'
+	};
+
+	for (const key of [
+		'filename',
+		'rootDir',
+		'runes',
+		'immutable',
+		'accessors',
+		'preserveWhitespace',
+		'customElement',
+		'outputFilename',
+		'cssOutputFilename',
+		'modernAst'
+	]) {
+		if (compileOptions[key] !== undefined) {
+			options[key] = compileOptions[key];
+		}
+	}
+
+	if (compileOptions.css === 'injected') {
+		options.css = 'injected';
+	}
+
+	return options;
+}
+
+/**
+ * @param {string | null | undefined} raw
+ */
+function parseLuxJson(raw) {
+	if (!raw || typeof raw !== 'string') {
+		return null;
+	}
+	try {
+		return JSON.parse(raw);
+	} catch {
+		return null;
+	}
 }
 
 /**
@@ -338,6 +398,7 @@ function writeLuxArtifactsIfEnabled(result, filename, normalizedFilename, ssr, o
 				filename,
 				normalizedFilename,
 				ts: result.ts ?? false,
+				metadataRunes: result.metadataRunes ?? false,
 				errors: result.errors ?? [],
 				warnings: result.warnings ?? [],
 				runtimeModules: (result.runtimeModules ?? []).map((module) => module.specifier)

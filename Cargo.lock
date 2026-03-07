@@ -515,6 +515,7 @@ dependencies = [
  "napi-build",
  "napi-derive",
  "oxc_allocator",
+ "serde_json",
 ]
 
 [[package]]

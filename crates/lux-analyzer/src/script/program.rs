@@ -11,10 +11,10 @@ use lux_utils::runes::{is_rune, is_state_creation_rune};
 use oxc_ast::AstKind;
 use oxc_ast::ast::{
     ArrowFunctionExpression, AssignmentExpression, AssignmentTarget, AssignmentTargetMaybeDefault,
-    AssignmentTargetProperty, BindingPattern, BindingProperty, CallExpression, Class, ClassElement, Declaration,
-    ExportDefaultDeclarationKind, Expression, Function, ImportDeclarationSpecifier,
+    AssignmentTargetProperty, BindingPattern, BindingProperty, CallExpression, Class, ClassElement,
+    Declaration, ExportDefaultDeclarationKind, Expression, Function, ImportDeclarationSpecifier,
     MethodDefinition, MethodDefinitionKind, Program, PropertyKey, SimpleAssignmentTarget,
-    Statement, UpdateExpression, VariableDeclaration,
+    Statement, UpdateExpression, VariableDeclaration, VariableDeclarationKind,
 };
 use oxc_ast_visit::{Visit, walk};
 use oxc_semantic::{ReferenceId, Semantic, SemanticBuilder};
@@ -26,6 +26,7 @@ pub(super) fn analyze_program(
     program: &Program<'_>,
     target: ScriptTarget,
     is_custom_element: bool,
+    component_runes: bool,
     tables: &mut AnalysisTables,
 ) {
     let semantic_result = SemanticBuilder::new().build(program);
@@ -36,13 +37,26 @@ pub(super) fn analyze_program(
     add_symbol_records(&semantic, target, tables);
     add_reference_records(&semantic, target, tables);
     add_rune_records(&runes, target, tables);
-    add_rune_argument_diagnostics(&runes, tables);
-    add_rune_placement_diagnostics(program, target, is_custom_element, &runes, tables);
-    add_props_rune_diagnostics(program, &runes, tables);
-    add_inspect_trace_diagnostics(program, tables);
-    add_class_state_field_diagnostics(&runes, program, tables);
-    add_module_export_rune_diagnostics(program, target, tables);
+    add_dollar_binding_diagnostics(program, component_runes, tables);
+    add_default_export_diagnostics(program, tables);
+    if component_runes {
+        add_rune_argument_diagnostics(&runes, tables);
+        add_rune_placement_diagnostics(program, target, is_custom_element, &runes, tables);
+        add_props_rune_diagnostics(program, &runes, tables);
+        add_inspect_trace_diagnostics(program, tables);
+        add_class_state_field_diagnostics(program, tables);
+        add_import_runes_diagnostics(program, tables);
+        add_export_rune_diagnostics(program, target, tables);
+    } else {
+        add_non_runes_rune_diagnostics(program, tables);
+    }
     add_import_records(program, target, tables);
+}
+
+pub(super) fn has_known_rune(program: &Program<'_>) -> bool {
+    collect_runes(program)
+        .iter()
+        .any(|rune| is_rune(&rune.name))
 }
 
 fn add_scope_records(semantic: &Semantic<'_>, target: ScriptTarget, tables: &mut AnalysisTables) {
@@ -272,14 +286,7 @@ fn add_rune_placement_diagnostics(
     }
 }
 
-fn add_class_state_field_diagnostics(
-    runes: &[CollectedRune],
-    program: &Program<'_>,
-    tables: &mut AnalysisTables,
-) {
-    if !runes.iter().any(|rune| is_rune(&rune.name)) {
-        return;
-    }
+fn add_class_state_field_diagnostics(program: &Program<'_>, tables: &mut AnalysisTables) {
     let mut collector = ClassStateFieldDiagnosticCollector::default();
     collector.visit_program(program);
     tables.diagnostics.extend(collector.diagnostics);
@@ -292,6 +299,7 @@ fn add_props_rune_diagnostics(
 ) {
     let mut seen_props = false;
     let mut seen_props_id = false;
+    let mut rest_props_identifiers = FxHashSet::default();
 
     for rune in runes {
         match rune.name.as_str() {
@@ -330,7 +338,10 @@ fn add_props_rune_diagnostics(
         }
 
         match &declarator.id {
-            BindingPattern::BindingIdentifier(_) | BindingPattern::ObjectPattern(_) => {}
+            BindingPattern::BindingIdentifier(identifier) => {
+                rest_props_identifiers.insert(identifier.name.as_str().to_owned());
+            }
+            BindingPattern::ObjectPattern(_) => {}
             _ => {
                 tables.diagnostics.push(AnalysisDiagnostic {
                     severity: AnalysisSeverity::Error,
@@ -358,8 +369,118 @@ fn add_props_rune_diagnostics(
                     span: property.span,
                 });
             }
+
+            if let PropertyKey::StaticIdentifier(identifier) = &property.key
+                && identifier.name.starts_with("$$")
+            {
+                tables.diagnostics.push(AnalysisDiagnostic {
+                    severity: AnalysisSeverity::Error,
+                    code: AnalysisDiagnosticCode::PropsIllegalName,
+                    message: "Declaring or accessing a prop starting with `$$` is illegal (they are reserved for Svelte internals).".to_owned(),
+                    span: property.span,
+                });
+            }
         }
     }
+
+    if !rest_props_identifiers.is_empty() {
+        let mut collector = PropsIllegalNameDiagnosticCollector {
+            rest_props_identifiers,
+            diagnostics: Vec::new(),
+        };
+        collector.visit_program(program);
+        tables.diagnostics.extend(collector.diagnostics);
+    }
+}
+
+fn add_default_export_diagnostics(program: &Program<'_>, tables: &mut AnalysisTables) {
+    for statement in &program.body {
+        match statement {
+            Statement::ExportDefaultDeclaration(declaration) => {
+                tables.diagnostics.push(AnalysisDiagnostic {
+                    severity: AnalysisSeverity::Error,
+                    code: AnalysisDiagnosticCode::ModuleIllegalDefaultExport,
+                    message: "A component cannot have a default export.".to_owned(),
+                    span: declaration.span,
+                });
+            }
+            Statement::ExportNamedDeclaration(declaration)
+                if declaration
+                    .specifiers
+                    .iter()
+                    .any(|specifier| specifier.exported.name().as_str() == "default") =>
+            {
+                tables.diagnostics.push(AnalysisDiagnostic {
+                    severity: AnalysisSeverity::Error,
+                    code: AnalysisDiagnosticCode::ModuleIllegalDefaultExport,
+                    message: "A component cannot have a default export.".to_owned(),
+                    span: declaration.span,
+                });
+            }
+            _ => {}
+        }
+    }
+}
+
+fn add_non_runes_rune_diagnostics(program: &Program<'_>, tables: &mut AnalysisTables) {
+    let mut collector = NonRunesRuneUsageDiagnosticCollector::default();
+    collector.visit_program(program);
+    tables.diagnostics.extend(collector.diagnostics);
+}
+
+fn add_import_runes_diagnostics(program: &Program<'_>, tables: &mut AnalysisTables) {
+    for statement in &program.body {
+        let Statement::ImportDeclaration(declaration) = statement else {
+            continue;
+        };
+        let source = declaration.source.value.as_str();
+
+        if source.starts_with("svelte/internal") {
+            tables.diagnostics.push(AnalysisDiagnostic {
+                severity: AnalysisSeverity::Error,
+                code: AnalysisDiagnosticCode::ImportSvelteInternalForbidden,
+                message: "Imports of `svelte/internal/*` are forbidden.".to_owned(),
+                span: declaration.span,
+            });
+        }
+
+        if source != "svelte" {
+            continue;
+        }
+
+        let Some(specifiers) = &declaration.specifiers else {
+            continue;
+        };
+        for specifier in specifiers {
+            let ImportDeclarationSpecifier::ImportSpecifier(specifier) = specifier else {
+                continue;
+            };
+            let imported_name = specifier.imported.name().as_str();
+            if !matches!(imported_name, "beforeUpdate" | "afterUpdate") {
+                continue;
+            }
+            tables.diagnostics.push(AnalysisDiagnostic {
+                severity: AnalysisSeverity::Error,
+                code: AnalysisDiagnosticCode::RunesModeInvalidImport,
+                message: format!("{imported_name} cannot be used in runes mode."),
+                span: specifier.span,
+            });
+        }
+    }
+}
+
+fn add_dollar_binding_diagnostics(
+    program: &Program<'_>,
+    strict: bool,
+    tables: &mut AnalysisTables,
+) {
+    let mut collector = DollarBindingDiagnosticCollector {
+        diagnostics: Vec::new(),
+        function_depth: 1,
+        strict,
+    };
+    collector.visit_program(program);
+    tables.diagnostics.extend(collector.diagnostics);
 }
 
 fn add_inspect_trace_diagnostics(program: &Program<'_>, tables: &mut AnalysisTables) {
@@ -611,6 +732,23 @@ struct ConstructorStateFieldAssignmentVisitor<'a> {
     diagnostics: &'a mut Vec<AnalysisDiagnostic>,
 }
 
+struct PropsIllegalNameDiagnosticCollector {
+    rest_props_identifiers: FxHashSet<String>,
+    diagnostics: Vec<AnalysisDiagnostic>,
+}
+
+#[derive(Default)]
+struct NonRunesRuneUsageDiagnosticCollector {
+    diagnostics: Vec<AnalysisDiagnostic>,
+}
+
+#[derive(Default)]
+struct DollarBindingDiagnosticCollector {
+    diagnostics: Vec<AnalysisDiagnostic>,
+    function_depth: usize,
+    strict: bool,
+}
+
 #[derive(Default)]
 struct InspectTraceDiagnosticCollector {
     diagnostics: Vec<AnalysisDiagnostic>,
@@ -659,6 +797,141 @@ impl<'a> Visit<'a> for ConstructorStateFieldAssignmentVisitor<'_> {
         }
 
         walk::walk_update_expression(self, expression);
+    }
+}
+
+impl<'a> Visit<'a> for PropsIllegalNameDiagnosticCollector {
+    fn visit_expression(&mut self, expression: &Expression<'a>) {
+        if let Expression::StaticMemberExpression(member) = expression
+            && let Expression::Identifier(identifier) =
+                strip_typescript_expression_wrappers(&member.object)
+            && self
+                .rest_props_identifiers
+                .contains(identifier.name.as_str())
+            && member.property.name.starts_with("$$")
+        {
+            self.diagnostics.push(AnalysisDiagnostic {
+                severity: AnalysisSeverity::Error,
+                code: AnalysisDiagnosticCode::PropsIllegalName,
+                message: "Declaring or accessing a prop starting with `$$` is illegal (they are reserved for Svelte internals).".to_owned(),
+                span: member.property.span,
+            });
+        }
+
+        walk::walk_expression(self, expression);
+    }
+}
+
+impl<'a> Visit<'a> for NonRunesRuneUsageDiagnosticCollector {
+    fn visit_variable_declarator(&mut self, declarator: &oxc_ast::ast::VariableDeclarator<'a>) {
+        let Some(init) = &declarator.init else {
+            return;
+        };
+        let Some((rune_name, span)) = extract_rune_call(init) else {
+            walk::walk_variable_declarator(self, declarator);
+            return;
+        };
+        if matches!(rune_name.as_str(), "$state" | "$derived" | "$props") {
+            self.diagnostics.push(AnalysisDiagnostic {
+                severity: AnalysisSeverity::Error,
+                code: AnalysisDiagnosticCode::RuneInvalidUsage,
+                message: format!("Cannot use `{rune_name}` rune in non-runes mode."),
+                span,
+            });
+        }
+
+        walk::walk_variable_declarator(self, declarator);
+    }
+}
+
+impl<'a> Visit<'a> for DollarBindingDiagnosticCollector {
+    fn visit_variable_declarator(&mut self, declarator: &oxc_ast::ast::VariableDeclarator<'a>) {
+        validate_binding_pattern_identifiers(
+            &declarator.id,
+            self.function_depth,
+            self.strict,
+            &mut self.diagnostics,
+        );
+        walk::walk_variable_declarator(self, declarator);
+    }
+
+    fn visit_function(&mut self, function: &Function<'a>, flags: ScopeFlags) {
+        if let Some(id) = &function.id {
+            push_dollar_binding_diagnostic(
+                &id.name,
+                id.span,
+                self.function_depth,
+                self.strict,
+                &mut self.diagnostics,
+            );
+        }
+        self.function_depth += 1;
+        walk::walk_function(self, function, flags);
+        self.function_depth -= 1;
+    }
+
+    fn visit_arrow_function_expression(&mut self, expression: &ArrowFunctionExpression<'a>) {
+        self.function_depth += 1;
+        walk::walk_arrow_function_expression(self, expression);
+        self.function_depth -= 1;
+    }
+
+    fn visit_class(&mut self, class: &Class<'a>) {
+        if let Some(id) = &class.id {
+            push_dollar_binding_diagnostic(
+                &id.name,
+                id.span,
+                self.function_depth,
+                self.strict,
+                &mut self.diagnostics,
+            );
+        }
+        walk::walk_class(self, class);
+    }
+
+    fn visit_import_declaration(&mut self, declaration: &oxc_ast::ast::ImportDeclaration<'a>) {
+        if declaration.import_kind.is_type() {
+            return;
+        }
+
+        if let Some(specifiers) = &declaration.specifiers {
+            for specifier in specifiers {
+                match specifier {
+                    ImportDeclarationSpecifier::ImportSpecifier(specifier) => {
+                        if specifier.import_kind.is_type() {
+                            continue;
+                        }
+                        push_dollar_binding_diagnostic(
+                            &specifier.local.name,
+                            specifier.local.span,
+                            self.function_depth,
+                            self.strict,
+                            &mut self.diagnostics,
+                        );
+                    }
+                    ImportDeclarationSpecifier::ImportDefaultSpecifier(specifier) => {
+                        push_dollar_binding_diagnostic(
+                            &specifier.local.name,
+                            specifier.local.span,
+                            self.function_depth,
+                            self.strict,
+                            &mut self.diagnostics,
+                        );
+                    }
+                    ImportDeclarationSpecifier::ImportNamespaceSpecifier(specifier) => {
+                        push_dollar_binding_diagnostic(
+                            &specifier.local.name,
+                            specifier.local.span,
+                            self.function_depth,
+                            self.strict,
+                            &mut self.diagnostics,
+                        );
+                    }
+                }
+            }
+        }
+
+        walk::walk_import_declaration(self, declaration);
     }
 }
 
@@ -726,19 +999,23 @@ impl<'a> Visit<'a> for InspectTraceDiagnosticCollector {
                 self.diagnostics.push(AnalysisDiagnostic {
                     severity: AnalysisSeverity::Error,
                     code: AnalysisDiagnosticCode::InspectTraceInvalidPlacement,
-                    message: "`$inspect.trace(...)` must be the first statement of a function body."
-                        .to_owned(),
+                    message:
+                        "`$inspect.trace(...)` must be the first statement of a function body."
+                            .to_owned(),
                     span: call.span,
                 });
             }
 
-            if self.function_stack.last().is_some_and(|context| context.generator) {
+            if self
+                .function_stack
+                .last()
+                .is_some_and(|context| context.generator)
+            {
                 self.diagnostics.push(AnalysisDiagnostic {
                     severity: AnalysisSeverity::Error,
                     code: AnalysisDiagnosticCode::InspectTraceGenerator,
-                    message:
-                        "`$inspect.trace(...)` cannot be used inside a generator function."
-                            .to_owned(),
+                    message: "`$inspect.trace(...)` cannot be used inside a generator function."
+                        .to_owned(),
                     span: call.span,
                 });
             }
@@ -788,11 +1065,31 @@ fn rune_invalid_placement_message(rune_name: &str) -> String {
     }
 }
 
-fn add_module_export_rune_diagnostics(
+fn add_export_rune_diagnostics(
     program: &Program<'_>,
     target: ScriptTarget,
     tables: &mut AnalysisTables,
 ) {
+    if target == ScriptTarget::Instance {
+        for statement in &program.body {
+            let Statement::ExportNamedDeclaration(declaration) = statement else {
+                continue;
+            };
+            let Some(Declaration::VariableDeclaration(variable)) = &declaration.declaration else {
+                continue;
+            };
+            if variable.kind == VariableDeclarationKind::Let {
+                tables.diagnostics.push(AnalysisDiagnostic {
+                    severity: AnalysisSeverity::Error,
+                    code: AnalysisDiagnosticCode::LegacyExportInvalid,
+                    message: "Cannot use `export let` in runes mode; use `$props()` instead."
+                        .to_owned(),
+                    span: declaration.span,
+                });
+            }
+        }
+    }
+
     if target != ScriptTarget::Module {
         return;
     }
@@ -817,8 +1114,8 @@ fn add_module_export_rune_diagnostics(
             "$derived" | "$derived.by" => {
                 tables.diagnostics.push(AnalysisDiagnostic {
                     severity: AnalysisSeverity::Error,
-                    code: AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
-                    message: "Cannot export derived state from a module. Export a function returning the derived value instead.".to_string(),
+                    code: AnalysisDiagnosticCode::DerivedInvalidExport,
+                    message: "Cannot export derived state from a module. To expose the current derived value, export a function returning its value.".to_owned(),
                     span: *rune_span,
                 });
             }
@@ -826,8 +1123,8 @@ fn add_module_export_rune_diagnostics(
                 if reassigned_identifiers.contains(&exported_name) {
                     tables.diagnostics.push(AnalysisDiagnostic {
                         severity: AnalysisSeverity::Error,
-                        code: AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
-                        message: "Cannot export reassigned state from a module. Export a function returning the state value instead.".to_string(),
+                        code: AnalysisDiagnosticCode::StateInvalidExport,
+                        message: "Cannot export state from a module if it is reassigned. Either export a function returning the state value or only mutate the state value's properties.".to_owned(),
                         span: *rune_span,
                     });
                 }
@@ -1391,10 +1688,9 @@ impl<'a> Visit<'a> for ScriptRuneCollector {
                     span: call.span,
                     callee_span: call.callee.span(),
                     argument_count: call.arguments.len() as u32,
-                    has_spread_argument: call
-                        .arguments
-                        .iter()
-                        .any(|argument| matches!(argument, oxc_ast::ast::Argument::SpreadElement(_))),
+                    has_spread_argument: call.arguments.iter().any(|argument| {
+                        matches!(argument, oxc_ast::ast::Argument::SpreadElement(_))
+                    }),
                 });
             }
         }
@@ -1558,7 +1854,111 @@ fn is_valid_props_binding_property(property: &BindingProperty<'_>) -> bool {
     matches!(value, BindingPattern::BindingIdentifier(_))
 }
 
-fn top_level_variable_declarators<'a>(program: &'a Program<'a>) -> Vec<&'a oxc_ast::ast::VariableDeclarator<'a>> {
+fn validate_binding_pattern_identifiers(
+    pattern: &BindingPattern<'_>,
+    function_depth: usize,
+    strict: bool,
+    diagnostics: &mut Vec<AnalysisDiagnostic>,
+) {
+    match pattern {
+        BindingPattern::BindingIdentifier(identifier) => {
+            push_dollar_binding_diagnostic(
+                &identifier.name,
+                identifier.span,
+                function_depth,
+                strict,
+                diagnostics,
+            );
+        }
+        BindingPattern::ObjectPattern(pattern) => {
+            for property in &pattern.properties {
+                validate_binding_pattern_identifiers(
+                    &property.value,
+                    function_depth,
+                    strict,
+                    diagnostics,
+                );
+            }
+            if let Some(rest) = &pattern.rest {
+                validate_binding_pattern_identifiers(
+                    &rest.argument,
+                    function_depth,
+                    strict,
+                    diagnostics,
+                );
+            }
+        }
+        BindingPattern::ArrayPattern(pattern) => {
+            for element in &pattern.elements {
+                if let Some(element) = element {
+                    validate_binding_pattern_identifiers(
+                        element,
+                        function_depth,
+                        strict,
+                        diagnostics,
+                    );
+                }
+            }
+            if let Some(rest) = &pattern.rest {
+                validate_binding_pattern_identifiers(
+                    &rest.argument,
+                    function_depth,
+                    strict,
+                    diagnostics,
+                );
+            }
+        }
+        BindingPattern::AssignmentPattern(pattern) => {
+            validate_binding_pattern_identifiers(
+                &pattern.left,
+                function_depth,
+                strict,
+                diagnostics,
+            );
+        }
+    }
+}
+
+fn push_dollar_binding_diagnostic(
+    name: &str,
+    span: Span,
+    function_depth: usize,
+    strict: bool,
+    diagnostics: &mut Vec<AnalysisDiagnostic>,
+) {
+    if !strict && function_depth > 1 {
+        return;
+    }
+
+    let code = if name == "$" {
+        AnalysisDiagnosticCode::DollarBindingInvalid
+    } else if name.starts_with('$') {
+        AnalysisDiagnosticCode::DollarPrefixInvalid
+    } else {
+        return;
+    };
+
+    let message = match code {
+        AnalysisDiagnosticCode::DollarBindingInvalid => {
+            "The `$` name is reserved and cannot be used for variables and imports.".to_owned()
+        }
+        AnalysisDiagnosticCode::DollarPrefixInvalid => {
+            "The `$` prefix is reserved and cannot be used for variables and imports.".to_owned()
+        }
+        _ => unreachable!(),
+    };
+
+    diagnostics.push(AnalysisDiagnostic {
+        severity: AnalysisSeverity::Error,
+        code,
+        message,
+        span,
+    });
+}
+
+fn top_level_variable_declarators<'a>(
+    program: &'a Program<'a>,
+) -> Vec<&'a oxc_ast::ast::VariableDeclarator<'a>> {
     let mut declarators = Vec::new();
 
     for statement in &program.body {

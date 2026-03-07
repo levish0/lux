@@ -264,6 +264,51 @@ fn analyze_reports_props_rune_invalid_placement_in_module_script() {
 }
 
 #[test]
+fn analyze_reports_rune_invalid_usage_when_runes_are_disabled() {
+    let source = r#"
+<svelte:options runes={false} />
+<script>
+  const value = $state(0);
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::RuneInvalidUsage })
+    );
+}
+
+#[test]
+fn analyze_reports_dollar_binding_diagnostics_in_runes_mode() {
+    let source = r#"
+<script>
+  import { writable as $store } from 'svelte/store';
+  let count = $state(0);
+  let $value = 1;
+  let $ = 2;
+  function $helper() {}
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::DollarPrefixInvalid })
+    );
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::DollarBindingInvalid })
+    );
+}
+
+#[test]
 fn analyze_reports_props_id_invalid_placement_for_destructuring() {
     let source = r#"
 <script>
@@ -288,9 +333,12 @@ fn analyze_reports_props_duplicate() {
 "#;
 
     let tables = analyze_source(source);
-    assert!(tables.diagnostics.iter().any(|diagnostic| {
-        diagnostic.code == AnalysisDiagnosticCode::PropsDuplicate
-    }));
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::PropsDuplicate })
+    );
 }
 
 #[test]
@@ -303,12 +351,40 @@ fn analyze_reports_props_invalid_identifier_and_pattern() {
 "#;
 
     let tables = analyze_source(source);
-    assert!(tables.diagnostics.iter().any(|diagnostic| {
-        diagnostic.code == AnalysisDiagnosticCode::PropsInvalidIdentifier
-    }));
-    assert!(tables.diagnostics.iter().any(|diagnostic| {
-        diagnostic.code == AnalysisDiagnosticCode::PropsInvalidPattern
-    }));
+    assert!(
+        tables.diagnostics.iter().any(|diagnostic| {
+            diagnostic.code == AnalysisDiagnosticCode::PropsInvalidIdentifier
+        })
+    );
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::PropsInvalidPattern })
+    );
+}
+
+#[test]
+fn analyze_reports_props_illegal_name_in_declaration_and_access() {
+    let source = r#"
+<script>
+  const { $$slot: slot } = $props();
+  const props = $props();
+  console.log(props.$$rest);
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    let illegal_name_count = tables
+        .diagnostics
+        .iter()
+        .filter(|diagnostic| diagnostic.code == AnalysisDiagnosticCode::PropsIllegalName)
+        .count();
+    assert!(
+        illegal_name_count >= 2,
+        "expected at least 2 props illegal name diagnostics, got {}",
+        illegal_name_count
+    );
 }
 
 #[test]
@@ -321,9 +397,11 @@ fn analyze_reports_rune_invalid_spread() {
 "#;
 
     let tables = analyze_source(source);
-    assert!(tables.diagnostics.iter().any(|diagnostic| {
-        diagnostic.code == AnalysisDiagnosticCode::ScriptRuneInvalidSpread
-    }));
+    assert!(
+        tables.diagnostics.iter().any(|diagnostic| {
+            diagnostic.code == AnalysisDiagnosticCode::ScriptRuneInvalidSpread
+        })
+    );
 }
 
 #[test]
@@ -345,9 +423,120 @@ fn analyze_reports_inspect_trace_placement_and_generator() {
     assert!(tables.diagnostics.iter().any(|diagnostic| {
         diagnostic.code == AnalysisDiagnosticCode::InspectTraceInvalidPlacement
     }));
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::InspectTraceGenerator })
+    );
+}
+
+#[test]
+fn analyze_reports_module_illegal_default_export() {
+    let source = r#"
+<script context="module">
+  const value = 1;
+  export { value as default };
+</script>
+<script>
+  export default function nope() {}
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    let illegal_default_export_count = tables
+        .diagnostics
+        .iter()
+        .filter(|diagnostic| diagnostic.code == AnalysisDiagnosticCode::ModuleIllegalDefaultExport)
+        .count();
+    assert!(
+        illegal_default_export_count >= 2,
+        "expected at least 2 module default export diagnostics, got {}",
+        illegal_default_export_count
+    );
+}
+
+#[test]
+fn analyze_reports_export_rune_diagnostics() {
+    let source = r#"
+<script context="module">
+  export const doubled = $derived(1);
+  export let count = $state(0);
+  count = 1;
+</script>
+<script>
+  let local = $state(0);
+  export let prop;
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::DerivedInvalidExport })
+    );
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::StateInvalidExport })
+    );
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::LegacyExportInvalid })
+    );
+}
+
+#[test]
+fn analyze_reports_component_wide_runes_mode_and_runes_import_diagnostics() {
+    let source = r#"
+<script context="module">
+  const module_state = $state(0);
+</script>
+<script>
+  import { beforeUpdate } from 'svelte';
+  import 'svelte/internal/disclose-version';
+  export let prop;
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::LegacyExportInvalid })
+    );
+    assert!(
+        tables.diagnostics.iter().any(|diagnostic| {
+            diagnostic.code == AnalysisDiagnosticCode::RunesModeInvalidImport
+        })
+    );
     assert!(tables.diagnostics.iter().any(|diagnostic| {
-        diagnostic.code == AnalysisDiagnosticCode::InspectTraceGenerator
+        diagnostic.code == AnalysisDiagnosticCode::ImportSvelteInternalForbidden
     }));
+}
+
+#[test]
+fn analyze_reports_explicit_runes_option_invalidates_export_let() {
+    let source = r#"
+<svelte:options runes={true} />
+<script>
+  export let prop;
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::LegacyExportInvalid })
+    );
 }
 
 #[test]

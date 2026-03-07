@@ -171,6 +171,27 @@ fn parity_against_reference_analyzer_diagnostics_smoke() {
             severity: AnalysisSeverity::Error,
         },
         ParityCase {
+            name: "props_illegal_name",
+            source: "<script>const { $$slot: slot } = $props();</script>",
+            reference_code: "props_illegal_name",
+            lux_code: AnalysisDiagnosticCode::PropsIllegalName,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "dollar_prefix_invalid",
+            source: "<script>let count = $state(0); let $value = 1;</script>",
+            reference_code: "dollar_prefix_invalid",
+            lux_code: AnalysisDiagnosticCode::DollarPrefixInvalid,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "dollar_binding_invalid",
+            source: "<script>let count = $state(0); let $ = 1;</script>",
+            reference_code: "dollar_binding_invalid",
+            lux_code: AnalysisDiagnosticCode::DollarBindingInvalid,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
             name: "inspect_trace_invalid_placement",
             source: "<script>$inspect.trace();</script>",
             reference_code: "inspect_trace_invalid_placement",
@@ -210,6 +231,48 @@ fn parity_against_reference_analyzer_diagnostics_smoke() {
             source: "<script>class Counter { constructor() { this.count = 1; this.count = $state(0); } }</script>",
             reference_code: "state_field_invalid_assignment",
             lux_code: AnalysisDiagnosticCode::StateFieldInvalidAssignment,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "derived_invalid_export",
+            source: "<script context=\"module\">export const doubled = $derived(1);</script>",
+            reference_code: "derived_invalid_export",
+            lux_code: AnalysisDiagnosticCode::DerivedInvalidExport,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "state_invalid_export",
+            source: "<script context=\"module\">export let count = $state(0); count = 1;</script>",
+            reference_code: "state_invalid_export",
+            lux_code: AnalysisDiagnosticCode::StateInvalidExport,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "legacy_export_invalid",
+            source: "<script>let count = $state(0); export let prop;</script>",
+            reference_code: "legacy_export_invalid",
+            lux_code: AnalysisDiagnosticCode::LegacyExportInvalid,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "module_illegal_default_export",
+            source: "<script>export default function nope() {}</script>",
+            reference_code: "module_illegal_default_export",
+            lux_code: AnalysisDiagnosticCode::ModuleIllegalDefaultExport,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "runes_mode_invalid_import",
+            source: "<script>import { beforeUpdate } from 'svelte'; let value = $state(0);</script>",
+            reference_code: "runes_mode_invalid_import",
+            lux_code: AnalysisDiagnosticCode::RunesModeInvalidImport,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "import_svelte_internal_forbidden",
+            source: "<script>import 'svelte/internal/disclose-version'; let value = $state(0);</script>",
+            reference_code: "import_svelte_internal_forbidden",
+            lux_code: AnalysisDiagnosticCode::ImportSvelteInternalForbidden,
             severity: AnalysisSeverity::Error,
         },
         ParityCase {
@@ -516,6 +579,22 @@ fn map_reference_error_code_to_lux(
             AnalysisDiagnosticCode::DuplicateClassField,
             AnalysisSeverity::Error,
         )),
+        "derived_invalid_export" => Some((
+            AnalysisDiagnosticCode::DerivedInvalidExport,
+            AnalysisSeverity::Error,
+        )),
+        "dollar_binding_invalid" => Some((
+            AnalysisDiagnosticCode::DollarBindingInvalid,
+            AnalysisSeverity::Error,
+        )),
+        "dollar_prefix_invalid" => Some((
+            AnalysisDiagnosticCode::DollarPrefixInvalid,
+            AnalysisSeverity::Error,
+        )),
+        "import_svelte_internal_forbidden" => Some((
+            AnalysisDiagnosticCode::ImportSvelteInternalForbidden,
+            AnalysisSeverity::Error,
+        )),
         "inspect_trace_generator" => Some((
             AnalysisDiagnosticCode::InspectTraceGenerator,
             AnalysisSeverity::Error,
@@ -536,6 +615,10 @@ fn map_reference_error_code_to_lux(
             AnalysisDiagnosticCode::PropsIdInvalidPlacement,
             AnalysisSeverity::Error,
         )),
+        "props_illegal_name" => Some((
+            AnalysisDiagnosticCode::PropsIllegalName,
+            AnalysisSeverity::Error,
+        )),
         "props_invalid_identifier" => Some((
             AnalysisDiagnosticCode::PropsInvalidIdentifier,
             AnalysisSeverity::Error,
@@ -544,8 +627,24 @@ fn map_reference_error_code_to_lux(
             AnalysisDiagnosticCode::PropsInvalidPattern,
             AnalysisSeverity::Error,
         )),
+        "module_illegal_default_export" => Some((
+            AnalysisDiagnosticCode::ModuleIllegalDefaultExport,
+            AnalysisSeverity::Error,
+        )),
+        "legacy_export_invalid" => Some((
+            AnalysisDiagnosticCode::LegacyExportInvalid,
+            AnalysisSeverity::Error,
+        )),
         "rune_invalid_spread" => Some((
             AnalysisDiagnosticCode::ScriptRuneInvalidSpread,
+            AnalysisSeverity::Error,
+        )),
+        "rune_invalid_usage" => Some((
+            AnalysisDiagnosticCode::RuneInvalidUsage,
+            AnalysisSeverity::Error,
+        )),
+        "runes_mode_invalid_import" => Some((
+            AnalysisDiagnosticCode::RunesModeInvalidImport,
             AnalysisSeverity::Error,
         )),
         "render_tag_invalid_call_expression" => Some((
@@ -574,6 +673,10 @@ fn map_reference_error_code_to_lux(
         )),
         "state_invalid_placement" => Some((
             AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+            AnalysisSeverity::Error,
+        )),
+        "state_invalid_export" => Some((
+            AnalysisDiagnosticCode::StateInvalidExport,
             AnalysisSeverity::Error,
         )),
         "state_field_duplicate" => Some((
