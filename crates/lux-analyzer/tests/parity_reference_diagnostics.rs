@@ -143,6 +143,76 @@ fn parity_against_reference_analyzer_diagnostics_smoke() {
             severity: AnalysisSeverity::Error,
         },
         ParityCase {
+            name: "props_id_invalid_placement",
+            source: "<script>const { id } = $props.id();</script>",
+            reference_code: "props_id_invalid_placement",
+            lux_code: AnalysisDiagnosticCode::PropsIdInvalidPlacement,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "props_duplicate",
+            source: "<script>const props = $props(); const more = $props();</script>",
+            reference_code: "props_duplicate",
+            lux_code: AnalysisDiagnosticCode::PropsDuplicate,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "props_invalid_identifier",
+            source: "<script>const [value] = $props();</script>",
+            reference_code: "props_invalid_identifier",
+            lux_code: AnalysisDiagnosticCode::PropsInvalidIdentifier,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "props_invalid_pattern",
+            source: "<script>const { [key]: value } = $props();</script>",
+            reference_code: "props_invalid_pattern",
+            lux_code: AnalysisDiagnosticCode::PropsInvalidPattern,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "inspect_trace_invalid_placement",
+            source: "<script>$inspect.trace();</script>",
+            reference_code: "inspect_trace_invalid_placement",
+            lux_code: AnalysisDiagnosticCode::InspectTraceInvalidPlacement,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "inspect_trace_generator",
+            source: "<script>function* gen() { $inspect.trace(); }</script>",
+            reference_code: "inspect_trace_generator",
+            lux_code: AnalysisDiagnosticCode::InspectTraceGenerator,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "rune_invalid_spread",
+            source: "<script>const args = [0]; const value = $state(...args);</script>",
+            reference_code: "rune_invalid_spread",
+            lux_code: AnalysisDiagnosticCode::ScriptRuneInvalidSpread,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "duplicate_class_field",
+            source: "<script>class Counter { count = 0; count = $state(1); }</script>",
+            reference_code: "duplicate_class_field",
+            lux_code: AnalysisDiagnosticCode::DuplicateClassField,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "state_field_duplicate",
+            source: "<script>class Counter { count = $state(0); count = $state(1); }</script>",
+            reference_code: "state_field_duplicate",
+            lux_code: AnalysisDiagnosticCode::StateFieldDuplicate,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
+            name: "state_field_invalid_assignment",
+            source: "<script>class Counter { constructor() { this.count = 1; this.count = $state(0); } }</script>",
+            reference_code: "state_field_invalid_assignment",
+            lux_code: AnalysisDiagnosticCode::StateFieldInvalidAssignment,
+            severity: AnalysisSeverity::Error,
+        },
+        ParityCase {
             name: "bindable_invalid_location",
             source: "<script>const value = $bindable();</script>",
             reference_code: "bindable_invalid_location",
@@ -442,8 +512,16 @@ fn map_reference_error_code_to_lux(
             AnalysisDiagnosticCode::BindDirectiveInvalidTarget,
             AnalysisSeverity::Error,
         )),
+        "duplicate_class_field" => Some((
+            AnalysisDiagnosticCode::DuplicateClassField,
+            AnalysisSeverity::Error,
+        )),
         "each_item_invalid_assignment" => Some((
             AnalysisDiagnosticCode::TemplateAssignmentToBinding,
+            AnalysisSeverity::Error,
+        )),
+        "props_id_invalid_placement" => Some((
+            AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
             AnalysisSeverity::Error,
         )),
         "render_tag_invalid_call_expression" => Some((
@@ -472,6 +550,14 @@ fn map_reference_error_code_to_lux(
         )),
         "state_invalid_placement" => Some((
             AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+            AnalysisSeverity::Error,
+        )),
+        "state_field_duplicate" => Some((
+            AnalysisDiagnosticCode::StateFieldDuplicate,
+            AnalysisSeverity::Error,
+        )),
+        "state_field_invalid_assignment" => Some((
+            AnalysisDiagnosticCode::StateFieldInvalidAssignment,
             AnalysisSeverity::Error,
         )),
         "effect_invalid_placement"

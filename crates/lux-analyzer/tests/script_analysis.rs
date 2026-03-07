@@ -205,6 +205,9 @@ fn analyze_reports_rune_argument_diagnostics() {
 <script>
   const derived = $derived();
   const props = $props(1);
+  $inspect.trace('a', 'b');
+  $inspect('a').with();
+  $state.eager();
 </script>
 "#;
 
@@ -243,6 +246,167 @@ fn analyze_reports_props_bindable_and_effect_placement() {
         "expected at least 3 invalid placement diagnostics, got {}",
         invalid_placement_count
     );
+}
+
+#[test]
+fn analyze_reports_props_rune_invalid_placement_in_module_script() {
+    let source = r#"
+<script context="module">
+  const props = $props();
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::TemplateRuneInvalidPlacement
+            && diagnostic.message.contains("$props()")
+    }));
+}
+
+#[test]
+fn analyze_reports_props_id_invalid_placement_for_destructuring() {
+    let source = r#"
+<script>
+  const { id } = $props.id();
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::PropsIdInvalidPlacement
+            && diagnostic.message.contains("$props.id()")
+    }));
+}
+
+#[test]
+fn analyze_reports_props_duplicate() {
+    let source = r#"
+<script>
+  const props = $props();
+  const more = $props();
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::PropsDuplicate
+    }));
+}
+
+#[test]
+fn analyze_reports_props_invalid_identifier_and_pattern() {
+    let source = r#"
+<script>
+  const [value] = $props();
+  const { [key]: value, nested: { inner } } = $props();
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::PropsInvalidIdentifier
+    }));
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::PropsInvalidPattern
+    }));
+}
+
+#[test]
+fn analyze_reports_rune_invalid_spread() {
+    let source = r#"
+<script>
+  const args = [0];
+  const value = $state(...args);
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::ScriptRuneInvalidSpread
+    }));
+}
+
+#[test]
+fn analyze_reports_inspect_trace_placement_and_generator() {
+    let source = r#"
+<script>
+  $inspect.trace();
+  function nope() {
+    let x = 1;
+    $inspect.trace();
+  }
+  function* gen() {
+    $inspect.trace();
+  }
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::InspectTraceInvalidPlacement
+    }));
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::InspectTraceGenerator
+    }));
+}
+
+#[test]
+fn analyze_reports_duplicate_class_field() {
+    let source = r#"
+<script>
+  class Counter {
+    count = 0;
+    count = $state(1);
+  }
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::DuplicateClassField })
+    );
+}
+
+#[test]
+fn analyze_reports_state_field_duplicate() {
+    let source = r#"
+<script>
+  class Counter {
+    count = $state(0);
+    count = $state(1);
+  }
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(
+        tables
+            .diagnostics
+            .iter()
+            .any(|diagnostic| { diagnostic.code == AnalysisDiagnosticCode::StateFieldDuplicate })
+    );
+}
+
+#[test]
+fn analyze_reports_state_field_invalid_assignment_before_constructor_declaration() {
+    let source = r#"
+<script>
+  class Counter {
+    constructor() {
+      this.count = 1;
+      this.count = $state(0);
+    }
+  }
+</script>
+"#;
+
+    let tables = analyze_source(source);
+    assert!(tables.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == AnalysisDiagnosticCode::StateFieldInvalidAssignment
+    }));
 }
 
 #[test]

@@ -10,15 +10,17 @@ use lux_ast::analysis::{
 use lux_utils::runes::{is_rune, is_state_creation_rune};
 use oxc_ast::AstKind;
 use oxc_ast::ast::{
-    AssignmentTarget, AssignmentTargetMaybeDefault, AssignmentTargetProperty, BindingPattern,
-    CallExpression, Class, ClassElement, Declaration, ExportDefaultDeclarationKind, Expression,
-    ImportDeclarationSpecifier, MethodDefinition, MethodDefinitionKind, Program,
-    SimpleAssignmentTarget, Statement, UpdateExpression, VariableDeclaration,
+    ArrowFunctionExpression, AssignmentExpression, AssignmentTarget, AssignmentTargetMaybeDefault,
+    AssignmentTargetProperty, BindingPattern, BindingProperty, CallExpression, Class, ClassElement, Declaration,
+    ExportDefaultDeclarationKind, Expression, Function, ImportDeclarationSpecifier,
+    MethodDefinition, MethodDefinitionKind, Program, PropertyKey, SimpleAssignmentTarget,
+    Statement, UpdateExpression, VariableDeclaration,
 };
 use oxc_ast_visit::{Visit, walk};
 use oxc_semantic::{ReferenceId, Semantic, SemanticBuilder};
 use oxc_span::{GetSpan, Span};
 use oxc_syntax::operator::AssignmentOperator;
+use oxc_syntax::scope::ScopeFlags;
 
 pub(super) fn analyze_program(
     program: &Program<'_>,
@@ -36,6 +38,9 @@ pub(super) fn analyze_program(
     add_rune_records(&runes, target, tables);
     add_rune_argument_diagnostics(&runes, tables);
     add_rune_placement_diagnostics(program, target, is_custom_element, &runes, tables);
+    add_props_rune_diagnostics(program, &runes, tables);
+    add_inspect_trace_diagnostics(program, tables);
+    add_class_state_field_diagnostics(&runes, program, tables);
     add_module_export_rune_diagnostics(program, target, tables);
     add_import_records(program, target, tables);
 }
@@ -148,6 +153,15 @@ fn add_rune_records(runes: &[CollectedRune], target: ScriptTarget, tables: &mut 
 
 fn add_rune_argument_diagnostics(runes: &[CollectedRune], tables: &mut AnalysisTables) {
     for rune in runes {
+        if rune.has_spread_argument && rune.name != "$inspect" {
+            tables.diagnostics.push(AnalysisDiagnostic {
+                severity: AnalysisSeverity::Error,
+                code: AnalysisDiagnosticCode::ScriptRuneInvalidSpread,
+                message: format!("`{}` cannot be called with a spread argument.", rune.name),
+                span: rune.span,
+            });
+        }
+
         match rune.name.as_str() {
             "$state" | "$state.raw" | "$bindable" => {
                 if rune.argument_count > 1 {
@@ -160,7 +174,7 @@ fn add_rune_argument_diagnostics(runes: &[CollectedRune], tables: &mut AnalysisT
                 }
             }
             "$derived" | "$derived.by" | "$effect" | "$effect.pre" | "$effect.root"
-            | "$state.snapshot" => {
+            | "$state.snapshot" | "$state.eager" | "$inspect().with" => {
                 if rune.argument_count != 1 {
                     push_rune_argument_length_diagnostic(
                         tables,
@@ -176,6 +190,16 @@ fn add_rune_argument_diagnostics(runes: &[CollectedRune], tables: &mut AnalysisT
                         tables,
                         &rune.name,
                         "one or more",
+                        rune.callee_span,
+                    );
+                }
+            }
+            "$inspect.trace" => {
+                if rune.argument_count > 1 {
+                    push_rune_argument_length_diagnostic(
+                        tables,
+                        &rune.name,
+                        "zero or one",
                         rune.callee_span,
                     );
                 }
@@ -203,7 +227,7 @@ fn add_rune_placement_diagnostics(
     tables: &mut AnalysisTables,
 ) {
     let allowed_state_spans = collect_allowed_state_rune_spans(program);
-    let allowed_props_spans = collect_allowed_props_rune_spans(program);
+    let allowed_props_spans = collect_allowed_props_rune_spans(program, target);
     let allowed_bindable_spans = collect_allowed_bindable_rune_spans(program, &allowed_props_spans);
     let allowed_effect_spans = collect_allowed_effect_rune_spans(program);
 
@@ -226,12 +250,501 @@ fn add_rune_placement_diagnostics(
             continue;
         }
 
+        let (code, message) = if rune.name == "$props.id" {
+            (
+                AnalysisDiagnosticCode::PropsIdInvalidPlacement,
+                "`$props.id()` can only be used at the top level as a variable declaration initializer."
+                    .to_owned(),
+            )
+        } else {
+            (
+                AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+                rune_invalid_placement_message(&rune.name),
+            )
+        };
+
         tables.diagnostics.push(AnalysisDiagnostic {
             severity: AnalysisSeverity::Error,
-            code: AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
-            message: rune_invalid_placement_message(&rune.name),
+            code,
+            message,
             span: rune.callee_span,
         });
+    }
+}
+
+fn add_class_state_field_diagnostics(
+    runes: &[CollectedRune],
+    program: &Program<'_>,
+    tables: &mut AnalysisTables,
+) {
+    if !runes.iter().any(|rune| is_rune(&rune.name)) {
+        return;
+    }
+    let mut collector = ClassStateFieldDiagnosticCollector::default();
+    collector.visit_program(program);
+    tables.diagnostics.extend(collector.diagnostics);
+}
+
+fn add_props_rune_diagnostics(
+    program: &Program<'_>,
+    runes: &[CollectedRune],
+    tables: &mut AnalysisTables,
+) {
+    let mut seen_props = false;
+    let mut seen_props_id = false;
+
+    for rune in runes {
+        match rune.name.as_str() {
+            "$props" => {
+                if seen_props {
+                    tables.diagnostics.push(AnalysisDiagnostic {
+                        severity: AnalysisSeverity::Error,
+                        code: AnalysisDiagnosticCode::PropsDuplicate,
+                        message: "Cannot use `$props()` more than once.".to_owned(),
+                        span: rune.span,
+                    });
+                }
+                seen_props = true;
+            }
+            "$props.id" => {
+                if seen_props_id {
+                    tables.diagnostics.push(AnalysisDiagnostic {
+                        severity: AnalysisSeverity::Error,
+                        code: AnalysisDiagnosticCode::PropsDuplicate,
+                        message: "Cannot use `$props.id()` more than once.".to_owned(),
+                        span: rune.span,
+                    });
+                }
+                seen_props_id = true;
+            }
+            _ => {}
+        }
+    }
+
+    for declarator in top_level_variable_declarators(program) {
+        let Some(init) = &declarator.init else {
+            continue;
+        };
+        if extract_specific_rune_call_span(init, "$props").is_none() {
+            continue;
+        }
+
+        match &declarator.id {
+            BindingPattern::BindingIdentifier(_) | BindingPattern::ObjectPattern(_) => {}
+            _ => {
+                tables.diagnostics.push(AnalysisDiagnostic {
+                    severity: AnalysisSeverity::Error,
+                    code: AnalysisDiagnosticCode::PropsInvalidIdentifier,
+                    message: "`$props()` can only be used with an object destructuring pattern."
+                        .to_owned(),
+                    span: declarator.span,
+                });
+                continue;
+            }
+        }
+
+        let BindingPattern::ObjectPattern(pattern) = &declarator.id else {
+            continue;
+        };
+
+        for property in &pattern.properties {
+            if property.computed || !is_valid_props_binding_property(property) {
+                tables.diagnostics.push(AnalysisDiagnostic {
+                    severity: AnalysisSeverity::Error,
+                    code: AnalysisDiagnosticCode::PropsInvalidPattern,
+                    message:
+                        "`$props()` assignment must not contain nested properties or computed keys."
+                            .to_owned(),
+                    span: property.span,
+                });
+            }
+        }
+    }
+}
+
+fn add_inspect_trace_diagnostics(program: &Program<'_>, tables: &mut AnalysisTables) {
+    let mut collector = InspectTraceDiagnosticCollector::default();
+    collector.visit_program(program);
+    tables.diagnostics.extend(collector.diagnostics);
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ClassFieldSlotKind {
+    Prop,
+    AssignedProp,
+    Get,
+    Set,
+    Method,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum StateFieldOrigin {
+    PropertyDefinition,
+    ConstructorAssignment,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct StateFieldRecord {
+    declaration_span: Span,
+    origin: StateFieldOrigin,
+}
+
+#[derive(Default)]
+struct ClassStateFieldDiagnosticCollector {
+    diagnostics: Vec<AnalysisDiagnostic>,
+}
+
+impl<'a> Visit<'a> for ClassStateFieldDiagnosticCollector {
+    fn visit_class(&mut self, class: &Class<'a>) {
+        collect_class_state_field_diagnostics(class, &mut self.diagnostics);
+        walk::walk_class(self, class);
+    }
+}
+
+fn collect_class_state_field_diagnostics(
+    class: &Class<'_>,
+    diagnostics: &mut Vec<AnalysisDiagnostic>,
+) {
+    let mut constructor = None;
+    let mut fields: HashMap<String, Vec<ClassFieldSlotKind>> = HashMap::new();
+    let mut state_fields: HashMap<String, StateFieldRecord> = HashMap::new();
+
+    for element in &class.body.body {
+        match element {
+            ClassElement::PropertyDefinition(property) => {
+                if !property.computed && !property.r#static {
+                    let Some(name) = property_key_name(&property.key) else {
+                        continue;
+                    };
+                    handle_state_field_declaration(
+                        &name,
+                        property.value.as_ref(),
+                        property.span,
+                        StateFieldOrigin::PropertyDefinition,
+                        &fields,
+                        &mut state_fields,
+                        diagnostics,
+                    );
+
+                    match fields.entry(name) {
+                        std::collections::hash_map::Entry::Vacant(entry) => {
+                            entry.insert(vec![if property.value.is_some() {
+                                ClassFieldSlotKind::AssignedProp
+                            } else {
+                                ClassFieldSlotKind::Prop
+                            }]);
+                        }
+                        std::collections::hash_map::Entry::Occupied(entry) => {
+                            push_duplicate_class_field_diagnostic(
+                                diagnostics,
+                                property.span,
+                                entry.key(),
+                            );
+                        }
+                    }
+                }
+            }
+            ClassElement::MethodDefinition(method)
+                if method.kind == MethodDefinitionKind::Constructor && !method.r#static =>
+            {
+                constructor = Some(method);
+            }
+            ClassElement::MethodDefinition(method) if !method.computed => {
+                let Some(name) = property_key_name(&method.key) else {
+                    continue;
+                };
+                let key = if method.r#static {
+                    format!("@{name}")
+                } else {
+                    name
+                };
+                let kind = match method.kind {
+                    MethodDefinitionKind::Get => ClassFieldSlotKind::Get,
+                    MethodDefinitionKind::Set => ClassFieldSlotKind::Set,
+                    MethodDefinitionKind::Constructor => continue,
+                    MethodDefinitionKind::Method => ClassFieldSlotKind::Method,
+                };
+
+                match fields.entry(key) {
+                    std::collections::hash_map::Entry::Vacant(entry) => {
+                        entry.insert(vec![kind]);
+                    }
+                    std::collections::hash_map::Entry::Occupied(mut entry) => {
+                        let key = entry.key().to_owned();
+                        let existing = entry.get_mut();
+                        if existing.contains(&kind)
+                            || existing.contains(&ClassFieldSlotKind::Prop)
+                            || existing.contains(&ClassFieldSlotKind::AssignedProp)
+                        {
+                            push_duplicate_class_field_diagnostic(diagnostics, method.span, &key);
+                        }
+
+                        if kind == ClassFieldSlotKind::Get {
+                            if existing.len() == 1 && existing[0] == ClassFieldSlotKind::Set {
+                                existing.push(kind);
+                                continue;
+                            }
+                        } else if kind == ClassFieldSlotKind::Set {
+                            if existing.len() == 1 && existing[0] == ClassFieldSlotKind::Get {
+                                existing.push(kind);
+                                continue;
+                            }
+                        } else {
+                            existing.push(kind);
+                            continue;
+                        }
+
+                        push_duplicate_class_field_diagnostic(diagnostics, method.span, &key);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    if let Some(constructor) = constructor
+        && let Some(body) = &constructor.value.body
+    {
+        for statement in &body.statements {
+            let Some((name, right, span)) = constructor_state_field_declaration(statement) else {
+                continue;
+            };
+            handle_state_field_declaration(
+                &name,
+                Some(right),
+                span,
+                StateFieldOrigin::ConstructorAssignment,
+                &fields,
+                &mut state_fields,
+                diagnostics,
+            );
+        }
+
+        validate_constructor_state_field_assignments(&body.statements, &state_fields, diagnostics);
+    }
+
+    for element in &class.body.body {
+        let ClassElement::PropertyDefinition(property) = element else {
+            continue;
+        };
+        let Some(_value) = &property.value else {
+            continue;
+        };
+        let Some(name) = property_key_name(&property.key) else {
+            continue;
+        };
+        let Some(field) = state_fields.get(&name) else {
+            continue;
+        };
+        if property.span.start < field.declaration_span.start {
+            push_state_field_invalid_assignment_diagnostic(diagnostics, property.span);
+        }
+    }
+}
+
+fn handle_state_field_declaration(
+    name: &str,
+    value: Option<&Expression<'_>>,
+    declaration_span: Span,
+    origin: StateFieldOrigin,
+    fields: &HashMap<String, Vec<ClassFieldSlotKind>>,
+    state_fields: &mut HashMap<String, StateFieldRecord>,
+    diagnostics: &mut Vec<AnalysisDiagnostic>,
+) {
+    let Some(value) = value else {
+        return;
+    };
+    if extract_state_creation_rune_span(value).is_none() {
+        return;
+    }
+
+    if state_fields.contains_key(name) {
+        push_state_field_duplicate_diagnostic(diagnostics, declaration_span, name);
+    }
+    if let Some(field) = fields.get(name)
+        && !(field.len() == 1 && field[0] == ClassFieldSlotKind::Prop)
+    {
+        push_duplicate_class_field_diagnostic(diagnostics, declaration_span, name);
+    }
+
+    state_fields.insert(
+        name.to_owned(),
+        StateFieldRecord {
+            declaration_span,
+            origin,
+        },
+    );
+}
+
+fn constructor_state_field_declaration<'a>(
+    statement: &'a Statement<'a>,
+) -> Option<(String, &'a Expression<'a>, Span)> {
+    let Statement::ExpressionStatement(statement) = statement else {
+        return None;
+    };
+    let Expression::AssignmentExpression(expression) = &statement.expression else {
+        return None;
+    };
+    if expression.operator != AssignmentOperator::Assign {
+        return None;
+    }
+    let name = assignment_target_state_field_name(&expression.left)?;
+    Some((name, &expression.right, expression.span))
+}
+
+fn validate_constructor_state_field_assignments(
+    statements: &[Statement<'_>],
+    state_fields: &HashMap<String, StateFieldRecord>,
+    diagnostics: &mut Vec<AnalysisDiagnostic>,
+) {
+    let mut visitor = ConstructorStateFieldAssignmentVisitor {
+        state_fields,
+        diagnostics,
+    };
+    for statement in statements {
+        visitor.visit_statement(statement);
+    }
+}
+
+struct ConstructorStateFieldAssignmentVisitor<'a> {
+    state_fields: &'a HashMap<String, StateFieldRecord>,
+    diagnostics: &'a mut Vec<AnalysisDiagnostic>,
+}
+
+#[derive(Default)]
+struct InspectTraceDiagnosticCollector {
+    diagnostics: Vec<AnalysisDiagnostic>,
+    function_stack: Vec<InspectTraceFunctionContext>,
+    current_expression_statement: Option<InspectTraceExpressionStatementContext>,
+    expression_depth: usize,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct InspectTraceFunctionContext {
+    generator: bool,
+    first_statement_span: Option<Span>,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct InspectTraceExpressionStatementContext {
+    is_first_function_statement: bool,
+}
+
+impl<'a> Visit<'a> for ConstructorStateFieldAssignmentVisitor<'_> {
+    fn visit_function(&mut self, _function: &Function<'a>, _flags: ScopeFlags) {}
+
+    fn visit_arrow_function_expression(&mut self, _expression: &ArrowFunctionExpression<'a>) {}
+
+    fn visit_class(&mut self, _class: &Class<'a>) {}
+
+    fn visit_assignment_expression(&mut self, expression: &AssignmentExpression<'a>) {
+        if let Some(name) = assignment_target_state_field_name(&expression.left)
+            && let Some(field) = self.state_fields.get(&name)
+            && field.origin == StateFieldOrigin::ConstructorAssignment
+            && expression.span.start < field.declaration_span.start
+        {
+            push_state_field_invalid_assignment_diagnostic(self.diagnostics, expression.span);
+        }
+
+        walk::walk_assignment_expression(self, expression);
+    }
+
+    fn visit_update_expression(&mut self, expression: &UpdateExpression<'a>) {
+        if let Some(name) = simple_assignment_target_state_field_name(&expression.argument)
+            && let Some(field) = self.state_fields.get(&name)
+            && field.origin == StateFieldOrigin::ConstructorAssignment
+            && expression.span.start < field.declaration_span.start
+        {
+            push_state_field_invalid_assignment_diagnostic(self.diagnostics, expression.span);
+        }
+
+        walk::walk_update_expression(self, expression);
+    }
+}
+
+impl<'a> Visit<'a> for InspectTraceDiagnosticCollector {
+    fn visit_function(&mut self, function: &Function<'a>, flags: ScopeFlags) {
+        let first_statement_span = function
+            .body
+            .as_ref()
+            .and_then(|body| body.statements.first())
+            .map(GetSpan::span);
+        self.function_stack.push(InspectTraceFunctionContext {
+            generator: function.generator,
+            first_statement_span,
+        });
+        walk::walk_function(self, function, flags);
+        self.function_stack.pop();
+    }
+
+    fn visit_arrow_function_expression(&mut self, expression: &ArrowFunctionExpression<'a>) {
+        let first_statement_span = expression.body.statements.first().map(GetSpan::span);
+        self.function_stack.push(InspectTraceFunctionContext {
+            generator: false,
+            first_statement_span,
+        });
+        walk::walk_arrow_function_expression(self, expression);
+        self.function_stack.pop();
+    }
+
+    fn visit_expression_statement(&mut self, statement: &oxc_ast::ast::ExpressionStatement<'a>) {
+        let is_first_function_statement = self
+            .function_stack
+            .last()
+            .and_then(|context| context.first_statement_span)
+            .is_some_and(|span| span == statement.span);
+        let previous =
+            self.current_expression_statement
+                .replace(InspectTraceExpressionStatementContext {
+                    is_first_function_statement,
+                });
+        walk::walk_expression_statement(self, statement);
+        self.current_expression_statement = previous;
+    }
+
+    fn visit_expression(&mut self, expression: &Expression<'a>) {
+        self.expression_depth += 1;
+        walk::walk_expression(self, expression);
+        self.expression_depth -= 1;
+    }
+
+    fn visit_call_expression(&mut self, call: &CallExpression<'a>) {
+        if let Some(name) = extract_rune_name(&call.callee)
+            && name == "$inspect.trace"
+        {
+            let direct_expression_statement = self
+                .current_expression_statement
+                .is_some_and(|_| self.expression_depth == 1);
+            let is_first_function_statement = self
+                .current_expression_statement
+                .is_some_and(|context| context.is_first_function_statement);
+
+            if self.function_stack.is_empty()
+                || !direct_expression_statement
+                || !is_first_function_statement
+            {
+                self.diagnostics.push(AnalysisDiagnostic {
+                    severity: AnalysisSeverity::Error,
+                    code: AnalysisDiagnosticCode::InspectTraceInvalidPlacement,
+                    message: "`$inspect.trace(...)` must be the first statement of a function body."
+                        .to_owned(),
+                    span: call.span,
+                });
+            }
+
+            if self.function_stack.last().is_some_and(|context| context.generator) {
+                self.diagnostics.push(AnalysisDiagnostic {
+                    severity: AnalysisSeverity::Error,
+                    code: AnalysisDiagnosticCode::InspectTraceGenerator,
+                    message:
+                        "`$inspect.trace(...)` cannot be used inside a generator function."
+                            .to_owned(),
+                    span: call.span,
+                });
+            }
+        }
+
+        walk::walk_call_expression(self, call);
     }
 }
 
@@ -457,8 +970,14 @@ fn collect_runes(program: &Program<'_>) -> Vec<CollectedRune> {
     collector.runes
 }
 
-fn collect_allowed_props_rune_spans(program: &Program<'_>) -> FxHashSet<(u32, u32)> {
+fn collect_allowed_props_rune_spans(
+    program: &Program<'_>,
+    target: ScriptTarget,
+) -> FxHashSet<(u32, u32)> {
     let mut spans = FxHashSet::default();
+    if target != ScriptTarget::Instance {
+        return spans;
+    }
     for statement in &program.body {
         match statement {
             Statement::VariableDeclaration(declaration) => {
@@ -490,7 +1009,11 @@ fn collect_allowed_props_runes_in_variable_declaration(
         let Some(name) = extract_rune_name(&call.callee) else {
             continue;
         };
-        if name == "$props" || name == "$props.id" {
+        if name == "$props" {
+            spans.insert((call.span.start, call.span.end));
+            continue;
+        }
+        if name == "$props.id" && matches!(declarator.id, BindingPattern::BindingIdentifier(_)) {
             spans.insert((call.span.start, call.span.end));
         }
     }
@@ -841,6 +1364,7 @@ struct CollectedRune {
     span: oxc_span::Span,
     callee_span: oxc_span::Span,
     argument_count: u32,
+    has_spread_argument: bool,
 }
 
 #[derive(Default)]
@@ -867,6 +1391,10 @@ impl<'a> Visit<'a> for ScriptRuneCollector {
                     span: call.span,
                     callee_span: call.callee.span(),
                     argument_count: call.arguments.len() as u32,
+                    has_spread_argument: call
+                        .arguments
+                        .iter()
+                        .any(|argument| matches!(argument, oxc_ast::ast::Argument::SpreadElement(_))),
                 });
             }
         }
@@ -1002,14 +1530,223 @@ fn collect_identifier_from_simple_target(
     }
 }
 
+fn property_key_name(key: &PropertyKey<'_>) -> Option<String> {
+    match key {
+        PropertyKey::StaticIdentifier(identifier) => Some(identifier.name.as_str().to_owned()),
+        PropertyKey::PrivateIdentifier(identifier) => {
+            Some(format!("#{}", identifier.name.as_str()))
+        }
+        PropertyKey::StringLiteral(literal) => Some(literal.value.as_str().to_owned()),
+        PropertyKey::NumericLiteral(literal) => Some(
+            literal
+                .raw
+                .as_ref()
+                .map_or_else(|| literal.value.to_string(), |raw| raw.as_str().to_owned()),
+        ),
+        PropertyKey::BigIntLiteral(literal) => Some(literal.value.as_str().to_owned()),
+        PropertyKey::BooleanLiteral(literal) => Some(literal.value.to_string()),
+        PropertyKey::NullLiteral(_) => Some("null".to_owned()),
+        _ => None,
+    }
+}
+
+fn is_valid_props_binding_property(property: &BindingProperty<'_>) -> bool {
+    let value = match &property.value {
+        BindingPattern::AssignmentPattern(pattern) => &pattern.left,
+        value => value,
+    };
+    matches!(value, BindingPattern::BindingIdentifier(_))
+}
+
+fn top_level_variable_declarators<'a>(program: &'a Program<'a>) -> Vec<&'a oxc_ast::ast::VariableDeclarator<'a>> {
+    let mut declarators = Vec::new();
+
+    for statement in &program.body {
+        match statement {
+            Statement::VariableDeclaration(declaration) => {
+                declarators.extend(declaration.declarations.iter());
+            }
+            Statement::ExportNamedDeclaration(export) => {
+                if let Some(Declaration::VariableDeclaration(declaration)) = &export.declaration {
+                    declarators.extend(declaration.declarations.iter());
+                }
+            }
+            _ => {}
+        }
+    }
+
+    declarators
+}
+
+fn expression_name(expression: &Expression<'_>) -> Option<String> {
+    match strip_typescript_expression_wrappers(expression) {
+        Expression::Identifier(identifier) => Some(identifier.name.as_str().to_owned()),
+        Expression::StringLiteral(literal) => Some(literal.value.as_str().to_owned()),
+        Expression::NumericLiteral(literal) => Some(
+            literal
+                .raw
+                .as_ref()
+                .map_or_else(|| literal.value.to_string(), |raw| raw.as_str().to_owned()),
+        ),
+        Expression::BigIntLiteral(literal) => Some(literal.value.as_str().to_owned()),
+        Expression::BooleanLiteral(literal) => Some(literal.value.to_string()),
+        Expression::NullLiteral(_) => Some("null".to_owned()),
+        Expression::ParenthesizedExpression(expression) => expression_name(&expression.expression),
+        _ => None,
+    }
+}
+
+fn assignment_target_state_field_name(target: &AssignmentTarget<'_>) -> Option<String> {
+    match target {
+        AssignmentTarget::StaticMemberExpression(member) => matches!(
+            strip_typescript_expression_wrappers(&member.object),
+            Expression::ThisExpression(_)
+        )
+        .then(|| member.property.name.as_str().to_owned()),
+        AssignmentTarget::ComputedMemberExpression(member) => matches!(
+            strip_typescript_expression_wrappers(&member.object),
+            Expression::ThisExpression(_)
+        )
+        .then(|| expression_name(&member.expression))
+        .flatten(),
+        AssignmentTarget::PrivateFieldExpression(member) => matches!(
+            strip_typescript_expression_wrappers(&member.object),
+            Expression::ThisExpression(_)
+        )
+        .then(|| format!("#{}", member.field.name.as_str())),
+        AssignmentTarget::TSAsExpression(target) => {
+            simple_assignment_target_state_field_name_expr(&target.expression)
+        }
+        AssignmentTarget::TSSatisfiesExpression(target) => {
+            simple_assignment_target_state_field_name_expr(&target.expression)
+        }
+        AssignmentTarget::TSNonNullExpression(target) => {
+            simple_assignment_target_state_field_name_expr(&target.expression)
+        }
+        AssignmentTarget::TSTypeAssertion(target) => {
+            simple_assignment_target_state_field_name_expr(&target.expression)
+        }
+        AssignmentTarget::AssignmentTargetIdentifier(_)
+        | AssignmentTarget::ObjectAssignmentTarget(_)
+        | AssignmentTarget::ArrayAssignmentTarget(_) => None,
+    }
+}
+
+fn simple_assignment_target_state_field_name(
+    target: &SimpleAssignmentTarget<'_>,
+) -> Option<String> {
+    match target {
+        SimpleAssignmentTarget::StaticMemberExpression(member) => matches!(
+            strip_typescript_expression_wrappers(&member.object),
+            Expression::ThisExpression(_)
+        )
+        .then(|| member.property.name.as_str().to_owned()),
+        SimpleAssignmentTarget::ComputedMemberExpression(member) => matches!(
+            strip_typescript_expression_wrappers(&member.object),
+            Expression::ThisExpression(_)
+        )
+        .then(|| expression_name(&member.expression))
+        .flatten(),
+        SimpleAssignmentTarget::PrivateFieldExpression(member) => matches!(
+            strip_typescript_expression_wrappers(&member.object),
+            Expression::ThisExpression(_)
+        )
+        .then(|| format!("#{}", member.field.name.as_str())),
+        SimpleAssignmentTarget::TSAsExpression(target) => {
+            simple_assignment_target_state_field_name_expr(&target.expression)
+        }
+        SimpleAssignmentTarget::TSSatisfiesExpression(target) => {
+            simple_assignment_target_state_field_name_expr(&target.expression)
+        }
+        SimpleAssignmentTarget::TSNonNullExpression(target) => {
+            simple_assignment_target_state_field_name_expr(&target.expression)
+        }
+        SimpleAssignmentTarget::TSTypeAssertion(target) => {
+            simple_assignment_target_state_field_name_expr(&target.expression)
+        }
+        SimpleAssignmentTarget::AssignmentTargetIdentifier(_) => None,
+    }
+}
+
+fn simple_assignment_target_state_field_name_expr(expression: &Expression<'_>) -> Option<String> {
+    match strip_typescript_expression_wrappers(expression) {
+        Expression::StaticMemberExpression(member) => matches!(
+            strip_typescript_expression_wrappers(&member.object),
+            Expression::ThisExpression(_)
+        )
+        .then(|| member.property.name.as_str().to_owned()),
+        Expression::ComputedMemberExpression(member) => matches!(
+            strip_typescript_expression_wrappers(&member.object),
+            Expression::ThisExpression(_)
+        )
+        .then(|| expression_name(&member.expression))
+        .flatten(),
+        Expression::PrivateFieldExpression(member) => matches!(
+            strip_typescript_expression_wrappers(&member.object),
+            Expression::ThisExpression(_)
+        )
+        .then(|| format!("#{}", member.field.name.as_str())),
+        _ => None,
+    }
+}
+
+fn push_duplicate_class_field_diagnostic(
+    diagnostics: &mut Vec<AnalysisDiagnostic>,
+    span: Span,
+    name: &str,
+) {
+    diagnostics.push(AnalysisDiagnostic {
+        severity: AnalysisSeverity::Error,
+        code: AnalysisDiagnosticCode::DuplicateClassField,
+        message: format!("`{name}` has already been declared."),
+        span,
+    });
+}
+
+fn push_state_field_duplicate_diagnostic(
+    diagnostics: &mut Vec<AnalysisDiagnostic>,
+    span: Span,
+    name: &str,
+) {
+    diagnostics.push(AnalysisDiagnostic {
+        severity: AnalysisSeverity::Error,
+        code: AnalysisDiagnosticCode::StateFieldDuplicate,
+        message: format!("`{name}` has already been declared on this class."),
+        span,
+    });
+}
+
+fn push_state_field_invalid_assignment_diagnostic(
+    diagnostics: &mut Vec<AnalysisDiagnostic>,
+    span: Span,
+) {
+    diagnostics.push(AnalysisDiagnostic {
+        severity: AnalysisSeverity::Error,
+        code: AnalysisDiagnosticCode::StateFieldInvalidAssignment,
+        message: "Cannot assign to a state field before its declaration.".to_owned(),
+        span,
+    });
+}
+
 fn extract_rune_name(callee: &Expression<'_>) -> Option<String> {
     match callee {
         Expression::Identifier(identifier) => Some(identifier.name.as_str().to_owned()),
         Expression::StaticMemberExpression(member) => {
+            if member.property.name == "with"
+                && let Expression::CallExpression(call) =
+                    strip_typescript_expression_wrappers(&member.object)
+                && extract_rune_name(&call.callee).as_deref() == Some("$inspect")
+            {
+                return Some("$inspect().with".to_owned());
+            }
             let object_name = extract_rune_name(&member.object)?;
             Some(format!("{object_name}.{}", member.property.name.as_str()))
         }
         Expression::ParenthesizedExpression(expr) => extract_rune_name(&expr.expression),
+        Expression::TSAsExpression(expr) => extract_rune_name(&expr.expression),
+        Expression::TSSatisfiesExpression(expr) => extract_rune_name(&expr.expression),
+        Expression::TSNonNullExpression(expr) => extract_rune_name(&expr.expression),
+        Expression::TSTypeAssertion(expr) => extract_rune_name(&expr.expression),
         _ => None,
     }
 }
