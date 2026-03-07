@@ -516,12 +516,36 @@ fn map_reference_error_code_to_lux(
             AnalysisDiagnosticCode::DuplicateClassField,
             AnalysisSeverity::Error,
         )),
+        "inspect_trace_generator" => Some((
+            AnalysisDiagnosticCode::InspectTraceGenerator,
+            AnalysisSeverity::Error,
+        )),
+        "inspect_trace_invalid_placement" => Some((
+            AnalysisDiagnosticCode::InspectTraceInvalidPlacement,
+            AnalysisSeverity::Error,
+        )),
         "each_item_invalid_assignment" => Some((
             AnalysisDiagnosticCode::TemplateAssignmentToBinding,
             AnalysisSeverity::Error,
         )),
+        "props_duplicate" => Some((
+            AnalysisDiagnosticCode::PropsDuplicate,
+            AnalysisSeverity::Error,
+        )),
         "props_id_invalid_placement" => Some((
-            AnalysisDiagnosticCode::TemplateRuneInvalidPlacement,
+            AnalysisDiagnosticCode::PropsIdInvalidPlacement,
+            AnalysisSeverity::Error,
+        )),
+        "props_invalid_identifier" => Some((
+            AnalysisDiagnosticCode::PropsInvalidIdentifier,
+            AnalysisSeverity::Error,
+        )),
+        "props_invalid_pattern" => Some((
+            AnalysisDiagnosticCode::PropsInvalidPattern,
+            AnalysisSeverity::Error,
+        )),
+        "rune_invalid_spread" => Some((
+            AnalysisDiagnosticCode::ScriptRuneInvalidSpread,
             AnalysisSeverity::Error,
         )),
         "render_tag_invalid_call_expression" => Some((
