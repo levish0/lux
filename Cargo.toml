@@ -43,4 +43,4 @@ napi-build = "2.3.1"
 strsim = "0.11.1"
 rustc-hash = "2.1.1"
 criterion = "0.8.2"
-winnow = { version = "0.7.14", features = ["simd"] }
+winnow = { version = "0.7.15", features = ["simd"] }
